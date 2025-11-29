@@ -1,0 +1,11 @@
+{
+  "name": "Copilotレビュー依頼",
+  "description": "作成したPRに対してGitHub Copilotのコードレビューを自動依頼します",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "message",
+    "message": "最新のPRに対してGitHub Copilotのコードレビューを依頼します。PR番号を教えてください（例: 1）"
+  }
+}

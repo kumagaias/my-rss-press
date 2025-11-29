@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Terraform
+infra/**/.terraform/
+infra/**/.terraform.lock.hcl
+infra/**/terraform.tfstate
+infra/**/terraform.tfstate.backup
+infra/**/*.tfvars
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/

@@ -1,0 +1,11 @@
+{
+  "name": "ユニットテスト実行",
+  "description": "すべてのユニットテストを実行します",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "shell",
+    "command": "make test-unit"
+  }
+}

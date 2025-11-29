@@ -1,0 +1,11 @@
+{
+  "name": "セキュリティチェック（コミット前）",
+  "description": "Git commit前に機密情報がないかチェックします",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "shell",
+    "command": "make security-check"
+  }
+}

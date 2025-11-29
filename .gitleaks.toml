@@ -1,0 +1,66 @@
+# Gitleaks設定ファイル
+# https://github.com/gitleaks/gitleaks
+
+title = "MyRSSPress Gitleaks Configuration"
+
+# AWS認証情報
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["aws", "credentials"]
+
+[[rules]]
+id = "aws-secret-access-key"
+description = "AWS Secret Access Key"
+regex = '''(?i)aws(.{0,20})?(?-i)['\"][0-9a-zA-Z\/+]{40}['\"]'''
+tags = ["aws", "credentials"]
+
+# 秘密鍵
+[[rules]]
+id = "private-key"
+description = "Private Key"
+regex = '''-----BEGIN (RSA |DSA |EC )?PRIVATE KEY-----'''
+tags = ["key", "private"]
+
+# GitHub Token
+[[rules]]
+id = "github-token"
+description = "GitHub Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+tags = ["github", "token"]
+
+[[rules]]
+id = "github-oauth"
+description = "GitHub OAuth Token"
+regex = '''gho_[0-9a-zA-Z]{36}'''
+tags = ["github", "token"]
+
+# 一般的なパスワードパターン
+[[rules]]
+id = "generic-password"
+description = "Generic Password"
+regex = '''(?i)(password|passwd|pwd)\s*[:=]\s*['"][^'"\s]{8,}['"]'''
+tags = ["password"]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api_key|apikey|api-key)\s*[:=]\s*['"][^'"\s]{16,}['"]'''
+tags = ["api", "key"]
+
+# 除外設定
+[allowlist]
+description = "Allowlist"
+paths = [
+  '''\.md$''',  # Markdownファイル（ドキュメント）
+  '''package-lock\.json$''',  # npm lockファイル
+  '''\.gitleaks\.toml$''',  # この設定ファイル自体
+]
+
+# 特定の文字列を除外（例：サンプルコード）
+regexes = [
+  '''example\.com''',
+  '''your-api-key-here''',
+  '''AKIA[X]{16}''',  # プレースホルダー
+]

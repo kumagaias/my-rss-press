@@ -1,0 +1,11 @@
+{
+  "name": "すべてのテスト実行",
+  "description": "タスク完了時にユニットテストとセキュリティチェックを自動実行します",
+  "trigger": {
+    "type": "onExecutionComplete"
+  },
+  "action": {
+    "type": "shell",
+    "command": "make test"
+  }
+}

@@ -5,33 +5,33 @@ import { rateLimit } from './middleware/rateLimit.js';
 
 export const app = new Hono();
 
-// ミドルウェア設定
-// 1. ログ記録
+// Middleware configuration
+// 1. Logging
 app.use('*', logger());
 
-// 2. CORS設定
+// 2. CORS configuration
 app.use('*', cors({
   origin: [
     'https://my-rss-press.com',
     'https://www.my-rss-press.com',
-    // 開発環境
+    // Development environment
     process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '',
   ].filter(Boolean),
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400, // 24時間
+  maxAge: 86400, // 24 hours
 }));
 
-// 3. レート制限（100リクエスト/分）
+// 3. Rate limiting (100 requests per minute)
 app.use('/api/*', rateLimit(100, 60000));
 
-// ヘルスチェックエンドポイント
+// Health check endpoint
 app.get('/api/health', (c) => {
   return c.json({ status: 'ok' });
 });
 
-// ルートエンドポイント
+// Root endpoint
 app.get('/', (c) => {
   return c.json({ 
     message: 'MyRSSPress API',

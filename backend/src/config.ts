@@ -1,19 +1,19 @@
 export const config = {
-  // AWS Bedrock設定
+  // AWS Bedrock configuration
   bedrockRegion: process.env.BEDROCK_REGION || 'ap-northeast-1',
   
-  // DynamoDB設定
+  // DynamoDB configuration
   dynamodbTable: process.env.DYNAMODB_TABLE || 'newspapers-local',
   
-  // 環境判定
+  // Environment detection
   isLocal: process.env.NODE_ENV !== 'production',
   
-  // Bedrockキャッシュ設定（ローカル開発時のコスト削減）
+  // Bedrock cache configuration (cost reduction for local development)
   enableCache: process.env.ENABLE_BEDROCK_CACHE !== 'false',
   
-  // Bedrockモックモード（オフライン開発用）
+  // Bedrock mock mode (for offline development)
   useMockBedrock: process.env.USE_BEDROCK_MOCK === 'true',
   
-  // DynamoDBエンドポイント（ローカル開発用）
+  // DynamoDB endpoint (for local development)
   dynamodbEndpoint: process.env.DYNAMODB_ENDPOINT,
 };

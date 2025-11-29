@@ -5,18 +5,18 @@ interface RateLimitRecord {
   resetTime: number;
 }
 
-// IPアドレスごとのリクエストカウントを保存
+// Store request counts per IP address
 const requestCounts = new Map<string, RateLimitRecord>();
 
 /**
- * レート制限ミドルウェア
- * @param maxRequests - 時間枠内の最大リクエスト数
- * @param windowMs - 時間枠（ミリ秒）
- * @returns Honoミドルウェア関数
+ * Rate limiting middleware
+ * @param maxRequests - Maximum number of requests within the time window
+ * @param windowMs - Time window in milliseconds
+ * @returns Hono middleware function
  */
 export const rateLimit = (maxRequests: number, windowMs: number) => {
   return async (c: Context, next: Next): Promise<Response | void> => {
-    // クライアントのIPアドレスを取得
+    // Get client IP address
     const ip = 
       c.req.header('x-forwarded-for') || 
       c.req.header('x-real-ip') || 
@@ -25,7 +25,7 @@ export const rateLimit = (maxRequests: number, windowMs: number) => {
     const now = Date.now();
     const record = requestCounts.get(ip);
     
-    // レコードが存在しないか、時間枠が過ぎている場合は新しいレコードを作成
+    // Create a new record if it doesn't exist or the time window has passed
     if (!record || now > record.resetTime) {
       requestCounts.set(ip, { 
         count: 1, 
@@ -34,10 +34,10 @@ export const rateLimit = (maxRequests: number, windowMs: number) => {
       return await next();
     }
     
-    // リクエストカウントをインクリメント
+    // Increment request count
     record.count++;
     
-    // 制限を超えた場合は429エラーを返す
+    // Return 429 error if limit is exceeded
     if (record.count > maxRequests) {
       const retryAfter = Math.ceil((record.resetTime - now) / 1000);
       return c.json({ 
@@ -46,14 +46,14 @@ export const rateLimit = (maxRequests: number, windowMs: number) => {
       }, 429);
     }
     
-    // 制限内の場合は次のミドルウェアへ
+    // Proceed to next middleware if within limit
     return await next();
   };
 };
 
 /**
- * 古いレコードをクリーンアップする関数
- * メモリリークを防ぐため、定期的に実行することを推奨
+ * Clean up old records
+ * Recommended to run periodically to prevent memory leaks
  */
 export const cleanupOldRecords = () => {
   const now = Date.now();
@@ -64,5 +64,5 @@ export const cleanupOldRecords = () => {
   }
 };
 
-// 5分ごとに古いレコードをクリーンアップ
+// Clean up old records every 5 minutes
 setInterval(cleanupOldRecords, 5 * 60 * 1000);

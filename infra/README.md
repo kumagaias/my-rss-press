@@ -4,7 +4,7 @@ This directory contains Terraform infrastructure-as-code for deploying MyRSSPres
 
 ## Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.10.0
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.11.0
 - AWS CLI configured with appropriate credentials
 - GitHub personal access token (for Amplify)
 - Domain registered at XServer (my-rss-press.com)

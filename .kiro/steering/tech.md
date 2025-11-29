@@ -24,7 +24,7 @@ MyRSSPressは、AWS上にデプロイされるサーバーレスアーキテク�
 - **Validation**: Zod 3.x
 
 ### Infrastructure
-- **IaC**: Terraform 1.10.x (安定版)
+- **IaC**: Terraform 1.11.x (安定版)
 - **Container Registry**: Amazon ECR
 - **CI/CD**: AWS Amplify (Frontend), GitHub Actions (Backend)
 - **Monitoring**: CloudWatch

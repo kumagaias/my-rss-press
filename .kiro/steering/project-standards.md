@@ -6,11 +6,57 @@
 - `.kiro`ディレクトリ内のファイルは日本語で記述すること。
 - READMEファイルは英語で記述し、200行以内に収めること。
 
-## ビルドとテストインフラ
+## ツールバージョン管理
+
+### .tool-versions
+
+プロジェクトルートに`.tool-versions`ファイルを配置し、必要なツールとそのバージョンを定義すること：
+
+**必須ツール:**
+- **Node.js**: 24.x (Active LTS) または 22.x (Maintenance LTS)
+- **Terraform**: >= 1.11.0
+- **AWS CLI**: >= 2.0
+- **Docker**: >= 20.0
+- **Gitleaks**: 最新版（セキュリティチェック用）
+
+**ツールのインストール:**
+
+asdfを使用する場合（推奨）:
+```bash
+# asdfのインストール（未インストールの場合）
+# macOS: brew install asdf
+# Linux: https://asdf-vm.com/guide/getting-started.html
+
+# プラグインの追加
+asdf plugin add nodejs
+asdf plugin add terraform
+
+# .tool-versionsに基づいてインストール
+asdf install
+```
+
+手動でインストールする場合:
+```bash
+# ツールの確認
+make check-tools
+
+# 各ツールを個別にインストール
+# Node.js: https://nodejs.org/
+# Terraform: https://www.terraform.io/downloads.html
+# AWS CLI: https://aws.amazon.com/cli/
+# Docker: https://www.docker.com/get-started
+# Gitleaks: https://github.com/gitleaks/gitleaks
+```
 
 ### Makefile
 
 プロジェクトルートに`Makefile`を配置し、以下のコマンドを提供すること：
+
+**ツール管理コマンド:**
+```bash
+make check-tools       # 必須ツールのインストール状況を確認
+make install-tools     # asdf経由でツールをインストール（asdfがある場合）
+```
 
 **テストコマンド:**
 ```bash
@@ -22,7 +68,7 @@ make security-check    # セキュリティチェック（エイリアス）
 
 **開発コマンド:**
 ```bash
-make install           # 依存関係のインストール
+make install           # 依存関係のインストール（check-toolsを自動実行）
 make clean             # ビルド成果物のクリーンアップ
 make help              # 利用可能なコマンドの表示
 ```

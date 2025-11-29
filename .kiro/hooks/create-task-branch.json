@@ -1,0 +1,11 @@
+{
+  "name": "タスクブランチ作成",
+  "description": "tasks.mdのタスクを実装する前にデフォルトブランチから新しいブランチを作成します",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "message",
+    "message": ".kiro/specs/phase-1/tasks.mdを確認して、実装するタスク番号を教えてください。デフォルトブランチ（main）から新しいブランチを作成します。\n\n手順:\n1. tasks.mdから実装するタスクを選択\n2. タスク番号（例: 1.1）を教えてください\n3. デフォルトブランチに切り替えて最新をpull\n4. 新しいブランチを作成（例: feat/task-1.1-setup-hono-app）\n5. タスクの実装を開始"
+  }
+}

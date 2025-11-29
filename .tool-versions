@@ -1,0 +1,24 @@
+# MyRSSPress Required Tools
+# This file specifies the required versions of tools for this project
+# Compatible with asdf version manager (https://asdf-vm.com/)
+
+# Node.js - Backend and Frontend runtime
+nodejs 24.11.0
+
+# Terraform - Infrastructure as Code
+terraform 1.11.0
+
+# AWS CLI - AWS resource management
+# Note: Install separately via package manager
+# macOS: brew install awscli
+# Linux: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+# Docker - Container runtime for backend deployment
+# Note: Install separately via Docker Desktop or package manager
+# macOS: brew install --cask docker
+# Linux: https://docs.docker.com/engine/install/
+
+# Gitleaks - Security scanning for secrets
+# Note: Install separately via package manager
+# macOS: brew install gitleaks
+# Linux: https://github.com/gitleaks/gitleaks#installing

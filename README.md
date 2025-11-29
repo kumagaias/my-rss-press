@@ -55,7 +55,7 @@ myrsspress/
 
 Required tools and versions are defined in `.tool-versions`:
 - Node.js 24.x LTS (or 22.x LTS)
-- Terraform >= 1.10.0
+- Terraform >= 1.11.0
 - AWS CLI >= 2.0
 - Docker >= 20.0
 - Gitleaks (for security checks)

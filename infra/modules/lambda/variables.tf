@@ -24,7 +24,7 @@ variable "dynamodb_table_arn" {
 variable "bedrock_region" {
   description = "AWS region for Bedrock service"
   type        = string
-  default     = "us-east-1"
+  default     = "ap-northeast-1"
 }
 
 variable "environment" {

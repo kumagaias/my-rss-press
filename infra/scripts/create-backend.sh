@@ -7,7 +7,7 @@ set -e
 # Configuration
 ENVIRONMENT="production"
 DYNAMODB_TABLE="myrsspress-terraform-locks"
-AWS_REGION="us-east-1"
+AWS_REGION="ap-northeast-1"
 
 echo "🚀 Creating Terraform backend resources..."
 echo ""

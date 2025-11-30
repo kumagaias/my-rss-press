@@ -18,6 +18,8 @@ amplify_app_name      = "myrsspress-frontend"
 
 # GitHub Configuration
 github_repository    = "https://github.com/YOUR_USERNAME/YOUR_REPO"
+# GitHub token is stored in AWS Secrets Manager for security
+# Terraform will create the secret automatically on first apply
 github_access_token  = "ghp_YOUR_GITHUB_TOKEN_HERE"
 
 # Bedrock Configuration

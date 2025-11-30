@@ -7,7 +7,7 @@ set -e
 # Configuration
 ENVIRONMENT="production"
 DYNAMODB_TABLE="myrsspress-terraform-locks"
-AWS_REGION="us-east-1"
+AWS_REGION="ap-northeast-1"
 
 # Check if AWS CLI is installed
 if ! command -v aws &> /dev/null; then

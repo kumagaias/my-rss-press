@@ -25,6 +25,20 @@ provider "aws" {
   }
 }
 
+# Provider for ACM certificates (must be in us-east-1 for CloudFront)
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Project     = "MyRSSPress"
+      Environment = "production"
+      ManagedBy   = "Terraform"
+    }
+  }
+}
+
 # Route53 Hosted Zone
 module "route53" {
   source = "../../modules/route53"
@@ -33,9 +47,13 @@ module "route53" {
   environment = var.environment
 }
 
-# ACM Certificate
+# ACM Certificate (must be in us-east-1 for CloudFront)
 module "acm" {
   source = "../../modules/acm"
+
+  providers = {
+    aws = aws.us_east_1
+  }
 
   domain_name      = var.domain_name
   route53_zone_id  = module.route53.zone_id

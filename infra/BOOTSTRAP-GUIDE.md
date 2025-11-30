@@ -123,7 +123,7 @@ terraform {
     # Bucket name includes AWS account ID for uniqueness
     bucket         = "myrsspress-production-{account-id}-terraform-state"
     key            = "production/terraform.tfstate"
-    region         = "us-east-1"
+    region         = "ap-northeast-1"
     dynamodb_table = "myrsspress-terraform-locks"
     encrypt        = true
   }
@@ -192,14 +192,14 @@ Minimum required permissions for Terraform execution:
         "dynamodb:PutItem",
         "dynamodb:DeleteItem"
       ],
-      "Resource": "arn:aws:dynamodb:us-east-1:*:table/myrsspress-terraform-locks"
+      "Resource": "arn:aws:dynamodb:ap-northeast-1:*:table/myrsspress-terraform-locks"
     },
     {
       "Effect": "Allow",
       "Action": [
         "secretsmanager:GetSecretValue"
       ],
-      "Resource": "arn:aws:secretsmanager:us-east-1:*:secret:myrsspress-*"
+      "Resource": "arn:aws:secretsmanager:ap-northeast-1:*:secret:myrsspress-*"
     }
   ]
 }

@@ -88,13 +88,13 @@ else
     echo "  Run: aws configure"
 fi
 
-# Check 6: AWS region set to us-east-1
+# Check 6: AWS region configuration
 AWS_REGION=$(aws configure get region)
-if [ "$AWS_REGION" = "us-east-1" ]; then
-    print_status 0 "AWS region set to us-east-1"
+if [ "$AWS_REGION" = "ap-northeast-1" ]; then
+    print_status 0 "AWS region set to ap-northeast-1"
 else
-    print_warning "AWS region is set to $AWS_REGION (expected: us-east-1)"
-    echo "  This may cause issues with ACM certificates"
+    print_warning "AWS region is set to $AWS_REGION (expected: ap-northeast-1)"
+    echo "  Note: ACM certificates for CloudFront must be in us-east-1"
 fi
 
 echo ""

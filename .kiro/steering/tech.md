@@ -29,6 +29,8 @@ MyRSSPressは、AWS上にデプロイされるサーバーレスアーキテク�
 - **CI/CD**: AWS Amplify (Frontend), GitHub Actions (Backend)
 - **Monitoring**: CloudWatch
 - **CDN**: CloudFront
+- **Primary Region**: ap-northeast-1 (Tokyo)
+- **ACM Region**: us-east-1 (CloudFront用証明書のみ)
 
 ## Architecture Diagram
 
@@ -907,9 +909,9 @@ terraform output
 # infra/environments/production/backend.tf
 terraform {
   backend "s3" {
-    bucket         = "myrsspress-terraform-state"
+    bucket         = "myrsspress-production-{account-id}-terraform-state"
     key            = "production/terraform.tfstate"
-    region         = "us-east-1"
+    region         = "ap-northeast-1"
     dynamodb_table = "myrsspress-terraform-locks"
     encrypt        = true
   }

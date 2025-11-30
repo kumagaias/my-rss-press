@@ -4,6 +4,22 @@ AWS CLI scripts for managing Terraform backend resources (S3 bucket and DynamoDB
 
 ## Scripts
 
+### update-backend-config.sh
+
+Updates `backend.tf` with your AWS account ID.
+
+**Usage:**
+```bash
+./infra/scripts/update-backend-config.sh
+```
+
+**What it does:**
+- Gets your AWS account ID
+- Updates `backend.tf` with the correct bucket name
+- Creates backup file (`backend.tf.bak`)
+
+**Run this first** before creating backend resources.
+
 ### create-backend.sh
 
 Creates S3 bucket and DynamoDB table for Terraform state management.
@@ -14,7 +30,8 @@ Creates S3 bucket and DynamoDB table for Terraform state management.
 ```
 
 **What it does:**
-- Creates S3 bucket: `myrsspress-terraform-state`
+- Gets your AWS account ID automatically
+- Creates S3 bucket: `myrsspress-production-{account-id}-terraform-state`
 - Enables versioning on the bucket
 - Enables AES256 encryption
 - Blocks all public access
@@ -38,10 +55,25 @@ Deletes S3 bucket and DynamoDB table.
 ```
 
 **What it does:**
+- Gets your AWS account ID automatically
 - Prompts for confirmation
 - Removes all objects and versions from S3 bucket
-- Deletes S3 bucket
+- Deletes S3 bucket: `myrsspress-production-{account-id}-terraform-state`
 - Deletes DynamoDB table
+
+## Quick Start
+
+```bash
+# 1. Update backend configuration with your account ID
+./infra/scripts/update-backend-config.sh
+
+# 2. Create backend resources
+./infra/scripts/create-backend.sh
+
+# 3. Initialize Terraform
+cd infra/environments/production
+terraform init -migrate-state
+```
 
 ## Alternative: Terraform Bootstrap
 
@@ -55,10 +87,26 @@ terraform apply
 
 See [../bootstrap/README.md](../bootstrap/README.md) for details.
 
+## Bucket Naming Convention
+
+Bucket names include the AWS account ID for global uniqueness:
+
+```
+myrsspress-{environment}-{account-id}-terraform-state
+```
+
+Example: `myrsspress-production-123456789012-terraform-state`
+
+This ensures:
+- Global uniqueness across all AWS accounts
+- Easy identification of which account owns the bucket
+- Support for multiple environments in the same account
+
 ## Which Method to Use?
 
-**Use Scripts (create-backend.sh):**
+**Use Scripts (Recommended):**
 - Quick setup
+- Automatic account ID detection
 - No Terraform state to manage for bootstrap
 - Simple one-time operation
 
@@ -66,6 +114,7 @@ See [../bootstrap/README.md](../bootstrap/README.md) for details.
 - Infrastructure as Code approach
 - Easier to modify and version control
 - Can manage bootstrap resources with Terraform
+- Also includes automatic account ID detection
 
 ## Required IAM Permissions
 
@@ -85,7 +134,7 @@ See [../bootstrap/README.md](../bootstrap/README.md) for details.
         "s3:ListBucket",
         "s3:GetBucketLocation"
       ],
-      "Resource": "arn:aws:s3:::myrsspress-terraform-state"
+      "Resource": "arn:aws:s3:::myrsspress-production-*-terraform-state"
     },
     {
       "Effect": "Allow",
@@ -93,7 +142,7 @@ See [../bootstrap/README.md](../bootstrap/README.md) for details.
         "s3:DeleteObject",
         "s3:DeleteObjectVersion"
       ],
-      "Resource": "arn:aws:s3:::myrsspress-terraform-state/*"
+      "Resource": "arn:aws:s3:::myrsspress-production-*-terraform-state/*"
     },
     {
       "Effect": "Allow",

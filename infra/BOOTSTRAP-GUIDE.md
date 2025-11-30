@@ -63,10 +63,25 @@ terraform apply
 ```
 
 **Resources created:**
-- S3 bucket: `myrsspress-terraform-state`
+- S3 bucket: `myrsspress-production-{account-id}-terraform-state`
 - DynamoDB table: `myrsspress-terraform-locks`
 
-### 2. Store GitHub Token in Secrets Manager
+Note: The bucket name includes your AWS account ID for global uniqueness.
+
+### 2. Update Backend Configuration
+
+Update `backend.tf` with your AWS account ID:
+
+```bash
+# Option A: Automatic (recommended)
+./infra/scripts/update-backend-config.sh
+
+# Option B: Manual
+# Edit infra/environments/production/backend.tf
+# Replace REPLACE_WITH_ACCOUNT_ID with your AWS account ID
+```
+
+### 3. Store GitHub Token in Secrets Manager
 
 ```bash
 # Create secret for GitHub token
@@ -76,7 +91,7 @@ aws secretsmanager create-secret \
   --secret-string "ghp_your_actual_token_here"
 ```
 
-### 3. Initialize Production Environment
+### 4. Initialize Production Environment
 
 ```bash
 cd infra/environments/production
@@ -105,7 +120,8 @@ The S3 backend is configured in `infra/environments/production/backend.tf`:
 ```hcl
 terraform {
   backend "s3" {
-    bucket         = "myrsspress-terraform-state"
+    # Bucket name includes AWS account ID for uniqueness
+    bucket         = "myrsspress-production-{account-id}-terraform-state"
     key            = "production/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "myrsspress-terraform-locks"
@@ -113,6 +129,8 @@ terraform {
   }
 }
 ```
+
+**Important:** Replace `{account-id}` with your AWS account ID, or use the `update-backend-config.sh` script to do this automatically.
 
 ## State Migration
 
@@ -158,14 +176,14 @@ Minimum required permissions for Terraform execution:
         "s3:PutObject",
         "s3:DeleteObject"
       ],
-      "Resource": "arn:aws:s3:::myrsspress-terraform-state/*"
+      "Resource": "arn:aws:s3:::myrsspress-production-*-terraform-state/*"
     },
     {
       "Effect": "Allow",
       "Action": [
         "s3:ListBucket"
       ],
-      "Resource": "arn:aws:s3:::myrsspress-terraform-state"
+      "Resource": "arn:aws:s3:::myrsspress-production-*-terraform-state"
     },
     {
       "Effect": "Allow",

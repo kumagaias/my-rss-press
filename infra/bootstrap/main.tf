@@ -24,13 +24,18 @@ provider "aws" {
   }
 }
 
+# Get current AWS account ID
+data "aws_caller_identity" "current" {}
+
 # S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = var.state_bucket_name
+  # Include AWS account ID in bucket name for uniqueness
+  bucket = "myrsspress-${var.environment}-${data.aws_caller_identity.current.account_id}-terraform-state"
 
   tags = {
     Name        = "Terraform State Bucket"
     Description = "Stores Terraform state files"
+    Environment = var.environment
   }
 }
 

@@ -3,7 +3,10 @@
 
 terraform {
   backend "s3" {
-    bucket         = "myrsspress-terraform-state"
+    # Bucket name format: myrsspress-production-{account-id}-terraform-state
+    # Replace {account-id} with your AWS account ID
+    # Example: myrsspress-production-123456789012-terraform-state
+    bucket         = "myrsspress-production-REPLACE_WITH_ACCOUNT_ID-terraform-state"
     key            = "production/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "myrsspress-terraform-locks"

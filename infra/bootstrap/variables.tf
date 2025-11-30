@@ -6,10 +6,10 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "state_bucket_name" {
-  description = "Name of the S3 bucket for Terraform state"
+variable "environment" {
+  description = "Environment name (e.g., production, staging)"
   type        = string
-  default     = "myrsspress-terraform-state"
+  default     = "production"
 }
 
 variable "lock_table_name" {

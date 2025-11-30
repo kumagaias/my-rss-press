@@ -5,9 +5,27 @@
 set -e
 
 # Configuration
-BUCKET_NAME="myrsspress-terraform-state"
+ENVIRONMENT="production"
 DYNAMODB_TABLE="myrsspress-terraform-locks"
 AWS_REGION="us-east-1"
+
+# Check if AWS CLI is installed
+if ! command -v aws &> /dev/null; then
+    echo "❌ Error: AWS CLI is not installed"
+    exit 1
+fi
+
+# Check if AWS credentials are configured
+if ! aws sts get-caller-identity &> /dev/null; then
+    echo "❌ Error: AWS credentials are not configured"
+    exit 1
+fi
+
+# Get AWS account ID
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+# Construct bucket name with account ID
+BUCKET_NAME="myrsspress-${ENVIRONMENT}-${AWS_ACCOUNT_ID}-terraform-state"
 
 echo "⚠️  WARNING: This will delete Terraform backend resources!"
 echo ""
@@ -15,6 +33,7 @@ echo "Resources to be deleted:"
 echo "  S3 Bucket:       ${BUCKET_NAME}"
 echo "  DynamoDB Table:  ${DYNAMODB_TABLE}"
 echo "  Region:          ${AWS_REGION}"
+echo "  AWS Account:     ${AWS_ACCOUNT_ID}"
 echo ""
 echo "This will permanently delete all Terraform state files!"
 echo ""
@@ -28,18 +47,6 @@ fi
 echo ""
 echo "🗑️  Deleting Terraform backend resources..."
 echo ""
-
-# Check if AWS CLI is installed
-if ! command -v aws &> /dev/null; then
-    echo "❌ Error: AWS CLI is not installed"
-    exit 1
-fi
-
-# Check if AWS credentials are configured
-if ! aws sts get-caller-identity &> /dev/null; then
-    echo "❌ Error: AWS credentials are not configured"
-    exit 1
-fi
 
 # Delete S3 bucket
 echo "📦 Deleting S3 bucket: ${BUCKET_NAME}"

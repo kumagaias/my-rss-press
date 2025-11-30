@@ -5,7 +5,7 @@
 set -e
 
 # Configuration
-BUCKET_NAME="myrsspress-terraform-state"
+ENVIRONMENT="production"
 DYNAMODB_TABLE="myrsspress-terraform-locks"
 AWS_REGION="us-east-1"
 
@@ -27,6 +27,14 @@ if ! aws sts get-caller-identity &> /dev/null; then
 fi
 
 echo "✅ AWS CLI is configured"
+
+# Get AWS account ID
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+echo "📋 AWS Account ID: ${AWS_ACCOUNT_ID}"
+
+# Construct bucket name with account ID
+BUCKET_NAME="myrsspress-${ENVIRONMENT}-${AWS_ACCOUNT_ID}-terraform-state"
+echo "📦 Bucket name: ${BUCKET_NAME}"
 echo ""
 
 # Create S3 bucket
@@ -120,14 +128,18 @@ fi
 echo ""
 echo "✅ Terraform backend resources created successfully!"
 echo ""
+echo "✅ Terraform backend resources created successfully!"
+echo ""
 echo "📋 Summary:"
 echo "  S3 Bucket:       ${BUCKET_NAME}"
 echo "  DynamoDB Table:  ${DYNAMODB_TABLE}"
 echo "  Region:          ${AWS_REGION}"
+echo "  AWS Account:     ${AWS_ACCOUNT_ID}"
 echo ""
 echo "🔧 Next steps:"
-echo "  1. cd infra/environments/production"
-echo "  2. terraform init -migrate-state"
-echo "  3. terraform plan"
-echo "  4. terraform apply"
+echo "  1. Update backend.tf: ./infra/scripts/update-backend-config.sh"
+echo "  2. cd infra/environments/production"
+echo "  3. terraform init -migrate-state"
+echo "  4. terraform plan"
+echo "  5. terraform apply"
 echo ""

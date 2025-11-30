@@ -17,8 +17,12 @@ Terraform configuration for deploying MyRSSPress to AWS.
 
 Create S3 bucket and DynamoDB table for Terraform state.
 
-**Option A: Using Script (Recommended for quick setup)**
+**Option A: Using Script (Recommended)**
 ```bash
+# Update backend.tf with your AWS account ID
+./infra/scripts/update-backend-config.sh
+
+# Create backend resources
 ./infra/scripts/create-backend.sh
 ```
 
@@ -27,6 +31,10 @@ Create S3 bucket and DynamoDB table for Terraform state.
 cd infra/bootstrap
 terraform init
 terraform apply
+
+# Then update backend.tf
+cd ../..
+./infra/scripts/update-backend-config.sh
 ```
 
 See [BOOTSTRAP-GUIDE.md](./BOOTSTRAP-GUIDE.md) for detailed instructions.
@@ -93,6 +101,16 @@ infra/
 
 See [BOOTSTRAP-GUIDE.md](./BOOTSTRAP-GUIDE.md#security-best-practices) for detailed IAM policy.
 
+## Bucket Naming
+
+S3 bucket names include your AWS account ID for global uniqueness:
+
+```
+myrsspress-production-{account-id}-terraform-state
+```
+
+Example: `myrsspress-production-123456789012-terraform-state`
+
 ## Useful Commands
 
 ```bash
@@ -130,9 +148,12 @@ terraform force-unlock <LOCK_ID>
 ### State Recovery
 
 ```bash
+# Get your bucket name (includes account ID)
+BUCKET_NAME=$(grep 'bucket' infra/environments/production/backend.tf | awk -F'"' '{print $2}')
+
 # List state versions
 aws s3api list-object-versions \
-  --bucket myrsspress-terraform-state \
+  --bucket "${BUCKET_NAME}" \
   --prefix production/terraform.tfstate
 ```
 

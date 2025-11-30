@@ -207,7 +207,7 @@
 
 ### 2.1 Storybookのセットアップ
 
-- [ ] 2.1 Storybookのセットアップ
+- [x] 2.1 Storybookのセットアップ
   - Storybook 8.xをインストール
   - `.storybook/main.ts`を設定
   - **受け入れ条件:**
@@ -217,7 +217,7 @@
 
 ### 2.2 デザインシステムの定義
 
-- [ ] 2.2 デザインシステムの定義
+- [x] 2.2 デザインシステムの定義
   - `frontend/lib/design-system.ts`を作成
   - カラーパレット、タイポグラフィ、スペーシングを定義
   - TailwindCSS設定に反映

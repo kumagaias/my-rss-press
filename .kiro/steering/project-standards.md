@@ -5,6 +5,15 @@
 - エージェントとのチャットは日本語で行うこと。
 - `.kiro`ディレクトリ内のファイルは日本語で記述すること。
 - READMEファイルは英語で記述し、200行以内に収めること。
+- **GitHub Pull RequestとIssueは英語で記述すること。**
+  - タイトル、説明文、コメントはすべて英語
+  - **コミットメッセージも英語で記述すること**
+  - PRとIssueは公開情報として英語で統一
+- **コード中のコメントは英語で記述すること。**
+  - 関数、クラス、変数の説明コメント
+  - インラインコメント
+  - JSDoc、TSDoc、Pythonのdocstringなど
+  - 理由：コードは国際的に共有される可能性があるため
 
 ## ツールバージョン管理
 
@@ -251,6 +260,8 @@ git push origin feat/task-1.1-setup-hono-app
 
 ### コミットメッセージの規約
 
+**言語: 英語で記述すること**
+
 **フォーマット:**
 ```
 <type>: <subject> (task-X.X)
@@ -261,22 +272,22 @@ Task: X.X
 ```
 
 **Type:**
-- `feat`: 新機能
-- `fix`: バグ修正
-- `docs`: ドキュメントのみの変更
-- `style`: コードの意味に影響しない変更（空白、フォーマット等）
-- `refactor`: バグ修正や機能追加ではないコード変更
-- `test`: テストの追加や修正
-- `chore`: ビルドプロセスやツールの変更
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that don't affect code meaning (whitespace, formatting)
+- `refactor`: Code changes that neither fix bugs nor add features
+- `test`: Adding or updating tests
+- `chore`: Changes to build process or tools
 
 **例:**
 ```
-feat: Honoアプリケーションのセットアップ (task-1.1)
+feat: Set up Hono application (task-1.1)
 
-- backend/src/app.tsを作成
-- GET /api/healthエンドポイントを実装
-- CORSとロギングミドルウェアを追加
-- ローカルサーバーが正常に起動することを確認
+- Create backend/src/app.ts
+- Implement GET /api/health endpoint
+- Add CORS and logging middleware
+- Verify local server starts successfully
 
 Task: 1.1
 ```
@@ -446,6 +457,8 @@ Issue #42 が自動的にクローズされました
 
 ### コミットメッセージの規約
 
+**言語: 英語で記述すること**
+
 **フォーマット:**
 ```
 <type>: <subject> (#issue-number)
@@ -456,25 +469,24 @@ Issue #42 が自動的にクローズされました
 ```
 
 **Type:**
-- `fix`: バグ修正
-- `feat`: 新機能
-- `docs`: ドキュメントのみの変更
-- `style`: コードの意味に影響しない変更（空白、フォーマット等）
-- `refactor`: バグ修正や機能追加ではないコード変更
-- `test`: テストの追加や修正
-- `chore`: ビルドプロセスやツールの変更
+- `fix`: Bug fix
+- `feat`: New feature
+- `docs`: Documentation only changes
+- `style`: Changes that don't affect code meaning (whitespace, formatting)
+- `refactor`: Code changes that neither fix bugs nor add features
+- `test`: Adding or updating tests
+- `chore`: Changes to build process or tools
 
 **例:**
 ```
-fix: 新聞生成ボタンのエラーを修正 (#42)
+fix: Fix newspaper generation button error (#42)
 
-フィード選択時のバリデーションが不足していたため、
-空のフィードリストで生成ボタンをクリックするとエラーが
-発生していました。
+Feed selection validation was missing, causing an error
+when clicking the generate button with an empty feed list.
 
-- フィード選択時のバリデーションを追加
-- エラーメッセージを改善
-- 関連するテストを追加
+- Add validation for feed selection
+- Improve error messages
+- Add related tests
 
 Fixes #42
 ```

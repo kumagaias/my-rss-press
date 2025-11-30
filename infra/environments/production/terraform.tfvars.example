@@ -1,0 +1,26 @@
+# Example Terraform variables file
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars to version control
+
+# AWS Configuration
+aws_region = "us-east-1"
+environment = "production"
+
+# Domain Configuration
+domain_name = "my-rss-press.com"
+
+# Resource Names
+dynamodb_table_name   = "myrsspress-newspapers"
+ecr_repository_name   = "myrsspress-backend"
+lambda_function_name  = "myrsspress-api"
+api_gateway_name      = "myrsspress-api"
+amplify_app_name      = "myrsspress-frontend"
+
+# GitHub Configuration
+github_repository    = "https://github.com/YOUR_USERNAME/YOUR_REPO"
+# GitHub token is stored in AWS Secrets Manager for security
+# Terraform will create the secret automatically on first apply
+github_access_token  = "ghp_YOUR_GITHUB_TOKEN_HERE"
+
+# Bedrock Configuration
+bedrock_region = "us-east-1"

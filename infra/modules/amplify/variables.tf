@@ -11,10 +11,9 @@ variable "github_repository" {
   type        = string
 }
 
-variable "github_access_token" {
-  description = "GitHub personal access token for repository access"
+variable "github_token_secret_id" {
+  description = "Secrets Manager secret ID containing GitHub access token"
   type        = string
-  sensitive   = true
 }
 
 variable "domain_name" {

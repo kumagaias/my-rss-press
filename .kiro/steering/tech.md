@@ -840,13 +840,20 @@ export default defineConfig({
 **ディレクトリ構造:**
 ```
 infra/
+├── bootstrap/            # Terraform state管理用リソース（初回のみ）
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   └── README.md
 ├── environments/
 │   └── production/
 │       ├── main.tf
+│       ├── backend.tf    # S3バックエンド設定
 │       ├── variables.tf
 │       ├── outputs.tf
 │       └── terraform.tfvars
 └── modules/
+    ├── secrets-manager/  # Secrets Manager（機密情報管理）
     ├── ecr/              # ECRリポジトリ
     ├── lambda/           # Lambda関数（ECRイメージ使用）
     ├── api-gateway/      # API Gateway
@@ -854,12 +861,30 @@ infra/
     └── amplify/          # Amplify Hosting
 ```
 
-**デプロイコマンド:**
+**初回セットアップ（Bootstrap）:**
+
+Terraform stateを管理するS3バケットとDynamoDBテーブルを作成：
+
+```bash
+# 1. Bootstrap実行（初回のみ）
+cd infra/bootstrap
+terraform init
+terraform plan
+terraform apply
+
+# 出力を確認
+terraform output
+# state_bucket_name = "myrsspress-terraform-state"
+# lock_table_name = "myrsspress-terraform-locks"
+```
+
+**本番環境デプロイ:**
+
 ```bash
 cd infra/environments/production
 
-# 初回のみ
-terraform init
+# 初回のみ（stateをS3に移行）
+terraform init -migrate-state
 
 # 変更内容を確認
 terraform plan
@@ -870,6 +895,61 @@ terraform apply
 # 出力確認
 terraform output
 ```
+
+**Terraform State管理:**
+
+- **S3バックエンド**: Terraform stateをS3に保存
+- **DynamoDBロック**: 複数人での同時実行を防止
+- **暗号化**: S3バケットでAES256暗号化を有効化
+- **バージョニング**: state履歴を保持
+
+```hcl
+# infra/environments/production/backend.tf
+terraform {
+  backend "s3" {
+    bucket         = "myrsspress-terraform-state"
+    key            = "production/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "myrsspress-terraform-locks"
+    encrypt        = true
+  }
+}
+```
+
+**Secrets Manager統合:**
+
+機密情報（GitHubトークン等）はSecrets Managerで管理：
+
+```hcl
+# infra/modules/secrets-manager/main.tf
+resource "aws_secretsmanager_secret" "github_token" {
+  name        = "myrsspress-github-amplify-token-production"
+  description = "GitHub Personal Access Token for Amplify deployment"
+}
+
+resource "aws_secretsmanager_secret_version" "github_token" {
+  secret_id     = aws_secretsmanager_secret.github_token.id
+  secret_string = var.github_access_token
+}
+
+# infra/modules/amplify/main.tf
+data "aws_secretsmanager_secret_version" "github_token" {
+  secret_id = var.github_token_secret_id
+}
+
+resource "aws_amplify_app" "main" {
+  name         = var.app_name
+  repository   = var.github_repository
+  access_token = data.aws_secretsmanager_secret_version.github_token.secret_string
+  # ...
+}
+```
+
+**メリット:**
+- GitHubトークンがTerraform stateに保存されない
+- トークンのローテーションが容易
+- 監査ログで追跡可能
+- AWS KMSで自動暗号化
 
 **Terraform設定例:**
 ```hcl
@@ -1096,7 +1176,35 @@ GitHub Actionsに必要な権限：
 - DynamoDB（作成・更新・削除）
 - ECR（リポジトリ作成・管理）
 - IAM（ロール作成）
-- S3（Terraformステート保存）
+- S3（Terraformステート保存・読み取り）
+- Secrets Manager（シークレット作成・読み取り）
+- Amplify（アプリケーション作成・管理）
+
+**AWS Secrets Managerの使用:**
+
+機密情報はAWS Secrets Managerで管理：
+
+1. **GitHubトークン**: Amplifyデプロイ用
+   - Secret名: `myrsspress-github-amplify-token-{environment}`
+   - Terraformで自動作成・管理
+   - Terraform stateに保存されない
+
+2. **セットアップ手順:**
+```bash
+# Terraformが自動的にSecrets Managerにトークンを保存
+cd infra/environments/production
+terraform apply
+
+# 手動でトークンを更新する場合
+aws secretsmanager update-secret \
+  --secret-id myrsspress-github-amplify-token-production \
+  --secret-string "ghp_new_token_here"
+```
+
+3. **ローテーション:**
+   - GitHubでトークンを再生成
+   - Secrets Managerで更新
+   - Terraformは次回実行時に自動的に新しいトークンを使用
 
 ### Deployment Best Practices
 

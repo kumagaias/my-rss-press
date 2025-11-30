@@ -1,204 +1,141 @@
 # MyRSSPress Infrastructure
 
-This directory contains Terraform infrastructure-as-code for deploying MyRSSPress to AWS.
+Terraform configuration for deploying MyRSSPress to AWS.
 
-## Prerequisites
+## Architecture
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.11.0
-- AWS CLI configured with appropriate credentials
-- GitHub personal access token (for Amplify)
-- Domain registered at XServer (my-rss-press.com)
+- **Frontend**: AWS Amplify (Next.js)
+- **Backend**: Lambda + API Gateway (Hono)
+- **Database**: DynamoDB
+- **Container Registry**: ECR
+- **State Management**: S3 + DynamoDB
+- **Secrets**: AWS Secrets Manager
+
+## Quick Start
+
+### 1. Bootstrap (First Time Only)
+
+Create S3 bucket and DynamoDB table for Terraform state:
+
+```bash
+cd bootstrap
+terraform init
+terraform apply
+```
+
+See [BOOTSTRAP-GUIDE.md](./BOOTSTRAP-GUIDE.md) for detailed instructions.
+
+### 2. Deploy Production Environment
+
+```bash
+cd environments/production
+
+# Copy example variables
+cp terraform.tfvars.example terraform.tfvars
+
+# Edit with your values
+vim terraform.tfvars
+
+# Initialize with S3 backend
+terraform init -migrate-state
+
+# Review changes
+terraform plan
+
+# Deploy
+terraform apply
+```
 
 ## Directory Structure
 
 ```
 infra/
+├── bootstrap/              # State management resources (run once)
 ├── environments/
-│   └── production/          # Production environment
-│       ├── main.tf          # Main configuration
-│       ├── variables.tf     # Variable definitions
-│       ├── outputs.tf       # Output definitions
-│       └── terraform.tfvars # Variable values (not in git)
-└── modules/                 # Reusable modules
-    ├── route53/            # DNS hosted zone
-    ├── acm/                # SSL certificates
-    ├── dynamodb/           # Database
-    ├── ecr/                # Container registry
-    ├── lambda/             # Backend function
-    ├── api-gateway/        # API endpoint
-    └── amplify/            # Frontend hosting
+│   └── production/        # Production environment
+│       ├── main.tf        # Main configuration
+│       ├── backend.tf     # S3 backend config
+│       ├── variables.tf   # Variable definitions
+│       ├── outputs.tf     # Output values
+│       └── terraform.tfvars.example
+└── modules/               # Reusable modules
+    ├── secrets-manager/   # Secrets Manager
+    ├── route53/          # DNS
+    ├── acm/              # SSL certificates
+    ├── dynamodb/         # Database
+    ├── ecr/              # Container registry
+    ├── lambda/           # Lambda functions
+    ├── api-gateway/      # API Gateway
+    └── amplify/          # Frontend hosting
 ```
 
-## Setup Instructions
+## Security
 
-### 1. Configure Variables
+### Secrets Management
+
+- GitHub tokens stored in AWS Secrets Manager
+- Not exposed in Terraform state files
+- Automatic encryption with AWS KMS
+
+### State Management
+
+- State stored in S3 with encryption
+- DynamoDB locking prevents concurrent modifications
+- Versioning enabled for state history
+
+## Required IAM Permissions
+
+See [BOOTSTRAP-GUIDE.md](./BOOTSTRAP-GUIDE.md#security-best-practices) for detailed IAM policy.
+
+## Useful Commands
 
 ```bash
-cd infra/environments/production
-cp terraform.tfvars.example terraform.tfvars
+# View current state
+terraform show
+
+# List resources
+terraform state list
+
+# View outputs
+terraform output
+
+# Format code
+terraform fmt -recursive
+
+# Validate configuration
+terraform validate
+
+# Refresh state
+terraform refresh
 ```
-
-Edit `terraform.tfvars` and set your values:
-- `github_repository`: Your GitHub repository URL
-- `github_access_token`: Your GitHub personal access token
-
-### 2. Initialize Terraform
-
-```bash
-terraform init
-```
-
-### 3. Review the Plan
-
-```bash
-terraform plan
-```
-
-### 4. Deploy Infrastructure
-
-```bash
-terraform apply
-```
-
-Review the changes and type `yes` to confirm.
-
-### 5. Configure DNS at XServer
-
-After deployment, Terraform will output Route53 name servers:
-
-```
-route53_name_servers = [
-  "ns-xxxx.awsdns-xx.com",
-  "ns-xxxx.awsdns-xx.net",
-  "ns-xxxx.awsdns-xx.org",
-  "ns-xxxx.awsdns-xx.co.uk"
-]
-```
-
-Configure these name servers in XServer:
-1. Log in to XServer control panel
-2. Go to Domain Settings → Name Server Settings
-3. Select `my-rss-press.com`
-4. Choose "Use other name servers"
-5. Enter the 4 Route53 name servers
-6. Save settings
-
-DNS propagation may take up to 48 hours (usually a few hours).
-
-### 6. Build and Push Docker Image
-
-Before the Lambda function can work, you need to build and push the backend Docker image:
-
-```bash
-# From project root
-cd backend
-npm run build
-
-# Build Docker image
-docker build -t myrsspress-backend .
-
-# Get ECR repository URL from Terraform output
-ECR_URL=$(cd ../infra/environments/production && terraform output -raw ecr_repository_url)
-
-# Login to ECR
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_URL
-
-# Tag and push image
-docker tag myrsspress-backend:latest $ECR_URL:latest
-docker push $ECR_URL:latest
-
-# Update Lambda function to use the new image
-aws lambda update-function-code \
-  --function-name myrsspress-api \
-  --image-uri $ECR_URL:latest
-```
-
-### 7. Verify Deployment
-
-Check the deployment:
-
-```bash
-# Get deployment URLs
-terraform output deployment_summary
-
-# Test API health endpoint
-curl https://api.my-rss-press.com/api/health
-
-# Visit frontend
-open https://my-rss-press.com
-```
-
-## Deployed Resources
-
-- **Route53**: DNS hosted zone for my-rss-press.com
-- **ACM**: SSL certificate for *.my-rss-press.com
-- **DynamoDB**: Newspapers table with GSIs
-- **ECR**: Container registry for backend
-- **Lambda**: Backend API function
-- **API Gateway**: REST API with custom domain
-- **Amplify**: Frontend hosting with auto-deploy
-
-## Cost Estimate
-
-Monthly costs (approximate):
-- Route53 hosted zone: $0.50
-- DynamoDB (on-demand): ~$1-5
-- Lambda: ~$0-5 (within free tier)
-- API Gateway: ~$0-5 (within free tier)
-- Amplify: ~$0 (within free tier)
-- ACM: Free
-- **Total**: ~$2-15/month
-
-## Maintenance
-
-### Update Infrastructure
-
-```bash
-# Make changes to .tf files
-terraform plan
-terraform apply
-```
-
-### Destroy Infrastructure
-
-```bash
-terraform destroy
-```
-
-**Warning**: This will delete all resources and data!
 
 ## Troubleshooting
 
-### Certificate Validation Stuck
+### State Lock Issues
 
-If ACM certificate validation is stuck:
-1. Check Route53 for validation records
-2. Ensure name servers are configured at XServer
-3. Wait for DNS propagation (up to 48 hours)
+```bash
+# View locks
+aws dynamodb scan --table-name myrsspress-terraform-locks
 
-### Lambda Function Not Working
+# Force unlock (use with caution)
+terraform force-unlock <LOCK_ID>
+```
 
-1. Check CloudWatch Logs: `/aws/lambda/myrsspress-api`
-2. Verify ECR image exists and is tagged correctly
-3. Check IAM permissions for Lambda execution role
+### State Recovery
 
-### Amplify Build Failing
+```bash
+# List state versions
+aws s3api list-object-versions \
+  --bucket myrsspress-terraform-state \
+  --prefix production/terraform.tfstate
+```
 
-1. Check Amplify console for build logs
-2. Verify `amplify.yml` configuration
-3. Check environment variables are set correctly
+## Documentation
 
-## Security Notes
-
-- Never commit `terraform.tfvars` to version control
-- Store GitHub token securely
-- Use AWS Secrets Manager for production secrets
-- Enable MFA on AWS account
-- Regularly review IAM permissions
+- [Bootstrap Guide](./BOOTSTRAP-GUIDE.md) - Detailed setup instructions
+- [Deployment Guide](./DEPLOYMENT.md) - Deployment procedures
+- [Quick Start](./QUICK-START.md) - Getting started guide
 
 ## Support
 
-For issues or questions, refer to:
-- [Terraform AWS Provider Docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [AWS Documentation](https://docs.aws.amazon.com/)
-- Project documentation in `.kiro/specs/`
+For issues or questions, see the main project [README](../README.md).

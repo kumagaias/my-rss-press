@@ -10,15 +10,7 @@ terraform {
     }
   }
 
-  # Backend configuration for state management
-  # Uncomment and configure after creating S3 bucket and DynamoDB table
-  # backend "s3" {
-  #   bucket         = "myrsspress-terraform-state"
-  #   key            = "production/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "myrsspress-terraform-locks"
-  #   encrypt        = true
-  # }
+  # Backend configuration is in backend.tf
 }
 
 provider "aws" {
@@ -48,6 +40,15 @@ module "acm" {
   domain_name      = var.domain_name
   route53_zone_id  = module.route53.zone_id
   environment      = var.environment
+}
+
+# Secrets Manager
+module "secrets_manager" {
+  source = "../../modules/secrets-manager"
+
+  project_name        = "myrsspress"
+  environment         = var.environment
+  github_access_token = var.github_access_token
 }
 
 # DynamoDB Table
@@ -99,12 +100,12 @@ module "api_gateway" {
 module "amplify" {
   source = "../../modules/amplify"
 
-  app_name             = var.amplify_app_name
-  github_repository    = var.github_repository
-  github_access_token  = var.github_access_token
-  domain_name          = var.domain_name
-  api_base_url         = module.api_gateway.custom_domain_url
-  environment          = var.environment
+  app_name                = var.amplify_app_name
+  github_repository       = var.github_repository
+  github_token_secret_id  = module.secrets_manager.github_token_secret_id
+  domain_name             = var.domain_name
+  api_base_url            = module.api_gateway.custom_domain_url
+  environment             = var.environment
 
-  depends_on = [module.api_gateway]
+  depends_on = [module.api_gateway, module.secrets_manager]
 }

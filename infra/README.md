@@ -15,10 +15,16 @@ Terraform configuration for deploying MyRSSPress to AWS.
 
 ### 1. Bootstrap (First Time Only)
 
-Create S3 bucket and DynamoDB table for Terraform state:
+Create S3 bucket and DynamoDB table for Terraform state.
 
+**Option A: Using Script (Recommended for quick setup)**
 ```bash
-cd bootstrap
+./infra/scripts/create-backend.sh
+```
+
+**Option B: Using Terraform**
+```bash
+cd infra/bootstrap
 terraform init
 terraform apply
 ```

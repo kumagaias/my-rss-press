@@ -44,7 +44,16 @@ Terraform state is stored remotely in S3 with DynamoDB locking to enable:
 
 ### 1. Bootstrap Resources (One-time)
 
-Create the S3 bucket and DynamoDB table:
+Create the S3 bucket and DynamoDB table.
+
+**Option A: Using Script (Quick)**
+
+```bash
+# From project root
+./infra/scripts/create-backend.sh
+```
+
+**Option B: Using Terraform (Infrastructure as Code)**
 
 ```bash
 cd infra/bootstrap

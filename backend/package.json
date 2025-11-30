@@ -1,0 +1,29 @@
+{
+  "name": "myrsspress-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/dev.ts",
+    "build": "tsc",
+    "start": "node dist/dev.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "docker:build": "docker build -t myrsspress-backend .",
+    "docker:run": "docker run -p 9000:8080 myrsspress-backend"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "@hono/node-server": "^1.0.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.0.0",
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0",
+    "tsx": "^4.0.0",
+    "vitest": "^2.0.0"
+  }
+}

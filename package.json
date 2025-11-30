@@ -1,0 +1,17 @@
+{
+  "name": "my-rss-press",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered RSS feed aggregator and newspaper generator",
+  "scripts": {
+    "prepare": "husky install",
+    "security-check": "./scripts/security-check.sh"
+  },
+  "devDependencies": {
+    "husky": "^8.0.3"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}

@@ -1,11 +1,11 @@
 {
   "name": "コミット・プッシュ・PR作成",
-  "description": "変更をコミット、プッシュして、PRを自動作成します（タイトル・説明文も自動生成）",
+  "description": "変更をコミット、プッシュして、PRを自動作成します（タイトル・説明文も自動生成、Copilotレビュー自動依頼）",
   "trigger": {
     "type": "manual"
   },
   "action": {
     "type": "message",
-    "message": "変更をコミット、プッシュして、PRを作成します。\n\n手順:\n1. 変更内容を確認\n2. タスク番号またはIssue番号を特定\n3. コミットメッセージを自動生成\n4. git add、commit、push\n5. PRのタイトルと説明文を自動生成\n6. GitHub MCPでPRを作成\n\nタスク番号またはIssue番号を教えてください（例: task-1.1 または issue-42）"
+    "message": "変更をコミット、プッシュして、PRを作成します。\n\n手順:\n1. 変更内容を確認\n2. タスク番号またはIssue番号を特定\n3. コミットメッセージを自動生成\n4. git add、commit、push\n5. PRのタイトルと説明文を自動生成（英語）\n6. GitHub MCPでPRを作成\n7. GitHub Copilotにコードレビューを自動依頼\n\nタスク番号またはIssue番号を教えてください（例: task-1.1 または issue-42）"
   }
 }

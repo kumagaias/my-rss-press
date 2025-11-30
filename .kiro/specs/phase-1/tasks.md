@@ -27,7 +27,7 @@
 
 ### 1.1 プロジェクト構造の作成
 
-- [ ] 1.1 プロジェクト構造の作成
+- [x] 1.1 プロジェクト構造の作成
   - ルートディレクトリに`frontend/`, `backend/`, `infra/`ディレクトリを作成
   - 各ディレクトリに基本的な設定ファイルを配置
   - **受け入れ条件:**
@@ -38,7 +38,7 @@
 
 ### 1.2 Makefileの作成
 
-- [ ] 1.2 Makefileの作成
+- [x] 1.2 Makefileの作成
   - プロジェクトルートに`Makefile`を作成
   - `test`, `test-unit`, `test-security`, `install`, `clean`, `help`コマンドを実装
   - **受け入れ条件:**
@@ -50,7 +50,7 @@
 
 ### 1.3 バックエンドプロジェクトのセットアップ
 
-- [ ] 1.3 バックエンドプロジェクトのセットアップ
+- [x] 1.3 バックエンドプロジェクトのセットアップ
   - `backend/`ディレクトリにNode.js + TypeScriptプロジェクトを初期化
   - Hono 4.x、TypeScript 5.9.x、Zod 3.xをインストール
   - `tsconfig.json`を設定
@@ -61,7 +61,7 @@
     - [ ] TypeScriptのコンパイルが成功する
   - _Requirements: 全般_
 
-- [ ] 1.3.1 Honoアプリケーションの基本構造を作成
+- [x] 1.3.1 Honoアプリケーションの基本構造を作成
   - `backend/src/app.ts`を作成
   - CORSとロギングミドルウェアを設定
   - `GET /api/health`エンドポイントを実装
@@ -72,7 +72,7 @@
     - [ ] CORSヘッダーが正しく設定されている
   - _Requirements: 全般_
 
-- [ ] 1.3.2 レート制限ミドルウェアを実装
+- [x] 1.3.2 レート制限ミドルウェアを実装
   - `backend/src/middleware/rateLimit.ts`を作成
   - IPベースのレート制限を実装（100リクエスト/分）
   - **受け入れ条件:**
@@ -84,7 +84,7 @@
 
 ### 1.4 フロントエンドプロジェクトのセットアップ
 
-- [ ] 1.4 フロントエンドプロジェクトのセットアップ
+- [x] 1.4 フロントエンドプロジェクトのセットアップ
   - `frontend/`ディレクトリにNext.js 15.xプロジェクトを作成
   - TailwindCSS 3.x、TypeScript 5.9.xを設定
   - **受け入れ条件:**
@@ -94,7 +94,7 @@
     - [ ] TailwindCSSが正しく動作する
   - _Requirements: 全般_
 
-- [ ] 1.4.1 多言語対応（i18n）のセットアップ
+- [x] 1.4.1 多言語対応（i18n）のセットアップ
   - `frontend/lib/i18n.ts`を作成
   - 日本語と英語の翻訳ファイルを作成
   - ブラウザ言語検出機能を実装
@@ -107,7 +107,7 @@
 
 ### 1.5 Terraformインフラのセットアップ
 
-- [ ] 1.5 Terraformインフラのセットアップ
+- [x] 1.5 Terraformインフラのセットアップ
   - `infra/environments/production/`ディレクトリを作成
   - `main.tf`, `variables.tf`, `outputs.tf`を作成
   - **受け入れ条件:**
@@ -116,7 +116,7 @@
     - [ ] `terraform validate`が成功する
   - _Requirements: 全般_
 
-- [ ] 1.5.1 Route53ホストゾーンの作成
+- [x] 1.5.1 Route53ホストゾーンの作成
   - `infra/modules/route53/`モジュールを作成
   - `my-rss-press.com`のホストゾーンを作成
   - **受け入れ条件:**
@@ -125,7 +125,7 @@
     - [ ] XServerでネームサーバーを設定する手順が明確
   - _Requirements: 全般_
 
-- [ ] 1.5.2 ACM証明書の作成
+- [x] 1.5.2 ACM証明書の作成
   - `infra/modules/acm/`モジュールを作成
   - `my-rss-press.com`と`*.my-rss-press.com`の証明書を作成
   - DNS検証を設定
@@ -136,7 +136,7 @@
   - _Requirements: 全般_
 
 
-- [ ] 1.5.3 DynamoDBテーブルの作成
+- [x] 1.5.3 DynamoDBテーブルの作成
   - `infra/modules/dynamodb/`モジュールを作成
   - Newspapersテーブルを作成（PK: NEWSPAPER#{id}, SK: METADATA）
   - GSI: PublicNewspapers（人気順）とRecentNewspapers（新着順）を作成
@@ -146,7 +146,7 @@
     - [ ] `terraform apply`が成功する
   - _Requirements: 全般_
 
-- [ ] 1.5.4 ECRリポジトリの作成
+- [x] 1.5.4 ECRリポジトリの作成
   - `infra/modules/ecr/`モジュールを作成
   - バックエンド用のECRリポジトリを作成
   - **受け入れ条件:**
@@ -154,7 +154,7 @@
     - [ ] リポジトリURLが出力される
   - _Requirements: 全般_
 
-- [ ] 1.5.5 Lambda関数の作成
+- [x] 1.5.5 Lambda関数の作成
   - `infra/modules/lambda/`モジュールを作成
   - ECRイメージを使用するLambda関数を作成
   - 環境変数（BEDROCK_REGION, DYNAMODB_TABLE）を設定
@@ -164,7 +164,7 @@
     - [ ] 環境変数が設定されている
   - _Requirements: 全般_
 
-- [ ] 1.5.6 API Gatewayの作成
+- [x] 1.5.6 API Gatewayの作成
   - `infra/modules/api-gateway/`モジュールを作成
   - REST APIを作成
   - Lambda統合を設定
@@ -176,7 +176,7 @@
     - [ ] `https://api.my-rss-press.com/api/health`にアクセスできる
   - _Requirements: 全般_
 
-- [ ] 1.5.7 Amplify Hostingの作成
+- [x] 1.5.7 Amplify Hostingの作成
   - `infra/modules/amplify/`モジュールを作成
   - GitHubリポジトリと連携
   - カスタムドメイン（my-rss-press.com）を設定
@@ -190,7 +190,7 @@
 
 ### 1.6 チェックポイント：インフラデプロイ
 
-- [ ] 1.6 チェックポイント：インフラデプロイ
+- [x] 1.6 チェックポイント：インフラデプロイ
   - すべてのインフラをデプロイ
   - 動作確認を実施
   - **受け入れ条件:**

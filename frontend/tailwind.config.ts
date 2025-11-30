@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import { colors, fonts, fontSize, spacing, borderRadius, shadows } from './lib/design-system';
 
 const config: Config = {
   content: [
@@ -9,29 +10,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-        },
-        newspaper: {
-          paper: '#f5f5dc',
-          ink: '#1a1a1a',
-          border: '#333333',
-          accent: '#8b4513',
-        },
-        success: '#10b981',
-        warning: '#f59e0b',
-        error: '#ef4444',
-        info: '#3b82f6',
+        primary: colors.primary,
+        newspaper: colors.newspaper,
+        success: colors.success,
+        warning: colors.warning,
+        error: colors.error,
+        info: colors.info,
+        gray: colors.gray,
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Georgia', 'Times New Roman', 'serif'],
-        mono: ['Fira Code', 'monospace'],
+        sans: fonts.sans,
+        serif: fonts.serif,
+        mono: fonts.mono,
       },
+      fontSize,
+      spacing,
+      borderRadius,
+      boxShadow: shadows,
     },
   },
   plugins: [],

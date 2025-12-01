@@ -138,24 +138,30 @@ function parseImportanceResponse(response: any): number[] {
   }
 }
 
+// Scoring constants for fallback algorithm
+const TITLE_SCORE_MULTIPLIER = 0.6; // Weight for title length
+const MAX_TITLE_SCORE = 60; // Maximum points from title length
+const IMAGE_BONUS = 40; // Bonus points for having an image
+const RANDOM_VARIATION_RANGE = 20; // Range for random variation (±10 points)
+
 /**
  * Fallback algorithm for importance calculation
+ * Uses a simple scoring system based on title length and image presence
  * @param article - Article to calculate importance for
  * @returns Importance score (0-100)
  */
 export function calculateImportanceFallback(article: Article): number {
-  // Simple scoring based on title length and image presence
   const titleLength = article.title.length;
   const hasImage = !!article.imageUrl;
 
-  // Title score: longer titles get higher scores (up to 60 points)
-  const titleScore = Math.min(titleLength * 0.6, 60);
+  // Title score: longer titles get higher scores (up to MAX_TITLE_SCORE points)
+  const titleScore = Math.min(titleLength * TITLE_SCORE_MULTIPLIER, MAX_TITLE_SCORE);
 
-  // Image bonus: 40 points if image present
-  const imageBonus = hasImage ? 40 : 0;
+  // Image bonus: IMAGE_BONUS points if image present
+  const imageBonus = hasImage ? IMAGE_BONUS : 0;
 
-  // Add some randomness for variation (±10 points)
-  const randomVariation = (Math.random() - 0.5) * 20;
+  // Add randomness for variation (±10 points)
+  const randomVariation = (Math.random() - 0.5) * RANDOM_VARIATION_RANGE;
 
   const totalScore = titleScore + imageBonus + randomVariation;
 

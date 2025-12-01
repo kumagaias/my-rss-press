@@ -154,34 +154,47 @@ export async function getPublicNewspapers(
 }
 
 /**
- * Increment view count for a newspaper
+ * Increment view count for a newspaper using atomic counter operation
+ * This prevents race conditions when multiple concurrent requests increment the count
  * @param newspaperId - Newspaper ID
  */
 export async function incrementViewCount(newspaperId: string): Promise<void> {
-  // Get current newspaper data
-  const newspaper = await getNewspaper(newspaperId);
-  if (!newspaper) {
-    throw new Error(`Newspaper not found: ${newspaperId}`);
-  }
-
-  const newViewCount = newspaper.viewCount + 1;
-
-  // Update view count
-  await docClient.send(
+  // Use atomic ADD operation to increment view count
+  // This prevents race conditions from concurrent requests
+  const result = await docClient.send(
     new UpdateCommand({
       TableName: config.dynamodbTable,
       Key: {
         PK: `NEWSPAPER#${newspaperId}`,
         SK: 'METADATA',
       },
-      UpdateExpression: 'SET viewCount = :count, updatedAt = :now, GSI1SK = :gsi1sk',
+      UpdateExpression: 'ADD viewCount :inc SET updatedAt = :now',
       ExpressionAttributeValues: {
-        ':count': newViewCount,
+        ':inc': 1,
         ':now': new Date().toISOString(),
-        ':gsi1sk': `VIEWS#${String(newViewCount).padStart(10, '0')}#${newspaperId}`,
       },
+      ReturnValues: 'ALL_NEW',
     })
   );
 
-  console.log(`Incremented view count for newspaper ${newspaperId}: ${newViewCount}`);
+  // Update GSI1SK with the new view count for proper sorting in popular newspapers
+  if (result.Attributes) {
+    const newViewCount = result.Attributes.viewCount as number;
+    
+    await docClient.send(
+      new UpdateCommand({
+        TableName: config.dynamodbTable,
+        Key: {
+          PK: `NEWSPAPER#${newspaperId}`,
+          SK: 'METADATA',
+        },
+        UpdateExpression: 'SET GSI1SK = :gsi1sk',
+        ExpressionAttributeValues: {
+          ':gsi1sk': `VIEWS#${String(newViewCount).padStart(10, '0')}#${newspaperId}`,
+        },
+      })
+    );
+
+    console.log(`Incremented view count for newspaper ${newspaperId}: ${newViewCount}`);
+  }
 }

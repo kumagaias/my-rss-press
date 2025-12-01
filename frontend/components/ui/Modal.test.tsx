@@ -137,4 +137,42 @@ describe('Modal', () => {
     expect(dialog).toHaveAttribute('aria-modal', 'true');
     expect(dialog).toHaveAttribute('aria-labelledby', 'modal-title');
   });
+
+  it('sets body overflow to hidden when modal opens', () => {
+    render(
+      <Modal isOpen={true} onClose={() => {}}>
+        <div>Content</div>
+      </Modal>
+    );
+    
+    expect(document.body.style.overflow).toBe('hidden');
+  });
+
+  it('cleans up body overflow when modal closes', () => {
+    const { rerender } = render(
+      <Modal isOpen={true} onClose={() => {}}>
+        <div>Content</div>
+      </Modal>
+    );
+    expect(document.body.style.overflow).toBe('hidden');
+    
+    rerender(
+      <Modal isOpen={false} onClose={() => {}}>
+        <div>Content</div>
+      </Modal>
+    );
+    expect(document.body.style.overflow).toBe('unset');
+  });
+
+  it('cleans up body overflow when modal unmounts', () => {
+    const { unmount } = render(
+      <Modal isOpen={true} onClose={() => {}}>
+        <div>Content</div>
+      </Modal>
+    );
+    expect(document.body.style.overflow).toBe('hidden');
+    
+    unmount();
+    expect(document.body.style.overflow).toBe('unset');
+  });
 });

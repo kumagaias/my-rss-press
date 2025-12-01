@@ -91,6 +91,7 @@ module "lambda" {
 
   function_name       = var.lambda_function_name
   ecr_image_uri       = "${module.ecr.repository_url}:latest"
+  ecr_repository_arn  = module.ecr.repository_arn
   dynamodb_table_name = module.dynamodb.table_name
   dynamodb_table_arn  = module.dynamodb.table_arn
   bedrock_region      = var.bedrock_region

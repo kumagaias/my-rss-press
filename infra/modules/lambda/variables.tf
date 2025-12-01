@@ -32,3 +32,8 @@ variable "environment" {
   type        = string
   default     = "production"
 }
+
+variable "ecr_repository_arn" {
+  description = "ARN of the ECR repository"
+  type        = string
+}

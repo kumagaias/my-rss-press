@@ -91,49 +91,9 @@ newspapersRouter.post(
 );
 
 /**
- * POST /api/newspapers
- * Save a newspaper
- */
-newspapersRouter.post('/newspapers', async (c) => {
-  try {
-    // Parse and validate request body
-    const body = await c.req.json();
-    const validated = SaveNewspaperSchema.parse(body);
-
-    // Save newspaper
-    const newspaperId = await saveNewspaper(validated);
-
-    return c.json(
-      {
-        newspaperId,
-        createdAt: new Date().toISOString(),
-      },
-      201
-    );
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return c.json(
-        {
-          error: 'Validation error',
-          details: error.errors,
-        },
-        400
-      );
-    }
-
-    console.error('Error in save newspaper:', error);
-    return c.json(
-      {
-        error: 'Failed to save newspaper',
-      },
-      500
-    );
-  }
-});
-
-/**
  * GET /api/newspapers/:id
  * Get a newspaper by ID
+ * Note: This route must be defined BEFORE /newspapers to avoid route conflicts
  */
 newspapersRouter.get('/newspapers/:id', async (c) => {
   try {
@@ -196,6 +156,47 @@ newspapersRouter.get('/newspapers', async (c) => {
     return c.json(
       {
         error: 'Failed to get newspapers',
+      },
+      500
+    );
+  }
+});
+
+/**
+ * POST /api/newspapers
+ * Save a newspaper
+ */
+newspapersRouter.post('/newspapers', async (c) => {
+  try {
+    // Parse and validate request body
+    const body = await c.req.json();
+    const validated = SaveNewspaperSchema.parse(body);
+
+    // Save newspaper
+    const newspaperId = await saveNewspaper(validated);
+
+    return c.json(
+      {
+        newspaperId,
+        createdAt: new Date().toISOString(),
+      },
+      201
+    );
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return c.json(
+        {
+          error: 'Validation error',
+          details: error.errors,
+        },
+        400
+      );
+    }
+
+    console.error('Error in save newspaper:', error);
+    return c.json(
+      {
+        error: 'Failed to save newspaper',
       },
       500
     );

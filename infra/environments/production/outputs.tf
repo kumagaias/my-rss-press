@@ -72,12 +72,24 @@ output "amplify_app_url" {
   value       = module.amplify.app_url
 }
 
+# GitHub OIDC
+output "github_actions_role_arn" {
+  description = "ARN of the GitHub Actions IAM role (use this in GitHub Actions workflow)"
+  value       = module.github_oidc.github_actions_role_arn
+}
+
+output "github_oidc_provider_arn" {
+  description = "ARN of the GitHub OIDC provider"
+  value       = module.github_oidc.oidc_provider_arn
+}
+
 # Summary
 output "deployment_summary" {
   description = "Summary of deployed resources"
   value = {
-    frontend_url = module.amplify.app_url
-    api_url      = module.api_gateway.custom_domain_url
-    name_servers = module.route53.name_servers
+    frontend_url             = module.amplify.app_url
+    api_url                  = module.api_gateway.custom_domain_url
+    name_servers             = module.route53.name_servers
+    github_actions_role_arn  = module.github_oidc.github_actions_role_arn
   }
 }

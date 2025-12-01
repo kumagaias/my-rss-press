@@ -127,3 +127,17 @@ module "amplify" {
 
   depends_on = [module.api_gateway, module.secrets_manager]
 }
+
+# GitHub OIDC for GitHub Actions
+module "github_oidc" {
+  source = "../../modules/github-oidc"
+
+  project_name        = "myrsspress"
+  environment         = var.environment
+  aws_region          = var.aws_region
+  github_org          = var.github_org
+  github_repo         = var.github_repo
+  lambda_function_arn = module.lambda.function_arn
+
+  depends_on = [module.lambda]
+}

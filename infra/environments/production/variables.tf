@@ -66,3 +66,15 @@ variable "bedrock_region" {
   type        = string
   default     = "ap-northeast-1"
 }
+
+variable "github_org" {
+  description = "GitHub organization or username"
+  type        = string
+  # Set this in terraform.tfvars or via environment variable
+}
+
+variable "github_repo" {
+  description = "GitHub repository name"
+  type        = string
+  # Set this in terraform.tfvars or via environment variable
+}

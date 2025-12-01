@@ -14,8 +14,8 @@
 
 ## タスク一覧
 
-- [ ] 1. プロジェクトセットアップとインフラ基盤
-- [ ] 2. デザインシステムとUIコンポーネント
+- [x] 1. プロジェクトセットアップとインフラ基盤
+- [x] 2. デザインシステムとUIコンポーネント
 - [ ] 3. バックエンドAPI実装
 - [ ] 4. フロントエンド実装
 - [ ] 5. 統合とE2Eテスト
@@ -229,54 +229,54 @@
 
 ### 2.3 基本UIコンポーネントの実装
 
-- [ ] 2.3.1 Buttonコンポーネント
+- [x] 2.3.1 Buttonコンポーネント
   - `frontend/components/ui/Button.tsx`を作成
   - variant（primary, secondary, outline, ghost）を実装
   - size（sm, md, lg）を実装
   - Storybookストーリーを作成
   - **受け入れ条件:**
-    - [ ] Buttonコンポーネントが実装されている
-    - [ ] すべてのvariantとsizeが動作する
-    - [ ] Storybookで確認できる
-    - [ ] ユニットテストが通る
+    - [x] Buttonコンポーネントが実装されている
+    - [x] すべてのvariantとsizeが動作する
+    - [x] Storybookで確認できる
+    - [x] ユニットテストが通る
   - _Requirements: 全般_
 
-- [ ] 2.3.2 Inputコンポーネント
+- [x] 2.3.2 Inputコンポーネント
   - `frontend/components/ui/Input.tsx`を作成
   - エラー表示機能を実装
   - Storybookストーリーを作成
   - **受け入れ条件:**
-    - [ ] Inputコンポーネントが実装されている
-    - [ ] エラー表示が動作する
-    - [ ] Storybookで確認できる
-    - [ ] ユニットテストが通る
+    - [x] Inputコンポーネントが実装されている
+    - [x] エラー表示が動作する
+    - [x] Storybookで確認できる
+    - [x] ユニットテストが通る
   - _Requirements: 2.2_
 
-- [ ] 2.3.3 Cardコンポーネント
+- [x] 2.3.3 Cardコンポーネント
   - `frontend/components/ui/Card.tsx`を作成
   - Storybookストーリーを作成
   - **受け入れ条件:**
-    - [ ] Cardコンポーネントが実装されている
-    - [ ] Storybookで確認できる
+    - [x] Cardコンポーネントが実装されている
+    - [x] Storybookで確認できる
   - _Requirements: 4.5_
 
-- [ ] 2.3.4 Checkboxコンポーネント
+- [x] 2.3.4 Checkboxコンポーネント
   - `frontend/components/ui/Checkbox.tsx`を作成
   - Storybookストーリーを作成
   - **受け入れ条件:**
-    - [ ] Checkboxコンポーネントが実装されている
-    - [ ] Storybookで確認できる
-    - [ ] ユニットテストが通る
+    - [x] Checkboxコンポーネントが実装されている
+    - [x] Storybookで確認できる
+    - [x] ユニットテストが通る
   - _Requirements: 3.2_
 
-- [ ] 2.3.5 Modalコンポーネント
+- [x] 2.3.5 Modalコンポーネント
   - `frontend/components/ui/Modal.tsx`を作成
   - Storybookストーリーを作成
   - **受け入れ条件:**
-    - [ ] Modalコンポーネントが実装されている
-    - [ ] 開閉が正しく動作する
-    - [ ] Storybookで確認できる
-    - [ ] ユニットテストが通る
+    - [x] Modalコンポーネントが実装されている
+    - [x] 開閉が正しく動作する
+    - [x] Storybookで確認できる
+    - [x] ユニットテストが通る
   - _Requirements: 6.2_
 
 

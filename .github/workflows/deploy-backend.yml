@@ -3,55 +3,68 @@ name: Deploy Backend to Lambda
 on:
   push:
     branches: [main]
-    paths: ['backend/**']
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPOSITORY: myrsspress-backend
+  ECR_REPOSITORY: myrsspress-production-backend
+  LAMBDA_FUNCTION_NAME: myrsspress-production-api
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
       
       - name: Install dependencies
-        run: cd backend && npm ci
+        working-directory: backend
+        run: npm ci
       
       - name: Run tests
-        run: make test
+        working-directory: backend
+        run: npm test
       
-      - name: Configure AWS credentials
+      - name: Build TypeScript
+        working-directory: backend
+        run: npm run build
+      
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::843925270284:role/myrsspress-github-actions-role
           aws-region: ${{ env.AWS_REGION }}
       
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
       
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
+        working-directory: backend
         run: |
-          cd backend
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
       
       - name: Update Lambda function
@@ -59,17 +72,25 @@ jobs:
           IMAGE_URI: ${{ steps.build-image.outputs.image }}
         run: |
           aws lambda update-function-code \
-            --function-name myrsspress-api \
+            --function-name $LAMBDA_FUNCTION_NAME \
             --image-uri $IMAGE_URI
           
           # Wait for update to complete
           aws lambda wait function-updated \
-            --function-name myrsspress-api
+            --function-name $LAMBDA_FUNCTION_NAME
       
       - name: Verify deployment
         run: |
-          # Check Lambda function status
+          # Get Lambda function status
           aws lambda get-function \
-            --function-name myrsspress-api \
+            --function-name $LAMBDA_FUNCTION_NAME \
             --query 'Configuration.[State,LastUpdateStatus]' \
             --output text
+      
+      - name: Test API endpoint
+        run: |
+          # Wait a bit for API Gateway to be ready
+          sleep 10
+          
+          # Test health endpoint
+          curl -f https://api.my-rss-press.com/api/health || exit 1

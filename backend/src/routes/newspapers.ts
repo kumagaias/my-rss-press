@@ -16,14 +16,14 @@ export const newspapersRouter = new Hono();
 
 // Validation schemas
 const GenerateNewspaperSchema = z.object({
-  feedUrls: z.array(z.string().url()).min(1, 'At least one feed URL is required'),
+  feedUrls: z.array(z.string().url()).min(1, 'At least one feed URL is required').max(10, 'Too many feed URLs'),
   theme: z.string().min(1, 'Theme is required'),
 });
 
 const SaveNewspaperSchema = z.object({
   name: z.string().min(1, 'Newspaper name is required').max(100),
   userName: z.string().min(1, 'User name is required').max(100),
-  feedUrls: z.array(z.string().url()).min(1),
+  feedUrls: z.array(z.string().url()).min(1).max(10, 'Too many feed URLs'),
   isPublic: z.boolean().optional().default(true),
 });
 

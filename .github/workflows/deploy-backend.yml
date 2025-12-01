@@ -1,0 +1,73 @@
+name: Deploy Backend to Lambda
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**']
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY: myrsspress-backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      
+      - name: Install dependencies
+        run: cd backend && npm ci
+      
+      - name: Run tests
+        run: make test
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd backend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
+      - name: Update Lambda function
+        env:
+          IMAGE_URI: ${{ steps.build-image.outputs.image }}
+        run: |
+          aws lambda update-function-code \
+            --function-name myrsspress-api \
+            --image-uri $IMAGE_URI
+          
+          # Wait for update to complete
+          aws lambda wait function-updated \
+            --function-name myrsspress-api
+      
+      - name: Verify deployment
+        run: |
+          # Check Lambda function status
+          aws lambda get-function \
+            --function-name myrsspress-api \
+            --query 'Configuration.[State,LastUpdateStatus]' \
+            --output text

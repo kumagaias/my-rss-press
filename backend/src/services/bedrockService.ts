@@ -136,17 +136,17 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
     {
       url: 'https://news.ycombinator.com/rss',
       title: 'Hacker News',
-      reasoning: `${theme}に関連する技術ニュースとディスカッション`,
+      reasoning: `Technology news and discussions relevant to the theme: ${theme}`,
     },
     {
       url: 'https://techcrunch.com/feed/',
       title: 'TechCrunch',
-      reasoning: `${theme}のスタートアップとイノベーションニュース`,
+      reasoning: `Startup and innovation news related to the theme: ${theme}`,
     },
     {
       url: 'https://www.theverge.com/rss/index.xml',
       title: 'The Verge',
-      reasoning: `${theme}に関するテクノロジーとカルチャーの記事`,
+      reasoning: `Technology and culture articles about the theme: ${theme}`,
     },
   ];
 }

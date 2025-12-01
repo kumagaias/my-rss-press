@@ -1107,6 +1107,7 @@ interface NewspaperService {
   saveNewspaper(newspaper: NewspaperData): Promise<string>;
   getNewspaper(newspaperId: string): Promise<NewspaperData>;
   getPublicNewspapers(sortBy: 'popular' | 'recent', limit: number): Promise<NewspaperData[]>;
+  getUserNewspapers(userId: string, limit: number): Promise<NewspaperData[]>;
   incrementViewCount(newspaperId: string): Promise<void>;
 }
 
@@ -1114,6 +1115,7 @@ interface NewspaperData {
   newspaperId: string;
   name: string;
   userName: string;
+  userId?: string;      // 将来のログイン機能用（オプショナル）
   feedUrls: string[];
   createdAt: string;
   updatedAt: string;
@@ -1126,6 +1128,7 @@ interface NewspaperData {
 - `saveNewspaper(newspaper)` - DynamoDBに新聞を保存
 - `getNewspaper(newspaperId)` - IDで新聞を取得
 - `getPublicNewspapers(sortBy, limit)` - 公開新聞を取得（人気順または新着順）
+- `getUserNewspapers(userId, limit)` - ユーザーが作成した新聞を取得（将来のログイン機能用）
 - `incrementViewCount(newspaperId)` - 閲覧数をインクリメント
 
 **依存関係:**
@@ -1189,10 +1192,13 @@ interface NewspaperData {
 {
   "name": "Tech Morning Digest",
   "userName": "John Doe",
+  "userId": null,
   "feedUrls": ["https://techcrunch.com/feed/"],
   "isPublic": true
 }
 ```
+
+**注:** MVPでは`userId`は常に`null`。将来のログイン機能実装時に使用。
 
 **レスポンス:**
 ```json
@@ -1209,6 +1215,7 @@ interface NewspaperData {
   "newspaperId": "uuid-1234",
   "name": "Tech Morning Digest",
   "userName": "John Doe",
+  "userId": null,
   "feedUrls": ["https://techcrunch.com/feed/"],
   "createdAt": "2025-11-29T10:00:00Z",
   "updatedAt": "2025-11-29T10:00:00Z",
@@ -1511,7 +1518,8 @@ interface FeedSuggestion {
 interface Newspaper {
   newspaperId: string;  // UUID
   name: string;         // 新聞名
-  userName: string;     // 作成者名
+  userName: string;     // 作成者名（表示用）
+  userId?: string;      // ユーザーID（将来のログイン機能用、オプショナル）
   feedUrls: string[];   // RSSフィードURLリスト
   createdAt: string;    // 作成日時（ISO 8601）
   updatedAt: string;    // 更新日時（ISO 8601）
@@ -1525,7 +1533,12 @@ interface Newspaper {
 **Newspapersテーブル:**
 - パーティションキー: `PK` = `NEWSPAPER#{newspaperId}` (String)
 - ソートキー: `SK` = `METADATA` (String)
-- 属性: `newspaperId`, `name`, `userName`, `feedUrls`, `createdAt`, `updatedAt`, `viewCount`, `isPublic`
+- 属性: `newspaperId`, `name`, `userName`, `userId`, `feedUrls`, `createdAt`, `updatedAt`, `viewCount`, `isPublic`
+
+**GSI: UserNewspapers（将来のログイン機能用）:**
+- パーティションキー: `PK` = `USER#{userId}` (String)
+- ソートキー: `SK` = `CREATED#{createdAt}#{newspaperId}` (String)
+- 用途: ユーザーが作成した新聞の一覧取得（ログイン後）
 
 **GSI: PublicNewspapers（人気順）:**
 - パーティションキー: `PK` = `PUBLIC` (String)

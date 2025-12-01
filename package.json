@@ -4,7 +4,7 @@
   "private": true,
   "description": "AI-powered RSS feed aggregator and newspaper generator",
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky install || true",
     "security-check": "./scripts/security-check.sh"
   },
   "devDependencies": {

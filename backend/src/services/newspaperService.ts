@@ -117,12 +117,17 @@ export async function getPublicNewspapers(
 ): Promise<NewspaperData[]> {
   const indexName = sortBy === 'popular' ? 'PublicNewspapers' : 'RecentNewspapers';
   const sortKeyPrefix = sortBy === 'popular' ? 'VIEWS#' : 'CREATED#';
+  
+  // Use correct GSI attributes based on sort order
+  // Popular uses GSI1 (GSI1PK/GSI1SK), Recent uses GSI2 (GSI2PK/GSI2SK)
+  const pkAttribute = sortBy === 'popular' ? 'GSI1PK' : 'GSI2PK';
+  const skAttribute = sortBy === 'popular' ? 'GSI1SK' : 'GSI2SK';
 
   const result = await docClient.send(
     new QueryCommand({
       TableName: config.dynamodbTable,
       IndexName: indexName,
-      KeyConditionExpression: 'GSI1PK = :pk AND begins_with(GSI1SK, :sk)',
+      KeyConditionExpression: `${pkAttribute} = :pk AND begins_with(${skAttribute}, :sk)`,
       ExpressionAttributeValues: {
         ':pk': 'PUBLIC',
         ':sk': sortKeyPrefix,

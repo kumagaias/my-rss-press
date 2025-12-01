@@ -7,7 +7,7 @@ export const feedsRouter = new Hono();
 
 // Validation schema for suggest-feeds request
 const SuggestFeedsSchema = z.object({
-  theme: z.string().min(1, 'Theme is required'),
+  theme: z.string().min(1, 'Theme is required').max(200, 'Theme is too long'),
 });
 
 /**

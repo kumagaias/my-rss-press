@@ -132,7 +132,8 @@ newspapersRouter.get('/newspapers/:id', async (c) => {
  */
 newspapersRouter.get('/newspapers', async (c) => {
   try {
-    const sortBy = c.req.query('sort') as 'popular' | 'recent' || 'popular';
+    const sortParam = c.req.query('sort');
+    const sortBy: 'popular' | 'recent' = (sortParam === 'popular' || sortParam === 'recent') ? sortParam : 'popular';
     const limit = parseInt(c.req.query('limit') || '10', 10);
 
     // Validate sort parameter

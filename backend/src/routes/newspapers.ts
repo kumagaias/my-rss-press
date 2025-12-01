@@ -1,0 +1,203 @@
+import { Hono } from 'hono';
+import { z } from 'zod';
+import {
+  saveNewspaper,
+  getNewspaper,
+  getPublicNewspapers,
+  incrementViewCount,
+} from '../services/newspaperService.js';
+import {
+  fetchArticlesForNewspaper,
+} from '../services/rssFetcherService.js';
+import { calculateImportance } from '../services/importanceCalculator.js';
+import { rateLimit } from '../middleware/rateLimit.js';
+
+export const newspapersRouter = new Hono();
+
+// Validation schemas
+const GenerateNewspaperSchema = z.object({
+  feedUrls: z.array(z.string().url()).min(1, 'At least one feed URL is required'),
+  theme: z.string().min(1, 'Theme is required'),
+});
+
+const SaveNewspaperSchema = z.object({
+  name: z.string().min(1, 'Newspaper name is required').max(100),
+  userName: z.string().min(1, 'User name is required').max(100),
+  feedUrls: z.array(z.string().url()).min(1),
+  isPublic: z.boolean().optional().default(true),
+});
+
+/**
+ * POST /api/generate-newspaper
+ * Generate a newspaper from RSS feeds
+ */
+newspapersRouter.post(
+  '/generate-newspaper',
+  rateLimit(20, 60000), // 20 requests per minute
+  async (c) => {
+    try {
+      // Parse and validate request body
+      const body = await c.req.json();
+      const validated = GenerateNewspaperSchema.parse(body);
+
+      console.log(`Generating newspaper for theme: ${validated.theme}`);
+
+      // Fetch articles from RSS feeds
+      const articles = await fetchArticlesForNewspaper(
+        validated.feedUrls,
+        validated.theme
+      );
+
+      // Check if we have enough articles
+      if (articles.length < 3) {
+        return c.json(
+          {
+            error: '記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。',
+            articleCount: articles.length,
+          },
+          400
+        );
+      }
+
+      // Calculate importance scores
+      const articlesWithImportance = await calculateImportance(
+        articles,
+        validated.theme
+      );
+
+      return c.json({
+        articles: articlesWithImportance,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return c.json(
+          {
+            error: 'Validation error',
+            details: error.errors,
+          },
+          400
+        );
+      }
+
+      console.error('Error in generate-newspaper:', error);
+      return c.json(
+        {
+          error: 'Failed to generate newspaper',
+        },
+        500
+      );
+    }
+  }
+);
+
+/**
+ * POST /api/newspapers
+ * Save a newspaper
+ */
+newspapersRouter.post('/newspapers', async (c) => {
+  try {
+    // Parse and validate request body
+    const body = await c.req.json();
+    const validated = SaveNewspaperSchema.parse(body);
+
+    // Save newspaper
+    const newspaperId = await saveNewspaper(validated);
+
+    return c.json(
+      {
+        newspaperId,
+        createdAt: new Date().toISOString(),
+      },
+      201
+    );
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return c.json(
+        {
+          error: 'Validation error',
+          details: error.errors,
+        },
+        400
+      );
+    }
+
+    console.error('Error in save newspaper:', error);
+    return c.json(
+      {
+        error: 'Failed to save newspaper',
+      },
+      500
+    );
+  }
+});
+
+/**
+ * GET /api/newspapers/:id
+ * Get a newspaper by ID
+ */
+newspapersRouter.get('/newspapers/:id', async (c) => {
+  try {
+    const newspaperId = c.req.param('id');
+
+    // Get newspaper
+    const newspaper = await getNewspaper(newspaperId);
+
+    if (!newspaper) {
+      return c.json(
+        {
+          error: 'Newspaper not found',
+        },
+        404
+      );
+    }
+
+    // Increment view count
+    await incrementViewCount(newspaperId);
+
+    return c.json(newspaper);
+  } catch (error) {
+    console.error('Error in get newspaper:', error);
+    return c.json(
+      {
+        error: 'Failed to get newspaper',
+      },
+      500
+    );
+  }
+});
+
+/**
+ * GET /api/newspapers?sort=popular&limit=10
+ * Get public newspapers
+ */
+newspapersRouter.get('/newspapers', async (c) => {
+  try {
+    const sortBy = c.req.query('sort') as 'popular' | 'recent' || 'popular';
+    const limit = parseInt(c.req.query('limit') || '10', 10);
+
+    // Validate sort parameter
+    if (sortBy !== 'popular' && sortBy !== 'recent') {
+      return c.json(
+        {
+          error: 'Invalid sort parameter. Must be "popular" or "recent"',
+        },
+        400
+      );
+    }
+
+    // Get public newspapers
+    const newspapers = await getPublicNewspapers(sortBy, limit);
+
+    return c.json({
+      newspapers,
+    });
+  } catch (error) {
+    console.error('Error in get public newspapers:', error);
+    return c.json(
+      {
+        error: 'Failed to get newspapers',
+      },
+      500
+    );
+  }
+});

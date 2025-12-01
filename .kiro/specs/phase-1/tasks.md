@@ -14,9 +14,9 @@
 
 ## タスク一覧
 
-- [ ] 1. プロジェクトセットアップとインフラ基盤
-- [ ] 2. デザインシステムとUIコンポーネント
-- [ ] 3. バックエンドAPI実装
+- [x] 1. プロジェクトセットアップとインフラ基盤
+- [x] 2. デザインシステムとUIコンポーネント
+- [-] 3. バックエンドAPI実装
 - [ ] 4. フロントエンド実装
 - [ ] 5. 統合とE2Eテスト
 - [ ] 6. 最終デプロイと動作確認
@@ -286,133 +286,133 @@
 
 ### 3.1 AWS Bedrock統合
 
-- [ ] 3.1 AWS Bedrock統合
+- [x] 3.1 AWS Bedrock統合
   - `backend/src/services/bedrockService.ts`を作成
   - Claude 3.5 Haikuを使用したフィード提案機能を実装
   - **受け入れ条件:**
-    - [ ] BedrockRuntimeClientが正しく設定されている
-    - [ ] `suggestFeeds(theme)`関数が実装されている
-    - [ ] テーマに基づいて3つのフィード提案が返される
-    - [ ] ユニットテスト（モック使用）が通る
+    - [x] BedrockRuntimeClientが正しく設定されている
+    - [x] `suggestFeeds(theme)`関数が実装されている
+    - [x] テーマに基づいて3つのフィード提案が返される
+    - [x] ユニットテスト（モック使用）が通る
   - _Requirements: 3.1, 3.2_
 
 ### 3.2 RSS取得サービス
 
-- [ ] 3.2 RSS取得サービス
+- [x] 3.2 RSS取得サービス
   - `backend/src/services/rssFetcherService.ts`を作成
   - 並行フィード取得を実装
   - 日付フィルタリング（3日間→7日間）を実装
   - **受け入れ条件:**
-    - [ ] `fetchArticles(feedUrls, daysBack)`関数が実装されている
-    - [ ] 複数フィードを並行して取得できる
-    - [ ] 日付フィルタリングが正しく動作する
-    - [ ] タイムアウト処理が実装されている
-    - [ ] ユニットテストが通る
+    - [x] `fetchArticles(feedUrls, daysBack)`関数が実装されている
+    - [x] 複数フィードを並行して取得できる
+    - [x] 日付フィルタリングが正しく動作する
+    - [x] タイムアウト処理が実装されている
+    - [x] ユニットテストが通る
   - _Requirements: 5.3, 5.4, 5.5, 5.6, 5.7_
 
 ### 3.3 記事重要度計算サービス
 
-- [ ] 3.3 記事重要度計算サービス
+- [x] 3.3 記事重要度計算サービス
   - `backend/src/services/importanceCalculator.ts`を作成
   - Bedrockを使用した重要度計算を実装
   - フォールバックアルゴリズムを実装
   - **受け入れ条件:**
-    - [ ] `calculateImportance(articles, theme)`関数が実装されている
-    - [ ] Bedrockで重要度スコア（0-100）が計算される
-    - [ ] Bedrock失敗時にフォールバックが動作する
-    - [ ] ユニットテストが通る
+    - [x] `calculateImportance(articles, theme)`関数が実装されている
+    - [x] Bedrockで重要度スコア（0-100）が計算される
+    - [x] Bedrock失敗時にフォールバックが動作する
+    - [x] ユニットテストが通る
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
 ### 3.4 新聞サービス
 
-- [ ] 3.4 新聞サービス
+- [x] 3.4 新聞サービス
   - `backend/src/services/newspaperService.ts`を作成
   - DynamoDB操作（保存、取得、一覧取得）を実装
   - **受け入れ条件:**
-    - [ ] `saveNewspaper(newspaper)`関数が実装されている
-    - [ ] `getNewspaper(id)`関数が実装されている
-    - [ ] `getPublicNewspapers(sortBy, limit)`関数が実装されている
-    - [ ] `incrementViewCount(id)`関数が実装されている
-    - [ ] ユニットテスト（AWS SDK Mock使用）が通る
+    - [x] `saveNewspaper(newspaper)`関数が実装されている
+    - [x] `getNewspaper(id)`関数が実装されている
+    - [x] `getPublicNewspapers(sortBy, limit)`関数が実装されている
+    - [x] `incrementViewCount(id)`関数が実装されている
+    - [x] ユニットテスト（AWS SDK Mock使用）が通る
   - _Requirements: 6.1, 6.5, 4.1, 4.2, 4.3, 4.4_
 
 
 ### 3.5 APIエンドポイントの実装
 
-- [ ] 3.5.1 POST /api/suggest-feeds
+- [x] 3.5.1 POST /api/suggest-feeds
   - `backend/src/routes/feeds.ts`を作成
   - フィード提案エンドポイントを実装
   - Zodバリデーションを追加
   - レート制限（10リクエスト/分）を設定
   - **受け入れ条件:**
-    - [ ] エンドポイントが実装されている
-    - [ ] リクエストボディがバリデーションされる
-    - [ ] 正しいレスポンスが返される
-    - [ ] レート制限が動作する
-    - [ ] 統合テストが通る
+    - [x] エンドポイントが実装されている
+    - [x] リクエストボディがバリデーションされる
+    - [x] 正しいレスポンスが返される
+    - [x] レート制限が動作する
+    - [x] 統合テストが通る
   - _Requirements: 3.1, 3.2_
 
-- [ ] 3.5.2 POST /api/generate-newspaper
+- [x] 3.5.2 POST /api/generate-newspaper
   - 新聞生成エンドポイントを実装
   - RSS取得、重要度計算を統合
   - レート制限（20リクエスト/分）を設定
   - **受け入れ条件:**
-    - [ ] エンドポイントが実装されている
-    - [ ] 記事が正しく取得される
-    - [ ] 重要度が計算される
-    - [ ] 5秒以内に完了する
-    - [ ] 統合テストが通る
+    - [x] エンドポイントが実装されている
+    - [x] 記事が正しく取得される
+    - [x] 重要度が計算される
+    - [x] 5秒以内に完了する
+    - [x] 統合テストが通る
   - _Requirements: 5.1, 5.2, 5.3, 5.8, 5.9, 5.10, 10.1, 10.2_
 
-- [ ] 3.5.3 POST /api/newspapers
+- [x] 3.5.3 POST /api/newspapers
   - 新聞保存エンドポイントを実装
   - **受け入れ条件:**
-    - [ ] エンドポイントが実装されている
-    - [ ] 新聞がDynamoDBに保存される
-    - [ ] 新聞IDが返される
-    - [ ] 統合テストが通る
+    - [x] エンドポイントが実装されている
+    - [x] 新聞がDynamoDBに保存される
+    - [x] 新聞IDが返される
+    - [x] 統合テストが通る
   - _Requirements: 6.1, 6.5_
 
-- [ ] 3.5.4 GET /api/newspapers/:id
+- [x] 3.5.4 GET /api/newspapers/:id
   - 新聞取得エンドポイントを実装
   - 閲覧数インクリメント機能を追加
   - **受け入れ条件:**
-    - [ ] エンドポイントが実装されている
-    - [ ] 新聞データが返される
-    - [ ] 閲覧数がインクリメントされる
-    - [ ] 統合テストが通る
+    - [x] エンドポイントが実装されている
+    - [x] 新聞データが返される
+    - [x] 閲覧数がインクリメントされる
+    - [x] 統合テストが通る
   - _Requirements: 4.6_
 
-- [ ] 3.5.5 GET /api/newspapers
+- [x] 3.5.5 GET /api/newspapers
   - 公開新聞一覧取得エンドポイントを実装
   - 並び替え（popular/recent）を実装
   - **受け入れ条件:**
-    - [ ] エンドポイントが実装されている
-    - [ ] 人気順と新着順の並び替えが動作する
-    - [ ] 統合テストが通る
+    - [x] エンドポイントが実装されている
+    - [x] 人気順と新着順の並び替えが動作する
+    - [x] 統合テストが通る
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
 ### 3.6 Dockerfileの作成
 
-- [ ] 3.6 Dockerfileの作成
+- [x] 3.6 Dockerfileの作成
   - `backend/Dockerfile`を作成
   - Lambda用のイメージをビルド
   - **受け入れ条件:**
-    - [ ] Dockerfileが作成されている
-    - [ ] `docker build`が成功する
-    - [ ] ローカルでLambdaをテストできる
+    - [x] Dockerfileが作成されている
+    - [x] `docker build`が成功する
+    - [x] ローカルでLambdaをテストできる
   - _Requirements: 全般_
 
 ### 3.7 チェックポイント：バックエンドデプロイ
 
-- [ ] 3.7 チェックポイント：バックエンドデプロイ
+- [x] 3.7 チェックポイント：バックエンドデプロイ
   - バックエンドをECR + Lambdaにデプロイ
   - 動作確認を実施
   - **受け入れ条件:**
-    - [ ] GitHub Actionsでビルド&デプロイが成功する
-    - [ ] `https://api.my-rss-press.com/api/health`が正常に応答する
-    - [ ] すべてのエンドポイントが動作する
-    - [ ] すべてのテストが通る
+    - [x] GitHub Actionsでビルド&デプロイが成功する
+    - [x] `https://api.my-rss-press.com/api/health`が正常に応答する
+    - [x] すべてのエンドポイントが動作する
+    - [x] すべてのテストが通る
 
 
 ---

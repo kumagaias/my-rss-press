@@ -1425,3 +1425,127 @@ export default function NewspaperPage() {
 - SQSで非同期処理
 - Step Functionsで複雑なワークフロー
 - Aurora Serverlessでリレーショナルデータ（必要に応じて）
+
+
+## Prohibited Practices (禁止事項)
+
+このセクションでは、プロジェクトで絶対に行ってはいけない開発プラクティスを定義します。
+
+### Terraform State Management
+
+**❌ 禁止: Terraform stateをlocalで管理すること**
+- Terraform stateは必ずS3バックエンドで管理すること
+- ローカルstateファイル（`terraform.tfstate`）をGitにコミットしないこと
+- 複数人での作業時にstate競合が発生するため、localバックエンドは使用禁止
+
+**❌ 禁止: エラー発生時のトラブルシュートでterraform stateを一時的にlocalで管理すること**
+- エラーが発生した場合でも、stateをlocalに移行してはいけない
+- 正しいアプローチ：
+  1. エラーの根本原因を調査する
+  2. Terraform planで変更内容を確認する
+  3. 必要に応じて`terraform state`コマンドでリソースをインポート/削除する
+  4. S3バックエンドを維持したまま問題を解決する
+
+**✅ 正しい方法:**
+```bash
+# S3バックエンドの設定
+terraform {
+  backend "s3" {
+    bucket         = "myrsspress-production-843925270284-terraform-state"
+    key            = "production/terraform.tfstate"
+    region         = "ap-northeast-1"
+    dynamodb_table = "myrsspress-terraform-locks"
+    encrypt        = true
+  }
+}
+```
+
+**トラブルシューティング例:**
+```bash
+# ロックが残っている場合
+terraform force-unlock <LOCK_ID>
+
+# リソースをstateから削除
+terraform state rm <resource_address>
+
+# リソースをstateにインポート
+terraform import <resource_address> <resource_id>
+
+# stateの確認
+terraform state list
+terraform state show <resource_address>
+```
+
+### Infrastructure as Code
+
+**❌ 禁止: AWSコンソールで手動リソース作成**
+- すべてのインフラリソースはTerraformで管理すること
+- 緊急時でもコンソールでの手動変更は避け、Terraformコードを更新すること
+- 例外: 初回セットアップ時のS3バケット作成のみ許可
+
+**❌ 禁止: Terraform管理外のリソース変更**
+- Terraform管理下のリソースをAWS CLIやコンソールで直接変更しないこと
+- 変更が必要な場合は、Terraformコードを更新してapplyすること
+
+### Deployment
+
+**❌ 禁止: 本番環境への直接デプロイ**
+- ローカルから直接本番環境にデプロイしないこと（Terraformを除く）
+- バックエンドのデプロイはGitHub Actionsを経由すること
+- フロントエンドのデプロイはAmplifyの自動デプロイを使用すること
+
+**❌ 禁止: テストをスキップしたデプロイ**
+- `make test`が失敗している状態でデプロイしないこと
+- CI/CDパイプラインでテストが失敗した場合は、必ず修正してから再デプロイすること
+
+### Security
+
+**❌ 禁止: 機密情報のハードコード**
+- AWS認証情報、APIキー、パスワードをコードにハードコードしないこと
+- 環境変数またはAWS Secrets Managerを使用すること
+
+**❌ 禁止: Access KeysをGitHub Secretsに保存**
+- GitHub ActionsではOIDC認証を使用すること
+- 長期的なAccess Keysは使用禁止
+
+**❌ 禁止: セキュリティチェックの無効化**
+- Gitleaksによるセキュリティチェックを無効化しないこと
+- pre-commitフックを削除しないこと
+
+### Code Quality
+
+**❌ 禁止: TypeScriptの`any`型の多用**
+- `any`型は最小限に抑えること
+- やむを得ない場合は`unknown`を検討すること
+
+**❌ 禁止: エラーハンドリングの省略**
+- すべての非同期処理にエラーハンドリングを実装すること
+- try-catchまたは.catch()を必ず使用すること
+
+**❌ 禁止: コンソールログの本番環境への残置**
+- `console.log()`は開発時のみ使用すること
+- 本番環境では構造化ログ（JSON形式）を使用すること
+
+### Git Workflow
+
+**❌ 禁止: mainブランチへの直接コミット**
+- 必ずfeatureブランチを作成してPRを経由すること
+- 例外: 緊急のホットフィックスのみ
+
+**❌ 禁止: 大きすぎるPR**
+- 1つのPRは500行以内を目安とすること
+- 大きな変更は複数のPRに分割すること
+
+### Performance
+
+**❌ 禁止: 無制限のデータ取得**
+- DynamoDBクエリには必ずLimitを設定すること
+- ページネーションを実装すること
+
+**❌ 禁止: 同期的な大量API呼び出し**
+- 複数のAPI呼び出しは`Promise.all()`で並列化すること
+- レート制限を考慮すること
+
+---
+
+これらの禁止事項に違反した場合、システムの安定性、セキュリティ、保守性に重大な影響を与える可能性があります。必ず遵守してください。

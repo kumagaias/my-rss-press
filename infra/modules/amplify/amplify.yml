@@ -9,15 +9,10 @@ frontend:
       commands:
         - npm run build
   artifacts:
-    # For Next.js 15 with App Router and standalone output
-    baseDirectory: frontend
+    # For Next.js 15 with static export
+    baseDirectory: frontend/out
     files:
-      - '.next/**/*'
-      - 'public/**/*'
-      - 'package.json'
-      - 'next.config.ts'
-      - 'node_modules/**/*'
+      - '**/*'
   cache:
     paths:
       - frontend/node_modules/**/*
-      - frontend/.next/cache/**/*

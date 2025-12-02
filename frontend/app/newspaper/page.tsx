@@ -15,7 +15,6 @@ export default function NewspaperPage() {
   const t = useTranslations(locale);
 
   const [articles, setArticles] = useState<Article[]>([]);
-  const [theme, setTheme] = useState('');
   const [feedUrls, setFeedUrls] = useState<string[]>([]);
   const [newspaperName, setNewspaperName] = useState('');
   const [userName, setUserName] = useState('');
@@ -40,7 +39,6 @@ export default function NewspaperPage() {
     }
 
     if (themeData) {
-      setTheme(themeData);
       // Generate default newspaper name from theme
       const defaultName = detectedLocale === 'ja' 
         ? `${themeData}の新聞`

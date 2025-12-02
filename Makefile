@@ -1,4 +1,4 @@
-.PHONY: help install install-tools check-tools clean test test-unit test-security security-check
+.PHONY: help install install-tools check-tools clean test test-unit test-lint test-security security-check
 
 # Default target
 .DEFAULT_GOAL := help
@@ -61,6 +61,13 @@ test-unit: ## Run unit tests only
 	cd backend && npm test
 	@echo "✓ Unit tests complete"
 
+test-lint: ## Run ESLint checks
+	@echo "Running frontend ESLint..."
+	cd frontend && npm run lint
+	@echo "Running backend ESLint..."
+	cd backend && npm run lint
+	@echo "✓ ESLint checks complete"
+
 test-security: ## Run security checks
 	@echo "Running security checks..."
 	./scripts/security-check.sh
@@ -75,5 +82,5 @@ test-vulnerabilities: ## Check npm vulnerabilities (medium+ severity)
 
 audit: test-vulnerabilities ## Alias for test-vulnerabilities
 
-test: test-unit test-security test-vulnerabilities ## Run all tests (unit + security + vulnerabilities)
+test: test-unit test-lint test-security test-vulnerabilities ## Run all tests (unit + lint + security + vulnerabilities)
 	@echo "✓ All tests complete"

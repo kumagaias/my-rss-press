@@ -196,6 +196,76 @@ it('Property: All items must be included (Completeness)', () => {
 });
 ```
 
+## Code Quality & Linting
+
+### ESLint Configuration
+
+**原則**: すべてのプロジェクトでESLintを使用してコード品質を保つこと
+
+**フロントエンド (Next.js)**:
+```json
+// frontend/.eslintrc.json
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:storybook/recommended"
+  ],
+  "rules": {
+    "@next/next/no-html-link-for-pages": "off",
+    "@next/next/no-img-element": "off",
+    "react/no-unescaped-entities": "off",
+    "storybook/no-renderer-packages": "off"
+  }
+}
+```
+
+**バックエンド (Node.js + TypeScript)**:
+```json
+// backend/.eslintrc.json
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-console": "off"
+  },
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "ignorePatterns": ["dist", "node_modules", "tests"]
+}
+```
+
+**実行方法**:
+```bash
+# 個別実行
+cd frontend && npm run lint
+cd backend && npm run lint
+
+# Makefileから実行（推奨）
+make test-lint
+
+# すべてのテストを実行（ユニット + ESLint + セキュリティ + 脆弱性）
+make test
+```
+
+**ベストプラクティス**:
+- コミット前に必ずESLintを実行すること
+- 警告は可能な限り修正すること
+- `any`型の使用は最小限に抑えること
+- 未使用変数は削除すること
+- CI/CDパイプラインでESLintを実行すること
+
 ## Security
 
 ### General Security Practices

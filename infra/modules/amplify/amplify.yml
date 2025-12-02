@@ -9,14 +9,14 @@ frontend:
       commands:
         - npm run build
   artifacts:
-    # For Next.js 15 with App Router (SSR)
-    # Amplify needs the entire .next directory for server-side rendering
+    # For Next.js 15 with App Router and standalone output
     baseDirectory: frontend
     files:
       - '.next/**/*'
       - 'public/**/*'
       - 'package.json'
       - 'next.config.ts'
+      - 'node_modules/**/*'
   cache:
     paths:
       - frontend/node_modules/**/*

@@ -70,7 +70,8 @@ describe('Home Page', () => {
     }, { timeout: 3000 });
 
     await waitFor(() => {
-      expect(screen.getByText('TechCrunch')).toBeInTheDocument();
+      // TechCrunch appears in both suggested feeds and selected feeds sections
+      expect(screen.getAllByText('TechCrunch').length).toBeGreaterThan(0);
     }, { timeout: 3000 });
   });
 
@@ -100,7 +101,8 @@ describe('Home Page', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('TechCrunch')).toBeInTheDocument();
+      // TechCrunch appears in both suggested feeds and selected feeds sections
+      expect(screen.getAllByText('TechCrunch').length).toBeGreaterThan(0);
     }, { timeout: 3000 });
 
     // Generate newspaper

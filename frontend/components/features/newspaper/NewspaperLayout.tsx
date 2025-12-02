@@ -2,7 +2,7 @@
 
 import { Article } from '@/types';
 import { calculateLayout } from '@/lib/layoutCalculator';
-import { useTranslations } from '@/lib/i18n';
+import { useTranslations, formatDate } from '@/lib/i18n';
 
 interface NewspaperLayoutProps {
   articles: Article[];
@@ -32,14 +32,7 @@ export function NewspaperLayout({
 }: NewspaperLayoutProps) {
   const t = useTranslations(locale);
   const layout = calculateLayout(articles);
-
-  const dateLocale = locale === 'ja' ? 'ja-JP' : 'en-US';
-  const formattedDate = createdAt.toLocaleDateString(dateLocale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = formatDate(createdAt, locale);
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-[#f5f5dc] font-serif min-h-screen">
@@ -52,7 +45,7 @@ export function NewspaperLayout({
           <div className="text-gray-700">{formattedDate}</div>
           {userName && (
             <div className="text-gray-600">
-              {locale === 'ja' ? '作成者' : 'Created by'}: {userName}
+              {t.createdBy}: {userName}
             </div>
           )}
         </div>
@@ -80,7 +73,7 @@ export function NewspaperLayout({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {locale === 'ja' ? '続きを読む' : 'Read more'} →
+            {t.readMore} →
           </a>
         </div>
       </article>
@@ -113,7 +106,7 @@ export function NewspaperLayout({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {locale === 'ja' ? '続きを読む' : 'Read more'} →
+                {t.readMore} →
               </a>
             </article>
           ))}
@@ -140,7 +133,7 @@ export function NewspaperLayout({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {locale === 'ja' ? '続きを読む' : 'Read more'} →
+                {t.readMore} →
               </a>
             </article>
           ))}

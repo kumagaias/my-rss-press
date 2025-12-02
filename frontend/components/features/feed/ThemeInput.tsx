@@ -3,6 +3,7 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { useTranslations } from '@/lib/i18n';
 
 interface ThemeInputProps {
   onSubmit: (theme: string) => void;
@@ -19,18 +20,7 @@ interface ThemeInputProps {
 export function ThemeInput({ onSubmit, isLoading, locale }: ThemeInputProps) {
   const [theme, setTheme] = useState('');
   const [error, setError] = useState<string | null>(null);
-
-  const placeholder = locale === 'ja' 
-    ? '興味のあるテーマを入力してください（例：テクノロジー、スポーツ）'
-    : 'Enter your interest theme (e.g., Technology, Sports)';
-
-  const buttonText = locale === 'ja' ? 'フィード提案を取得' : 'Get Feed Suggestions';
-  const errorEmpty = locale === 'ja' 
-    ? 'テーマを入力してください'
-    : 'Please enter a theme';
-  const errorWhitespace = locale === 'ja'
-    ? '有効なテーマを入力してください'
-    : 'Please enter a valid theme';
+  const t = useTranslations(locale);
 
   /**
    * Validate theme input
@@ -39,12 +29,12 @@ export function ThemeInput({ onSubmit, isLoading, locale }: ThemeInputProps) {
    */
   const validateTheme = (value: string): boolean => {
     if (value.length === 0) {
-      setError(errorEmpty);
+      setError(t.themeEmpty);
       return false;
     }
 
     if (value.trim().length === 0) {
-      setError(errorWhitespace);
+      setError(t.themeRequired);
       return false;
     }
 
@@ -73,7 +63,7 @@ export function ThemeInput({ onSubmit, isLoading, locale }: ThemeInputProps) {
       <div>
         <Input
           type="text"
-          placeholder={placeholder}
+          placeholder={t.themeInputPlaceholder}
           value={theme}
           onChange={handleChange}
           error={error || undefined}
@@ -89,7 +79,7 @@ export function ThemeInput({ onSubmit, isLoading, locale }: ThemeInputProps) {
         loading={isLoading}
         className="w-full"
       >
-        {buttonText}
+        {t.getFeedSuggestions}
       </Button>
     </form>
   );

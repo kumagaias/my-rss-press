@@ -380,6 +380,39 @@ git push origin feat/your-branch
 - `console.log()`は開発時のみ使用すること
 - 本番環境では構造化ログ（JSON形式）を使用すること
 
+### Internationalization (i18n)
+
+**❌ 禁止: コンポーネント内で翻訳を直接分岐すること**
+- `locale === 'ja' ? '日本語' : 'English'`のような直接分岐は禁止
+- 必ず`lib/i18n.ts`の翻訳ファイルを使用すること
+- `useTranslations(locale)`を使って翻訳を取得すること
+
+**悪い例:**
+```typescript
+// ❌ Bad: 直接分岐
+const buttonText = locale === 'ja' ? '保存' : 'Save';
+const placeholder = locale === 'ja' 
+  ? 'テーマを入力してください'
+  : 'Enter your theme';
+```
+
+**良い例:**
+```typescript
+// ✅ Good: i18nファイルを使用
+import { useTranslations } from '@/lib/i18n';
+
+const t = useTranslations(locale);
+const buttonText = t.save;
+const placeholder = t.themeInputPlaceholder;
+```
+
+**理由:**
+- 翻訳の一元管理が可能
+- 翻訳の追加・変更が容易
+- コードの可読性が向上
+- 翻訳漏れを防止
+- 将来的な多言語対応が容易
+
 ### Git Workflow
 
 **❌ 禁止: mainブランチへの直接コミット**

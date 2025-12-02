@@ -19,6 +19,7 @@ export default function NewspaperPage() {
   const [feedUrls, setFeedUrls] = useState<string[]>([]);
   const [newspaperName, setNewspaperName] = useState('');
   const [userName, setUserName] = useState('');
+  const [createdAt] = useState(new Date());
   const [isSaved, setIsSaved] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);

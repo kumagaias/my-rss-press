@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Button } from '@/components/ui/Button';
 import type { NewspaperSettings, Locale } from '@/types';
-import { useTranslations } from '@/lib/i18n';
+import { useTranslations, formatDate } from '@/lib/i18n';
 
 interface NewspaperSettingsProps {
   isOpen: boolean;
@@ -37,17 +37,11 @@ export function NewspaperSettingsModal({
   useEffect(() => {
     if (isOpen && !newspaperName && !defaultName) {
       const now = new Date();
-      const dateStr = now.toLocaleDateString(locale === 'ja' ? 'ja-JP' : 'en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-      const defaultNewspaperName = locale === 'ja' 
-        ? `${dateStr}の新聞`
-        : `${dateStr} Newspaper`;
+      const dateStr = formatDate(now, locale);
+      const defaultNewspaperName = t.defaultNewspaperName(dateStr);
       setNewspaperName(defaultNewspaperName);
     }
-  }, [isOpen, locale]);
+  }, [isOpen, locale, t]);
 
   const handleSave = () => {
     const settings: NewspaperSettings = {
@@ -70,12 +64,8 @@ export function NewspaperSettingsModal({
   const getDefaultName = (): string => {
     if (defaultName) return defaultName;
     const now = new Date();
-    const dateStr = now.toLocaleDateString(locale === 'ja' ? 'ja-JP' : 'en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    return locale === 'ja' ? `${dateStr}の新聞` : `${dateStr} Newspaper`;
+    const dateStr = formatDate(now, locale);
+    return t.defaultNewspaperName(dateStr);
   };
 
   return (
@@ -92,9 +82,7 @@ export function NewspaperSettingsModal({
             placeholder={getDefaultName()}
           />
           <p className="mt-1 text-xs text-gray-500">
-            {locale === 'ja' 
-              ? '空欄の場合、デフォルト名が使用されます'
-              : 'Default name will be used if left empty'}
+            {t.defaultNameNote}
           </p>
         </div>
 
@@ -106,12 +94,10 @@ export function NewspaperSettingsModal({
             type="text"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
-            placeholder={locale === 'ja' ? 'あなたの名前（任意）' : 'Your name (optional)'}
+            placeholder={t.userNamePlaceholder}
           />
           <p className="mt-1 text-xs text-gray-500">
-            {locale === 'ja' 
-              ? '空欄の場合、「匿名」として表示されます'
-              : 'Will be displayed as "Anonymous" if left empty'}
+            {t.anonymousNote}
           </p>
         </div>
 
@@ -122,9 +108,7 @@ export function NewspaperSettingsModal({
             label={t.makePublic}
           />
           <p className="mt-1 text-xs text-gray-500 ml-6">
-            {locale === 'ja' 
-              ? '公開すると、他のユーザーがあなたの新聞を閲覧できます'
-              : 'When public, other users can view your newspaper'}
+            {t.publicNote}
           </p>
         </div>
 

@@ -5,6 +5,7 @@ import { FeedSuggestion } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { useTranslations } from '@/lib/i18n';
 
 interface FeedSelectorProps {
   suggestions: FeedSuggestion[];
@@ -44,20 +45,7 @@ export function FeedSelector({
     [suggestions]
   );
 
-  const t = {
-    suggestedFeeds: locale === 'ja' ? '提案されたフィード' : 'Suggested Feeds',
-    addCustomFeed: locale === 'ja' ? 'カスタムフィードを追加' : 'Add Custom Feed',
-    feedUrlPlaceholder: locale === 'ja' ? 'フィードURLを入力' : 'Enter feed URL',
-    addButton: locale === 'ja' ? '追加' : 'Add',
-    removeButton: locale === 'ja' ? '削除' : 'Remove',
-    generateButton: locale === 'ja' ? '新聞を生成' : 'Generate Newspaper',
-    selectedCount: locale === 'ja' 
-      ? (count: number) => `${count}個のフィードを選択中`
-      : (count: number) => `${count} feed${count !== 1 ? 's' : ''} selected`,
-    errorInvalidUrl: locale === 'ja' ? '有効なURLを入力してください' : 'Please enter a valid URL',
-    errorDuplicate: locale === 'ja' ? 'このフィードは既に追加されています' : 'This feed is already added',
-    errorSelectFeed: locale === 'ja' ? '少なくとも1つのフィードを選択してください' : 'Please select at least one feed',
-  };
+  const t = useTranslations(locale);
 
   /**
    * Validate URL format

@@ -8,7 +8,7 @@ describe('ThemeInput', () => {
 
     render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
 
-    expect(screen.getByPlaceholderText(/Enter your interest theme/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Technology, Sports, Business/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Get Feed Suggestions/ })).toBeInTheDocument();
   });
 
@@ -17,7 +17,7 @@ describe('ThemeInput', () => {
 
     render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="ja" />);
 
-    expect(screen.getByPlaceholderText(/興味のあるテーマを入力してください/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/テクノロジー、スポーツ、ビジネス/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /フィード提案を取得/ })).toBeInTheDocument();
   });
 
@@ -26,7 +26,7 @@ describe('ThemeInput', () => {
 
     render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
 
-    const input = screen.getByPlaceholderText(/Enter your interest theme/) as HTMLInputElement;
+    const input = screen.getByPlaceholderText(/Technology, Sports, Business/) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Technology' } });
 
     expect(input.value).toBe('Technology');
@@ -49,13 +49,13 @@ describe('ThemeInput', () => {
 
     render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
 
-    const input = screen.getByPlaceholderText(/Enter your interest theme/);
+    const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     fireEvent.change(input, { target: { value: '   ' } });
 
     const button = screen.getByRole('button', { name: /Get Feed Suggestions/ });
     fireEvent.click(button);
 
-    expect(screen.getByText(/Please enter a valid theme/)).toBeInTheDocument();
+    expect(screen.getByText(/Please enter a theme/)).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -64,7 +64,7 @@ describe('ThemeInput', () => {
 
     render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
 
-    const input = screen.getByPlaceholderText(/Enter your interest theme/);
+    const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     fireEvent.change(input, { target: { value: '  Technology  ' } });
 
     const button = screen.getByRole('button', { name: /Get Feed Suggestions/ });
@@ -78,7 +78,7 @@ describe('ThemeInput', () => {
 
     const { container } = render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
 
-    const input = screen.getByPlaceholderText(/Enter your interest theme/);
+    const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     fireEvent.change(input, { target: { value: 'Sports' } });
     
     // Pressing Enter in an input inside a form triggers form submission
@@ -95,7 +95,7 @@ describe('ThemeInput', () => {
 
     render(<ThemeInput onSubmit={onSubmit} isLoading={true} locale="en" />);
 
-    const input = screen.getByPlaceholderText(/Enter your interest theme/);
+    const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     const button = screen.getByRole('button');
 
     expect(input).toBeDisabled();
@@ -114,7 +114,7 @@ describe('ThemeInput', () => {
     expect(screen.getByText(/Please enter a theme/)).toBeInTheDocument();
 
     // Start typing
-    const input = screen.getByPlaceholderText(/Enter your interest theme/);
+    const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     fireEvent.change(input, { target: { value: 'T' } });
 
     expect(screen.queryByText(/Please enter a theme/)).not.toBeInTheDocument();
@@ -129,7 +129,7 @@ describe('ThemeInput', () => {
     // Button should not be disabled - we want to show validation errors
     expect(button).not.toBeDisabled();
 
-    const input = screen.getByPlaceholderText(/Enter your interest theme/);
+    const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     fireEvent.change(input, { target: { value: '   ' } });
 
     // Button should still not be disabled

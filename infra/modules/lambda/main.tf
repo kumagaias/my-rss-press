@@ -106,6 +106,25 @@ resource "aws_iam_role_policy" "ecr_access" {
   })
 }
 
+# Policy for KMS access (to decrypt environment variables)
+resource "aws_iam_role_policy" "kms_access" {
+  name = "${var.function_name}-kms-policy"
+  role = aws_iam_role.lambda_exec.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 # Lambda function
 resource "aws_lambda_function" "api" {
   function_name = var.function_name
@@ -125,6 +144,10 @@ resource "aws_lambda_function" "api" {
       NODE_ENV        = var.environment
     }
   }
+
+  # Disable KMS encryption for environment variables
+  # This avoids KMS permission issues with AWS-managed keys
+  kms_key_arn = null
 
   tags = {
     Name        = "MyRSSPress API"

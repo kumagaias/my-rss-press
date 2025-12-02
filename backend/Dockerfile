@@ -14,8 +14,11 @@ COPY tsconfig.json ./
 # Build TypeScript code
 RUN npm run build
 
-# Remove devDependencies to reduce image size
-RUN npm prune --production
+# Copy built files to Lambda task root
+RUN cp -r dist/* ${LAMBDA_TASK_ROOT}/
 
-# Set the Lambda function handler
+# Remove devDependencies and source files to reduce image size
+RUN npm prune --production && rm -rf src tsconfig.json
+
+# Set the Lambda function handler (points to dist/lambda.js)
 CMD ["lambda.handler"]

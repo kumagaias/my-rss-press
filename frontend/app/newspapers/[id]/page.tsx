@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout';
 import { Button } from '@/components/ui/Button';
@@ -21,12 +21,7 @@ export default function NewspaperDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setLocale(detectLocale());
-    fetchNewspaperData();
-  }, [newspaperId]);
-
-  const fetchNewspaperData = async () => {
+  const fetchNewspaperData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -48,7 +43,12 @@ export default function NewspaperDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [newspaperId]);
+
+  useEffect(() => {
+    setLocale(detectLocale());
+    fetchNewspaperData();
+  }, [fetchNewspaperData]);
 
   const handleBackToHome = () => {
     router.push('/');
@@ -66,7 +66,7 @@ export default function NewspaperDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error || 'Newspaper not found'}</p>
+          <p className="text-red-600 mb-4">{error || t.newspaperNotFound}</p>
           <Button variant="outline" size="sm" onClick={handleBackToHome}>
             {t.backToHome}
           </Button>
@@ -109,9 +109,7 @@ export default function NewspaperDetailPage() {
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-600">
-              {locale === 'ja' 
-                ? '記事を読み込んでいます...'
-                : 'Loading articles...'}
+              {t.loadingArticles}
             </p>
           </div>
         )}

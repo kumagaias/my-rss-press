@@ -68,6 +68,8 @@ export const translations = {
     error: 'Error',
     errorOccurred: 'An error occurred',
     tryAgain: 'Try Again',
+    newspaperNotFound: 'Newspaper not found',
+    loadingArticles: 'Loading articles...',
     
     // Validation messages
     themeRequired: 'Please enter a theme',
@@ -149,6 +151,8 @@ export const translations = {
     error: 'エラー',
     errorOccurred: 'エラーが発生しました',
     tryAgain: '再試行',
+    newspaperNotFound: '新聞が見つかりません',
+    loadingArticles: '記事を読み込んでいます...',
     
     // バリデーションメッセージ
     themeRequired: 'テーマを入力してください',

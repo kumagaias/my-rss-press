@@ -10,8 +10,8 @@ frontend:
         - npm run build
   artifacts:
     # For Next.js 15 with static export
-    # Build runs in frontend/, so output is in out/ (relative)
-    baseDirectory: out
+    # Output is in frontend/out from repository root
+    baseDirectory: frontend/out
     files:
       - '**/*'
   cache:

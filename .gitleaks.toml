@@ -56,6 +56,9 @@ paths = [
   '''\.md$''',  # Markdownファイル（ドキュメント）
   '''package-lock\.json$''',  # npm lockファイル
   '''\.gitleaks\.toml$''',  # この設定ファイル自体
+  '''\.tfplan$''',  # Terraform planファイル（機密情報を含む可能性）
+  '''tfplan$''',  # Terraform planファイル
+  '''node_modules/''',  # node_modules（誤検知を防ぐ）
 ]
 
 # 特定の文字列を除外（例：サンプルコード）

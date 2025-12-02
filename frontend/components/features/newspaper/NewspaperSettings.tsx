@@ -41,7 +41,7 @@ export function NewspaperSettingsModal({
       const defaultNewspaperName = t.defaultNewspaperName(dateStr);
       setNewspaperName(defaultNewspaperName);
     }
-  }, [isOpen, locale, t]);
+  }, [isOpen, locale, t, newspaperName, defaultName]);
 
   const handleSave = () => {
     const settings: NewspaperSettings = {

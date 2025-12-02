@@ -31,8 +31,33 @@ export function NewspaperLayout({
   locale,
 }: NewspaperLayoutProps) {
   const t = useTranslations(locale);
-  const layout = calculateLayout(articles);
   const formattedDate = formatDate(createdAt, locale);
+
+  // Handle empty article list
+  if (!articles || articles.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto p-8 bg-[#f5f5dc] font-serif min-h-screen">
+        <header className="text-center border-b-4 border-black pb-4 mb-8">
+          <h1 className="text-6xl font-bold mb-2" style={{ fontFamily: 'Georgia, serif' }}>
+            {newspaperName || 'MyRSSPress'}
+          </h1>
+          <div className="text-sm mt-2 space-y-1">
+            <div className="text-gray-700">{formattedDate}</div>
+            {userName && (
+              <div className="text-gray-600">
+                {t.createdBy}: {userName}
+              </div>
+            )}
+          </div>
+        </header>
+        <div className="text-center py-12">
+          <p className="text-xl text-gray-600">{t.noNewspapersFound}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const layout = calculateLayout(articles);
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-[#f5f5dc] font-serif min-h-screen">
@@ -56,7 +81,7 @@ export function NewspaperLayout({
         {layout.lead.imageUrl && (
           <img
             src={layout.lead.imageUrl}
-            alt={layout.lead.title}
+            alt={layout.lead.title || 'Article image'}
             className="w-full h-auto object-cover rounded"
           />
         )}
@@ -90,7 +115,7 @@ export function NewspaperLayout({
               {article.imageUrl && (
                 <img
                   src={article.imageUrl}
-                  alt={article.title}
+                  alt={article.title || 'Article image'}
                   className="w-full h-48 object-cover rounded"
                 />
               )}

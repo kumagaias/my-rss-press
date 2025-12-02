@@ -31,7 +31,7 @@ export function NewspaperSettingsModal({
     if (isOpen && defaultName && !newspaperName) {
       setNewspaperName(defaultName);
     }
-  }, [isOpen, defaultName]);
+  }, [isOpen, defaultName, newspaperName]);
 
   // Generate default newspaper name based on current date
   useEffect(() => {

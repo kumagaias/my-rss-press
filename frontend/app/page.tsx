@@ -8,8 +8,7 @@ import { PopularNewspapers } from '@/components/features/home/PopularNewspapers'
 import { Button } from '@/components/ui/Button';
 import { detectLocale, useTranslations } from '@/lib/i18n';
 import { suggestFeeds, generateNewspaper } from '@/lib/api';
-import type { Locale } from '@/types';
-import type { FeedSuggestion } from '@/lib/api';
+import type { Locale, FeedSuggestion } from '@/types';
 
 export default function Home() {
   const router = useRouter();

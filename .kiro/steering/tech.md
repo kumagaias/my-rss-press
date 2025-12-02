@@ -1,4 +1,13 @@
-# Technical Architecture
+# Technical Architecture - MyRSSPress
+
+このドキュメントはMyRSSPress固有の技術詳細を記載しています。
+
+**関連ドキュメント:**
+- [tech-common.md](./tech-common.md) - 汎用的なベストプラクティス（TypeScript規約、テスト戦略、セキュリティ等）
+- [structure.md](./structure.md) - プロジェクト構造
+- [project-standards.md](./project-standards.md) - プロジェクト標準
+
+---
 
 ## Overview
 
@@ -1312,13 +1321,30 @@ aws secretsmanager update-secret \
 
 ### Deployment Best Practices
 
-1. **テストを必ず実行**: デプロイ前に`make test`を実行
-2. **インフラ変更の確認**: `terraform plan`で変更内容を確認
-3. **段階的デプロイ**: 重要な変更は段階的にデプロイ
-4. **イメージタグ管理**: GitコミットSHAをイメージタグとして使用
-5. **ロールバック準備**: 前のイメージタグに戻せるようにする
-6. **モニタリング**: CloudWatch Logsでデプロイ後の動作を確認
-7. **通知設定**: デプロイ成功/失敗をSlackなどに通知
+1. **プッシュ前にプル**: `git push`前に必ず`git pull`を実行してリモートの変更を取り込む
+2. **テストを必ず実行**: デプロイ前に`make test`を実行
+3. **インフラ変更の確認**: `terraform plan`で変更内容を確認
+4. **段階的デプロイ**: 重要な変更は段階的にデプロイ
+5. **イメージタグ管理**: GitコミットSHAをイメージタグとして使用
+6. **ロールバック準備**: 前のイメージタグに戻せるようにする
+7. **モニタリング**: CloudWatch Logsでデプロイ後の動作を確認
+8. **通知設定**: デプロイ成功/失敗をSlackなどに通知
+
+**プッシュの正しい手順:**
+```bash
+# 1. 変更をコミット
+git add .
+git commit -m "feat: Add new feature"
+
+# 2. リモートの変更を取り込む（重要！）
+git pull origin feat/your-branch
+
+# 3. コンフリクトがあれば解決
+# （コンフリクトがある場合は手動で解決してコミット）
+
+# 4. プッシュ
+git push origin feat/your-branch
+```
 
 ### Rollback Strategy
 
@@ -1423,143 +1449,7 @@ const formattedDate = new Date().toLocaleDateString(dateLocale, {
 - 新しいUIテキストを追加する際は、必ず両言語の翻訳を同時に追加すること
 - 翻訳キーは説明的な名前を使用すること（例：`buttonSubmit`ではなく`generateNewspaper`）
 
-## TypeScript/JavaScript Conventions
-
-### 命名規則
-
-- 変数と関数にはcamelCaseを使用すること（例：`userName`, `fetchData`）
-- クラスとReactコンポーネントにはPascalCaseを使用すること（例：`UserProfile`, `NewspaperCard`）
-- 定数にはUPPER_SNAKE_CASEを使用すること（例：`MAX_RETRY_COUNT`, `API_BASE_URL`）
-- ブール値の変数には`is`, `has`, `should`などのプレフィックスを使用すること（例：`isLoading`, `hasError`）
-- イベントハンドラーには`handle`プレフィックスを使用すること（例：`handleClick`, `handleSubmit`）
-
-### ファイル構造
-
-- 1ファイルにつき1コンポーネントを配置すること
-- 関連するコンポーネントはフォルダーにまとめること
-- エクスポートにはindex.tsファイルを使用すること
-- ファイル名はコンポーネント名と一致させること（例：`UserProfile.tsx`）
-- テストファイルは同じディレクトリに配置し、`.test.ts`または`.spec.ts`の拡張子を使用すること
-
-### TypeScriptのベストプラクティス
-
-- パブリックAPIにはtypeよりもinterfaceを優先すること
-- エクスポートされる関数には明示的な戻り値の型を指定すること
-- `any`型の使用を避けること（やむを得ない場合は`unknown`を検討）
-- 型アサーション（`as`）は最小限に抑えること
-- ユニオン型とインターセクション型を適切に使用すること
-- ジェネリクスを活用して再利用可能な型を作成すること
-- `null`と`undefined`を明確に区別すること
-- オプショナルチェイニング（`?.`）とnullish coalescing（`??`）を活用すること
-
-### コーディングスタイル
-
-- セミコロンを使用すること
-- シングルクォート（`'`）を優先すること（JSX内ではダブルクォート）
-- インデントは2スペースを使用すること
-- 行の長さは100文字以内を目安とすること
-- アロー関数を優先すること（`function`キーワードは特別な理由がある場合のみ）
-- 分割代入を積極的に使用すること
-- テンプレートリテラルを使用して文字列を構築すること
-
-### Import/Export
-
-- 名前付きエクスポートを優先すること（デフォルトエクスポートは最小限に）
-- インポートは以下の順序でグループ化すること：
-  1. 外部ライブラリ（React、Next.js等）
-  2. 内部モジュール（`@/`から始まるパス）
-  3. 相対パス（`./`、`../`）
-  4. 型のみのインポート（`import type`）
-- 未使用のインポートは削除すること
-
-### テストとドキュメントでの固有サービス名の使用禁止
-
-**原則**: テストコード、仕様書、設計書、ドキュメントでは実在するサービス名を使用しないこと
-
-**理由**:
-1. 商標権の侵害リスクを避ける
-2. サービスの仕様変更や終了の影響を受けない
-3. 汎用的で理解しやすいコードを保つ
-4. 特定のサービスへの依存を示唆しない
-
-**禁止例**:
-- ❌ TechCrunch, Hacker News, Reddit, Twitter/X
-- ❌ Google, Facebook, Amazon（サービス名として）
-- ❌ その他の実在するWebサービス、企業名、製品名
-
-**推奨する代替名**:
-```typescript
-// ❌ Bad: 実在のサービス名
-const mockFeeds = [
-  { url: 'https://techcrunch.com/feed/', title: 'TechCrunch', reasoning: 'Tech news' },
-  { url: 'https://news.ycombinator.com/rss', title: 'Hacker News', reasoning: 'Tech community' },
-];
-
-// ✅ Good: 汎用的な名前
-const mockFeeds = [
-  { url: 'https://example.com/tech-feed', title: 'Tech News Feed', reasoning: 'Technology news' },
-  { url: 'https://example.com/community-feed', title: 'Tech Community Feed', reasoning: 'Community discussions' },
-];
-
-// ✅ Good: より説明的な名前
-const mockFeeds = [
-  { url: 'https://example.com/feed1', title: 'Sample Tech Blog', reasoning: 'Technology articles' },
-  { url: 'https://example.com/feed2', title: 'Sample News Site', reasoning: 'General news' },
-];
-```
-
-**適用範囲**:
-- ユニットテスト（`*.test.ts`, `*.spec.ts`）
-- E2Eテスト（Playwright等）
-- 仕様書（`.kiro/specs/`）
-- 設計書（`design.md`, `requirements.md`）
-- ドキュメント（`README.md`, `docs/`）
-- コード内のコメント例
-
-**例外**:
-- 本番コードで実際にそのサービスのAPIを使用する場合（例：AWS SDK、Bedrock API）
-- 統合テストで実際のサービスに接続する場合（明示的にマークすること）
-- ユーザー向けドキュメントで具体例として説明する場合（「例：」と明記すること）
-
-## Code Organization
-
-### File Size Limits
-
-- 各ファイルは300行以内に収めること
-- 超える場合は複数ファイルに分割すること
-- ファイル分割時は関心の分離を明確に保つこと
-
-### Component Splitting Example
-
-```typescript
-// ❌ Bad: 1つの大きなコンポーネント (500行)
-export default function NewspaperPage() {
-  // すべてのロジックとUIが1つのファイルに...
-}
-
-// ✅ Good: 複数の小さなコンポーネントに分割
-// NewspaperPage.tsx (100行)
-export default function NewspaperPage() {
-  return (
-    <>
-      <NewspaperHeader />
-      <NewspaperContent />
-      <NewspaperFooter />
-    </>
-  );
-}
-
-// NewspaperHeader.tsx (50行)
-// NewspaperContent.tsx (150行)
-// NewspaperFooter.tsx (50行)
-```
-
-### Separation of Concerns
-
-- **Presentation Components**: UIのみを担当
-- **Container Components**: ロジックとデータ取得を担当
-- **Hooks**: 再利用可能なロジックを抽出
-- **Utils**: 汎用的なヘルパー関数
+**注**: TypeScript規約、コード構成、テスト戦略、セキュリティの汎用的なベストプラクティスは [tech-common.md](./tech-common.md) を参照してください。
 
 ## Scalability Considerations
 
@@ -1663,39 +1553,7 @@ terraform state show <resource_address>
 - Gitleaksによるセキュリティチェックを無効化しないこと
 - pre-commitフックを削除しないこと
 
-### Code Quality
-
-**❌ 禁止: TypeScriptの`any`型の多用**
-- `any`型は最小限に抑えること
-- やむを得ない場合は`unknown`を検討すること
-
-**❌ 禁止: エラーハンドリングの省略**
-- すべての非同期処理にエラーハンドリングを実装すること
-- try-catchまたは.catch()を必ず使用すること
-
-**❌ 禁止: コンソールログの本番環境への残置**
-- `console.log()`は開発時のみ使用すること
-- 本番環境では構造化ログ（JSON形式）を使用すること
-
-### Git Workflow
-
-**❌ 禁止: mainブランチへの直接コミット**
-- 必ずfeatureブランチを作成してPRを経由すること
-- 例外: 緊急のホットフィックスのみ
-
-**❌ 禁止: 大きすぎるPR**
-- 1つのPRは500行以内を目安とすること
-- 大きな変更は複数のPRに分割すること
-
-### Performance
-
-**❌ 禁止: 無制限のデータ取得**
-- DynamoDBクエリには必ずLimitを設定すること
-- ページネーションを実装すること
-
-**❌ 禁止: 同期的な大量API呼び出し**
-- 複数のAPI呼び出しは`Promise.all()`で並列化すること
-- レート制限を考慮すること
+**注**: Code Quality、Git Workflow、Performanceの汎用的な禁止事項は [tech-common.md](./tech-common.md) を参照してください。
 
 ---
 

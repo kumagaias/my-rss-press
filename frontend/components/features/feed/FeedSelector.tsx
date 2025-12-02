@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { FeedSuggestion } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -34,6 +34,15 @@ export function FeedSelector({
 }: FeedSelectorProps) {
   const [customFeedUrl, setCustomFeedUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Create a Map for O(1) lookup of suggestions by URL
+   * This prevents O(n*m) complexity when rendering selected feeds
+   */
+  const suggestionMap = useMemo(
+    () => new Map(suggestions.map((s) => [s.url, s])),
+    [suggestions]
+  );
 
   const t = {
     suggestedFeeds: locale === 'ja' ? '提案されたフィード' : 'Suggested Feeds',
@@ -190,7 +199,7 @@ export function FeedSelector({
           </h3>
           <div className="space-y-2">
             {selectedFeeds.map((url) => {
-              const suggestion = suggestions.find((s) => s.url === url);
+              const suggestion = suggestionMap.get(url);
               return (
                 <div
                   key={url}

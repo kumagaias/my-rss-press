@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'vitest';
+import * as fc from 'fast-check';
 import { calculateLayout, validateLayout } from './layoutCalculator';
 import { Article } from '@/types';
+
+// Arbitrary for generating random articles
+const articleArbitrary = fc.record({
+  title: fc.string({ minLength: 1, maxLength: 100 }),
+  description: fc.string({ minLength: 0, maxLength: 500 }),
+  link: fc.webUrl(),
+  pubDate: fc.date(),
+  importance: fc.integer({ min: 0, max: 100 }),
+});
 
 // Helper function to create mock articles
 function createMockArticle(importance: number, title: string): Article {
@@ -144,5 +154,122 @@ describe('validateLayout', () => {
     };
 
     expect(validateLayout(articles, layout)).toBe(false);
+  });
+});
+
+describe('calculateLayout - Property-Based Tests', () => {
+  it('Property: All articles must be included in layout (Completeness)', () => {
+    fc.assert(
+      fc.property(
+        fc.array(articleArbitrary, { minLength: 1, maxLength: 100 }),
+        (articles) => {
+          const layout = calculateLayout(articles);
+          const totalInLayout = 1 + layout.topStories.length + layout.remaining.length;
+          return totalInLayout === articles.length;
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property: Articles must be sorted by importance (Ordering)', () => {
+    fc.assert(
+      fc.property(
+        fc.array(articleArbitrary, { minLength: 1, maxLength: 100 }),
+        (articles) => {
+          const layout = calculateLayout(articles);
+          const allArticles = [layout.lead, ...layout.topStories, ...layout.remaining];
+          
+          // Check if sorted in descending order by importance
+          for (let i = 0; i < allArticles.length - 1; i++) {
+            if (allArticles[i].importance < allArticles[i + 1].importance) {
+              return false;
+            }
+          }
+          return true;
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property: Lead article must have highest importance (Maximum)', () => {
+    fc.assert(
+      fc.property(
+        fc.array(articleArbitrary, { minLength: 1, maxLength: 100 }),
+        (articles) => {
+          const layout = calculateLayout(articles);
+          const maxImportance = Math.max(...articles.map(a => a.importance));
+          return layout.lead.importance === maxImportance;
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property: Original array must not be mutated (Immutability)', () => {
+    fc.assert(
+      fc.property(
+        fc.array(articleArbitrary, { minLength: 1, maxLength: 100 }),
+        (articles) => {
+          const originalOrder = articles.map(a => a.title);
+          calculateLayout(articles);
+          const afterOrder = articles.map(a => a.title);
+          return JSON.stringify(originalOrder) === JSON.stringify(afterOrder);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property: Layout structure depends on article count (Structure)', () => {
+    fc.assert(
+      fc.property(
+        fc.array(articleArbitrary, { minLength: 1, maxLength: 100 }),
+        (articles) => {
+          const layout = calculateLayout(articles);
+          const count = articles.length;
+          
+          if (count <= 4) {
+            return layout.topStories.length === count - 1 && layout.remaining.length === 0;
+          } else if (count <= 8) {
+            return layout.topStories.length === 3 && layout.remaining.length === count - 4;
+          } else {
+            return layout.topStories.length === 4 && layout.remaining.length === count - 5;
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property: validateLayout returns true for valid layouts (Validation)', () => {
+    fc.assert(
+      fc.property(
+        fc.array(articleArbitrary, { minLength: 1, maxLength: 100 }),
+        (articles) => {
+          const layout = calculateLayout(articles);
+          return validateLayout(articles, layout) === true;
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('Property: Layout with 1 article has no topStories or remaining (Edge Case)', () => {
+    fc.assert(
+      fc.property(
+        articleArbitrary,
+        (article) => {
+          const layout = calculateLayout([article]);
+          return (
+            layout.lead.title === article.title &&
+            layout.topStories.length === 0 &&
+            layout.remaining.length === 0
+          );
+        }
+      ),
+      { numRuns: 100 }
+    );
   });
 });

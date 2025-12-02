@@ -68,5 +68,12 @@ test-security: ## Run security checks
 
 security-check: test-security ## Alias for test-security
 
-test: test-unit test-security ## Run all tests (unit + security)
+test-vulnerabilities: ## Check npm vulnerabilities (medium+ severity)
+	@echo "Checking npm vulnerabilities..."
+	./scripts/npm-audit-check.sh
+	@echo "✓ Vulnerability checks complete"
+
+audit: test-vulnerabilities ## Alias for test-vulnerabilities
+
+test: test-unit test-security test-vulnerabilities ## Run all tests (unit + security + vulnerabilities)
 	@echo "✓ All tests complete"

@@ -21,11 +21,18 @@ export const translations = {
     
     // Feed selection
     feedSelectorTitle: 'Select RSS Feeds',
+    suggestedFeeds: 'Suggested Feeds',
+    addCustomFeed: 'Add Custom Feed',
     addFeedManually: 'Add Feed Manually',
-    feedUrlPlaceholder: 'Enter RSS feed URL',
-    addFeed: 'Add Feed',
+    feedUrlPlaceholder: 'Enter feed URL',
+    addFeed: 'Add',
+    addButton: 'Add',
     removeFeed: 'Remove',
+    removeButton: 'Remove',
     generateNewspaper: 'Generate Newspaper',
+    generateButton: 'Generate Newspaper',
+    selectedCount: (count: number) => `${count} feed${count !== 1 ? 's' : ''} selected`,
+    getFeedSuggestions: 'Get Feed Suggestions',
     
     // Newspaper
     newspaperTitle: 'Your Newspaper',
@@ -39,9 +46,14 @@ export const translations = {
     newspaperSettings: 'Newspaper Settings',
     newspaperName: 'Newspaper Name',
     userName: 'Your Name',
+    userNamePlaceholder: 'Your name (optional)',
     makePublic: 'Make this newspaper public',
     save: 'Save',
     cancel: 'Cancel',
+    defaultNewspaperName: (date: string) => `${date} Newspaper`,
+    defaultNameNote: 'Default name will be used if left empty',
+    anonymousNote: 'Will be displayed as "Anonymous" if left empty',
+    publicNote: 'When public, other users can view your newspaper',
     
     // Popular newspapers
     popularNewspapers: 'Popular Newspapers',
@@ -56,15 +68,26 @@ export const translations = {
     error: 'Error',
     errorOccurred: 'An error occurred',
     tryAgain: 'Try Again',
+    newspaperNotFound: 'Newspaper not found',
+    loadingArticles: 'Loading articles...',
+    noNewspapersFound: 'No newspapers found',
     
     // Validation messages
     themeRequired: 'Please enter a theme',
+    themeEmpty: 'Please enter a theme',
     feedRequired: 'Please select at least one feed',
+    errorSelectFeed: 'Please select at least one feed',
     invalidUrl: 'Please enter a valid URL',
+    errorInvalidUrl: 'Please enter a valid URL',
     duplicateFeed: 'This feed is already added',
+    errorDuplicate: 'This feed is already added',
     
     // Demo
     demoButton: 'Try Demo',
+    demoTheme: 'Technology',
+    
+    // Status
+    saved: 'Saved',
   },
   ja: {
     // アプリメタデータ
@@ -82,11 +105,18 @@ export const translations = {
     
     // フィード選択
     feedSelectorTitle: 'RSSフィードを選択',
+    suggestedFeeds: '提案されたフィード',
+    addCustomFeed: 'カスタムフィードを追加',
     addFeedManually: '手動でフィードを追加',
-    feedUrlPlaceholder: 'RSSフィードのURLを入力',
+    feedUrlPlaceholder: 'フィードURLを入力',
     addFeed: '追加',
+    addButton: '追加',
     removeFeed: '削除',
+    removeButton: '削除',
     generateNewspaper: '新聞を生成',
+    generateButton: '新聞を生成',
+    selectedCount: (count: number) => `${count}個のフィードを選択中`,
+    getFeedSuggestions: 'フィード提案を取得',
     
     // 新聞
     newspaperTitle: 'あなたの新聞',
@@ -100,9 +130,14 @@ export const translations = {
     newspaperSettings: '新聞設定',
     newspaperName: '新聞名',
     userName: 'あなたの名前',
+    userNamePlaceholder: 'あなたの名前（任意）',
     makePublic: 'この新聞を公開する',
     save: '保存',
     cancel: 'キャンセル',
+    defaultNewspaperName: (date: string) => `${date}の新聞`,
+    defaultNameNote: '空欄の場合、デフォルト名が使用されます',
+    anonymousNote: '空欄の場合、「匿名」として表示されます',
+    publicNote: '公開すると、他のユーザーがあなたの新聞を閲覧できます',
     
     // 人気の新聞
     popularNewspapers: '人気の新聞',
@@ -117,15 +152,26 @@ export const translations = {
     error: 'エラー',
     errorOccurred: 'エラーが発生しました',
     tryAgain: '再試行',
+    newspaperNotFound: '新聞が見つかりません',
+    loadingArticles: '記事を読み込んでいます...',
+    noNewspapersFound: '新聞が見つかりません',
     
     // バリデーションメッセージ
     themeRequired: 'テーマを入力してください',
+    themeEmpty: 'テーマを入力してください',
     feedRequired: '少なくとも1つのフィードを選択してください',
+    errorSelectFeed: '少なくとも1つのフィードを選択してください',
     invalidUrl: '有効なURLを入力してください',
+    errorInvalidUrl: '有効なURLを入力してください',
     duplicateFeed: 'このフィードは既に追加されています',
+    errorDuplicate: 'このフィードは既に追加されています',
     
     // デモ
     demoButton: 'デモを試す',
+    demoTheme: 'テクノロジー',
+    
+    // ステータス
+    saved: '保存済み',
   },
 };
 

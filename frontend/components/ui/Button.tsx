@@ -7,6 +7,7 @@ interface ButtonProps {
   loading?: boolean;
   children: React.ReactNode;
   onClick?: () => void;
+  className?: string;
 }
 
 export function Button({
@@ -16,6 +17,7 @@ export function Button({
   loading = false,
   children,
   onClick,
+  className = '',
 }: ButtonProps) {
   const baseStyles = 'font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
   
@@ -34,7 +36,7 @@ export function Button({
   
   return (
     <button
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]}`}
+      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       disabled={disabled || loading}
       onClick={onClick}
     >

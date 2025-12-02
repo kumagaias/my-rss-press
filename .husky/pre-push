@@ -3,3 +3,8 @@
 
 # セキュリティチェックを実行
 ./scripts/security-check.sh
+
+# npm脆弱性チェックを実行（手動実行推奨: make audit）
+# 注: 開発環境のみの脆弱性でプッシュがブロックされるのを避けるため、
+#     pre-pushフックでは実行しない。定期的に手動で実行すること。
+# ./scripts/npm-audit-check.sh

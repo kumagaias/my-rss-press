@@ -1,4 +1,13 @@
-# Technical Architecture
+# Technical Architecture - MyRSSPress
+
+このドキュメントはMyRSSPress固有の技術詳細を記載しています。
+
+**関連ドキュメント:**
+- [tech-common.md](./tech-common.md) - 汎用的なベストプラクティス（TypeScript規約、テスト戦略、セキュリティ等）
+- [structure.md](./structure.md) - プロジェクト構造
+- [project-standards.md](./project-standards.md) - プロジェクト標準
+
+---
 
 ## Overview
 
@@ -600,6 +609,108 @@ Purpose: 新着順での新聞取得
 - レート制限を実装
 - 入力データをサニタイズ
 - IAMロールで最小権限の原則を適用
+
+### Dependency Security (npm脆弱性チェック)
+
+**概要:**
+
+npm依存関係の脆弱性を自動的にチェックし、Medium以上の深刻度の脆弱性が見つかった場合はプッシュを防止します。
+
+**チェックツール:**
+- `npm audit` - npm公式の脆弱性チェックツール
+- 深刻度レベル: Critical, High, Moderate, Low
+
+**自動チェックのタイミング:**
+1. **pre-pushフック**: `git push`実行時に自動チェック
+2. **手動実行**: `make test-vulnerabilities`または`make audit`
+
+**深刻度の対応方針:**
+- **Critical/High/Moderate**: プッシュをブロック、即座に修正が必要
+- **Low**: 警告のみ、プッシュは許可（定期的に修正を検討）
+
+**実行方法:**
+
+```bash
+# 手動で脆弱性チェック
+make test-vulnerabilities
+# または
+make audit
+
+# すべてのテスト（ユニット + セキュリティ + 脆弱性）
+make test
+```
+
+**脆弱性が見つかった場合の対応:**
+
+```bash
+# 1. 該当ディレクトリに移動
+cd frontend  # または backend
+
+# 2. 脆弱性の詳細を確認
+npm audit
+
+# 3. 自動修正を試みる（非破壊的）
+npm audit fix
+
+# 4. 自動修正できない場合は破壊的変更を含む修正
+npm audit fix --force
+
+# 5. package-lock.jsonをコミット
+git add package-lock.json
+git commit -m "fix: Update dependencies to fix vulnerabilities"
+```
+
+**スクリプトの場所:**
+- `scripts/npm-audit-check.sh` - 脆弱性チェックスクリプト
+- `.husky/pre-push` - pre-pushフック設定
+
+**チェック対象:**
+- `frontend/` - フロントエンド依存関係
+- `backend/` - バックエンド依存関係
+- ルートディレクトリ（package.jsonが存在する場合）
+
+**出力例:**
+
+```
+🔍 npm脆弱性チェックを開始...
+
+📦 Frontend の脆弱性をチェック中...
+❌ Frontend に脆弱性が見つかりました:
+  Critical: 0
+  High: 0
+  Moderate: 2
+
+修正方法:
+  cd frontend
+  npm audit fix
+  # または破壊的変更を含む修正:
+  npm audit fix --force
+
+❌ Medium以上の脆弱性が見つかりました。修正してから再度プッシュしてください。
+```
+
+**ベストプラクティス:**
+1. 定期的に`npm audit`を実行して脆弱性を確認
+2. 依存関係の更新は慎重に行い、テストを実行
+3. `npm audit fix --force`は破壊的変更を含むため、実行後は必ずテスト
+4. 修正できない脆弱性は、代替パッケージの検討またはissue報告
+5. CI/CDパイプラインでも脆弱性チェックを実行
+
+**修正できない脆弱性の対応:**
+
+依存関係の競合などで即座に修正できない脆弱性がある場合：
+
+1. **影響範囲を評価**: 開発環境のみか、本番環境にも影響するか
+2. **GitHub Issueを作成**: 脆弱性の詳細と修正計画を記録
+3. **一時的な回避策**: 
+   - 開発環境のみの脆弱性の場合、本番ビルドに影響しないことを確認
+   - 本番環境に影響する場合は、代替パッケージの検討または緊急対応
+4. **定期的な再評価**: 依存関係の更新時に再度修正を試みる
+
+**例: esbuild脆弱性（GHSA-67mh-4wv8-2f99）**
+- 影響: 開発サーバーのみ（本番ビルドには影響なし）
+- 対応: Storybook/Viteの互換性問題により即座の修正は困難
+- 計画: Storybook 9.x リリース後に再評価
 
 ## Monitoring & Logging
 
@@ -1210,13 +1321,30 @@ aws secretsmanager update-secret \
 
 ### Deployment Best Practices
 
-1. **テストを必ず実行**: デプロイ前に`make test`を実行
-2. **インフラ変更の確認**: `terraform plan`で変更内容を確認
-3. **段階的デプロイ**: 重要な変更は段階的にデプロイ
-4. **イメージタグ管理**: GitコミットSHAをイメージタグとして使用
-5. **ロールバック準備**: 前のイメージタグに戻せるようにする
-6. **モニタリング**: CloudWatch Logsでデプロイ後の動作を確認
-7. **通知設定**: デプロイ成功/失敗をSlackなどに通知
+1. **プッシュ前にプル**: `git push`前に必ず`git pull`を実行してリモートの変更を取り込む
+2. **テストを必ず実行**: デプロイ前に`make test`を実行
+3. **インフラ変更の確認**: `terraform plan`で変更内容を確認
+4. **段階的デプロイ**: 重要な変更は段階的にデプロイ
+5. **イメージタグ管理**: GitコミットSHAをイメージタグとして使用
+6. **ロールバック準備**: 前のイメージタグに戻せるようにする
+7. **モニタリング**: CloudWatch Logsでデプロイ後の動作を確認
+8. **通知設定**: デプロイ成功/失敗をSlackなどに通知
+
+**プッシュの正しい手順:**
+```bash
+# 1. 変更をコミット
+git add .
+git commit -m "feat: Add new feature"
+
+# 2. リモートの変更を取り込む（重要！）
+git pull origin feat/your-branch
+
+# 3. コンフリクトがあれば解決
+# （コンフリクトがある場合は手動で解決してコミット）
+
+# 4. プッシュ
+git push origin feat/your-branch
+```
 
 ### Rollback Strategy
 
@@ -1321,94 +1449,7 @@ const formattedDate = new Date().toLocaleDateString(dateLocale, {
 - 新しいUIテキストを追加する際は、必ず両言語の翻訳を同時に追加すること
 - 翻訳キーは説明的な名前を使用すること（例：`buttonSubmit`ではなく`generateNewspaper`）
 
-## TypeScript/JavaScript Conventions
-
-### 命名規則
-
-- 変数と関数にはcamelCaseを使用すること（例：`userName`, `fetchData`）
-- クラスとReactコンポーネントにはPascalCaseを使用すること（例：`UserProfile`, `NewspaperCard`）
-- 定数にはUPPER_SNAKE_CASEを使用すること（例：`MAX_RETRY_COUNT`, `API_BASE_URL`）
-- ブール値の変数には`is`, `has`, `should`などのプレフィックスを使用すること（例：`isLoading`, `hasError`）
-- イベントハンドラーには`handle`プレフィックスを使用すること（例：`handleClick`, `handleSubmit`）
-
-### ファイル構造
-
-- 1ファイルにつき1コンポーネントを配置すること
-- 関連するコンポーネントはフォルダーにまとめること
-- エクスポートにはindex.tsファイルを使用すること
-- ファイル名はコンポーネント名と一致させること（例：`UserProfile.tsx`）
-- テストファイルは同じディレクトリに配置し、`.test.ts`または`.spec.ts`の拡張子を使用すること
-
-### TypeScriptのベストプラクティス
-
-- パブリックAPIにはtypeよりもinterfaceを優先すること
-- エクスポートされる関数には明示的な戻り値の型を指定すること
-- `any`型の使用を避けること（やむを得ない場合は`unknown`を検討）
-- 型アサーション（`as`）は最小限に抑えること
-- ユニオン型とインターセクション型を適切に使用すること
-- ジェネリクスを活用して再利用可能な型を作成すること
-- `null`と`undefined`を明確に区別すること
-- オプショナルチェイニング（`?.`）とnullish coalescing（`??`）を活用すること
-
-### コーディングスタイル
-
-- セミコロンを使用すること
-- シングルクォート（`'`）を優先すること（JSX内ではダブルクォート）
-- インデントは2スペースを使用すること
-- 行の長さは100文字以内を目安とすること
-- アロー関数を優先すること（`function`キーワードは特別な理由がある場合のみ）
-- 分割代入を積極的に使用すること
-- テンプレートリテラルを使用して文字列を構築すること
-
-### Import/Export
-
-- 名前付きエクスポートを優先すること（デフォルトエクスポートは最小限に）
-- インポートは以下の順序でグループ化すること：
-  1. 外部ライブラリ（React、Next.js等）
-  2. 内部モジュール（`@/`から始まるパス）
-  3. 相対パス（`./`、`../`）
-  4. 型のみのインポート（`import type`）
-- 未使用のインポートは削除すること
-
-## Code Organization
-
-### File Size Limits
-
-- 各ファイルは300行以内に収めること
-- 超える場合は複数ファイルに分割すること
-- ファイル分割時は関心の分離を明確に保つこと
-
-### Component Splitting Example
-
-```typescript
-// ❌ Bad: 1つの大きなコンポーネント (500行)
-export default function NewspaperPage() {
-  // すべてのロジックとUIが1つのファイルに...
-}
-
-// ✅ Good: 複数の小さなコンポーネントに分割
-// NewspaperPage.tsx (100行)
-export default function NewspaperPage() {
-  return (
-    <>
-      <NewspaperHeader />
-      <NewspaperContent />
-      <NewspaperFooter />
-    </>
-  );
-}
-
-// NewspaperHeader.tsx (50行)
-// NewspaperContent.tsx (150行)
-// NewspaperFooter.tsx (50行)
-```
-
-### Separation of Concerns
-
-- **Presentation Components**: UIのみを担当
-- **Container Components**: ロジックとデータ取得を担当
-- **Hooks**: 再利用可能なロジックを抽出
-- **Utils**: 汎用的なヘルパー関数
+**注**: TypeScript規約、コード構成、テスト戦略、セキュリティの汎用的なベストプラクティスは [tech-common.md](./tech-common.md) を参照してください。
 
 ## Scalability Considerations
 
@@ -1512,39 +1553,7 @@ terraform state show <resource_address>
 - Gitleaksによるセキュリティチェックを無効化しないこと
 - pre-commitフックを削除しないこと
 
-### Code Quality
-
-**❌ 禁止: TypeScriptの`any`型の多用**
-- `any`型は最小限に抑えること
-- やむを得ない場合は`unknown`を検討すること
-
-**❌ 禁止: エラーハンドリングの省略**
-- すべての非同期処理にエラーハンドリングを実装すること
-- try-catchまたは.catch()を必ず使用すること
-
-**❌ 禁止: コンソールログの本番環境への残置**
-- `console.log()`は開発時のみ使用すること
-- 本番環境では構造化ログ（JSON形式）を使用すること
-
-### Git Workflow
-
-**❌ 禁止: mainブランチへの直接コミット**
-- 必ずfeatureブランチを作成してPRを経由すること
-- 例外: 緊急のホットフィックスのみ
-
-**❌ 禁止: 大きすぎるPR**
-- 1つのPRは500行以内を目安とすること
-- 大きな変更は複数のPRに分割すること
-
-### Performance
-
-**❌ 禁止: 無制限のデータ取得**
-- DynamoDBクエリには必ずLimitを設定すること
-- ページネーションを実装すること
-
-**❌ 禁止: 同期的な大量API呼び出し**
-- 複数のAPI呼び出しは`Promise.all()`で並列化すること
-- レート制限を考慮すること
+**注**: Code Quality、Git Workflow、Performanceの汎用的な禁止事項は [tech-common.md](./tech-common.md) を参照してください。
 
 ---
 

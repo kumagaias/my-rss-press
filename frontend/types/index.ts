@@ -6,7 +6,7 @@ export interface Article {
   title: string;
   description: string;
   link: string;
-  pubDate: Date;
+  pubDate: string;
   imageUrl?: string;
   importance: number;
 }

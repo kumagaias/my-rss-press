@@ -1,38 +1,8 @@
 // API client for MyRSSPress backend
 
+import type { Article, FeedSuggestion, NewspaperData, NewspaperSettings } from '@/types';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-
-export interface FeedSuggestion {
-  url: string;
-  title: string;
-  reasoning: string;
-}
-
-export interface Article {
-  title: string;
-  description: string;
-  link: string;
-  pubDate: string;
-  imageUrl?: string;
-  importance: number;
-}
-
-export interface NewspaperData {
-  newspaperId: string;
-  name: string;
-  userName: string;
-  feedUrls: string[];
-  createdAt: string;
-  updatedAt: string;
-  viewCount: number;
-  isPublic: boolean;
-}
-
-export interface NewspaperSettings {
-  newspaperName: string;
-  userName: string;
-  isPublic: boolean;
-}
 
 /**
  * Suggest RSS feeds based on a theme
@@ -47,7 +17,7 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to suggest feeds');
+    throw new Error(`Failed to suggest feeds: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
@@ -61,6 +31,14 @@ export async function generateNewspaper(
   feedUrls: string[],
   theme: string
 ): Promise<Article[]> {
+  // Validate input
+  if (!feedUrls || feedUrls.length === 0) {
+    throw new Error('At least one feed URL is required');
+  }
+  if (feedUrls.length > 10) {
+    throw new Error('Maximum 10 feed URLs allowed');
+  }
+
   const response = await fetch(`${API_BASE_URL}/api/generate-newspaper`, {
     method: 'POST',
     headers: {
@@ -74,7 +52,7 @@ export async function generateNewspaper(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to generate newspaper');
+    throw new Error(`Failed to generate newspaper: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
@@ -102,7 +80,7 @@ export async function saveNewspaper(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to save newspaper');
+    throw new Error(`Failed to save newspaper: ${response.status} ${response.statusText}`);
   }
 
   return await response.json();
@@ -115,7 +93,7 @@ export async function getNewspaper(newspaperId: string): Promise<NewspaperData> 
   const response = await fetch(`${API_BASE_URL}/api/newspapers/${newspaperId}`);
 
   if (!response.ok) {
-    throw new Error('Failed to fetch newspaper');
+    throw new Error(`Failed to fetch newspaper: ${response.status} ${response.statusText}`);
   }
 
   return await response.json();
@@ -133,7 +111,7 @@ export async function getPublicNewspapers(
   );
 
   if (!response.ok) {
-    throw new Error('Failed to fetch newspapers');
+    throw new Error(`Failed to fetch newspapers: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();

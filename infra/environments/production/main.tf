@@ -60,6 +60,17 @@ module "acm" {
   environment      = var.environment
 }
 
+# ACM Certificate for API Gateway (Regional - ap-northeast-1)
+module "acm_regional" {
+  source = "../../modules/acm-regional"
+
+  domain_name               = "api.${var.domain_name}"
+  subject_alternative_names = []
+  route53_zone_id           = module.route53.zone_id
+  environment               = var.environment
+  certificate_name          = "MyRSSPress API SSL Certificate"
+}
+
 # Secrets Manager
 module "secrets_manager" {
   source = "../../modules/secrets-manager"
@@ -108,11 +119,11 @@ module "api_gateway" {
   lambda_function_name = module.lambda.function_name
   lambda_invoke_arn    = module.lambda.function_invoke_arn
   custom_domain_name   = "api.${var.domain_name}"
-  acm_certificate_arn  = module.acm.validated_certificate_arn
+  acm_certificate_arn  = module.acm_regional.validated_certificate_arn
   route53_zone_id      = module.route53.zone_id
   environment          = var.environment
 
-  depends_on = [module.lambda, module.acm]
+  depends_on = [module.lambda, module.acm_regional]
 }
 
 # Amplify Hosting

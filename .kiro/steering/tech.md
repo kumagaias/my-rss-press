@@ -601,6 +601,108 @@ Purpose: 新着順での新聞取得
 - 入力データをサニタイズ
 - IAMロールで最小権限の原則を適用
 
+### Dependency Security (npm脆弱性チェック)
+
+**概要:**
+
+npm依存関係の脆弱性を自動的にチェックし、Medium以上の深刻度の脆弱性が見つかった場合はプッシュを防止します。
+
+**チェックツール:**
+- `npm audit` - npm公式の脆弱性チェックツール
+- 深刻度レベル: Critical, High, Moderate, Low
+
+**自動チェックのタイミング:**
+1. **pre-pushフック**: `git push`実行時に自動チェック
+2. **手動実行**: `make test-vulnerabilities`または`make audit`
+
+**深刻度の対応方針:**
+- **Critical/High/Moderate**: プッシュをブロック、即座に修正が必要
+- **Low**: 警告のみ、プッシュは許可（定期的に修正を検討）
+
+**実行方法:**
+
+```bash
+# 手動で脆弱性チェック
+make test-vulnerabilities
+# または
+make audit
+
+# すべてのテスト（ユニット + セキュリティ + 脆弱性）
+make test
+```
+
+**脆弱性が見つかった場合の対応:**
+
+```bash
+# 1. 該当ディレクトリに移動
+cd frontend  # または backend
+
+# 2. 脆弱性の詳細を確認
+npm audit
+
+# 3. 自動修正を試みる（非破壊的）
+npm audit fix
+
+# 4. 自動修正できない場合は破壊的変更を含む修正
+npm audit fix --force
+
+# 5. package-lock.jsonをコミット
+git add package-lock.json
+git commit -m "fix: Update dependencies to fix vulnerabilities"
+```
+
+**スクリプトの場所:**
+- `scripts/npm-audit-check.sh` - 脆弱性チェックスクリプト
+- `.husky/pre-push` - pre-pushフック設定
+
+**チェック対象:**
+- `frontend/` - フロントエンド依存関係
+- `backend/` - バックエンド依存関係
+- ルートディレクトリ（package.jsonが存在する場合）
+
+**出力例:**
+
+```
+🔍 npm脆弱性チェックを開始...
+
+📦 Frontend の脆弱性をチェック中...
+❌ Frontend に脆弱性が見つかりました:
+  Critical: 0
+  High: 0
+  Moderate: 2
+
+修正方法:
+  cd frontend
+  npm audit fix
+  # または破壊的変更を含む修正:
+  npm audit fix --force
+
+❌ Medium以上の脆弱性が見つかりました。修正してから再度プッシュしてください。
+```
+
+**ベストプラクティス:**
+1. 定期的に`npm audit`を実行して脆弱性を確認
+2. 依存関係の更新は慎重に行い、テストを実行
+3. `npm audit fix --force`は破壊的変更を含むため、実行後は必ずテスト
+4. 修正できない脆弱性は、代替パッケージの検討またはissue報告
+5. CI/CDパイプラインでも脆弱性チェックを実行
+
+**修正できない脆弱性の対応:**
+
+依存関係の競合などで即座に修正できない脆弱性がある場合：
+
+1. **影響範囲を評価**: 開発環境のみか、本番環境にも影響するか
+2. **GitHub Issueを作成**: 脆弱性の詳細と修正計画を記録
+3. **一時的な回避策**: 
+   - 開発環境のみの脆弱性の場合、本番ビルドに影響しないことを確認
+   - 本番環境に影響する場合は、代替パッケージの検討または緊急対応
+4. **定期的な再評価**: 依存関係の更新時に再度修正を試みる
+
+**例: esbuild脆弱性（GHSA-67mh-4wv8-2f99）**
+- 影響: 開発サーバーのみ（本番ビルドには影響なし）
+- 対応: Storybook/Viteの互換性問題により即座の修正は困難
+- 計画: Storybook 9.x リリース後に再評価
+
 ## Monitoring & Logging
 
 ### Logging

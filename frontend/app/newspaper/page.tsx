@@ -118,7 +118,7 @@ export default function NewspaperPage() {
             <div className="flex items-center gap-4">
               {isSaved && (
                 <span className="text-green-600 text-sm font-medium">
-                  ✓ {locale === 'ja' ? '保存済み' : 'Saved'}
+                  ✓ {t.saved}
                 </span>
               )}
               

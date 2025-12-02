@@ -81,6 +81,10 @@ export const translations = {
     
     // Demo
     demoButton: 'Try Demo',
+    demoTheme: 'Technology',
+    
+    // Status
+    saved: 'Saved',
   },
   ja: {
     // アプリメタデータ
@@ -158,6 +162,10 @@ export const translations = {
     
     // デモ
     demoButton: 'デモを試す',
+    demoTheme: 'テクノロジー',
+    
+    // ステータス
+    saved: '保存済み',
   },
 };
 

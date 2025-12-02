@@ -79,7 +79,7 @@ export default function Home() {
 
   const handleDemo = async () => {
     // Demo with pre-configured feeds
-    const demoTheme = locale === 'ja' ? 'テクノロジー' : 'Technology';
+    const demoTheme = t.demoTheme;
     const demoFeeds = [
       'https://example.com/tech-feed',
       'https://example.com/community-feed',

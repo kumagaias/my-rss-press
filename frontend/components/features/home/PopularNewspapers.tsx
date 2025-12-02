@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import type { NewspaperData, Locale } from '@/types';
 import { useTranslations, formatDate, formatNumber } from '@/lib/i18n';
+import { getHostnameFromUrl } from '@/lib/utils';
 
 interface PopularNewspapersProps {
   locale: Locale;
@@ -16,11 +17,7 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchNewspapers();
-  }, [sortBy]);
-
-  const fetchNewspapers = async () => {
+  const fetchNewspapers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -39,7 +36,11 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [sortBy]);
+
+  useEffect(() => {
+    fetchNewspapers();
+  }, [fetchNewspapers]);
 
   const handleSortChange = (newSort: 'popular' | 'recent') => {
     setSortBy(newSort);
@@ -97,7 +98,7 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
 
       {!isLoading && !error && newspapers.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-600">No newspapers found</p>
+          <p className="text-gray-600">{t.noNewspapersFound}</p>
         </div>
       )}
 
@@ -134,7 +135,7 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
                           key={index}
                           className="text-xs bg-gray-100 px-2 py-1 rounded"
                         >
-                          {new URL(url).hostname.replace('www.', '')}
+                          {getHostnameFromUrl(url)}
                         </span>
                       ))}
                       {newspaper.feedUrls.length > 3 && (

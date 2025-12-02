@@ -70,6 +70,7 @@ export const translations = {
     tryAgain: 'Try Again',
     newspaperNotFound: 'Newspaper not found',
     loadingArticles: 'Loading articles...',
+    noNewspapersFound: 'No newspapers found',
     
     // Validation messages
     themeRequired: 'Please enter a theme',
@@ -153,6 +154,7 @@ export const translations = {
     tryAgain: '再試行',
     newspaperNotFound: '新聞が見つかりません',
     loadingArticles: '記事を読み込んでいます...',
+    noNewspapersFound: '新聞が見つかりません',
     
     // バリデーションメッセージ
     themeRequired: 'テーマを入力してください',

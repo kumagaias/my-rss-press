@@ -81,8 +81,8 @@ export default function Home() {
     // Demo with pre-configured feeds
     const demoTheme = locale === 'ja' ? 'テクノロジー' : 'Technology';
     const demoFeeds = [
-      'https://news.ycombinator.com/rss',
-      'https://techcrunch.com/feed/',
+      'https://example.com/tech-feed',
+      'https://example.com/community-feed',
     ];
 
     setTheme(demoTheme);

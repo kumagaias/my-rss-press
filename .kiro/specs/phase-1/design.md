@@ -1150,8 +1150,8 @@ interface NewspaperData {
 {
   "suggestions": [
     {
-      "url": "https://techcrunch.com/feed/",
-      "title": "TechCrunch",
+      "url": "https://example.com/tech-feed",
+      "title": "Tech News Feed",
       "reasoning": "スタートアップとイノベーションをカバーする主要なテクノロジーニュース"
     }
   ]
@@ -1162,7 +1162,7 @@ interface NewspaperData {
 **リクエスト:**
 ```json
 {
-  "feedUrls": ["https://techcrunch.com/feed/"],
+  "feedUrls": ["https://example.com/tech-feed"],
   "daysBack": 3,
   "theme": "Tech"
 }
@@ -1193,7 +1193,7 @@ interface NewspaperData {
   "name": "Tech Morning Digest",
   "userName": "John Doe",
   "userId": null,
-  "feedUrls": ["https://techcrunch.com/feed/"],
+  "feedUrls": ["https://example.com/tech-feed"],
   "isPublic": true
 }
 ```
@@ -1216,7 +1216,7 @@ interface NewspaperData {
   "name": "Tech Morning Digest",
   "userName": "John Doe",
   "userId": null,
-  "feedUrls": ["https://techcrunch.com/feed/"],
+  "feedUrls": ["https://example.com/tech-feed"],
   "createdAt": "2025-11-29T10:00:00Z",
   "updatedAt": "2025-11-29T10:00:00Z",
   "viewCount": 42,

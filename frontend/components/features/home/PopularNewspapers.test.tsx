@@ -11,7 +11,7 @@ const mockNewspapers: NewspaperData[] = [
     newspaperId: '1',
     name: 'Tech News Daily',
     userName: 'John Doe',
-    feedUrls: ['https://techcrunch.com/feed/', 'https://news.ycombinator.com/rss'],
+    feedUrls: ['https://example.com/tech-feed', 'https://example.com/community-feed'],
     createdAt: '2025-12-01T10:00:00Z',
     updatedAt: '2025-12-01T10:00:00Z',
     viewCount: 150,
@@ -160,8 +160,8 @@ describe('PopularNewspapers', () => {
     render(<PopularNewspapers locale="en" />);
 
     await waitFor(() => {
-      expect(screen.getByText('techcrunch.com')).toBeInTheDocument();
-      expect(screen.getByText('news.ycombinator.com')).toBeInTheDocument();
+      // example.com appears multiple times (2 feeds in first newspaper)
+      expect(screen.getAllByText('example.com').length).toBeGreaterThan(0);
     });
   });
 

@@ -51,8 +51,8 @@ describe('Home Page', () => {
 
   it('suggests feeds when theme is submitted', async () => {
     const mockSuggestions = [
-      { url: 'https://techcrunch.com/feed/', title: 'TechCrunch', reasoning: 'Tech news' },
-      { url: 'https://news.ycombinator.com/rss', title: 'Hacker News', reasoning: 'Tech community' },
+      { url: 'https://example.com/tech-feed', title: 'Tech News Feed', reasoning: 'Technology news' },
+      { url: 'https://example.com/community-feed', title: 'Tech Community Feed', reasoning: 'Community discussions' },
     ];
 
     (api.suggestFeeds as any).mockResolvedValueOnce(mockSuggestions);
@@ -70,14 +70,14 @@ describe('Home Page', () => {
     }, { timeout: 3000 });
 
     await waitFor(() => {
-      // TechCrunch appears in both suggested feeds and selected feeds sections
-      expect(screen.getAllByText('TechCrunch').length).toBeGreaterThan(0);
+      // Feed appears in both suggested feeds and selected feeds sections
+      expect(screen.getAllByText('Tech News Feed').length).toBeGreaterThan(0);
     }, { timeout: 3000 });
   });
 
   it('generates newspaper when generate button is clicked', async () => {
     const mockSuggestions = [
-      { url: 'https://techcrunch.com/feed/', title: 'TechCrunch', reasoning: 'Tech news' },
+      { url: 'https://example.com/tech-feed', title: 'Tech News Feed', reasoning: 'Technology news' },
     ];
     const mockArticles = [
       {
@@ -101,8 +101,8 @@ describe('Home Page', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      // TechCrunch appears in both suggested feeds and selected feeds sections
-      expect(screen.getAllByText('TechCrunch').length).toBeGreaterThan(0);
+      // Feed appears in both suggested feeds and selected feeds sections
+      expect(screen.getAllByText('Tech News Feed').length).toBeGreaterThan(0);
     }, { timeout: 3000 });
 
     // Generate newspaper
@@ -111,7 +111,7 @@ describe('Home Page', () => {
 
     await waitFor(() => {
       expect(api.generateNewspaper).toHaveBeenCalledWith(
-        ['https://techcrunch.com/feed/'],
+        ['https://example.com/tech-feed'],
         'Technology'
       );
     }, { timeout: 3000 });

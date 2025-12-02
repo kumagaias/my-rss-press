@@ -1472,6 +1472,55 @@ const formattedDate = new Date().toLocaleDateString(dateLocale, {
   4. 型のみのインポート（`import type`）
 - 未使用のインポートは削除すること
 
+### テストとドキュメントでの固有サービス名の使用禁止
+
+**原則**: テストコード、仕様書、設計書、ドキュメントでは実在するサービス名を使用しないこと
+
+**理由**:
+1. 商標権の侵害リスクを避ける
+2. サービスの仕様変更や終了の影響を受けない
+3. 汎用的で理解しやすいコードを保つ
+4. 特定のサービスへの依存を示唆しない
+
+**禁止例**:
+- ❌ TechCrunch, Hacker News, Reddit, Twitter/X
+- ❌ Google, Facebook, Amazon（サービス名として）
+- ❌ その他の実在するWebサービス、企業名、製品名
+
+**推奨する代替名**:
+```typescript
+// ❌ Bad: 実在のサービス名
+const mockFeeds = [
+  { url: 'https://techcrunch.com/feed/', title: 'TechCrunch', reasoning: 'Tech news' },
+  { url: 'https://news.ycombinator.com/rss', title: 'Hacker News', reasoning: 'Tech community' },
+];
+
+// ✅ Good: 汎用的な名前
+const mockFeeds = [
+  { url: 'https://example.com/tech-feed', title: 'Tech News Feed', reasoning: 'Technology news' },
+  { url: 'https://example.com/community-feed', title: 'Tech Community Feed', reasoning: 'Community discussions' },
+];
+
+// ✅ Good: より説明的な名前
+const mockFeeds = [
+  { url: 'https://example.com/feed1', title: 'Sample Tech Blog', reasoning: 'Technology articles' },
+  { url: 'https://example.com/feed2', title: 'Sample News Site', reasoning: 'General news' },
+];
+```
+
+**適用範囲**:
+- ユニットテスト（`*.test.ts`, `*.spec.ts`）
+- E2Eテスト（Playwright等）
+- 仕様書（`.kiro/specs/`）
+- 設計書（`design.md`, `requirements.md`）
+- ドキュメント（`README.md`, `docs/`）
+- コード内のコメント例
+
+**例外**:
+- 本番コードで実際にそのサービスのAPIを使用する場合（例：AWS SDK、Bedrock API）
+- 統合テストで実際のサービスに接続する場合（明示的にマークすること）
+- ユーザー向けドキュメントで具体例として説明する場合（「例：」と明記すること）
+
 ## Code Organization
 
 ### File Size Limits

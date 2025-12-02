@@ -5,18 +5,18 @@ import { FeedSuggestion } from '@/types';
 
 const mockSuggestions: FeedSuggestion[] = [
   {
-    url: 'https://techcrunch.com/feed/',
-    title: 'TechCrunch',
+    url: 'https://example.com/tech-feed',
+    title: 'Tech News Feed',
     reasoning: 'Leading technology news and startup coverage',
   },
   {
-    url: 'https://www.theverge.com/rss/index.xml',
-    title: 'The Verge',
+    url: 'https://example.com/science-feed',
+    title: 'Science & Culture Feed',
     reasoning: 'Technology, science, and culture news',
   },
   {
-    url: 'https://news.ycombinator.com/rss',
-    title: 'Hacker News',
+    url: 'https://example.com/community-feed',
+    title: 'Tech Community Feed',
     reasoning: 'Tech community news and discussions',
   },
 ];
@@ -38,9 +38,9 @@ describe('FeedSelector', () => {
     );
 
     expect(screen.getByText('Suggested Feeds')).toBeInTheDocument();
-    expect(screen.getByText('TechCrunch')).toBeInTheDocument();
-    expect(screen.getByText('The Verge')).toBeInTheDocument();
-    expect(screen.getByText('Hacker News')).toBeInTheDocument();
+    expect(screen.getByText('Tech News Feed')).toBeInTheDocument();
+    expect(screen.getByText('Science & Culture Feed')).toBeInTheDocument();
+    expect(screen.getByText('Tech Community Feed')).toBeInTheDocument();
   });
 
   it('should toggle feed selection', () => {

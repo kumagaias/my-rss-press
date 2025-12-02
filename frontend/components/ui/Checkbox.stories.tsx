@@ -83,8 +83,8 @@ export const LongLabel: Story = {
 
 export const FeedSelection: Story = {
   args: {
-    label: 'TechCrunch RSS Feed',
-    helperText: 'https://techcrunch.com/feed/',
+    label: 'Tech News RSS Feed',
+    helperText: 'https://example.com/tech-feed',
     checked: true,
   },
 };

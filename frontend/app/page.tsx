@@ -33,7 +33,7 @@ export default function Home() {
     setIsLoadingSuggestions(true);
 
     try {
-      const feedSuggestions = await suggestFeeds(themeValue);
+      const feedSuggestions = await suggestFeeds(themeValue, locale);
       setSuggestions(feedSuggestions);
       
       // Auto-select all suggested feeds

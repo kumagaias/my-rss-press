@@ -8,6 +8,7 @@ export const feedsRouter = new Hono();
 // Validation schema for suggest-feeds request
 const SuggestFeedsSchema = z.object({
   theme: z.string().min(1, 'Theme is required').max(200, 'Theme is too long'),
+  locale: z.enum(['en', 'ja']).optional(),
 });
 
 /**
@@ -24,7 +25,7 @@ feedsRouter.post(
       const validated = SuggestFeedsSchema.parse(body);
 
       // Get feed suggestions from Bedrock
-      const suggestions = await suggestFeeds(validated.theme);
+      const suggestions = await suggestFeeds(validated.theme, validated.locale);
 
       return c.json({
         suggestions,

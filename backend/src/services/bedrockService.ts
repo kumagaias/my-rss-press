@@ -52,14 +52,16 @@ async function validateFeedUrl(url: string): Promise<boolean> {
 /**
  * Suggest RSS feeds based on user theme using AWS Bedrock (Claude 3 Haiku)
  * @param theme - User's interest theme
+ * @param locale - User's language preference ('en' or 'ja')
  * @returns Array of feed suggestions
  */
-export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
+export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): Promise<FeedSuggestion[]> {
   // Check cache in local development mode
+  const cacheKey = `${theme}:${locale}`;
   if (config.isLocal && config.enableCache) {
-    const cached = cache.get(theme);
+    const cached = cache.get(cacheKey);
     if (cached) {
-      console.log('Using cached Bedrock response for theme:', theme);
+      console.log('Using cached Bedrock response for theme:', theme, 'locale:', locale);
       return cached;
     }
   }
@@ -72,7 +74,7 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
 
   try {
     // Build prompt for feed suggestions
-    const prompt = buildPrompt(theme);
+    const prompt = buildPrompt(theme, locale);
 
     // Invoke Bedrock model (using Claude 3 Haiku - most cost-effective)
     const command = new InvokeModelCommand({
@@ -121,7 +123,7 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
 
     // Cache the result in local development
     if (config.isLocal && config.enableCache) {
-      cache.set(theme, validatedSuggestions);
+      cache.set(cacheKey, validatedSuggestions);
     }
 
     return validatedSuggestions;
@@ -139,38 +141,74 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
 /**
  * Build prompt for AI feed suggestions
  */
-function buildPrompt(theme: string): string {
-  return `ユーザーが「${theme}」に興味があります。関連するRSSフィードを15個提案してください。
+function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
+  if (locale === 'ja') {
+    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを15個提案してください。
 
 重要な制約：
-1. 実際に存在し、現在もアクティブなRSSフィードのURLのみを提案してください
-2. 架空のURLや存在しないフィードは絶対に提案しないでください
-3. 大手メディアや公式サイトの確実にアクセス可能なフィードを優先してください
-4. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml などで終わる正しい形式にしてください
-5. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
+1. 実際に存在し、現在もアクティブな日本語のRSSフィードのURLのみを提案してください
+2. 日本のメディア、ブログ、ニュースサイトを優先してください
+3. 架空のURLや存在しないフィードは絶対に提案しないでください
+4. 大手メディアや公式サイトの確実にアクセス可能なフィードを優先してください
+5. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml、/index.xml などで終わる正しい形式にしてください
+6. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
 
 各フィードについて、以下の情報をJSON形式で返してください：
-- url: RSSフィードのURL（必ず実在するもの）
-- title: フィードの名前
-- reasoning: なぜこのフィードを提案するのか（1-2文）
+- url: RSSフィードのURL（必ず実在する日本語のもの）
+- title: フィードの名前（日本語）
+- reasoning: なぜこのフィードを提案するのか（日本語で1-2文）
 
 レスポンス形式：
 {
   "feeds": [
     {
-      "url": "https://example.com/feed",
-      "title": "Example Feed",
-      "reasoning": "このフィードは${theme}に関する最新情報を提供します"
+      "url": "https://example.jp/feed",
+      "title": "サンプルフィード",
+      "reasoning": "このフィードは${theme}に関する最新情報を日本語で提供します"
     }
   ]
 }
 
-例：
-- 技術系: https://news.ycombinator.com/rss, https://techcrunch.com/feed/
-- ニュース: https://feeds.bbci.co.uk/news/rss.xml, https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
-- ブログ: https://blog.example.com/feed/
+日本語フィードの例：
+- 技術系: https://www.itmedia.co.jp/rss/2.0/news_bursts.xml, https://japan.cnet.com/rss/index.rdf
+- ニュース: https://www3.nhk.or.jp/rss/news/cat0.xml, https://news.yahoo.co.jp/rss/topics/top-picks.xml
+- ブログ: https://blog.example.jp/feed/
 
-必ず実在する、アクセス可能なRSSフィードのURLを提案してください。`;
+必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。`;
+  } else {
+    return `The user is interested in "${theme}". Please suggest 15 related RSS feeds in English.
+
+Important constraints:
+1. Only suggest RSS feed URLs that actually exist and are currently active
+2. Prioritize English-language media, blogs, and news sites
+3. Never suggest fictional or non-existent feed URLs
+4. Prioritize reliable feeds from major media outlets and official websites
+5. Feed URLs must end with proper formats like /rss, /feed, /rss.xml, /feed.xml, /index.xml
+6. Sort by relevance to the theme (most relevant first)
+
+For each feed, provide the following information in JSON format:
+- url: RSS feed URL (must be real and in English)
+- title: Feed name (in English)
+- reasoning: Why you recommend this feed (1-2 sentences in English)
+
+Response format:
+{
+  "feeds": [
+    {
+      "url": "https://example.com/feed",
+      "title": "Example Feed",
+      "reasoning": "This feed provides the latest information about ${theme} in English"
+    }
+  ]
+}
+
+Examples of English feeds:
+- Technology: https://news.ycombinator.com/rss, https://techcrunch.com/feed/
+- News: https://feeds.bbci.co.uk/news/rss.xml, https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
+- Blogs: https://blog.example.com/feed/
+
+Please only suggest real, accessible English RSS feed URLs.`;
+  }
 }
 
 /**

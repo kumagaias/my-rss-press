@@ -7,13 +7,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3
 /**
  * Suggest RSS feeds based on a theme
  */
-export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
+export async function suggestFeeds(theme: string, locale?: 'en' | 'ja'): Promise<FeedSuggestion[]> {
   const response = await fetch(`${API_BASE_URL}/api/suggest-feeds`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ theme }),
+    body: JSON.stringify({ theme, locale }),
   });
 
   if (!response.ok) {

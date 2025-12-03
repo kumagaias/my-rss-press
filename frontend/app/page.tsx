@@ -6,6 +6,7 @@ import { ThemeInput } from '@/components/features/feed/ThemeInput';
 import { FeedSelector } from '@/components/features/feed/FeedSelector';
 import { PopularNewspapers } from '@/components/features/home/PopularNewspapers';
 import { Button } from '@/components/ui/Button';
+import { TopicMarquee } from '@/components/ui/TopicMarquee';
 import { detectLocale, useTranslations } from '@/lib/i18n';
 import { suggestFeeds, generateNewspaper } from '@/lib/api';
 import type { Locale, FeedSuggestion } from '@/types';
@@ -44,6 +45,11 @@ export default function Home() {
     } finally {
       setIsLoadingSuggestions(false);
     }
+  };
+
+  const handleKeywordClick = (keyword: string) => {
+    // Set theme and automatically trigger feed suggestions
+    handleThemeSubmit(keyword);
   };
 
   const handleGenerateNewspaper = async () => {
@@ -159,6 +165,15 @@ export default function Home() {
             {/* Theme Input */}
             <div className="bg-white border-4 border-black shadow-lg p-8">
               <h2 className="text-3xl font-serif font-black mb-6 border-b-2 border-black pb-2">{t.themeInputLabel}</h2>
+              
+              {/* Topic Marquee */}
+              <div className="mb-6 -mx-8">
+                <TopicMarquee
+                  keywords={t.topicKeywords}
+                  onKeywordClick={handleKeywordClick}
+                />
+              </div>
+              
               <ThemeInput
                 onSubmit={handleThemeSubmit}
                 isLoading={isLoadingSuggestions}

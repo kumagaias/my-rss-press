@@ -88,6 +88,20 @@ export const translations = {
     
     // Status
     saved: 'Saved',
+    
+    // Topic keywords
+    topicKeywords: [
+      'Technology', 'Sports', 'Business', 'Politics', 'Entertainment',
+      'Science', 'Health', 'Travel', 'Food', 'Fashion',
+      'Music', 'Movies', 'Books', 'Gaming', 'Art',
+      'Photography', 'Design', 'Education', 'Finance', 'Real Estate',
+      'Automotive', 'Environment', 'Space', 'AI', 'Cryptocurrency',
+      'Startups', 'Marketing', 'Programming', 'Fitness', 'Yoga',
+      'Cooking', 'Wine', 'Coffee', 'Tea', 'Pets',
+      'Gardening', 'DIY', 'Home Decor', 'Parenting', 'Relationships',
+      'Psychology', 'Philosophy', 'History', 'Geography', 'Culture',
+      'Language', 'Religion', 'Spirituality', 'Meditation', 'Wellness',
+    ],
   },
   ja: {
     // アプリメタデータ
@@ -172,6 +186,20 @@ export const translations = {
     
     // ステータス
     saved: '保存済み',
+    
+    // トピックキーワード
+    topicKeywords: [
+      'テクノロジー', 'スポーツ', 'ビジネス', '政治', 'エンタメ',
+      '科学', '健康', '旅行', '料理', 'ファッション',
+      '音楽', '映画', '読書', 'ゲーム', 'アート',
+      '写真', 'デザイン', '教育', '金融', '不動産',
+      '自動車', '環境', '宇宙', 'AI', '暗号通貨',
+      'スタートアップ', 'マーケティング', 'プログラミング', 'フィットネス', 'ヨガ',
+      '料理', 'ワイン', 'コーヒー', 'お茶', 'ペット',
+      'ガーデニング', 'DIY', 'インテリア', '子育て', '人間関係',
+      '心理学', '哲学', '歴史', '地理', '文化',
+      '言語', '宗教', 'スピリチュアル', '瞑想', 'ウェルネス',
+    ],
   },
 };
 

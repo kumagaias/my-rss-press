@@ -21,4 +21,18 @@
 
 @layer utilities {
   /* Custom utility classes will go here */
+  
+  /* Marquee animation - left to right */
+  @keyframes marquee-ltr {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+  
+  .animate-marquee-ltr {
+    animation: marquee-ltr 60s linear infinite;
+  }
 }

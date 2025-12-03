@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { FeedSuggestion } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -35,6 +35,7 @@ export function FeedSelector({
 }: FeedSelectorProps) {
   const [customFeedUrl, setCustomFeedUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const generateButtonRef = useRef<HTMLButtonElement>(null);
 
   /**
    * Create a Map for O(1) lookup of suggestions by URL
@@ -46,6 +47,19 @@ export function FeedSelector({
   );
 
   const t = useTranslations(locale);
+
+  /**
+   * Auto-focus generate button when feeds are suggested
+   */
+  useEffect(() => {
+    if (suggestions.length > 0 && selectedFeeds.length > 0 && generateButtonRef.current) {
+      // Scroll to button and focus
+      generateButtonRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setTimeout(() => {
+        generateButtonRef.current?.focus();
+      }, 300); // Wait for scroll animation
+    }
+  }, [suggestions.length, selectedFeeds.length]);
 
   /**
    * Validate URL format
@@ -131,12 +145,13 @@ export function FeedSelector({
             {suggestions.map((suggestion) => (
               <div
                 key={suggestion.url}
-                className="p-4 border border-gray-300 rounded-lg hover:border-primary-500 transition-colors"
+                onClick={() => toggleFeed(suggestion.url)}
+                className="p-4 border border-gray-300 rounded-lg hover:border-primary-500 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <div className="flex items-start space-x-3">
                   <Checkbox
                     checked={selectedFeeds.includes(suggestion.url)}
-                    onChange={() => toggleFeed(suggestion.url)}
+                    onChange={() => {}} // Handled by parent div onClick
                     label=""
                   />
                   <div className="flex-1">
@@ -218,6 +233,7 @@ export function FeedSelector({
       {/* Generate Button */}
       <div className="pt-4">
         <Button
+          ref={generateButtonRef}
           variant="primary"
           size="lg"
           onClick={handleGenerate}

@@ -43,7 +43,19 @@ function NewspaperPageInner() {
         setIsSaved(true); // Already saved newspaper
         try {
           const newspaper = await getNewspaper(newspaperId);
-          setArticles(newspaper.articles || []);
+          
+          // Check if articles exist
+          if (!newspaper.articles || newspaper.articles.length === 0) {
+            setError(
+              detectedLocale === 'ja'
+                ? 'この新聞には記事がありません。'
+                : 'This newspaper has no articles.'
+            );
+            setIsLoading(false);
+            return;
+          }
+          
+          setArticles(newspaper.articles);
           setFeedUrls(newspaper.feedUrls || []);
           setNewspaperName(newspaper.name || '');
           setUserName(newspaper.userName || '');

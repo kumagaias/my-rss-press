@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -11,7 +11,7 @@ interface ButtonProps {
   className?: string;
 }
 
-export function Button({
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({
   variant = 'primary',
   size = 'md',
   type = 'button',
@@ -20,7 +20,7 @@ export function Button({
   children,
   onClick,
   className = '',
-}: ButtonProps) {
+}, ref) {
   const baseStyles = 'font-serif font-bold transition-colors focus:outline-none border-2 border-black';
   
   const variantStyles = {
@@ -38,6 +38,7 @@ export function Button({
   
   return (
     <button
+      ref={ref}
       type={type}
       className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       disabled={disabled || loading}
@@ -46,4 +47,4 @@ export function Button({
       {loading ? 'Loading...' : children}
     </button>
   );
-}
+});

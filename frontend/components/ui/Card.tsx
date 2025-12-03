@@ -32,10 +32,10 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={`
-        bg-white rounded-lg
+        bg-white border-2 border-black
         ${paddingClasses[padding]}
         ${shadowClasses[shadow]}
-        ${hover ? 'transition-shadow hover:shadow-xl' : ''}
+        ${hover ? 'transition-all hover:shadow-2xl hover:border-4' : ''}
         ${className}
       `}
     >
@@ -64,7 +64,7 @@ export interface CardTitleProps {
 
 export const CardTitle: React.FC<CardTitleProps> = ({ children, className = '' }) => {
   return (
-    <h3 className={`text-xl font-bold text-gray-900 ${className}`}>
+    <h3 className={`text-xl font-serif font-black text-black ${className}`}>
       {children}
     </h3>
   );
@@ -90,7 +90,7 @@ export interface CardFooterProps {
 
 export const CardFooter: React.FC<CardFooterProps> = ({ children, className = '' }) => {
   return (
-    <div className={`mt-4 pt-4 border-t border-gray-200 ${className}`}>
+    <div className={`mt-4 pt-4 border-t-2 border-black ${className}`}>
       {children}
     </div>
   );

@@ -54,8 +54,8 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">
+      <div className="flex items-center justify-between mb-6 border-b-2 border-black pb-4">
+        <h2 className="text-3xl font-serif font-black">
           {sortBy === 'popular' ? t.popularNewspapers : t.recentNewspapers}
         </h2>
         <div className="flex gap-2">
@@ -110,13 +110,13 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
               onClick={() => handleNewspaperClick(newspaper.newspaperId)}
               className="cursor-pointer"
             >
-              <Card className="hover:shadow-lg transition-shadow">
+              <Card className="hover:shadow-lg transition-all">
                 <div className="space-y-3">
-                  <h3 className="text-xl font-bold line-clamp-2">
+                  <h3 className="text-xl font-serif font-black line-clamp-2 border-b border-gray-300 pb-2">
                     {newspaper.name}
                   </h3>
                   
-                  <div className="text-sm text-gray-600 space-y-1">
+                  <div className="text-sm text-gray-800 space-y-1 font-serif">
                     <p>
                       {t.createdBy}: {newspaper.userName || 'Anonymous'}
                     </p>
@@ -129,17 +129,17 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
                   </div>
 
                   {newspaper.feedUrls && newspaper.feedUrls.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-300">
                       {newspaper.feedUrls.slice(0, 3).map((url, index) => (
                         <span
                           key={index}
-                          className="text-xs bg-gray-100 px-2 py-1 rounded"
+                          className="text-xs bg-white border border-black px-2 py-1 font-mono"
                         >
                           {getHostnameFromUrl(url)}
                         </span>
                       ))}
                       {newspaper.feedUrls.length > 3 && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-700 font-serif italic">
                           +{newspaper.feedUrls.length - 3} more
                         </span>
                       )}

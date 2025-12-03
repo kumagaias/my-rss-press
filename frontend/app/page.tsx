@@ -112,40 +112,42 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-[#f4f1e8]">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <header className="bg-white border-b-4 border-black">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex justify-end mb-4">
             <div className="flex gap-2">
               <button
                 onClick={() => setLocale('ja')}
-                className={`px-3 py-1 rounded ${
+                className={`px-4 py-2 font-serif font-bold border-2 border-black transition-colors ${
                   locale === 'ja'
-                    ? 'bg-sky-500 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-black text-white'
+                    : 'bg-white text-black hover:bg-gray-100'
                 }`}
               >
                 日本語
               </button>
               <button
                 onClick={() => setLocale('en')}
-                className={`px-3 py-1 rounded ${
+                className={`px-4 py-2 font-serif font-bold border-2 border-black transition-colors ${
                   locale === 'en'
-                    ? 'bg-sky-500 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-black text-white'
+                    : 'bg-white text-black hover:bg-gray-100'
                 }`}
               >
                 English
               </button>
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-center text-gray-900">
-            {t.appName}
-          </h1>
-          <p className="text-center text-gray-600 mt-2">
-            {t.appTagline}
-          </p>
+          <div className="border-t-2 border-b-2 border-black py-6">
+            <h1 className="text-6xl font-serif font-black text-center text-black tracking-tight">
+              {t.appName}
+            </h1>
+            <p className="text-center text-gray-800 mt-3 text-sm font-serif italic border-t border-gray-400 pt-3 mt-3">
+              {t.appTagline}
+            </p>
+          </div>
         </div>
       </header>
 
@@ -155,8 +157,8 @@ export default function Home() {
           {/* Theme Input & Feed Selection */}
           <div className="space-y-6">
             {/* Theme Input */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold mb-4">{t.themeInputLabel}</h2>
+            <div className="bg-white border-4 border-black shadow-lg p-8">
+              <h2 className="text-3xl font-serif font-black mb-6 border-b-2 border-black pb-2">{t.themeInputLabel}</h2>
               <ThemeInput
                 onSubmit={handleThemeSubmit}
                 isLoading={isLoadingSuggestions}
@@ -178,7 +180,7 @@ export default function Home() {
 
             {/* Feed Selection */}
             {suggestions.length > 0 && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white border-4 border-black shadow-lg p-8">
                 <FeedSelector
                   suggestions={suggestions}
                   selectedFeeds={selectedFeeds}
@@ -192,21 +194,21 @@ export default function Home() {
 
             {/* Error Display */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-800">{error}</p>
+              <div className="bg-white border-4 border-red-800 p-6">
+                <p className="text-red-900 font-serif font-bold">{error}</p>
               </div>
             )}
 
             {/* Loading State */}
             {isGenerating && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-800 text-center">{t.generating}</p>
+              <div className="bg-white border-4 border-black p-6">
+                <p className="text-black text-center font-serif font-bold text-lg">{t.generating}</p>
               </div>
             )}
           </div>
 
           {/* Popular Newspapers */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white border-4 border-black shadow-lg p-8">
             <PopularNewspapers
               locale={locale}
               onNewspaperClick={handleNewspaperClick}

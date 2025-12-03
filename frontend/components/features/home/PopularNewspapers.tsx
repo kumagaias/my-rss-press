@@ -108,18 +108,13 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
             <div
               key={newspaper.newspaperId}
               onClick={() => handleNewspaperClick(newspaper.newspaperId)}
-              className="cursor-pointer relative"
+              className="cursor-pointer"
             >
               <Card className="hover:shadow-lg transition-all">
                 <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-xl font-serif font-black line-clamp-2 border-b border-gray-300 pb-2 flex-1">
-                      {newspaper.name}
-                    </h3>
-                    <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 font-serif italic whitespace-nowrap">
-                      Coming Soon
-                    </span>
-                  </div>
+                  <h3 className="text-xl font-serif font-black line-clamp-2 border-b border-gray-300 pb-2">
+                    {newspaper.name}
+                  </h3>
                   
                   <div className="text-sm text-gray-800 space-y-1 font-serif">
                     <p>

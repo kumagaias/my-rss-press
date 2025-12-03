@@ -78,11 +78,7 @@ export default function Home() {
   };
 
   const handleNewspaperClick = (newspaperId: string) => {
-    // TODO: Implement newspaper detail page
-    console.log('Newspaper clicked:', newspaperId);
-    alert(locale === 'ja' 
-      ? '新聞の詳細ページは現在開発中です' 
-      : 'Newspaper detail page is coming soon');
+    router.push(`/newspaper?id=${newspaperId}`);
   };
 
   return (

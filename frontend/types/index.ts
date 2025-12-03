@@ -22,6 +22,7 @@ export interface NewspaperData {
   name: string;
   userName: string;
   feedUrls: string[];
+  articles?: Article[];
   createdAt: string;
   updatedAt: string;
   viewCount: number;

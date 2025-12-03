@@ -1,16 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout';
 import { NewspaperSettingsModal } from '@/components/features/newspaper/NewspaperSettings';
 import { Button } from '@/components/ui/Button';
 import { detectLocale, useTranslations } from '@/lib/i18n';
-import { saveNewspaper } from '@/lib/api';
+import { saveNewspaper, getNewspaper } from '@/lib/api';
 import type { Locale, Article, NewspaperSettings } from '@/types';
 
-export default function NewspaperPage() {
+function NewspaperPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const newspaperId = searchParams.get('id');
+  
   const [locale, setLocale] = useState<Locale>('en');
   const t = useTranslations(locale);
 
@@ -18,43 +21,70 @@ export default function NewspaperPage() {
   const [feedUrls, setFeedUrls] = useState<string[]>([]);
   const [newspaperName, setNewspaperName] = useState('');
   const [userName, setUserName] = useState('');
-  const [createdAt] = useState(new Date());
+  const [createdAt, setCreatedAt] = useState<Date>(new Date());
+  const [viewCount, setViewCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load data from sessionStorage on mount
+  // Load data from sessionStorage or API
   useEffect(() => {
     const detectedLocale = detectLocale();
     setLocale(detectedLocale);
 
-    const articlesData = sessionStorage.getItem('newspaperArticles');
-    const themeData = sessionStorage.getItem('newspaperTheme');
-    const feedsData = sessionStorage.getItem('newspaperFeeds');
+    const loadNewspaper = async () => {
+      // If newspaperId is provided, load from API
+      if (newspaperId) {
+        setIsLoading(true);
+        setIsSaved(true); // Already saved newspaper
+        try {
+          const newspaper = await getNewspaper(newspaperId);
+          setArticles(newspaper.articles || []);
+          setFeedUrls(newspaper.feedUrls || []);
+          setNewspaperName(newspaper.name || '');
+          setUserName(newspaper.userName || '');
+          setCreatedAt(new Date(newspaper.createdAt));
+          setViewCount(newspaper.viewCount || 0);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : t.newspaperNotFound);
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+      }
 
-    if (articlesData) {
-      const parsedArticles = JSON.parse(articlesData);
-      setArticles(parsedArticles);
-    }
+      // Otherwise, load from sessionStorage (newly generated newspaper)
+      const articlesData = sessionStorage.getItem('newspaperArticles');
+      const themeData = sessionStorage.getItem('newspaperTheme');
+      const feedsData = sessionStorage.getItem('newspaperFeeds');
 
-    if (themeData) {
-      // Generate default newspaper name from theme
-      const defaultName = detectedLocale === 'ja' 
-        ? `${themeData}の新聞`
-        : `${themeData} Newspaper`;
-      setNewspaperName(defaultName);
-    }
+      if (articlesData) {
+        const parsedArticles = JSON.parse(articlesData);
+        setArticles(parsedArticles);
+      }
 
-    if (feedsData) {
-      setFeedUrls(JSON.parse(feedsData));
-    }
+      if (themeData) {
+        // Generate default newspaper name from theme
+        const defaultName = detectedLocale === 'ja' 
+          ? `${themeData}の新聞`
+          : `${themeData} Newspaper`;
+        setNewspaperName(defaultName);
+      }
 
-    // If no articles, redirect to home
-    if (!articlesData) {
-      router.push('/');
-    }
-  }, [router]);
+      if (feedsData) {
+        setFeedUrls(JSON.parse(feedsData));
+      }
+
+      // If no articles and no newspaperId, redirect to home
+      if (!articlesData && !newspaperId) {
+        router.push('/');
+      }
+    };
+
+    loadNewspaper();
+  }, [router, newspaperId, t]);
 
   const handleSaveClick = () => {
     setShowSettingsModal(true);
@@ -91,6 +121,27 @@ export default function NewspaperPage() {
     router.push('/');
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">{t.loading}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button variant="outline" onClick={handleBackToHome}>
+            {t.backToHome}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (articles.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -114,13 +165,20 @@ export default function NewspaperPage() {
             </Button>
 
             <div className="flex items-center gap-4">
-              {isSaved && (
+              {/* Show view count for saved newspapers */}
+              {newspaperId && viewCount > 0 && (
+                <span className="text-gray-600 text-sm font-medium">
+                  {t.viewCount}: {viewCount}
+                </span>
+              )}
+              
+              {isSaved && !newspaperId && (
                 <span className="text-green-600 text-sm font-medium">
                   ✓ {t.saved}
                 </span>
               )}
               
-              {!isSaved && (
+              {!isSaved && !newspaperId && (
                 <Button
                   variant="primary"
                   size="sm"
@@ -171,5 +229,17 @@ export default function NewspaperPage() {
         </div>
       </footer>
     </main>
+  );
+}
+
+export default function NewspaperPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    }>
+      <NewspaperPageInner />
+    </Suspense>
   );
 }

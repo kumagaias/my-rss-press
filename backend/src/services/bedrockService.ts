@@ -105,10 +105,18 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
       }
     }
 
-    // If no valid feeds found, return default suggestions
-    if (validatedSuggestions.length === 0) {
-      console.log('No valid feeds found, using default suggestions');
-      return getDefaultFeedSuggestions(theme);
+    // If we have less than 10 valid feeds, supplement with defaults
+    if (validatedSuggestions.length < 10) {
+      console.log(`Only ${validatedSuggestions.length} valid feeds found, supplementing with defaults`);
+      const defaultFeeds = getDefaultFeedSuggestions(theme);
+      
+      // Add default feeds that aren't already in the list
+      const existingUrls = new Set(validatedSuggestions.map(s => s.url));
+      for (const defaultFeed of defaultFeeds) {
+        if (!existingUrls.has(defaultFeed.url) && validatedSuggestions.length < 10) {
+          validatedSuggestions.push(defaultFeed);
+        }
+      }
     }
 
     // Cache the result in local development
@@ -132,13 +140,14 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
  * Build prompt for AI feed suggestions
  */
 function buildPrompt(theme: string): string {
-  return `ユーザーが「${theme}」に興味があります。関連するRSSフィードを10個提案してください。
+  return `ユーザーが「${theme}」に興味があります。関連するRSSフィードを15個提案してください。
 
 重要な制約：
 1. 実際に存在し、現在もアクティブなRSSフィードのURLのみを提案してください
 2. 架空のURLや存在しないフィードは絶対に提案しないでください
 3. 大手メディアや公式サイトの確実にアクセス可能なフィードを優先してください
 4. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml などで終わる正しい形式にしてください
+5. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
 
 各フィードについて、以下の情報をJSON形式で返してください：
 - url: RSSフィードのURL（必ず実在するもの）
@@ -182,8 +191,8 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     const parsed = JSON.parse(jsonMatch[0]);
     const feeds = parsed.feeds || [];
 
-    // Validate and return suggestions (up to 10)
-    return feeds.slice(0, 10).map((feed: any) => ({
+    // Validate and return suggestions (up to 15)
+    return feeds.slice(0, 15).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',

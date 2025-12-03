@@ -41,12 +41,15 @@ export function NewspaperLayout({
           <h1 className="text-6xl font-bold mb-2" style={{ fontFamily: 'Georgia, serif' }}>
             {newspaperName || 'MyRSSPress'}
           </h1>
-          <div className="text-sm mt-2 space-y-1">
+          <div className="text-sm mt-2 flex items-center justify-center gap-3">
             <div className="text-gray-700">{formattedDate}</div>
             {userName && (
-              <div className="text-gray-600">
-                {t.createdBy}: {userName}
-              </div>
+              <>
+                <span className="text-gray-400">|</span>
+                <div className="text-gray-600">
+                  {t.createdBy}: {userName}
+                </div>
+              </>
             )}
           </div>
         </header>
@@ -66,12 +69,15 @@ export function NewspaperLayout({
         <h1 className="text-6xl font-bold mb-2" style={{ fontFamily: 'Georgia, serif' }}>
           {newspaperName || 'MyRSSPress'}
         </h1>
-        <div className="text-sm mt-2 space-y-1">
+        <div className="text-sm mt-2 flex items-center justify-center gap-3">
           <div className="text-gray-700">{formattedDate}</div>
           {userName && (
-            <div className="text-gray-600">
-              {t.createdBy}: {userName}
-            </div>
+            <>
+              <span className="text-gray-400">|</span>
+              <div className="text-gray-600">
+                {t.createdBy}: {userName}
+              </div>
+            </>
           )}
         </div>
       </header>

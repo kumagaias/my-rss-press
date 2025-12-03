@@ -101,7 +101,8 @@ export function NewspaperSettingsModal({
           </p>
         </div>
 
-        <div>
+        {/* TODO: Phase 2 - Add public/private toggle */}
+        {/* <div>
           <Checkbox
             checked={isPublic}
             onChange={(e) => setIsPublic(e.target.checked)}
@@ -110,7 +111,7 @@ export function NewspaperSettingsModal({
           <p className="mt-1 text-xs text-gray-500 ml-6">
             {t.publicNote}
           </p>
-        </div>
+        </div> */}
 
         <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" size="md" onClick={handleClose}>

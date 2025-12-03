@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 
 interface TopicMarqueeProps {
   keywords: string[];
@@ -6,45 +6,52 @@ interface TopicMarqueeProps {
 }
 
 export function TopicMarquee({ keywords, onKeywordClick }: TopicMarqueeProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [dragDistance, setDragDistance] = useState(0);
 
   // Duplicate keywords for seamless loop
-  const duplicatedKeywords = [...keywords, ...keywords, ...keywords];
+  const duplicatedKeywords = [...keywords, ...keywords];
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
+    if (!containerRef.current) return;
     setIsDragging(true);
-    setIsPaused(true);
-    setStartX(e.pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
+    setDragDistance(0);
+    setStartX(e.pageX - containerRef.current.offsetLeft);
+    setScrollLeft(containerRef.current.scrollLeft);
+    containerRef.current.style.cursor = 'grabbing';
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
+    if (!isDragging || !containerRef.current) return;
     e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed multiplier
-    scrollRef.current.scrollLeft = scrollLeft - walk;
+    const x = e.pageX - containerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+    containerRef.current.scrollLeft = scrollLeft - walk;
+    setDragDistance(Math.abs(walk));
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    setTimeout(() => setIsPaused(false), 100);
+    if (containerRef.current) {
+      containerRef.current.style.cursor = 'grab';
+    }
   };
 
   const handleMouseLeave = () => {
     if (isDragging) {
       setIsDragging(false);
-      setTimeout(() => setIsPaused(false), 100);
+      if (containerRef.current) {
+        containerRef.current.style.cursor = 'grab';
+      }
     }
   };
 
   const handleKeywordClick = (keyword: string) => {
-    if (!isDragging) {
+    // Only trigger click if not dragging (drag distance < 5px)
+    if (dragDistance < 5) {
       onKeywordClick(keyword);
     }
   };
@@ -52,8 +59,8 @@ export function TopicMarquee({ keywords, onKeywordClick }: TopicMarqueeProps) {
   return (
     <div className="relative overflow-hidden bg-white border-t-2 border-b-2 border-black py-3">
       <div
-        ref={scrollRef}
-        className="flex overflow-x-auto scrollbar-hide whitespace-nowrap cursor-grab active:cursor-grabbing"
+        ref={containerRef}
+        className="overflow-x-auto scrollbar-hide cursor-grab"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -63,12 +70,13 @@ export function TopicMarquee({ keywords, onKeywordClick }: TopicMarqueeProps) {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       >
-        <div className={`flex ${!isPaused ? 'animate-marquee-ltr' : ''}`}>
+        <div className="flex whitespace-nowrap animate-marquee-slow">
           {duplicatedKeywords.map((keyword, index) => (
             <button
               key={`${keyword}-${index}`}
               onClick={() => handleKeywordClick(keyword)}
-              className="inline-block mx-4 px-4 py-1 font-serif text-sm border border-black hover:bg-black hover:text-white transition-colors cursor-pointer select-none"
+              onMouseDown={(e) => e.stopPropagation()}
+              className="inline-block mx-4 px-4 py-1 font-serif text-sm border border-black hover:bg-black hover:text-white transition-colors cursor-pointer select-none flex-shrink-0"
             >
               {keyword}
             </button>

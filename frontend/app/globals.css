@@ -22,18 +22,22 @@
 @layer utilities {
   /* Custom utility classes will go here */
   
-  /* Marquee animation - left to right */
-  @keyframes marquee-ltr {
+  /* Marquee animation - slow scroll */
+  @keyframes marquee-slow {
     0% {
-      transform: translateX(-50%);
+      transform: translateX(0%);
     }
     100% {
-      transform: translateX(0%);
+      transform: translateX(-50%);
     }
   }
   
-  .animate-marquee-ltr {
-    animation: marquee-ltr 60s linear infinite;
+  .animate-marquee-slow {
+    animation: marquee-slow 120s linear infinite;
+  }
+  
+  .animate-marquee-slow:hover {
+    animation-play-state: paused;
   }
   
   /* Hide scrollbar */

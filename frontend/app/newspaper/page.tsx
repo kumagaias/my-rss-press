@@ -97,7 +97,7 @@ function NewspaperPageInner() {
     setIsSaving(true);
 
     try {
-      const result = await saveNewspaper(settings, feedUrls);
+      const result = await saveNewspaper(settings, feedUrls, articles);
       
       setNewspaperName(settings.newspaperName);
       setUserName(settings.userName);

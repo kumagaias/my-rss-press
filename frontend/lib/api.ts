@@ -64,7 +64,8 @@ export async function generateNewspaper(
  */
 export async function saveNewspaper(
   settings: NewspaperSettings,
-  feedUrls: string[]
+  feedUrls: string[],
+  articles?: Article[]
 ): Promise<{ newspaperId: string; createdAt: string }> {
   const response = await fetch(`${API_BASE_URL}/api/newspapers`, {
     method: 'POST',
@@ -75,6 +76,7 @@ export async function saveNewspaper(
       name: settings.newspaperName,
       userName: settings.userName,
       feedUrls,
+      articles,
       isPublic: settings.isPublic,
     }),
   });

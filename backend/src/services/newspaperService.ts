@@ -17,11 +17,21 @@ const dynamoClient = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
+export interface Article {
+  title: string;
+  description: string;
+  link: string;
+  pubDate: string;
+  imageUrl?: string;
+  importance: number;
+}
+
 export interface NewspaperData {
   newspaperId: string;
   name: string;
   userName: string;
   feedUrls: string[];
+  articles?: Article[];
   createdAt: string;
   updatedAt: string;
   viewCount: number;
@@ -44,6 +54,7 @@ export async function saveNewspaper(
     name: newspaper.name,
     userName: newspaper.userName,
     feedUrls: newspaper.feedUrls,
+    articles: newspaper.articles,
     createdAt: now,
     updatedAt: now,
     viewCount: 0,
@@ -98,6 +109,7 @@ export async function getNewspaper(newspaperId: string): Promise<NewspaperData |
     name: result.Item.name,
     userName: result.Item.userName,
     feedUrls: result.Item.feedUrls,
+    articles: result.Item.articles,
     createdAt: result.Item.createdAt,
     updatedAt: result.Item.updatedAt,
     viewCount: result.Item.viewCount,

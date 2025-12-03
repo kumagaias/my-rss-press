@@ -40,9 +40,9 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
     // Build prompt for feed suggestions
     const prompt = buildPrompt(theme);
 
-    // Invoke Bedrock model
+    // Invoke Bedrock model (using Claude 3 Haiku - most cost-effective)
     const command = new InvokeModelCommand({
-      modelId: 'anthropic.claude-3-5-haiku-20241022-v1:0',
+      modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
       contentType: 'application/json',
       accept: 'application/json',
       body: JSON.stringify({
@@ -68,6 +68,10 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
     return suggestions;
   } catch (error) {
     console.error('Bedrock API error:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     // Fallback to default feeds on error
     return getDefaultFeedSuggestions(theme);
   }

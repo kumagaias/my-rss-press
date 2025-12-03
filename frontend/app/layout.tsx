@@ -4,6 +4,9 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'MyRSSPress',
   description: 'Your Personalized Morning Digest, Curated by AI',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

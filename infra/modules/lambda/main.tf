@@ -71,7 +71,7 @@ resource "aws_iam_role_policy" "bedrock_access" {
         ]
         Resource = [
           # Foundation models are AWS-managed, use * for account ID
-          "arn:aws:bedrock:${var.bedrock_region}:*:foundation-model/anthropic.claude-3-5-haiku-20241022-v1:0"
+          "arn:aws:bedrock:${var.bedrock_region}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
         ]
       }
     ]

@@ -82,41 +82,6 @@ export default function Home() {
     router.push(`/newspapers/${newspaperId}`);
   };
 
-  const handleDemo = async () => {
-    // Demo with pre-configured feeds
-    const demoTheme = t.demoTheme;
-    const demoFeeds = [
-      'https://example.com/tech-feed',
-      'https://example.com/community-feed',
-    ];
-
-    setTheme(demoTheme);
-    setSelectedFeeds(demoFeeds);
-    setSuggestions(demoFeeds.map(url => ({
-      url,
-      title: new URL(url).hostname.replace('www.', ''),
-      reasoning: 'Demo feed',
-    })));
-
-    // Generate newspaper immediately
-    setError(null);
-    setIsGenerating(true);
-
-    try {
-      const articles = await generateNewspaper(demoFeeds, demoTheme);
-      
-      sessionStorage.setItem('newspaperArticles', JSON.stringify(articles));
-      sessionStorage.setItem('newspaperTheme', demoTheme);
-      sessionStorage.setItem('newspaperFeeds', JSON.stringify(demoFeeds));
-      
-      router.push('/newspaper');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate newspaper');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-[#f4f1e8]">
       {/* Header */}
@@ -179,18 +144,6 @@ export default function Home() {
                 isLoading={isLoadingSuggestions}
                 locale={locale}
               />
-              
-              {/* Demo Button */}
-              <div className="mt-4 text-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDemo}
-                  disabled={isGenerating}
-                >
-                  {t.demoButton}
-                </Button>
-              </div>
             </div>
 
             {/* Feed Selection */}

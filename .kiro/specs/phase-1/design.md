@@ -453,6 +453,28 @@ export const Loading: Story = {
 
 ### フロントエンドコンポーネント
 
+#### TopicMarqueeComponent
+**目的:** 人気トピックキーワードを左から右にスクロール表示し、クリックで自動入力
+
+**Props:**
+```typescript
+interface TopicMarqueeProps {
+  keywords: string[];
+  onKeywordClick: (keyword: string) => void;
+}
+```
+
+**機能:**
+- 50個のトピックキーワードを左から右に無限スクロール
+- キーワードをクリック/タップでテーマ入力欄に自動入力
+- 自動的にフィード提案を取得
+- 新聞風デザイン（黒枠、ホバーで白黒反転）
+- 60秒でループするアニメーション
+
+**キーワード例:**
+- 英語: Technology, Sports, Business, Politics, Entertainment...
+- 日本語: テクノロジー、スポーツ、ビジネス、政治、エンタメ...
+
 #### ThemeInputComponent
 **目的:** ユーザーの興味トピックをキャプチャ
 

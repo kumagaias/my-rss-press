@@ -82,10 +82,6 @@ export const translations = {
     duplicateFeed: 'This feed is already added',
     errorDuplicate: 'This feed is already added',
     
-    // Demo
-    demoButton: 'Try Demo',
-    demoTheme: 'Technology',
-    
     // Status
     saved: 'Saved',
     
@@ -179,10 +175,6 @@ export const translations = {
     errorInvalidUrl: '有効なURLを入力してください',
     duplicateFeed: 'このフィードは既に追加されています',
     errorDuplicate: 'このフィードは既に追加されています',
-    
-    // デモ
-    demoButton: 'デモを試す',
-    demoTheme: 'テクノロジー',
     
     // ステータス
     saved: '保存済み',

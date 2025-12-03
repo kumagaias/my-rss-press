@@ -345,7 +345,7 @@ aws configure
 # AWSコンソールで以下を実行：
 # 1. Bedrockコンソールにアクセス
 # 2. Model access → Manage model access
-# 3. Claude 3.5 Haikuを有効化
+# 3. Claude 3 Haikuを有効化
 ```
 
 3. **IAM権限の確認:**

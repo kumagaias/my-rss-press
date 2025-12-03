@@ -155,7 +155,7 @@ USE_BEDROCK_MOCK=false
 
 ### Bedrock
 
-The application uses AWS Bedrock (Claude 3.5 Haiku) for AI features. For local development:
+The application uses AWS Bedrock (Claude 3 Haiku) for AI features. For local development:
 
 1. **Configure AWS CLI**:
 ```bash
@@ -164,7 +164,7 @@ aws configure
 
 2. **Enable Bedrock Model Access**:
    - Go to AWS Console → Bedrock → Model access
-   - Enable Claude 3.5 Haiku
+   - Enable Claude 3 Haiku
 
 3. **Cost Management**:
    - Set `ENABLE_BEDROCK_CACHE=true` to cache responses locally

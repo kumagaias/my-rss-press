@@ -16,7 +16,7 @@ export interface FeedSuggestion {
 }
 
 /**
- * Suggest RSS feeds based on user theme using AWS Bedrock (Claude 3.5 Haiku)
+ * Suggest RSS feeds based on user theme using AWS Bedrock (Claude 3 Haiku)
  * @param theme - User's interest theme
  * @returns Array of feed suggestions
  */

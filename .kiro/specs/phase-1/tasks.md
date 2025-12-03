@@ -288,7 +288,7 @@
 
 - [x] 3.1 AWS Bedrock統合
   - `backend/src/services/bedrockService.ts`を作成
-  - Claude 3.5 Haikuを使用したフィード提案機能を実装
+  - Claude 3 Haikuを使用したフィード提案機能を実装
   - **受け入れ条件:**
     - [x] BedrockRuntimeClientが正しく設定されている
     - [x] `suggestFeeds(theme)`関数が実装されている

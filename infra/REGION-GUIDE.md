@@ -132,7 +132,7 @@ env:
 ## Why ap-northeast-1?
 
 1. **Latency**: Closest region to Japan for optimal performance
-2. **Bedrock Availability**: Claude 3.5 Haiku is available in ap-northeast-1
+2. **Bedrock Availability**: Claude 3 Haiku is available in ap-northeast-1
 3. **Cost**: Competitive pricing for Tokyo region
 4. **Compliance**: Data residency in Japan if required
 

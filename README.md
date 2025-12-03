@@ -8,7 +8,7 @@ MyRSSPress is a web application that converts RSS feeds into beautiful, newspape
 
 ## Features
 
-- **AI-Powered Feed Suggestions**: Get relevant RSS feed recommendations using AWS Bedrock (Claude 3.5 Haiku)
+- **AI-Powered Feed Suggestions**: Get relevant RSS feed recommendations using AWS Bedrock (Claude 3 Haiku)
 - **Newspaper-Style Layout**: Articles displayed with authentic newspaper design and paper textures
 - **Intelligent Article Ranking**: AI-based importance calculation for optimal article placement
 - **Multi-language Support**: Interface available in Japanese and English
@@ -27,7 +27,7 @@ MyRSSPress is a web application that converts RSS feeds into beautiful, newspape
 - AWS Lambda (Node.js 24.x LTS)
 - Hono 4.x Framework
 - TypeScript 5.9.x
-- AWS Bedrock (Claude 3.5 Haiku)
+- AWS Bedrock (Claude 3 Haiku)
 - DynamoDB
 
 ### Infrastructure

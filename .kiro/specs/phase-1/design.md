@@ -69,7 +69,7 @@ MyRSSPressは、RSSフィードを視覚的に魅力的な新聞スタイルの�
 - AWS Lambda (Node.js 24.x または 22.x)
 - Hono 4.x framework
 - TypeScript 5.9.x
-- AWS Bedrock Runtime API (Claude 3.5 Haiku)によるフィード提案
+- AWS Bedrock Runtime API (Claude 3 Haiku)によるフィード提案
 - RSSフィード解析ライブラリ
 - Zod 3.x によるバリデーション
 
@@ -82,7 +82,7 @@ MyRSSPressは、RSSフィードを視覚的に魅力的な新聞スタイルの�
 - API Gateway REST（APIエンドポイント）
 - AWS Lambda（TypeScript/Honoバックエンド、ECRイメージ使用）
 - Amazon ECR（コンテナレジストリ）
-- AWS Bedrock Runtime API（Claude 3.5 Haiku）
+- AWS Bedrock Runtime API（Claude 3 Haiku）
 - DynamoDB（データストレージ）
 - CloudWatch Logs（ログ記録）
 - CloudFront（CDN）
@@ -945,7 +945,7 @@ interface AISuggesterService {
 - `parseAIResponse(response)` - 構造化されたフィードデータを抽出
 
 **使用モデル:**
-- **Claude 3.5 Haiku** (`anthropic.claude-3-5-haiku-20241022-v1:0`)
+- **Claude 3 Haiku** (`anthropic.claude-3-haiku-20240307-v1:0`)
 - コスト効率を重視した選択
 - 高速なレスポンス時間
 - フィード提案に十分な品質

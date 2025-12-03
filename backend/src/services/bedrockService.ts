@@ -20,14 +20,29 @@ export interface FeedSuggestion {
  */
 async function validateFeedUrl(url: string): Promise<boolean> {
   try {
-    const response = await fetch(url, {
+    // Try HEAD request first
+    const headResponse = await fetch(url, {
       method: 'HEAD',
       headers: {
-        'User-Agent': 'MyRSSPress/1.0',
+        'User-Agent': 'Mozilla/5.0 (compatible; MyRSSPress/1.0; +https://my-rss-press.com)',
       },
-      signal: AbortSignal.timeout(5000), // 5 second timeout
+      signal: AbortSignal.timeout(5000),
     });
-    return response.ok;
+    
+    if (headResponse.ok) {
+      return true;
+    }
+    
+    // If HEAD fails, try GET (some servers don't support HEAD)
+    const getResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; MyRSSPress/1.0; +https://my-rss-press.com)',
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+    
+    return getResponse.ok;
   } catch (error) {
     console.log(`Feed URL validation failed for ${url}:`, error);
     return false;

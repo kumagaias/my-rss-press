@@ -67,6 +67,7 @@ export default function Home() {
       sessionStorage.setItem('newspaperArticles', JSON.stringify(articles));
       sessionStorage.setItem('newspaperTheme', theme);
       sessionStorage.setItem('newspaperFeeds', JSON.stringify(selectedFeeds));
+      sessionStorage.setItem('newspaperLocale', locale); // Save selected locale
       
       // Navigate to newspaper page
       router.push('/newspaper');

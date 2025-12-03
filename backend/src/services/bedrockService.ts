@@ -178,6 +178,8 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   } else {
     return `The user is interested in "${theme}". Please suggest 15 related RSS feeds in English.
 
+IMPORTANT: You MUST respond in English. All titles and reasoning MUST be in English.
+
 Important constraints:
 1. Only suggest RSS feed URLs that actually exist and are currently active
 2. Prioritize English-language media, blogs, and news sites
@@ -188,8 +190,8 @@ Important constraints:
 
 For each feed, provide the following information in JSON format:
 - url: RSS feed URL (must be real and in English)
-- title: Feed name (in English)
-- reasoning: Why you recommend this feed (1-2 sentences in English)
+- title: Feed name (in English - DO NOT use Japanese)
+- reasoning: Why you recommend this feed (1-2 sentences in English - DO NOT use Japanese)
 
 Response format:
 {
@@ -207,7 +209,7 @@ Examples of English feeds:
 - News: https://feeds.bbci.co.uk/news/rss.xml, https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
 - Blogs: https://blog.example.com/feed/
 
-Please only suggest real, accessible English RSS feed URLs.`;
+REMEMBER: All text in your response MUST be in English. Do NOT use Japanese.`;
   }
 }
 

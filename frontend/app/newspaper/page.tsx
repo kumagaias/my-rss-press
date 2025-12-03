@@ -31,7 +31,9 @@ function NewspaperPageInner() {
 
   // Load data from sessionStorage or API
   useEffect(() => {
-    const detectedLocale = detectLocale();
+    // Try to get saved locale from sessionStorage, otherwise detect from browser
+    const savedLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
+    const detectedLocale = savedLocale || detectLocale();
     setLocale(detectedLocale);
 
     const loadNewspaper = async () => {
@@ -165,6 +167,29 @@ function NewspaperPageInner() {
             </Button>
 
             <div className="flex items-center gap-4">
+              {/* Language switcher */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setLocale('ja')}
+                  className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
+                    locale === 'ja'
+                      ? 'bg-black text-white'
+                      : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  日本語
+                </button>
+                <button
+                  onClick={() => setLocale('en')}
+                  className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
+                    locale === 'en'
+                      ? 'bg-black text-white'
+                      : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
               {/* Show view count for saved newspapers */}
               {newspaperId && viewCount > 0 && (
                 <span className="text-gray-600 text-sm font-medium">

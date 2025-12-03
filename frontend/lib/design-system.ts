@@ -2,21 +2,21 @@
 // This file defines the core design tokens used throughout the application
 
 export const colors = {
-  // Brand colors
+  // Brand colors (newspaper theme)
   primary: {
-    50: '#f0f9ff',
-    100: '#e0f2fe',
-    500: '#0ea5e9',  // Main color
-    600: '#0284c7',
-    700: '#0369a1',
+    50: '#f9f9f9',
+    100: '#f4f1e8',      // Newspaper yellow
+    500: '#000000',      // Black (main color)
+    600: '#1a1a1a',
+    700: '#333333',
   },
   
   // Newspaper theme colors
   newspaper: {
-    paper: '#f5f5dc',      // Paper color (beige)
-    ink: '#1a1a1a',        // Ink color (dark gray)
-    border: '#333333',     // Border
-    accent: '#8b4513',     // Accent (brown)
+    paper: '#f4f1e8',      // Paper color (newspaper yellow)
+    ink: '#000000',        // Ink color (pure black)
+    border: '#000000',     // Border (pure black)
+    accent: '#333333',     // Accent (dark gray)
   },
   
   // Semantic colors
@@ -41,14 +41,14 @@ export const colors = {
 };
 
 export const fonts = {
-  // UI fonts
-  sans: ['Inter', 'system-ui', 'sans-serif'],
+  // UI fonts (newspaper style - serif by default)
+  sans: ['Georgia', 'Times New Roman', 'serif'],
   
-  // Newspaper fonts
+  // Newspaper fonts (primary)
   serif: ['Georgia', 'Times New Roman', 'serif'],
   
   // Code fonts
-  mono: ['Fira Code', 'monospace'],
+  mono: ['Courier New', 'monospace'],
 };
 
 export const fontSize = {
@@ -79,25 +79,25 @@ export const spacing = {
 };
 
 export const borderRadius = {
-  none: '0',
-  sm: '0.125rem',   // 2px
-  DEFAULT: '0.25rem', // 4px
-  md: '0.375rem',   // 6px
-  lg: '0.5rem',     // 8px
-  xl: '0.75rem',    // 12px
-  '2xl': '1rem',    // 16px
-  '3xl': '1.5rem',  // 24px
-  full: '9999px',
+  none: '0',        // Newspaper style - no rounded corners
+  sm: '0',
+  DEFAULT: '0',
+  md: '0',
+  lg: '0',
+  xl: '0',
+  '2xl': '0',
+  '3xl': '0',
+  full: '0',        // Even "full" is square for newspaper aesthetic
 };
 
 export const shadows = {
-  sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-  DEFAULT: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-  md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-  lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-  xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-  '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-  inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+  sm: '2px 2px 0 rgb(0 0 0 / 0.2)',
+  DEFAULT: '3px 3px 0 rgb(0 0 0 / 0.3)',
+  md: '4px 4px 0 rgb(0 0 0 / 0.4)',
+  lg: '6px 6px 0 rgb(0 0 0 / 0.5)',
+  xl: '8px 8px 0 rgb(0 0 0 / 0.6)',
+  '2xl': '12px 12px 0 rgb(0 0 0 / 0.7)',
+  inner: 'inset 2px 2px 0 rgb(0 0 0 / 0.1)',
   none: 'none',
 };
 

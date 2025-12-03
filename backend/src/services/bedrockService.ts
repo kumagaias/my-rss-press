@@ -117,7 +117,7 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
  * Build prompt for AI feed suggestions
  */
 function buildPrompt(theme: string): string {
-  return `ユーザーが「${theme}」に興味があります。関連するRSSフィードを3つ提案してください。
+  return `ユーザーが「${theme}」に興味があります。関連するRSSフィードを10個提案してください。
 
 重要な制約：
 1. 実際に存在し、現在もアクティブなRSSフィードのURLのみを提案してください
@@ -167,8 +167,8 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     const parsed = JSON.parse(jsonMatch[0]);
     const feeds = parsed.feeds || [];
 
-    // Validate and return suggestions
-    return feeds.slice(0, 3).map((feed: any) => ({
+    // Validate and return suggestions (up to 10)
+    return feeds.slice(0, 10).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',
@@ -198,6 +198,41 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
       url: 'https://feeds.reuters.com/reuters/topNews',
       title: 'Reuters Top News',
       reasoning: `Breaking news and updates about the theme: ${theme}`,
+    },
+    {
+      url: 'https://feeds.washingtonpost.com/rss/world',
+      title: 'Washington Post World',
+      reasoning: `International news related to the theme: ${theme}`,
+    },
+    {
+      url: 'https://feeds.theguardian.com/theguardian/world/rss',
+      title: 'The Guardian World News',
+      reasoning: `Global perspective on the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.aljazeera.com/xml/rss/all.xml',
+      title: 'Al Jazeera',
+      reasoning: `Middle Eastern perspective on the theme: ${theme}`,
+    },
+    {
+      url: 'https://feeds.npr.org/1001/rss.xml',
+      title: 'NPR News',
+      reasoning: `Public radio coverage of the theme: ${theme}`,
+    },
+    {
+      url: 'https://feeds.feedburner.com/time/topstories',
+      title: 'TIME Top Stories',
+      reasoning: `Magazine-style coverage of the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.economist.com/rss',
+      title: 'The Economist',
+      reasoning: `Economic and business analysis of the theme: ${theme}`,
+    },
+    {
+      url: 'https://feeds.arstechnica.com/arstechnica/index',
+      title: 'Ars Technica',
+      reasoning: `Technology and science coverage of the theme: ${theme}`,
     },
   ];
 }

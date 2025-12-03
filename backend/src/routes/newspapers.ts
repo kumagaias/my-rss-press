@@ -31,7 +31,7 @@ const ArticleSchema = z.object({
 
 const SaveNewspaperSchema = z.object({
   name: z.string().min(1, 'Newspaper name is required').max(100),
-  userName: z.string().optional().default('Anonymous'),
+  userName: z.string().min(1).optional().default('Anonymous'),
   feedUrls: z.array(z.string().url()).min(1).max(10, 'Too many feed URLs'),
   articles: z.array(ArticleSchema).optional(),
   isPublic: z.boolean().optional().default(true),

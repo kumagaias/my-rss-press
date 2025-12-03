@@ -46,7 +46,7 @@ export function NewspaperSettingsModal({
   const handleSave = () => {
     const settings: NewspaperSettings = {
       newspaperName: newspaperName.trim() || getDefaultName(),
-      userName: userName.trim(),
+      userName: userName.trim() || 'Anonymous',
       isPublic,
     };
     onSave(settings);

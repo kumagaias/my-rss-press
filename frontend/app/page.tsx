@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { ThemeInput } from '@/components/features/feed/ThemeInput';
 import { FeedSelector } from '@/components/features/feed/FeedSelector';
 import { PopularNewspapers } from '@/components/features/home/PopularNewspapers';
-import { Button } from '@/components/ui/Button';
 import { TopicMarquee } from '@/components/ui/TopicMarquee';
 import { detectLocale, useTranslations } from '@/lib/i18n';
 import { suggestFeeds, generateNewspaper } from '@/lib/api';
@@ -86,12 +85,20 @@ export default function Home() {
     <main className="min-h-screen bg-[#f4f1e8]">
       {/* Header */}
       <header className="bg-white border-b-4 border-black">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex justify-end mb-4">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="border-l-4 border-r-4 border-black px-4 py-2">
+              <h1 className="text-4xl font-serif font-black text-black tracking-tight">
+                {t.appName}
+              </h1>
+              <p className="text-gray-800 text-xs font-serif italic mt-1">
+                {t.appTagline}
+              </p>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setLocale('ja')}
-                className={`px-4 py-2 font-serif font-bold border-2 border-black transition-colors ${
+                className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
                   locale === 'ja'
                     ? 'bg-black text-white'
                     : 'bg-white text-black hover:bg-gray-100'
@@ -101,23 +108,15 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setLocale('en')}
-                className={`px-4 py-2 font-serif font-bold border-2 border-black transition-colors ${
+                className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
                   locale === 'en'
                     ? 'bg-black text-white'
                     : 'bg-white text-black hover:bg-gray-100'
                 }`}
               >
-                English
+                EN
               </button>
             </div>
-          </div>
-          <div className="border-t-2 border-b-2 border-black py-6">
-            <h1 className="text-6xl font-serif font-black text-center text-black tracking-tight">
-              {t.appName}
-            </h1>
-            <p className="text-center text-gray-800 mt-3 text-sm font-serif italic border-t border-gray-400 pt-3 mt-3">
-              {t.appTagline}
-            </p>
           </div>
         </div>
       </header>
@@ -184,6 +183,16 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-black text-white border-t-4 border-black mt-12">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex justify-between items-center text-xs font-serif">
+            <p>© 2025 MyRSSPress</p>
+            <p>{t.footerTagline}</p>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

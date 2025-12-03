@@ -85,6 +85,9 @@ export const translations = {
     // Status
     saved: 'Saved',
     
+    // Footer
+    footerTagline: 'Powered by AI',
+    
     // Topic keywords
     topicKeywords: [
       'Technology', 'Sports', 'Business', 'Politics', 'Entertainment',
@@ -178,6 +181,9 @@ export const translations = {
     
     // ステータス
     saved: '保存済み',
+    
+    // フッター
+    footerTagline: 'AIで動作',
     
     // トピックキーワード
     topicKeywords: [

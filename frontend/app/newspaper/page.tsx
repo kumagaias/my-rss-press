@@ -160,6 +160,16 @@ export default function NewspaperPage() {
         locale={locale}
         defaultName={newspaperName}
       />
+
+      {/* Footer */}
+      <footer className="bg-black text-white border-t-4 border-black mt-12">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex justify-between items-center text-xs font-serif">
+            <p>© 2025 MyRSSPress</p>
+            <p>{t.footerTagline}</p>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

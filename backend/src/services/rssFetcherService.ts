@@ -32,13 +32,22 @@ export async function fetchArticles(
 
   // Collect all articles from successful feeds
   const allArticles: Article[] = [];
+  let successCount = 0;
+  let failCount = 0;
+  
   feedResults.forEach((result, index) => {
     if (result.status === 'fulfilled') {
       allArticles.push(...result.value);
+      successCount++;
+      console.log(`✓ Feed ${index + 1}/${feedUrls.length} succeeded: ${feedUrls[index]} (${result.value.length} articles)`);
     } else {
-      console.error(`Failed to fetch feed ${feedUrls[index]}:`, result.reason);
+      failCount++;
+      console.error(`✗ Feed ${index + 1}/${feedUrls.length} failed: ${feedUrls[index]}`);
+      console.error(`  Reason:`, result.reason);
     }
   });
+  
+  console.log(`Feed fetch summary: ${successCount} succeeded, ${failCount} failed, ${allArticles.length} total articles`);
 
   // Filter by date
   const filteredArticles = filterByDate(allArticles, daysBack);
@@ -55,7 +64,10 @@ export async function fetchArticles(
  */
 async function parseFeed(url: string): Promise<Article[]> {
   try {
+    console.log(`Parsing feed: ${url}`);
     const feed = await parser.parseURL(url);
+    console.log(`Feed parsed successfully: ${url}, items: ${feed.items?.length || 0}`);
+    
     const articles: Article[] = [];
 
     for (const item of feed.items) {
@@ -80,9 +92,14 @@ async function parseFeed(url: string): Promise<Article[]> {
       });
     }
 
+    console.log(`Extracted ${articles.length} articles from ${url}`);
     return articles;
   } catch (error) {
     console.error(`Error parsing feed ${url}:`, error);
+    if (error instanceof Error) {
+      console.error(`Error message: ${error.message}`);
+      console.error(`Error stack: ${error.stack}`);
+    }
     throw error;
   }
 }

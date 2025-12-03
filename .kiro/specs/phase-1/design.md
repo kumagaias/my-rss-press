@@ -943,6 +943,40 @@ interface AISuggesterService {
 - `suggestFeeds(theme)` - Bedrock Runtime APIを呼び出してフィード提案を取得
 - `buildPrompt(theme)` - フィード提案用のAIプロンプトを構築
 - `parseAIResponse(response)` - 構造化されたフィードデータを抽出
+- `validateFeedUrl(url)` - フィードURLの存在確認（HEAD リクエスト）
+
+**フィード提案フロー:**
+```
+1. ユーザーがテーマを入力
+   ↓
+2. buildPrompt(theme) でプロンプト生成
+   - 10個のフィード提案を要求
+   - 実在するフィードのみを要求する制約を含む
+   ↓
+3. Bedrock (Claude 3 Haiku) にリクエスト
+   ↓
+4. parseAIResponse() でJSON解析
+   - 最大10個のフィードを抽出
+   ↓
+5. 各フィードURLに対してvalidateFeedUrl()を実行
+   - HEAD リクエストで存在確認（5秒タイムアウト）
+   - 200 OK の場合のみ有効と判定
+   ↓
+6. 有効なフィードのみをフィルタリング
+   ↓
+7. 有効なフィードが0個の場合
+   - デフォルトフィード（BBC, NYT等）を返す
+   ↓
+8. フロントエンドに返却
+```
+
+**フィードURL検証の詳細:**
+- **タイミング**: Bedrockからのレスポンス取得後、フロントエンドに返す前
+- **方法**: HTTP HEAD リクエスト
+- **タイムアウト**: 5秒
+- **判定基準**: HTTPステータス 200 OK
+- **失敗時**: そのフィードをスキップ、他の有効なフィードのみ返す
+- **全て失敗時**: デフォルトフィード（10個）にフォールバック
 
 **使用モデル:**
 - **Claude 3 Haiku** (`anthropic.claude-3-haiku-20240307-v1:0`)

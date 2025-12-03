@@ -320,10 +320,62 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
   });
   
   const response = await bedrockClient.send(command);
-  // レスポンスを解析して返す
-  return parseBedrockResponse(response);
+  const suggestions = parseBedrockResponse(response);
+  
+  // フィードURLの検証（Bedrock後の処理）
+  const validatedSuggestions = [];
+  for (const suggestion of suggestions) {
+    const isValid = await validateFeedUrl(suggestion.url);
+    if (isValid) {
+      validatedSuggestions.push(suggestion);
+    }
+  }
+  
+  return validatedSuggestions.length > 0 
+    ? validatedSuggestions 
+    : getDefaultFeeds();
+}
+
+// フィードURL検証（HEAD リクエスト）
+async function validateFeedUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(5000), // 5秒タイムアウト
+    });
+    return response.ok; // 200 OK の場合のみtrue
+  } catch (error) {
+    return false;
+  }
 }
 ```
+
+**フィード提案の処理フロー:**
+
+```
+1. ユーザー入力 (テーマ)
+   ↓
+2. Bedrock API呼び出し
+   - Claude 3 Haikuに10個のフィード提案を要求
+   - 実在するフィードのみを要求する制約を含む
+   ↓
+3. AIレスポンス解析
+   - JSON形式で最大10個のフィードを抽出
+   ↓
+4. フィードURL検証 ★ここで存在確認
+   - 各URLにHEAD リクエスト（5秒タイムアウト）
+   - 200 OKの場合のみ有効と判定
+   - 無効なURLはスキップ
+   ↓
+5. 結果の返却
+   - 有効なフィードのみを返す
+   - 全て無効な場合はデフォルトフィード（BBC, NYT等）を返す
+```
+
+**検証のメリット:**
+- 架空のURLや存在しないフィードを除外
+- ユーザーに確実にアクセス可能なフィードのみ提供
+- AIの幻覚（hallucination）による誤った提案を防止
 
 **ローカル開発のセットアップ:**
 

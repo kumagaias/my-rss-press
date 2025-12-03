@@ -50,10 +50,14 @@ newspapersRouter.post(
 
       // Check if we have enough articles
       if (articles.length < 3) {
+        console.error(`Insufficient articles: ${articles.length} (minimum: 3)`);
         return c.json(
           {
-            error: '記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。',
+            error: articles.length === 0
+              ? 'フィードから記事を取得できませんでした。フィードURLが正しいか、またはフィードが利用可能か確認してください。'
+              : '記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。',
             articleCount: articles.length,
+            suggestion: 'Try using different RSS feeds or check if the feed URLs are accessible.',
           },
           400
         );

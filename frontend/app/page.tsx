@@ -72,7 +72,18 @@ export default function Home() {
       // Navigate to newspaper page
       router.push('/newspaper');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate newspaper');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate newspaper';
+      setError(errorMessage);
+      console.error('Newspaper generation error:', err);
+      
+      // Show user-friendly message for common errors
+      if (errorMessage.includes('記事を取得できませんでした') || errorMessage.includes('記事数が不足')) {
+        setError(
+          locale === 'ja'
+            ? 'フィードから記事を取得できませんでした。別のフィードを試すか、AI提案を使用してください。'
+            : 'Failed to fetch articles from the feeds. Please try different feeds or use AI suggestions.'
+        );
+      }
     } finally {
       setIsGenerating(false);
     }

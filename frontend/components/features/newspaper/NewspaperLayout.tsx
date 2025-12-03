@@ -83,31 +83,33 @@ export function NewspaperLayout({
       </header>
 
       {/* Lead Article (Most Important) */}
-      <article className="grid md:grid-cols-2 gap-8 mb-8 pb-8 border-b-2 border-gray-800">
-        {layout.lead.imageUrl && (
-          <img
-            src={layout.lead.imageUrl}
-            alt={layout.lead.title || 'Article image'}
-            className="w-full h-auto object-cover rounded"
-          />
-        )}
-        <div className={layout.lead.imageUrl ? '' : 'md:col-span-2'}>
-          <h2 className="text-4xl font-bold leading-tight mb-4">
-            {layout.lead.title}
-          </h2>
-          <p className="text-lg leading-relaxed mb-4 text-gray-800">
-            {layout.lead.description}
-          </p>
-          <a
-            href={layout.lead.link}
-            className="text-blue-600 hover:underline inline-flex items-center"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t.readMore} →
-          </a>
-        </div>
-      </article>
+      <a
+        href={layout.lead.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block hover:bg-gray-100 transition-colors cursor-pointer"
+      >
+        <article className="grid md:grid-cols-2 gap-8 mb-8 pb-8 border-b-2 border-gray-800">
+          {layout.lead.imageUrl && (
+            <img
+              src={layout.lead.imageUrl}
+              alt={layout.lead.title || 'Article image'}
+              className="w-full h-auto object-cover rounded"
+            />
+          )}
+          <div className={layout.lead.imageUrl ? '' : 'md:col-span-2'}>
+            <h2 className="text-4xl font-bold leading-tight mb-4">
+              {layout.lead.title}
+            </h2>
+            <p className="text-lg leading-relaxed mb-4 text-gray-800">
+              {layout.lead.description}
+            </p>
+            <span className="text-blue-600 hover:underline inline-flex items-center">
+              {t.readMore} →
+            </span>
+          </div>
+        </article>
+      </a>
 
       {/* Top Stories (3-4 columns based on article count) */}
       {layout.topStories.length > 0 && (
@@ -117,29 +119,32 @@ export function NewspaperLayout({
           }`}
         >
           {layout.topStories.map((article, index) => (
-            <article key={`top-${index}`} className="space-y-2">
-              {article.imageUrl && (
-                <img
-                  src={article.imageUrl}
-                  alt={article.title || 'Article image'}
-                  className="w-full h-48 object-cover rounded"
-                />
-              )}
-              <h3 className="text-2xl font-bold leading-tight">
-                {article.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-800">
-                {article.description}
-              </p>
-              <a
-                href={article.link}
-                className="text-blue-600 hover:underline text-sm inline-flex items-center"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t.readMore} →
-              </a>
-            </article>
+            <a
+              key={`top-${index}`}
+              href={article.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block hover:bg-gray-100 transition-colors cursor-pointer p-2 -m-2 rounded"
+            >
+              <article className="space-y-2">
+                {article.imageUrl && (
+                  <img
+                    src={article.imageUrl}
+                    alt={article.title || 'Article image'}
+                    className="w-full h-48 object-cover rounded"
+                  />
+                )}
+                <h3 className="text-2xl font-bold leading-tight">
+                  {article.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-gray-800">
+                  {article.description}
+                </p>
+                <span className="text-blue-600 hover:underline text-sm inline-flex items-center">
+                  {t.readMore} →
+                </span>
+              </article>
+            </a>
           ))}
         </div>
       )}
@@ -148,25 +153,25 @@ export function NewspaperLayout({
       {layout.remaining.length > 0 && (
         <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
           {layout.remaining.map((article, index) => (
-            <article
+            <a
               key={`remaining-${index}`}
-              className="pb-6 border-b border-gray-300"
+              href={article.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block hover:bg-gray-100 transition-colors cursor-pointer p-2 -m-2 rounded"
             >
-              <h4 className="text-xl font-bold leading-tight mb-2">
-                {article.title}
-              </h4>
-              <p className="text-sm leading-relaxed mb-2 text-gray-800">
-                {article.description}
-              </p>
-              <a
-                href={article.link}
-                className="text-blue-600 hover:underline text-sm inline-flex items-center"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t.readMore} →
-              </a>
-            </article>
+              <article className="pb-6 border-b border-gray-300">
+                <h4 className="text-xl font-bold leading-tight mb-2">
+                  {article.title}
+                </h4>
+                <p className="text-sm leading-relaxed mb-2 text-gray-800">
+                  {article.description}
+                </p>
+                <span className="text-blue-600 hover:underline text-sm inline-flex items-center">
+                  {t.readMore} →
+                </span>
+              </article>
+            </a>
           ))}
         </div>
       )}

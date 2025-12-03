@@ -116,6 +116,30 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex justify-end mb-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setLocale('ja')}
+                className={`px-3 py-1 rounded ${
+                  locale === 'ja'
+                    ? 'bg-sky-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                日本語
+              </button>
+              <button
+                onClick={() => setLocale('en')}
+                className={`px-3 py-1 rounded ${
+                  locale === 'en'
+                    ? 'bg-sky-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                English
+              </button>
+            </div>
+          </div>
           <h1 className="text-4xl font-bold text-center text-gray-900">
             {t.appName}
           </h1>
@@ -125,11 +149,11 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Theme Input & Feed Selection */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-8">
+          {/* Theme Input & Feed Selection */}
+          <div className="space-y-6">
             {/* Theme Input */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold mb-4">{t.themeInputLabel}</h2>
@@ -181,14 +205,12 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right Column: Popular Newspapers */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <PopularNewspapers
-                locale={locale}
-                onNewspaperClick={handleNewspaperClick}
-              />
-            </div>
+          {/* Popular Newspapers */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <PopularNewspapers
+              locale={locale}
+              onNewspaperClick={handleNewspaperClick}
+            />
           </div>
         </div>
       </div>

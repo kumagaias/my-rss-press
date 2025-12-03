@@ -16,6 +16,25 @@ export interface FeedSuggestion {
 }
 
 /**
+ * Validate if a feed URL is accessible
+ */
+async function validateFeedUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      headers: {
+        'User-Agent': 'MyRSSPress/1.0',
+      },
+      signal: AbortSignal.timeout(5000), // 5 second timeout
+    });
+    return response.ok;
+  } catch (error) {
+    console.log(`Feed URL validation failed for ${url}:`, error);
+    return false;
+  }
+}
+
+/**
  * Suggest RSS feeds based on user theme using AWS Bedrock (Claude 3 Haiku)
  * @param theme - User's interest theme
  * @returns Array of feed suggestions
@@ -60,12 +79,29 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
     const response = await bedrockClient.send(command);
     const suggestions = parseAIResponse(response);
 
-    // Cache the result in local development
-    if (config.isLocal && config.enableCache) {
-      cache.set(theme, suggestions);
+    // Validate feed URLs
+    const validatedSuggestions: FeedSuggestion[] = [];
+    for (const suggestion of suggestions) {
+      const isValid = await validateFeedUrl(suggestion.url);
+      if (isValid) {
+        validatedSuggestions.push(suggestion);
+      } else {
+        console.log(`Skipping invalid feed URL: ${suggestion.url}`);
+      }
     }
 
-    return suggestions;
+    // If no valid feeds found, return default suggestions
+    if (validatedSuggestions.length === 0) {
+      console.log('No valid feeds found, using default suggestions');
+      return getDefaultFeedSuggestions(theme);
+    }
+
+    // Cache the result in local development
+    if (config.isLocal && config.enableCache) {
+      cache.set(theme, validatedSuggestions);
+    }
+
+    return validatedSuggestions;
   } catch (error) {
     console.error('Bedrock API error:', error);
     if (error instanceof Error) {
@@ -83,8 +119,14 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
 function buildPrompt(theme: string): string {
   return `ユーザーが「${theme}」に興味があります。関連するRSSフィードを3つ提案してください。
 
+重要な制約：
+1. 実際に存在し、現在もアクティブなRSSフィードのURLのみを提案してください
+2. 架空のURLや存在しないフィードは絶対に提案しないでください
+3. 大手メディアや公式サイトの確実にアクセス可能なフィードを優先してください
+4. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml などで終わる正しい形式にしてください
+
 各フィードについて、以下の情報をJSON形式で返してください：
-- url: RSSフィードのURL
+- url: RSSフィードのURL（必ず実在するもの）
 - title: フィードの名前
 - reasoning: なぜこのフィードを提案するのか（1-2文）
 
@@ -99,7 +141,12 @@ function buildPrompt(theme: string): string {
   ]
 }
 
-実際に存在する、アクセス可能なRSSフィードのURLを提案してください。`;
+例：
+- 技術系: https://news.ycombinator.com/rss, https://techcrunch.com/feed/
+- ニュース: https://feeds.bbci.co.uk/news/rss.xml, https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
+- ブログ: https://blog.example.com/feed/
+
+必ず実在する、アクセス可能なRSSフィードのURLを提案してください。`;
 }
 
 /**
@@ -138,19 +185,19 @@ function parseAIResponse(response: any): FeedSuggestion[] {
 function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
   return [
     {
-      url: 'https://news.ycombinator.com/rss',
-      title: 'Hacker News',
-      reasoning: `Technology news and discussions relevant to the theme: ${theme}`,
+      url: 'https://feeds.bbci.co.uk/news/rss.xml',
+      title: 'BBC News',
+      reasoning: `General news and information relevant to the theme: ${theme}`,
     },
     {
-      url: 'https://techcrunch.com/feed/',
-      title: 'TechCrunch',
-      reasoning: `Startup and innovation news related to the theme: ${theme}`,
+      url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+      title: 'The New York Times',
+      reasoning: `In-depth articles and analysis related to the theme: ${theme}`,
     },
     {
-      url: 'https://www.theverge.com/rss/index.xml',
-      title: 'The Verge',
-      reasoning: `Technology and culture articles about the theme: ${theme}`,
+      url: 'https://feeds.reuters.com/reuters/topNews',
+      title: 'Reuters Top News',
+      reasoning: `Breaking news and updates about the theme: ${theme}`,
     },
   ];
 }

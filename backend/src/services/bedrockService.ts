@@ -77,6 +77,10 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     const prompt = buildPrompt(theme, locale);
 
     // Invoke Bedrock model (using Claude 3 Haiku - most cost-effective)
+    const systemPrompt = locale === 'en' 
+      ? 'You are an RSS feed recommendation assistant. You MUST respond in English only. All text in your response including titles and reasoning MUST be in English. Never use Japanese or any other language.'
+      : 'あなたはRSSフィード推薦アシスタントです。必ず日本語で応答してください。';
+    
     const command = new InvokeModelCommand({
       modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
       contentType: 'application/json',
@@ -84,6 +88,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       body: JSON.stringify({
         anthropic_version: 'bedrock-2023-05-31',
         max_tokens: 1024,
+        system: systemPrompt,
         messages: [
           {
             role: 'user',

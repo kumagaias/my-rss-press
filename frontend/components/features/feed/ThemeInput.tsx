@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useTranslations } from '@/lib/i18n';
@@ -9,6 +9,7 @@ interface ThemeInputProps {
   onSubmit: (theme: string) => void;
   isLoading: boolean;
   locale: 'en' | 'ja';
+  initialTheme?: string;
 }
 
 /**
@@ -17,10 +18,17 @@ interface ThemeInputProps {
  * Allows users to input their interest theme for RSS feed suggestions.
  * Validates input to ensure it's not empty or whitespace-only.
  */
-export function ThemeInput({ onSubmit, isLoading, locale }: ThemeInputProps) {
-  const [theme, setTheme] = useState('');
+export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '' }: ThemeInputProps) {
+  const [theme, setTheme] = useState(initialTheme);
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations(locale);
+
+  // Update theme when initialTheme changes (from keyword click)
+  useEffect(() => {
+    if (initialTheme) {
+      setTheme(initialTheme);
+    }
+  }, [initialTheme]);
 
   /**
    * Validate theme input

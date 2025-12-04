@@ -6,6 +6,8 @@ import { ThemeInput } from '@/components/features/feed/ThemeInput';
 import { FeedSelector } from '@/components/features/feed/FeedSelector';
 import { PopularNewspapers } from '@/components/features/home/PopularNewspapers';
 import { TopicMarquee } from '@/components/ui/TopicMarquee';
+import { LoadingAnimation } from '@/components/ui/LoadingAnimation';
+import { SuccessAnimation } from '@/components/ui/SuccessAnimation';
 import { detectLocale, useTranslations } from '@/lib/i18n';
 import { suggestFeeds, generateNewspaper } from '@/lib/api';
 import type { Locale, FeedSuggestion } from '@/types';
@@ -19,6 +21,7 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<FeedSuggestion[]>([]);
   const [selectedFeeds, setSelectedFeeds] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +33,7 @@ export default function Home() {
   const handleThemeSubmit = async (themeValue: string) => {
     setTheme(themeValue);
     setError(null);
+    setShowSuccessAnimation(false);
     setIsLoadingSuggestions(true);
 
     try {
@@ -39,6 +43,9 @@ export default function Home() {
       // Auto-select all suggested feeds
       const feedUrls = feedSuggestions.map(s => s.url);
       setSelectedFeeds(feedUrls);
+      
+      // Show success animation
+      setShowSuccessAnimation(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to suggest feeds');
     } finally {
@@ -47,8 +54,17 @@ export default function Home() {
   };
 
   const handleKeywordClick = (keyword: string) => {
-    // Set theme and automatically trigger feed suggestions
+    // Set theme in input field and automatically trigger feed suggestions
+    setTheme(keyword);
     handleThemeSubmit(keyword);
+  };
+
+  const handleScrollToGenerate = () => {
+    // Scroll to the FeedSelector section
+    const feedSelectorElement = document.getElementById('feed-selector');
+    if (feedSelectorElement) {
+      feedSelectorElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const handleGenerateNewspaper = async () => {
@@ -154,12 +170,21 @@ export default function Home() {
                 onSubmit={handleThemeSubmit}
                 isLoading={isLoadingSuggestions}
                 locale={locale}
+                initialTheme={theme}
               />
+
+              {/* Loading Animation */}
+              {isLoadingSuggestions && <LoadingAnimation locale={locale} />}
+
+              {/* Success Animation */}
+              {showSuccessAnimation && !isLoadingSuggestions && suggestions.length > 0 && (
+                <SuccessAnimation onScrollToGenerate={handleScrollToGenerate} locale={locale} />
+              )}
             </div>
 
             {/* Feed Selection */}
             {suggestions.length > 0 && (
-              <div className="bg-white border-4 border-black shadow-lg p-8">
+              <div id="feed-selector" className="bg-white border-4 border-black shadow-lg p-8">
                 <FeedSelector
                   suggestions={suggestions}
                   selectedFeeds={selectedFeeds}

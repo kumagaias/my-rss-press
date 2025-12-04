@@ -352,7 +352,243 @@
 5. ブックマーク状態が変更されたとき、MyRSSPressシステムは即座にUIを更新しなければならない
 6. ユーザーがブックマーク一覧ページにアクセスしたとき、MyRSSPressシステムは保存されたすべての記事URLを取得して表示しなければならない
 
-### 要件14: プロパティベーステストへの移行
+### 要件14: エラーコードの標準化
+
+**ユーザーストーリー:** 開発者として、APIエラーを標準化されたエラーコードで管理したい。そうすることで、フロントエンドで適切な多言語エラーメッセージを表示でき、デバッグも容易になる。
+
+#### 背景
+
+現在、バックエンドAPIは日本語のエラーメッセージを直接返しています：
+
+```json
+{
+  "error": "記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。",
+  "articleCount": 0
+}
+```
+
+これには以下の問題があります：
+1. 多言語対応が困難（エラーメッセージがハードコード）
+2. フロントエンドでエラーの種類を判別できない
+3. デバッグ時にエラーの原因が分かりにくい
+
+#### 受入基準
+
+**バックエンド:**
+
+1. APIエラーを返すとき、MyRSSPressシステムは以下の形式を使用しなければならない：
+```json
+{
+  "error": "Developer-friendly error message in English",
+  "errorCode": "ERROR_CODE_CONSTANT",
+  "details": {
+    "additionalInfo": "value"
+  }
+}
+```
+
+2. エラーコードを定義するとき、MyRSSPressシステムは以下の命名規則に従わなければならない：
+   - 大文字のスネークケース（例：`GENERATE_NEWSPAPER_NO_ARTICLES`）
+   - 機能名をプレフィックスとして使用（例：`GENERATE_NEWSPAPER_*`、`SUGGEST_FEEDS_*`）
+   - 説明的で明確な名前
+
+3. エラーコードを管理するとき、MyRSSPressシステムは`backend/src/constants/errorCodes.ts`ファイルに集約しなければならない
+
+4. エラーコードファイルを作成するとき、MyRSSPressシステムは以下の構造を使用しなければならない：
+```typescript
+export const ErrorCodes = {
+  // Newspaper generation errors
+  GENERATE_NEWSPAPER_NO_ARTICLES: 'GENERATE_NEWSPAPER_NO_ARTICLES',
+  GENERATE_NEWSPAPER_INSUFFICIENT_ARTICLES: 'GENERATE_NEWSPAPER_INSUFFICIENT_ARTICLES',
+  GENERATE_NEWSPAPER_INVALID_FEED_URL: 'GENERATE_NEWSPAPER_INVALID_FEED_URL',
+  GENERATE_NEWSPAPER_FEED_FETCH_FAILED: 'GENERATE_NEWSPAPER_FEED_FETCH_FAILED',
+  
+  // Feed suggestion errors
+  SUGGEST_FEEDS_INVALID_THEME: 'SUGGEST_FEEDS_INVALID_THEME',
+  SUGGEST_FEEDS_BEDROCK_ERROR: 'SUGGEST_FEEDS_BEDROCK_ERROR',
+  SUGGEST_FEEDS_NO_SUGGESTIONS: 'SUGGEST_FEEDS_NO_SUGGESTIONS',
+  
+  // Newspaper save errors
+  SAVE_NEWSPAPER_INVALID_NAME: 'SAVE_NEWSPAPER_INVALID_NAME',
+  SAVE_NEWSPAPER_NO_ARTICLES: 'SAVE_NEWSPAPER_NO_ARTICLES',
+  
+  // Newspaper retrieval errors
+  GET_NEWSPAPER_NOT_FOUND: 'GET_NEWSPAPER_NOT_FOUND',
+  GET_NEWSPAPER_ACCESS_DENIED: 'GET_NEWSPAPER_ACCESS_DENIED',
+  
+  // Validation errors
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  
+  // Generic errors
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
+} as const;
+
+export type ErrorCode = typeof ErrorCodes[keyof typeof ErrorCodes];
+```
+
+5. エラーレスポンスを返すとき、MyRSSPressシステムは以下の例に従わなければならない：
+```typescript
+// 例1: 記事が取得できない
+return c.json(
+  {
+    error: 'No articles could be fetched from the provided feeds',
+    errorCode: ErrorCodes.GENERATE_NEWSPAPER_NO_ARTICLES,
+    details: {
+      articleCount: 0,
+      feedCount: feedUrls.length,
+    },
+  },
+  400
+);
+
+// 例2: 記事数が不足
+return c.json(
+  {
+    error: 'Insufficient articles to generate newspaper (minimum: 3)',
+    errorCode: ErrorCodes.GENERATE_NEWSPAPER_INSUFFICIENT_ARTICLES,
+    details: {
+      articleCount: articles.length,
+      minimumRequired: 3,
+    },
+  },
+  400
+);
+```
+
+**フロントエンド:**
+
+6. エラーメッセージを定義するとき、MyRSSPressシステムは`frontend/lib/i18n.ts`に追加しなければならない
+
+7. エラーメッセージを追加するとき、MyRSSPressシステムは以下の構造を使用しなければならない：
+```typescript
+export const translations = {
+  en: {
+    // ... existing translations
+    
+    // Error messages
+    errors: {
+      GENERATE_NEWSPAPER_NO_ARTICLES: 'No articles could be fetched from the feeds. Please check the feed URLs or try different feeds.',
+      GENERATE_NEWSPAPER_INSUFFICIENT_ARTICLES: 'Not enough articles to generate a newspaper. Please add more feeds or try again later.',
+      GENERATE_NEWSPAPER_INVALID_FEED_URL: 'One or more feed URLs are invalid. Please check and try again.',
+      GENERATE_NEWSPAPER_FEED_FETCH_FAILED: 'Failed to fetch articles from one or more feeds. Please try again later.',
+      SUGGEST_FEEDS_INVALID_THEME: 'Please enter a valid theme.',
+      SUGGEST_FEEDS_BEDROCK_ERROR: 'AI service is temporarily unavailable. Please try again later.',
+      SUGGEST_FEEDS_NO_SUGGESTIONS: 'No feed suggestions found for this theme. Please try a different theme.',
+      SAVE_NEWSPAPER_INVALID_NAME: 'Please enter a valid newspaper name.',
+      SAVE_NEWSPAPER_NO_ARTICLES: 'Cannot save a newspaper without articles.',
+      GET_NEWSPAPER_NOT_FOUND: 'Newspaper not found.',
+      GET_NEWSPAPER_ACCESS_DENIED: 'You do not have permission to view this newspaper.',
+      VALIDATION_ERROR: 'Invalid input. Please check your data and try again.',
+      INTERNAL_SERVER_ERROR: 'An unexpected error occurred. Please try again later.',
+      RATE_LIMIT_EXCEEDED: 'Too many requests. Please wait a moment and try again.',
+      UNKNOWN_ERROR: 'An error occurred. Please try again.',
+    },
+  },
+  ja: {
+    // ... existing translations
+    
+    // エラーメッセージ
+    errors: {
+      GENERATE_NEWSPAPER_NO_ARTICLES: 'フィードから記事を取得できませんでした。フィードURLを確認するか、別のフィードをお試しください。',
+      GENERATE_NEWSPAPER_INSUFFICIENT_ARTICLES: '新聞を生成するのに十分な記事がありません。フィードを追加するか、後でもう一度お試しください。',
+      GENERATE_NEWSPAPER_INVALID_FEED_URL: '1つ以上のフィードURLが無効です。確認してもう一度お試しください。',
+      GENERATE_NEWSPAPER_FEED_FETCH_FAILED: '1つ以上のフィードから記事を取得できませんでした。後でもう一度お試しください。',
+      SUGGEST_FEEDS_INVALID_THEME: '有効なテーマを入力してください。',
+      SUGGEST_FEEDS_BEDROCK_ERROR: 'AIサービスが一時的に利用できません。後でもう一度お試しください。',
+      SUGGEST_FEEDS_NO_SUGGESTIONS: 'このテーマのフィード提案が見つかりませんでした。別のテーマをお試しください。',
+      SAVE_NEWSPAPER_INVALID_NAME: '有効な新聞名を入力してください。',
+      SAVE_NEWSPAPER_NO_ARTICLES: '記事のない新聞は保存できません。',
+      GET_NEWSPAPER_NOT_FOUND: '新聞が見つかりませんでした。',
+      GET_NEWSPAPER_ACCESS_DENIED: 'この新聞を閲覧する権限がありません。',
+      VALIDATION_ERROR: '入力が無効です。データを確認してもう一度お試しください。',
+      INTERNAL_SERVER_ERROR: '予期しないエラーが発生しました。後でもう一度お試しください。',
+      RATE_LIMIT_EXCEEDED: 'リクエストが多すぎます。しばらく待ってからもう一度お試しください。',
+      UNKNOWN_ERROR: 'エラーが発生しました。もう一度お試しください。',
+    },
+  },
+};
+```
+
+8. APIエラーを処理するとき、MyRSSPressシステムは以下のヘルパー関数を使用しなければならない：
+```typescript
+// frontend/lib/errorHandler.ts
+import { translations, Locale } from './i18n';
+
+export interface APIError {
+  error: string;
+  errorCode?: string;
+  details?: Record<string, any>;
+}
+
+export function getErrorMessage(error: APIError, locale: Locale): string {
+  const t = translations[locale];
+  
+  // If errorCode exists and has a translation, use it
+  if (error.errorCode && error.errorCode in t.errors) {
+    return t.errors[error.errorCode as keyof typeof t.errors];
+  }
+  
+  // Fallback to generic error message
+  return t.errors.UNKNOWN_ERROR;
+}
+```
+
+9. APIを呼び出すとき、MyRSSPressシステムは以下のパターンを使用しなければならない：
+```typescript
+// frontend/lib/api.ts
+import { getErrorMessage } from './errorHandler';
+
+export async function generateNewspaper(
+  feedUrls: string[],
+  theme: string,
+  locale: Locale = 'en'
+): Promise<Article[]> {
+  const response = await fetch(`${API_BASE_URL}/api/generate-newspaper`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ feedUrls, theme }),
+  });
+
+  if (!response.ok) {
+    const errorData: APIError = await response.json();
+    const userMessage = getErrorMessage(errorData, locale);
+    throw new Error(userMessage);
+  }
+
+  const data = await response.json();
+  return data.articles || [];
+}
+```
+
+**ドキュメント:**
+
+10. エラーコードを追加するとき、MyRSSPressシステムは`docs/API.md`にエラーコード一覧を記載しなければならない
+
+11. エラーコードドキュメントを作成するとき、MyRSSPressシステムは以下の情報を含めなければならない：
+    - エラーコード
+    - HTTPステータスコード
+    - 説明
+    - 発生条件
+    - 対処方法
+
+**移行戦略:**
+
+12. 既存のエラーレスポンスを移行するとき、MyRSSPressシステムは以下の順序で実行しなければならない：
+    - ステップ1: `errorCodes.ts`を作成してエラーコードを定義
+    - ステップ2: バックエンドのエラーレスポンスを更新
+    - ステップ3: フロントエンドのi18nにエラーメッセージを追加
+    - ステップ4: フロントエンドのエラーハンドリングを更新
+    - ステップ5: 既存のハードコードされたエラーメッセージを削除
+
+13. 移行を完了するとき、MyRSSPressシステムは以下のファイルを更新しなければならない：
+    - `backend/src/routes/newspapers.ts`
+    - `backend/src/routes/feeds.ts`
+    - `frontend/lib/api.ts`
+    - `frontend/app/page.tsx`
+    - `frontend/app/newspaper/page.tsx`
+
+### 要件15: プロパティベーステストへの移行
 
 **ユーザーストーリー:** 開発者として、例ベースのテストをプロパティベーステストに書き換えたい。そうすることで、より広範囲の入力パターンをテストし、エッジケースを自動的に発見できる。
 

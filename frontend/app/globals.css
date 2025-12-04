@@ -49,4 +49,53 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari, Opera */
   }
+  
+  /* Wave animation for loading */
+  @keyframes wave {
+    0%, 100% {
+      transform: scaleY(0.5);
+    }
+    50% {
+      transform: scaleY(1.5);
+    }
+  }
+  
+  .animate-wave {
+    animation: wave 1s ease-in-out infinite;
+  }
+  
+  /* Scale in animation for success checkmark circle */
+  @keyframes scale-in {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.5s ease-out forwards;
+  }
+  
+  /* Checkmark path animation */
+  @keyframes checkmark {
+    0% {
+      stroke-dashoffset: 50;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+  
+  .animate-checkmark .checkmark-path {
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: checkmark 0.5s ease-out 0.3s forwards;
+  }
 }

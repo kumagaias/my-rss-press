@@ -78,7 +78,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
 
     // Invoke Bedrock model (using Claude 3 Haiku - most cost-effective)
     const systemPrompt = locale === 'en' 
-      ? 'You are an RSS feed recommendation assistant. You MUST respond in English only. All text in your response including titles and reasoning MUST be in English. Never use Japanese or any other language.'
+      ? 'You are an RSS feed recommendation assistant. You MUST respond ONLY in English. CRITICAL: All text in your response including feed titles and reasoning MUST be in English. NEVER use Japanese, Chinese, or any other language. If you use any non-English text, your response will be rejected.'
       : 'あなたはRSSフィード推薦アシスタントです。必ず日本語で応答してください。';
     
     const command = new InvokeModelCommand({
@@ -181,9 +181,14 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 
 必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。`;
   } else {
-    return `The user is interested in "${theme}". Please suggest 15 related RSS feeds in English.
+    return `The user is interested in "${theme}". Please suggest 15 related RSS feeds.
 
-IMPORTANT: You MUST respond in English. All titles and reasoning MUST be in English.
+CRITICAL LANGUAGE REQUIREMENT: 
+- You MUST write ALL text in English
+- Feed titles MUST be in English
+- Reasoning MUST be in English  
+- DO NOT use Japanese characters (日本語) or any other language
+- If the feed is from a non-English source, translate the title to English
 
 Important constraints:
 1. Only suggest RSS feed URLs that actually exist and are currently active
@@ -198,23 +203,24 @@ For each feed, provide the following information in JSON format:
 - title: Feed name (in English - DO NOT use Japanese)
 - reasoning: Why you recommend this feed (1-2 sentences in English - DO NOT use Japanese)
 
-Response format:
+Response format (ALL TEXT MUST BE IN ENGLISH):
 {
   "feeds": [
     {
       "url": "https://example.com/feed",
-      "title": "Example Feed",
-      "reasoning": "This feed provides the latest information about ${theme} in English"
+      "title": "Example Feed (IN ENGLISH)",
+      "reasoning": "This feed provides the latest information about ${theme} (IN ENGLISH)"
     }
   ]
 }
 
-Examples of English feeds:
-- Technology: https://news.ycombinator.com/rss, https://techcrunch.com/feed/
-- News: https://feeds.bbci.co.uk/news/rss.xml, https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
-- Blogs: https://blog.example.com/feed/
+Examples of CORRECT English responses:
+- Technology: 
+  {"url": "https://techcrunch.com/feed/", "title": "TechCrunch", "reasoning": "Leading technology news and startup coverage"}
+- News: 
+  {"url": "https://feeds.bbci.co.uk/news/rss.xml", "title": "BBC News", "reasoning": "Comprehensive international news coverage"}
 
-REMEMBER: All text in your response MUST be in English. Do NOT use Japanese.`;
+FINAL REMINDER: Write EVERYTHING in English. No Japanese (日本語), no Chinese, no other languages. Only English alphabet and words.`;
   }
 }
 

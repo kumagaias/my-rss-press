@@ -24,6 +24,10 @@ myrsspress/
 │   │   └── structure.md         # プロジェクト構造（このファイル）
 │   └── hooks/            # エージェントフック
 ├── scripts/              # ユーティリティスクリプト
+│   ├── verify-production.sh           # 本番環境検証スクリプト
+│   ├── test-production-functionality.sh  # 本番機能テストスクリプト
+│   ├── npm-audit-check.sh             # npm脆弱性チェック
+│   └── security-check.sh              # セキュリティチェック
 ├── Makefile              # 開発タスク
 └── README.md             # プロジェクト概要
 ```

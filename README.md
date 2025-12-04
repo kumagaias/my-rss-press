@@ -138,7 +138,16 @@ make security-check
 
 ### Deployment
 
-#### Infrastructure Setup
+### Production Environment
+
+The application is deployed and accessible at:
+- **Frontend**: https://my-rss-press.com
+- **API**: https://api.my-rss-press.com
+
+### Infrastructure Setup
+
+Infrastructure is managed with Terraform and deployed to AWS:
+
 ```bash
 cd infra/environments/production
 terraform init
@@ -146,16 +155,53 @@ terraform plan
 terraform apply
 ```
 
-#### Backend Deployment
-Push to main branch triggers automatic deployment via GitHub Actions:
+**Deployed Resources:**
+- AWS Amplify Hosting (Frontend)
+- AWS Lambda + API Gateway (Backend)
+- Amazon DynamoDB (Database)
+- AWS Bedrock (AI Services)
+- Route53 (DNS)
+- CloudFront (CDN)
+- ACM (SSL Certificates)
+
+### Backend Deployment
+
+Backend is automatically deployed via GitHub Actions when pushing to main:
+
 ```bash
 git push origin main
 ```
 
-#### Frontend Deployment
-Amplify automatically deploys on push to main:
+The deployment process:
+1. Runs all tests
+2. Builds Docker image
+3. Pushes to Amazon ECR
+4. Updates Lambda function
+
+### Frontend Deployment
+
+Frontend is automatically deployed via AWS Amplify when pushing to main:
+
 ```bash
 git push origin main
+```
+
+Amplify automatically:
+1. Detects changes
+2. Builds Next.js application
+3. Deploys to CloudFront CDN
+4. Updates custom domain
+
+### Verification
+
+Verify production deployment:
+
+```bash
+# Check all services
+./scripts/verify-production.sh
+
+# Test functionality
+./scripts/test-production-functionality.sh
 ```
 
 ## Architecture
@@ -192,6 +238,51 @@ BEDROCK_REGION=ap-northeast-1
 DYNAMODB_TABLE=newspapers-production
 NODE_ENV=development
 ```
+
+## Monitoring & Troubleshooting
+
+### CloudWatch Logs
+
+View application logs:
+
+```bash
+# Backend Lambda logs
+aws logs tail /aws/lambda/myrsspress-production-api --follow
+
+# Amplify build logs
+# View in AWS Console: Amplify > MyRSSPress > Build logs
+```
+
+### Common Issues
+
+**Issue: API returns 502 Bad Gateway**
+- Check Lambda function logs in CloudWatch
+- Verify Lambda has correct environment variables
+- Check IAM permissions for Bedrock and DynamoDB
+
+**Issue: Frontend shows old version**
+- Clear CloudFront cache in AWS Console
+- Wait for Amplify deployment to complete
+- Check Amplify build logs for errors
+
+**Issue: Slow newspaper generation**
+- Check Bedrock API latency in CloudWatch
+- Verify RSS feeds are accessible
+- Review Lambda timeout settings (current: 30s)
+
+### Performance Metrics
+
+Target performance:
+- Frontend load time: < 2 seconds
+- API health check: < 1 second
+- Newspaper generation: < 5 seconds (target), < 10 seconds (acceptable)
+
+### Cost Monitoring
+
+Monitor AWS costs:
+- CloudWatch dashboard for service usage
+- AWS Cost Explorer for detailed breakdown
+- Set up billing alerts for unexpected charges
 
 ## Contributing
 

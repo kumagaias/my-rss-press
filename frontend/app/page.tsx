@@ -121,7 +121,7 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white border-b-4 border-black">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-center items-center relative">
             <div className="border-l-4 border-r-4 border-black px-4 py-2">
               <h1 className="text-4xl font-serif font-black text-black tracking-tight">
                 {t.appName}
@@ -130,7 +130,7 @@ export default function Home() {
                 {t.appTagline}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="absolute right-0 flex gap-2">
               <button
                 onClick={() => setLocale('ja')}
                 className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${

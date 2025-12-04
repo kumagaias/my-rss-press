@@ -33,7 +33,7 @@ export async function interceptApiCalls(page: Page, urlPattern: string | RegExp)
     calls.push({
       url: request.url(),
       method: request.method(),
-      body: request.postDataJSON(),
+      body: request.postDataJSON() ?? null,
     });
     await route.continue();
   });

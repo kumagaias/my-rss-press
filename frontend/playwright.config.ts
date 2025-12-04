@@ -7,6 +7,10 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e/specs',
   
+  /* Global setup and teardown hooks */
+  globalSetup: require.resolve('./tests/e2e/setup/global-setup'),
+  globalTeardown: require.resolve('./tests/e2e/setup/global-teardown'),
+  
   /* Run tests in files in parallel */
   fullyParallel: true,
   

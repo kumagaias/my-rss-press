@@ -14,13 +14,23 @@ const mockRouter = {
   prefetch: vi.fn(),
 };
 
+// Mock useSearchParams - can be overridden in individual tests
+let mockNewspaperId: string | null = null;
+
 vi.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
+  useSearchParams: () => ({
+    get: (key: string) => {
+      if (key === 'id') return mockNewspaperId;
+      return null;
+    },
+  }),
 }));
 
 // Mock API
 vi.mock('@/lib/api', () => ({
   saveNewspaper: vi.fn(),
+  getNewspaper: vi.fn(),
 }));
 
 // Mock sessionStorage
@@ -53,11 +63,24 @@ const mockArticles = [
 describe('NewspaperPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockNewspaperId = null; // Reset to no newspaper ID by default
     mockSessionStorage.getItem.mockImplementation((key) => {
       if (key === 'newspaperArticles') return JSON.stringify(mockArticles);
       if (key === 'newspaperTheme') return 'Technology';
       if (key === 'newspaperFeeds') return JSON.stringify(['https://example.com/feed']);
       return null;
+    });
+    
+    // Mock getNewspaper to return newspaper data (only called when newspaperId exists)
+    (api.getNewspaper as any).mockResolvedValue({
+      newspaperId: 'test-newspaper-id',
+      newspaperName: 'Test Newspaper',
+      userName: 'Test User',
+      articles: mockArticles,
+      feedUrls: ['https://example.com/feed'],
+      createdAt: '2025-12-01T10:00:00Z',
+      viewCount: 5,
+      isPublic: true,
     });
   });
 
@@ -78,13 +101,14 @@ describe('NewspaperPage', () => {
   it('renders save button when not saved', async () => {
     render(<NewspaperPage />);
 
-    expect(await screen.findByText('Save Newspaper', {}, { timeout: 5000 })).toBeInTheDocument();
+    // Button text comes from i18n
+    expect(await screen.findByRole('button', { name: /save/i }, { timeout: 5000 })).toBeInTheDocument();
   });
 
   it('opens settings modal when save button is clicked', async () => {
     render(<NewspaperPage />);
 
-    const saveButton = await screen.findByText('Save Newspaper', {}, { timeout: 3000 });
+    const saveButton = await screen.findByRole('button', { name: /save/i }, { timeout: 3000 });
     fireEvent.click(saveButton);
 
     await waitFor(() => {
@@ -100,7 +124,7 @@ describe('NewspaperPage', () => {
 
     render(<NewspaperPage />);
 
-    const saveButton = await screen.findByText('Save Newspaper', {}, { timeout: 3000 });
+    const saveButton = await screen.findByRole('button', { name: /save/i }, { timeout: 3000 });
     fireEvent.click(saveButton);
 
     await screen.findByText('Newspaper Settings', {}, { timeout: 3000 });
@@ -130,6 +154,7 @@ describe('NewspaperPage', () => {
 
   it('redirects to home if no articles in session', () => {
     mockSessionStorage.getItem.mockReturnValue(null);
+    (api.getNewspaper as any).mockResolvedValue(null);
 
     render(<NewspaperPage />);
 
@@ -141,7 +166,7 @@ describe('NewspaperPage', () => {
 
     render(<NewspaperPage />);
 
-    const saveButton = await screen.findByText('Save Newspaper', {}, { timeout: 3000 });
+    const saveButton = await screen.findByRole('button', { name: /save/i }, { timeout: 3000 });
     fireEvent.click(saveButton);
 
     await screen.findByText('Newspaper Settings', {}, { timeout: 3000 });

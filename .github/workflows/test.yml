@@ -98,9 +98,11 @@ jobs:
       - name: Check frontend vulnerabilities
         working-directory: frontend
         run: |
+          npm ci
           npm audit --audit-level=moderate || exit 1
       
       - name: Check backend vulnerabilities
         working-directory: backend
         run: |
+          npm ci
           npm audit --audit-level=moderate || exit 1

@@ -66,10 +66,17 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     }
   }
 
-  // Use mock mode if enabled (for offline development)
+  // Use mock mode if enabled (for offline development or testing)
   if (config.useMockBedrock) {
     console.log('Using mock Bedrock response for theme:', theme);
-    return getMockFeedSuggestions(theme);
+    const mockSuggestions = getMockFeedSuggestions(theme);
+    
+    // Cache the mock response
+    if (config.isLocal && config.enableCache) {
+      cache.set(cacheKey, mockSuggestions);
+    }
+    
+    return mockSuggestions;
   }
 
   try {

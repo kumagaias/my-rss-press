@@ -63,7 +63,7 @@ describe('Card', () => {
   it('applies hover effect when hover prop is true', () => {
     const { container } = render(<Card hover>Content</Card>);
     const card = container.firstChild as HTMLElement;
-    expect(card).toHaveClass('hover:shadow-xl');
+    expect(card).toHaveClass('hover:shadow-2xl', 'hover:border-4');
   });
 
   it('applies custom className', () => {
@@ -101,7 +101,7 @@ describe('CardTitle', () => {
   it('applies title styling', () => {
     render(<CardTitle>Title</CardTitle>);
     const title = screen.getByText('Title');
-    expect(title).toHaveClass('text-xl', 'font-bold', 'text-gray-900');
+    expect(title).toHaveClass('text-xl', 'font-serif', 'font-black', 'text-black');
   });
 });
 
@@ -121,7 +121,7 @@ describe('CardFooter', () => {
   it('applies border top', () => {
     const { container } = render(<CardFooter>Footer</CardFooter>);
     const footer = container.firstChild as HTMLElement;
-    expect(footer).toHaveClass('border-t', 'border-gray-200');
+    expect(footer).toHaveClass('border-t-2', 'border-black');
   });
 });
 

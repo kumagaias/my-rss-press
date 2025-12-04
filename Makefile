@@ -61,6 +61,11 @@ test-unit: ## Run unit tests only
 	cd backend && npm test
 	@echo "✓ Unit tests complete"
 
+test-e2e: ## Run E2E tests only
+	@echo "Running E2E tests..."
+	cd frontend && npm run test:e2e
+	@echo "✓ E2E tests complete"
+
 test-lint: ## Run ESLint checks
 	@echo "Running frontend ESLint..."
 	cd frontend && npm run lint
@@ -82,5 +87,5 @@ test-vulnerabilities: ## Check npm vulnerabilities (medium+ severity)
 
 audit: test-vulnerabilities ## Alias for test-vulnerabilities
 
-test: test-unit test-lint test-security test-vulnerabilities ## Run all tests (unit + lint + security + vulnerabilities)
+test: test-unit test-e2e test-lint test-security test-vulnerabilities ## Run all tests (unit + e2e + lint + security + vulnerabilities)
 	@echo "✓ All tests complete"

@@ -19,43 +19,43 @@ describe('Button', () => {
   it('renders primary variant by default', () => {
     render(<Button>Primary</Button>);
     const button = screen.getByText('Primary');
-    expect(button).toHaveClass('bg-primary-500');
+    expect(button).toHaveClass('bg-black', 'text-white');
   });
 
   it('renders secondary variant', () => {
     render(<Button variant="secondary">Secondary</Button>);
     const button = screen.getByText('Secondary');
-    expect(button).toHaveClass('bg-gray-200');
+    expect(button).toHaveClass('bg-white', 'text-black');
   });
 
   it('renders outline variant', () => {
     render(<Button variant="outline">Outline</Button>);
     const button = screen.getByText('Outline');
-    expect(button).toHaveClass('border-2', 'border-primary-500');
+    expect(button).toHaveClass('border-2', 'border-black', 'bg-white');
   });
 
   it('renders ghost variant', () => {
     render(<Button variant="ghost">Ghost</Button>);
     const button = screen.getByText('Ghost');
-    expect(button).toHaveClass('text-gray-700');
+    expect(button).toHaveClass('bg-transparent', 'text-black', 'border-transparent');
   });
 
   it('renders small size', () => {
     render(<Button size="sm">Small</Button>);
     const button = screen.getByText('Small');
-    expect(button).toHaveClass('px-3', 'py-1.5', 'text-sm');
+    expect(button).toHaveClass('px-4', 'py-2', 'text-sm');
   });
 
   it('renders medium size by default', () => {
     render(<Button>Medium</Button>);
     const button = screen.getByText('Medium');
-    expect(button).toHaveClass('px-4', 'py-2', 'text-base');
+    expect(button).toHaveClass('px-6', 'py-3', 'text-base');
   });
 
   it('renders large size', () => {
     render(<Button size="lg">Large</Button>);
     const button = screen.getByText('Large');
-    expect(button).toHaveClass('px-6', 'py-3', 'text-lg');
+    expect(button).toHaveClass('px-8', 'py-4', 'text-lg');
   });
 
   it('can be disabled', () => {

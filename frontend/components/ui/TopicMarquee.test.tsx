@@ -34,7 +34,7 @@ describe('TopicMarquee', () => {
     );
 
     // Check for marquee animation class
-    const marqueeElement = container.querySelector('.animate-marquee-ltr');
+    const marqueeElement = container.querySelector('.animate-marquee-slow');
     expect(marqueeElement).toBeInTheDocument();
   });
 

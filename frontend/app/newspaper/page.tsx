@@ -30,11 +30,17 @@ function NewspaperPageInner() {
   const [isRegeneratingArticles, setIsRegeneratingArticles] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Save locale to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('locale', locale);
+  }, [locale]);
+
   // Load data from sessionStorage or API
   useEffect(() => {
-    // Try to get saved locale from sessionStorage, otherwise detect from browser
-    const savedLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
-    const detectedLocale = savedLocale || detectLocale();
+    // Try to get saved locale from localStorage first, then sessionStorage, then detect
+    const localStorageLocale = localStorage.getItem('locale') as Locale | null;
+    const sessionLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
+    const detectedLocale = localStorageLocale || sessionLocale || detectLocale();
     setLocale(detectedLocale);
 
     const loadNewspaper = async () => {

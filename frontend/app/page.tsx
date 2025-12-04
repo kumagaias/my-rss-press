@@ -27,8 +27,15 @@ export default function Home() {
 
   // Detect locale on mount
   useEffect(() => {
-    setLocale(detectLocale());
+    // Check localStorage first, then detect from browser
+    const savedLocale = localStorage.getItem('locale') as Locale | null;
+    setLocale(savedLocale || detectLocale());
   }, []);
+
+  // Save locale to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('locale', locale);
+  }, [locale]);
 
   const handleThemeSubmit = async (themeValue: string) => {
     setTheme(themeValue);

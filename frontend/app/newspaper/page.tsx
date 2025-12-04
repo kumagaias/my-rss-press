@@ -147,6 +147,9 @@ function NewspaperPageInner() {
     try {
       const regeneratedArticles = await generateNewspaper(feedUrls, newspaperName || 'News');
       setArticles(regeneratedArticles);
+      
+      // Mark as not saved so user can save the regenerated version
+      setIsSaved(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to regenerate articles';
       setError(errorMessage);

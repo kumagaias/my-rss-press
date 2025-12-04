@@ -6,7 +6,7 @@ import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout
 import { NewspaperSettingsModal } from '@/components/features/newspaper/NewspaperSettings';
 import { Button } from '@/components/ui/Button';
 import { detectLocale, useTranslations } from '@/lib/i18n';
-import { saveNewspaper, getNewspaper } from '@/lib/api';
+import { saveNewspaper, getNewspaper, generateNewspaper } from '@/lib/api';
 import type { Locale, Article, NewspaperSettings } from '@/types';
 
 function NewspaperPageInner() {
@@ -27,6 +27,7 @@ function NewspaperPageInner() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegeneratingArticles, setIsRegeneratingArticles] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Load data from sessionStorage or API
@@ -46,11 +47,14 @@ function NewspaperPageInner() {
           
           // Check if articles exist
           if (!newspaper.articles || newspaper.articles.length === 0) {
-            setError(
-              detectedLocale === 'ja'
-                ? 'この新聞には記事がありません。'
-                : 'This newspaper has no articles.'
-            );
+            // Articles are missing, but we have feedUrls
+            // We'll show a message and allow user to regenerate
+            setFeedUrls(newspaper.feedUrls || []);
+            setNewspaperName(newspaper.name || '');
+            setUserName(newspaper.userName || '');
+            setCreatedAt(new Date(newspaper.createdAt));
+            setViewCount(newspaper.viewCount || 0);
+            setArticles([]); // Empty articles
             setIsLoading(false);
             return;
           }
@@ -125,6 +129,27 @@ function NewspaperPageInner() {
     }
   };
 
+  const handleRegenerateArticles = async () => {
+    if (feedUrls.length === 0) {
+      setError(t.feedRequired);
+      return;
+    }
+
+    setError(null);
+    setIsRegeneratingArticles(true);
+
+    try {
+      const regeneratedArticles = await generateNewspaper(feedUrls, newspaperName || 'News');
+      setArticles(regeneratedArticles);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to regenerate articles';
+      setError(errorMessage);
+      console.error('Article regeneration error:', err);
+    } finally {
+      setIsRegeneratingArticles(false);
+    }
+  };
+
   const handleBackToHome = () => {
     // Clear session storage
     sessionStorage.removeItem('newspaperArticles');
@@ -156,11 +181,86 @@ function NewspaperPageInner() {
     );
   }
 
-  if (articles.length === 0) {
+  if (articles.length === 0 && !newspaperId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600">{t.loading}</p>
       </div>
+    );
+  }
+
+  // Show regenerate option if newspaper exists but has no articles
+  if (articles.length === 0 && newspaperId && feedUrls.length > 0) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Button variant="outline" size="sm" onClick={handleBackToHome}>
+                ← {t.backToHome}
+              </Button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setLocale('ja')}
+                  className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
+                    locale === 'ja' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  日本語
+                </button>
+                <button
+                  onClick={() => setLocale('en')}
+                  className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
+                    locale === 'en' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <div className="bg-white border-4 border-black shadow-lg p-8 text-center">
+            <h2 className="text-2xl font-serif font-black mb-4">{newspaperName}</h2>
+            <p className="text-gray-600 mb-6">
+              {locale === 'ja'
+                ? 'この新聞には記事がありません。フィードから記事を生成できます。'
+                : 'This newspaper has no articles. You can generate articles from the feeds.'}
+            </p>
+            <div className="space-y-4">
+              <div className="text-left">
+                <h3 className="font-serif font-bold mb-2">
+                  {locale === 'ja' ? 'フィード:' : 'Feeds:'}
+                </h3>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {feedUrls.map((url, index) => (
+                    <li key={index} className="break-all">{url}</li>
+                  ))}
+                </ul>
+              </div>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleRegenerateArticles}
+                disabled={isRegeneratingArticles}
+                loading={isRegeneratingArticles}
+                className="w-full"
+              >
+                {isRegeneratingArticles
+                  ? t.loading
+                  : locale === 'ja'
+                  ? '記事を生成'
+                  : 'Generate Articles'}
+              </Button>
+              {error && (
+                <div className="text-red-600 text-sm mt-2">{error}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
     );
   }
 

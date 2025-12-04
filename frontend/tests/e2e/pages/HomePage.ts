@@ -23,8 +23,9 @@ export class HomePage {
     this.page = page;
     // Header elements
     this.appTitle = page.locator('h1');
-    this.languageButtonJa = page.getByRole('button', { name: '日本語' });
-    this.languageButtonEn = page.getByRole('button', { name: 'EN' });
+    // Use exact match and more specific selector for language buttons
+    this.languageButtonJa = page.getByRole('button', { name: '日本語', exact: true });
+    this.languageButtonEn = page.getByRole('button', { name: 'EN', exact: true });
     
     // Theme input section
     this.themeInput = page.locator('input[type="text"]').first();

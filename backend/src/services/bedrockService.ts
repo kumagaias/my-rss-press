@@ -13,6 +13,7 @@ export interface FeedSuggestion {
   url: string;
   title: string;
   reasoning: string;
+  isDefault?: boolean; // Flag to indicate if this is a default/fallback feed
 }
 
 /**
@@ -147,19 +148,29 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
 
     console.log(`[Validation] Result: ${validatedSuggestions.length}/${suggestions.length} feeds are valid`);
 
-    // If we have less than 5 valid feeds, supplement with defaults
-    if (validatedSuggestions.length < 5) {
-      console.log(`[Fallback] Only ${validatedSuggestions.length} valid feeds found, supplementing with defaults`);
+    // If we have less than 3 valid feeds, supplement with defaults (max 2 default feeds)
+    if (validatedSuggestions.length < 3) {
+      console.log(`[Fallback] Only ${validatedSuggestions.length} valid feeds found, supplementing with defaults (max 2)`);
       const defaultFeeds = getDefaultFeedSuggestions(theme);
       
-      // Add default feeds that aren't already in the list
+      // Add default feeds that aren't already in the list (max 2)
       const existingUrls = new Set(validatedSuggestions.map(s => s.url));
+      let defaultFeedsAdded = 0;
+      const maxDefaultFeeds = 2;
+      
       for (const defaultFeed of defaultFeeds) {
-        if (!existingUrls.has(defaultFeed.url) && validatedSuggestions.length < 10) {
-          validatedSuggestions.push(defaultFeed);
-          console.log(`[Fallback] Added default feed: ${defaultFeed.url}`);
+        if (defaultFeedsAdded >= maxDefaultFeeds) {
+          break;
+        }
+        if (!existingUrls.has(defaultFeed.url)) {
+          // Mark as default feed for lower priority
+          validatedSuggestions.push({ ...defaultFeed, isDefault: true } as any);
+          console.log(`[Fallback] Added default feed (${defaultFeedsAdded + 1}/${maxDefaultFeeds}): ${defaultFeed.url}`);
+          defaultFeedsAdded++;
         }
       }
+      
+      console.log(`[Fallback] Total feeds after supplementing: ${validatedSuggestions.length} (${defaultFeedsAdded} defaults)`);
     }
 
     // Cache the result in local development

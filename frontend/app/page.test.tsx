@@ -110,7 +110,8 @@ describe('Home Page', () => {
     await waitFor(() => {
       expect(api.generateNewspaper).toHaveBeenCalledWith(
         ['https://example.com/tech-feed'],
-        'Technology'
+        'Technology',
+        [] // defaultFeedUrls (empty array since no default feeds in this test)
       );
     }, { timeout: 3000 });
 

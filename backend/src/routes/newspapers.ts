@@ -16,8 +16,9 @@ export const newspapersRouter = new Hono();
 
 // Validation schemas
 const GenerateNewspaperSchema = z.object({
-  feedUrls: z.array(z.string().url()).min(1, 'At least one feed URL is required').max(10, 'Too many feed URLs'),
+  feedUrls: z.array(z.string().url()).min(3, 'At least 3 feed URLs are required').max(10, 'Too many feed URLs'),
   theme: z.string().min(1, 'Theme is required'),
+  defaultFeedUrls: z.array(z.string().url()).optional(), // URLs of default/fallback feeds
 });
 
 const ArticleSchema = z.object({
@@ -73,10 +74,12 @@ newspapersRouter.post(
         );
       }
 
-      // Calculate importance scores
+      // Calculate importance scores (with penalty for default feed articles)
+      const defaultFeedUrls = new Set(validated.defaultFeedUrls || []);
       const articlesWithImportance = await calculateImportance(
         articles,
-        validated.theme
+        validated.theme,
+        defaultFeedUrls
       );
 
       return c.json({

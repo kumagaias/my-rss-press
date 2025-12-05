@@ -96,9 +96,15 @@ async function parseFeed(url: string): Promise<Article[]> {
       // Parse publication date
       const pubDate = item.pubDate ? new Date(item.pubDate) : new Date();
 
+      // Truncate description to 200 characters for newspaper layout
+      const rawDescription = item.contentSnippet || item.content || item.summary || '';
+      const description = rawDescription.length > 200 
+        ? rawDescription.substring(0, 200) + '...'
+        : rawDescription;
+
       articles.push({
         title: item.title,
-        description: item.contentSnippet || item.content || item.summary || '',
+        description,
         link: item.link,
         pubDate,
         imageUrl,

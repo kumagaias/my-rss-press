@@ -21,11 +21,15 @@ export interface FeedSuggestion {
  */
 async function validateFeedUrl(url: string): Promise<boolean> {
   try {
+    // Use a more common User-Agent to avoid blocking
+    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    
     // Try HEAD request first
     const headResponse = await fetch(url, {
       method: 'HEAD',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; MyRSSPress/1.0; +https://my-rss-press.com)',
+        'User-Agent': userAgent,
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
       },
       signal: AbortSignal.timeout(5000),
     });
@@ -41,7 +45,8 @@ async function validateFeedUrl(url: string): Promise<boolean> {
     const getResponse = await fetch(url, {
       method: 'GET',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; MyRSSPress/1.0; +https://my-rss-press.com)',
+        'User-Agent': userAgent,
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
       },
       signal: AbortSignal.timeout(5000),
     });
@@ -198,7 +203,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
  */
 function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   if (locale === 'ja') {
-    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを10個提案してください。
+    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを20個提案してください。
 
 重要な制約：
 1. 実際に存在し、現在もアクティブな日本語のRSSフィードのURLのみを提案してください
@@ -232,7 +237,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。
 レスポンスは必ず完全なJSON形式で終わらせてください（}で閉じる）。`;
   } else {
-    return `The user is interested in "${theme}". Please suggest 10 related RSS feeds.
+    return `The user is interested in "${theme}". Please suggest 20 related RSS feeds.
 
 CRITICAL LANGUAGE REQUIREMENT: 
 - You MUST write ALL text in English
@@ -324,8 +329,8 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     const feeds = parsed.feeds || [];
     console.log(`[Bedrock] Parsed ${feeds.length} feeds from AI response`);
 
-    // Validate and return suggestions (up to 10)
-    return feeds.slice(0, 10).map((feed: any) => ({
+    // Validate and return suggestions (up to 20)
+    return feeds.slice(0, 20).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',

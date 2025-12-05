@@ -125,8 +125,8 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       })
       .map(result => result.suggestion);
 
-    // If we have less than 10 valid feeds, supplement with defaults
-    if (validatedSuggestions.length < 10) {
+    // If we have less than 5 valid feeds, supplement with defaults
+    if (validatedSuggestions.length < 5) {
       console.log(`Only ${validatedSuggestions.length} valid feeds found, supplementing with defaults`);
       const defaultFeeds = getDefaultFeedSuggestions(theme);
       
@@ -161,7 +161,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
  */
 function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   if (locale === 'ja') {
-    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを15個提案してください。
+    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを10個提案してください。
 
 重要な制約：
 1. 実際に存在し、現在もアクティブな日本語のRSSフィードのURLのみを提案してください
@@ -194,7 +194,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 
 必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。`;
   } else {
-    return `The user is interested in "${theme}". Please suggest 15 related RSS feeds.
+    return `The user is interested in "${theme}". Please suggest 10 related RSS feeds.
 
 CRITICAL LANGUAGE REQUIREMENT: 
 - You MUST write ALL text in English
@@ -255,8 +255,8 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     const parsed = JSON.parse(jsonMatch[0]);
     const feeds = parsed.feeds || [];
 
-    // Validate and return suggestions (up to 15)
-    return feeds.slice(0, 15).map((feed: any) => ({
+    // Validate and return suggestions (up to 8)
+    return feeds.slice(0, 8).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',
@@ -288,34 +288,9 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
       reasoning: `Breaking news and updates about the theme: ${theme}`,
     },
     {
-      url: 'https://feeds.washingtonpost.com/rss/world',
-      title: 'Washington Post World',
-      reasoning: `International news related to the theme: ${theme}`,
-    },
-    {
       url: 'https://feeds.theguardian.com/theguardian/world/rss',
       title: 'The Guardian World News',
       reasoning: `Global perspective on the theme: ${theme}`,
-    },
-    {
-      url: 'https://www.aljazeera.com/xml/rss/all.xml',
-      title: 'Al Jazeera',
-      reasoning: `Middle Eastern perspective on the theme: ${theme}`,
-    },
-    {
-      url: 'https://feeds.npr.org/1001/rss.xml',
-      title: 'NPR News',
-      reasoning: `Public radio coverage of the theme: ${theme}`,
-    },
-    {
-      url: 'https://feeds.feedburner.com/time/topstories',
-      title: 'TIME Top Stories',
-      reasoning: `Magazine-style coverage of the theme: ${theme}`,
-    },
-    {
-      url: 'https://www.economist.com/rss',
-      title: 'The Economist',
-      reasoning: `Economic and business analysis of the theme: ${theme}`,
     },
     {
       url: 'https://feeds.arstechnica.com/arstechnica/index',

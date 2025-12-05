@@ -155,13 +155,21 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     
     console.log(`[Validation] Result: ${validatedSuggestions.length}/${suggestions.length} feeds are valid`);
 
+    // Select top 10 feeds from validated suggestions
+    const maxFeeds = 10;
+    const topFeeds = validatedSuggestions.slice(0, maxFeeds);
+    
+    if (validatedSuggestions.length > maxFeeds) {
+      console.log(`[Selection] Selected top ${maxFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
+    }
+
     // If we have less than 3 valid feeds, supplement with defaults (max 2 default feeds)
-    if (validatedSuggestions.length < 3) {
-      console.log(`[Fallback] Only ${validatedSuggestions.length} valid feeds found, supplementing with defaults (max 2)`);
+    if (topFeeds.length < 3) {
+      console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with defaults (max 2)`);
       const defaultFeeds = getDefaultFeedSuggestions(theme);
       
       // Add default feeds that aren't already in the list (max 2)
-      const existingUrls = new Set(validatedSuggestions.map(s => s.url));
+      const existingUrls = new Set(topFeeds.map(s => s.url));
       let defaultFeedsAdded = 0;
       const maxDefaultFeeds = 2;
       
@@ -171,21 +179,21 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
         }
         if (!existingUrls.has(defaultFeed.url)) {
           // Mark as default feed for lower priority
-          validatedSuggestions.push({ ...defaultFeed, isDefault: true } as any);
+          topFeeds.push({ ...defaultFeed, isDefault: true } as any);
           console.log(`[Fallback] Added default feed (${defaultFeedsAdded + 1}/${maxDefaultFeeds}): ${defaultFeed.url}`);
           defaultFeedsAdded++;
         }
       }
       
-      console.log(`[Fallback] Total feeds after supplementing: ${validatedSuggestions.length} (${defaultFeedsAdded} defaults)`);
+      console.log(`[Fallback] Total feeds after supplementing: ${topFeeds.length} (${defaultFeedsAdded} defaults)`);
     }
 
     // Cache the result in local development
     if (config.isLocal && config.enableCache) {
-      cache.set(cacheKey, validatedSuggestions);
+      cache.set(cacheKey, topFeeds);
     }
 
-    return validatedSuggestions;
+    return topFeeds;
   } catch (error) {
     console.error('[Bedrock] API error occurred:', error);
     if (error instanceof Error) {

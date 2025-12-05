@@ -108,16 +108,22 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     const response = await bedrockClient.send(command);
     const suggestions = parseAIResponse(response);
 
-    // Validate feed URLs
-    const validatedSuggestions: FeedSuggestion[] = [];
-    for (const suggestion of suggestions) {
-      const isValid = await validateFeedUrl(suggestion.url);
-      if (isValid) {
-        validatedSuggestions.push(suggestion);
-      } else {
-        console.log(`Skipping invalid feed URL: ${suggestion.url}`);
-      }
-    }
+    // Validate feed URLs in parallel for better performance
+    const validationResults = await Promise.all(
+      suggestions.map(async (suggestion) => ({
+        suggestion,
+        isValid: await validateFeedUrl(suggestion.url),
+      }))
+    );
+
+    const validatedSuggestions: FeedSuggestion[] = validationResults
+      .filter(result => {
+        if (!result.isValid) {
+          console.log(`Skipping invalid feed URL: ${result.suggestion.url}`);
+        }
+        return result.isValid;
+      })
+      .map(result => result.suggestion);
 
     // If we have less than 10 valid feeds, supplement with defaults
     if (validatedSuggestions.length < 10) {

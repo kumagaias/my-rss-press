@@ -255,8 +255,8 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     const parsed = JSON.parse(jsonMatch[0]);
     const feeds = parsed.feeds || [];
 
-    // Validate and return suggestions (up to 8)
-    return feeds.slice(0, 8).map((feed: any) => ({
+    // Validate and return suggestions (up to 10)
+    return feeds.slice(0, 10).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',

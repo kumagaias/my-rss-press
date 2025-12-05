@@ -2,6 +2,8 @@
 
 Transform RSS feeds into visually appealing newspaper-style layouts with AI-powered curation.
 
+🌐 **Live Demo**: [https://www.my-rss-press.com/](https://www.my-rss-press.com/)
+
 ## Features
 
 - **AI-Powered Feed Suggestions**: AWS Bedrock (Claude 3 Haiku) recommendations

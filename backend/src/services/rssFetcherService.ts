@@ -193,10 +193,21 @@ export async function fetchArticlesForNewspaper(
   // Step 4: Select up to target count (prioritize recent articles)
   const selectedArticles = articles.slice(0, Math.min(targetCount, articles.length));
 
-  // Step 5: Shuffle for layout variation
-  const shuffled = selectedArticles.sort(() => Math.random() - 0.5);
+  // Step 5: Prioritize articles with images for lead story
+  // Separate articles with and without images
+  const articlesWithImages = selectedArticles.filter(article => article.imageUrl);
+  const articlesWithoutImages = selectedArticles.filter(article => !article.imageUrl);
 
-  console.log(`Selected ${shuffled.length} articles for newspaper`);
+  console.log(`Articles with images: ${articlesWithImages.length}, without images: ${articlesWithoutImages.length}`);
+
+  // Shuffle each group separately
+  const shuffledWithImages = articlesWithImages.sort(() => Math.random() - 0.5);
+  const shuffledWithoutImages = articlesWithoutImages.sort(() => Math.random() - 0.5);
+
+  // Combine: images first (for lead story), then others
+  const shuffled = [...shuffledWithImages, ...shuffledWithoutImages];
+
+  console.log(`Selected ${shuffled.length} articles for newspaper (lead story has image: ${shuffled[0]?.imageUrl ? 'yes' : 'no'})`);
 
   return shuffled;
 }

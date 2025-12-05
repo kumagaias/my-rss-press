@@ -120,20 +120,20 @@ export default function Home() {
     <main className="min-h-screen bg-[#f4f1e8]">
       {/* Header */}
       <header className="bg-white border-b-4 border-black">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex justify-center items-center relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center relative gap-4 sm:gap-0">
             <div className="border-l-4 border-r-4 border-black px-4 py-2">
-              <h1 className="text-4xl font-serif font-black text-black tracking-tight">
+              <h1 className="text-2xl sm:text-4xl font-serif font-black text-black tracking-tight text-center">
                 {t.appName}
               </h1>
-              <p className="text-gray-800 text-xs font-serif italic mt-1">
+              <p className="text-gray-800 text-xs font-serif italic mt-1 text-center">
                 {t.appTagline}
               </p>
             </div>
-            <div className="absolute right-0 flex gap-2">
+            <div className="sm:absolute sm:right-0 flex gap-2">
               <button
                 onClick={() => setLocale('ja')}
-                className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
+                className={`px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black transition-colors ${
                   locale === 'ja'
                     ? 'bg-black text-white'
                     : 'bg-white text-black hover:bg-gray-100'
@@ -143,7 +143,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setLocale('en')}
-                className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
+                className={`px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black transition-colors ${
                   locale === 'en'
                     ? 'bg-black text-white'
                     : 'bg-white text-black hover:bg-gray-100'
@@ -156,17 +156,17 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Main Content */}
         <div className="space-y-8">
           {/* Theme Input & Feed Selection */}
           <div className="space-y-6">
             {/* Theme Input */}
-            <div className="bg-white border-4 border-black shadow-lg p-8">
-              <h2 className="text-3xl font-serif font-black mb-6 border-b-2 border-black pb-2">{t.themeInputLabel}</h2>
+            <div className="bg-white border-4 border-black shadow-lg p-4 sm:p-8">
+              <h2 className="text-2xl sm:text-3xl font-serif font-black mb-4 sm:mb-6 border-b-2 border-black pb-2">{t.themeInputLabel}</h2>
               
               {/* Topic Marquee */}
-              <div className="mb-6 -mx-8">
+              <div className="mb-4 sm:mb-6 -mx-4 sm:-mx-8">
                 <TopicMarquee
                   keywords={t.topicKeywords}
                   onKeywordClick={handleKeywordClick}
@@ -191,7 +191,7 @@ export default function Home() {
 
             {/* Feed Selection */}
             {suggestions.length > 0 && (
-              <div id="feed-selector" className="bg-white border-4 border-black shadow-lg p-8">
+              <div id="feed-selector" className="bg-white border-4 border-black shadow-lg p-4 sm:p-8">
                 <FeedSelector
                   suggestions={suggestions}
                   selectedFeeds={selectedFeeds}
@@ -205,21 +205,21 @@ export default function Home() {
 
             {/* Error Display */}
             {error && (
-              <div className="bg-white border-4 border-red-800 p-6">
-                <p className="text-red-900 font-serif font-bold">{error}</p>
+              <div className="bg-white border-4 border-red-800 p-4 sm:p-6">
+                <p className="text-red-900 font-serif font-bold text-sm sm:text-base">{error}</p>
               </div>
             )}
 
             {/* Loading State */}
             {isGenerating && (
-              <div className="bg-white border-4 border-black p-6">
-                <p className="text-black text-center font-serif font-bold text-lg">{t.generating}</p>
+              <div className="bg-white border-4 border-black p-4 sm:p-6">
+                <p className="text-black text-center font-serif font-bold text-base sm:text-lg">{t.generating}</p>
               </div>
             )}
           </div>
 
           {/* Popular Newspapers */}
-          <div className="bg-white border-4 border-black shadow-lg p-8">
+          <div className="bg-white border-4 border-black shadow-lg p-4 sm:p-8">
             <PopularNewspapers
               locale={locale}
               onNewspaperClick={handleNewspaperClick}
@@ -229,11 +229,11 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-black text-white border-t-4 border-black mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex justify-between items-center text-xs font-serif">
+      <footer className="bg-black text-white border-t-4 border-black mt-8 sm:mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0 text-xs font-serif">
             <p>© 2025 MyRSSPress</p>
-            <p>{t.footerTagline}</p>
+            <p className="text-center">{t.footerTagline}</p>
           </div>
         </div>
       </footer>

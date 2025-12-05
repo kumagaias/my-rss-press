@@ -506,3 +506,232 @@ const placeholder = t.themeInputPlaceholder;
 ---
 
 これらの禁止事項に違反した場合、システムの安定性、セキュリティ、保守性に重大な影響を与える可能性があります。必ず遵守してください。
+
+
+## Bug Fix Workflow
+
+バグを発見した場合、以下のワークフローに従って修正すること。
+
+### 1. Issue作成
+
+バグを発見したら、まずGitHub Issueを作成する：
+
+```markdown
+## Description
+バグの詳細な説明
+
+## Steps to Reproduce
+1. 手順1
+2. 手順2
+3. 手順3
+
+## Expected Behavior
+期待される動作
+
+## Current Behavior
+現在の動作
+
+## Technical Details
+- Location: ファイルパスと行番号
+- Suspected Cause: 疑わしい原因
+
+## Investigation Needed
+調査が必要な項目のリスト
+
+## Priority
+High/Medium/Low
+```
+
+**Issueのラベル:**
+- `bug`: バグ修正
+- 影響範囲に応じて: `frontend`, `backend`, `database`, `infrastructure`
+
+### 2. ブランチ作成
+
+Issue番号を含むブランチを作成：
+
+```bash
+git checkout -b fix/issue-{番号}-{短い説明}
+
+# 例
+git checkout -b fix/issue-13-saved-newspapers-no-articles
+```
+
+### 3. 問題の調査
+
+**調査手順:**
+
+1. **再現確認**: バグを実際に再現できるか確認
+2. **コードレビュー**: 関連するコードを読んで原因を特定
+3. **ログ確認**: エラーログやコンソール出力を確認
+4. **データ確認**: データベースやAPIレスポンスを確認
+
+**調査のポイント:**
+- フロントエンドとバックエンドの両方を確認
+- データの流れを追跡（UI → API → Service → Database）
+- 型定義とインターフェースの不一致を確認
+- 戻り値に必要なフィールドが含まれているか確認
+
+### 4. 修正実装
+
+**修正の原則:**
+- **最小限の変更**: 問題を解決する最小限のコードのみ変更
+- **影響範囲の確認**: 変更が他の機能に影響しないか確認
+- **型安全性**: TypeScriptの型チェックを活用
+- **テスト**: 既存のテストが通ることを確認
+
+**修正例（Issue #13の場合）:**
+
+```typescript
+// ❌ Bad: articlesフィールドが欠落
+return result.Items.map(item => ({
+  newspaperId: item.newspaperId,
+  name: item.name,
+  // ... articles が含まれていない
+}));
+
+// ✅ Good: articlesフィールドを追加
+return result.Items.map(item => ({
+  newspaperId: item.newspaperId,
+  name: item.name,
+  articles: item.articles, // 追加
+  // ...
+}));
+```
+
+### 5. テスト実行
+
+修正後、必ずテストを実行：
+
+```bash
+# ユニットテスト
+make test-unit
+
+# 全テスト
+make test
+
+# 手動テスト
+# 1. バグの再現手順を実行
+# 2. 修正が機能することを確認
+# 3. 他の機能に影響がないことを確認
+```
+
+### 6. コミットとプッシュ
+
+**コミットメッセージの形式:**
+
+```
+fix: {簡潔な説明}
+
+- 変更内容1
+- 変更内容2
+- 根本原因の説明
+
+Fixes #{Issue番号}
+```
+
+**例:**
+```bash
+git add backend/src/services/newspaperService.ts
+git commit -m "fix: Include articles in getPublicNewspapers response
+
+- Add articles field to the response of getPublicNewspapers
+- This fixes the issue where saved newspapers show 'no articles' message
+- Articles were being saved but not returned when fetching public newspapers
+
+Fixes #13"
+
+git push origin fix/issue-13-saved-newspapers-no-articles
+```
+
+### 7. Pull Request作成
+
+**PRの内容:**
+
+```markdown
+## Overview
+Fixes #{Issue番号} - 問題の簡潔な説明
+
+## Problem
+バグの詳細な説明
+
+## Root Cause
+根本原因の説明
+
+## Solution
+修正内容の説明
+
+## Changes
+- **Backend**: 変更したファイルと内容
+- **Frontend**: 変更したファイルと内容
+
+## Testing
+- ✅ テスト項目1
+- ✅ テスト項目2
+
+## Verification Steps
+修正を確認する手順
+
+Fixes #{Issue番号}
+```
+
+### 8. レビューとマージ
+
+1. PRを作成
+2. CI/CDが通ることを確認
+3. コードレビュー（必要に応じて）
+4. mainブランチにマージ
+5. Issueが自動的にクローズされることを確認
+
+### バグ修正のチェックリスト
+
+修正前に以下を確認：
+
+- [ ] Issueを作成した
+- [ ] 適切なブランチ名を使用した
+- [ ] 問題の根本原因を特定した
+- [ ] 最小限の変更で修正した
+- [ ] テストが通ることを確認した
+- [ ] 手動テストで動作確認した
+- [ ] コミットメッセージに`Fixes #番号`を含めた
+- [ ] PRの説明が明確である
+- [ ] 他の機能に影響がないことを確認した
+
+### よくあるバグのパターン
+
+**1. APIレスポンスのフィールド欠落**
+- 症状: フロントエンドでデータが表示されない
+- 原因: バックエンドのレスポンスに必要なフィールドが含まれていない
+- 修正: レスポンスマッピングにフィールドを追加
+
+**2. 型定義の不一致**
+- 症状: TypeScriptのコンパイルエラー
+- 原因: インターフェースと実装が一致していない
+- 修正: 型定義を更新するか、実装を修正
+
+**3. 非同期処理のエラーハンドリング不足**
+- 症状: エラーが発生してもユーザーに通知されない
+- 原因: try-catchが不足している
+- 修正: 適切なエラーハンドリングを追加
+
+**4. 状態管理の問題**
+- 症状: UIが更新されない、または予期しない動作
+- 原因: Reactの状態更新が正しく行われていない
+- 修正: useEffectの依存配列を確認、状態更新ロジックを修正
+
+### デバッグのヒント
+
+**フロントエンド:**
+- ブラウザのDevToolsでネットワークタブを確認
+- Consoleでエラーメッセージを確認
+- React DevToolsで状態を確認
+
+**バックエンド:**
+- CloudWatch Logsでエラーログを確認
+- ローカルで`console.log`を使ってデバッグ
+- APIレスポンスをcurlやPostmanで確認
+
+**データベース:**
+- DynamoDBコンソールでデータを直接確認
+- クエリ条件が正しいか確認
+- GSI（Global Secondary Index）が正しく設定されているか確認

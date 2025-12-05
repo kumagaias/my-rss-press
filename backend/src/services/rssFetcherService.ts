@@ -15,6 +15,20 @@ export interface Article {
 }
 
 /**
+ * Fisher-Yates shuffle algorithm for true random distribution
+ * @param array - Array to shuffle
+ * @returns Shuffled array
+ */
+function shuffle<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+/**
  * Fetch articles from multiple RSS feeds in parallel
  * @param feedUrls - Array of RSS feed URLs
  * @param daysBack - Number of days to look back (default: 3, fallback to 7)
@@ -200,9 +214,9 @@ export async function fetchArticlesForNewspaper(
 
   console.log(`Articles with images: ${articlesWithImages.length}, without images: ${articlesWithoutImages.length}`);
 
-  // Shuffle each group separately
-  const shuffledWithImages = articlesWithImages.sort(() => Math.random() - 0.5);
-  const shuffledWithoutImages = articlesWithoutImages.sort(() => Math.random() - 0.5);
+  // Shuffle each group separately using Fisher-Yates algorithm
+  const shuffledWithImages = shuffle(articlesWithImages);
+  const shuffledWithoutImages = shuffle(articlesWithoutImages);
 
   // Combine: images first (for lead story), then others
   const shuffled = [...shuffledWithImages, ...shuffledWithoutImages];

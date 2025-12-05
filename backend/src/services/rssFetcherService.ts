@@ -202,7 +202,13 @@ export async function fetchArticlesForNewspaper(
     articles = await fetchArticles(feedUrls, 7);
   }
 
-  // Step 3: If still not enough, use all available articles
+  // Step 3: If still not enough, extend to 14 days
+  if (articles.length < minArticles) {
+    console.log(`Only ${articles.length} articles found in 7 days, extending to 14 days`);
+    articles = await fetchArticles(feedUrls, 14);
+  }
+
+  // Step 4: If still not enough, use all available articles
   if (articles.length < minArticles) {
     console.warn(`Only ${articles.length} articles found (minimum: ${minArticles})`);
   }
@@ -210,10 +216,10 @@ export async function fetchArticlesForNewspaper(
   // Sort by publication date (newest first)
   articles.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
 
-  // Step 4: Select up to target count (prioritize recent articles)
+  // Step 5: Select up to target count (prioritize recent articles)
   const selectedArticles = articles.slice(0, Math.min(targetCount, articles.length));
 
-  // Step 5: Prioritize articles with images for lead story
+  // Step 6: Prioritize articles with images for lead story
   // Separate articles with and without images
   const articlesWithImages = selectedArticles.filter(article => article.imageUrl);
   const articlesWithoutImages = selectedArticles.filter(article => !article.imageUrl);

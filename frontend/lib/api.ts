@@ -29,7 +29,8 @@ export async function suggestFeeds(theme: string, locale?: 'en' | 'ja'): Promise
  */
 export async function generateNewspaper(
   feedUrls: string[],
-  theme: string
+  theme: string,
+  defaultFeedUrls: string[] = []
 ): Promise<Article[]> {
   // Validate input
   if (!feedUrls || feedUrls.length === 0) {
@@ -47,6 +48,7 @@ export async function generateNewspaper(
     body: JSON.stringify({
       feedUrls,
       theme,
+      defaultFeedUrls, // Pass default feed URLs for lower priority
       daysBack: 3,
     }),
   });

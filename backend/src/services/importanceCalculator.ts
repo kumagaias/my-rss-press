@@ -11,11 +11,13 @@ const bedrockClient = new BedrockRuntimeClient({
  * Calculate importance scores for articles using AWS Bedrock
  * @param articles - Array of articles
  * @param userTheme - User's theme keyword
+ * @param defaultFeedUrls - Set of default/fallback feed URLs (articles from these feeds get lower priority)
  * @returns Articles with importance scores
  */
 export async function calculateImportance(
   articles: Article[],
-  userTheme: string
+  userTheme: string,
+  defaultFeedUrls: Set<string> = new Set()
 ): Promise<Article[]> {
   // Use mock mode if enabled
   if (config.useMockBedrock) {
@@ -51,20 +53,40 @@ export async function calculateImportance(
     const response = await bedrockClient.send(command);
     const scores = parseImportanceResponse(response);
 
-    // Assign importance scores to articles
-    return articles.map((article, index) => ({
-      ...article,
-      importance: scores[index] || 50, // Default to 50 if score missing
-    }));
+    // Assign importance scores to articles with penalty for default feeds
+    return articles.map((article, index) => {
+      let importance = scores[index] || 50; // Default to 50 if score missing
+      
+      // Apply penalty if article is from a default feed
+      if (defaultFeedUrls.has(article.feedSource)) {
+        importance = Math.max(0, importance - 30); // Reduce importance by 30 points
+        console.log(`[Importance] Reduced score for default feed article: ${article.title.substring(0, 50)}... (${scores[index]} → ${importance})`);
+      }
+      
+      return {
+        ...article,
+        importance,
+      };
+    });
   } catch (error) {
     console.error('Bedrock importance calculation error:', error);
     console.log('Falling back to simple algorithm');
 
-    // Fallback to simple algorithm
-    return articles.map(article => ({
-      ...article,
-      importance: calculateImportanceFallback(article),
-    }));
+    // Fallback to simple algorithm with penalty for default feeds
+    return articles.map(article => {
+      let importance = calculateImportanceFallback(article);
+      
+      // Apply penalty if article is from a default feed
+      if (defaultFeedUrls.has(article.feedSource)) {
+        importance = Math.max(0, importance - 30); // Reduce importance by 30 points
+        console.log(`[Importance] Reduced score for default feed article (fallback): ${article.title.substring(0, 50)}... (${importance + 30} → ${importance})`);
+      }
+      
+      return {
+        ...article,
+        importance,
+      };
+    });
   }
 }
 
@@ -93,15 +115,23 @@ function buildImportancePrompt(articles: Article[], userTheme: string): string {
   return `ユーザーは「${userTheme}」に興味があります。
 ${randomPerspective}、以下の記事リストからユーザーにとっての重要度を0-100のスコアで評価してください。
 
-評価基準：
-1. ユーザーのテーマとの関連性（最重要）
-2. 画像の有無（画像付きは+10点）
-3. タイトルの魅力度と新鮮さ
+評価基準（合計100点）：
+1. テーマ「${userTheme}」との関連性: 0-70点
+   - 直接関連（テーマの核心的な内容）: 60-70点
+   - 間接的に関連（テーマに関係する周辺情報）: 40-59点
+   - 関連性が低い（テーマとほぼ無関係）: 0-39点
+2. 画像の有無: +10点（画像ありの場合のみ加算）
+3. タイトルの魅力度と新鮮さ: 0-20点
+   - 魅力的で新鮮なタイトル: 15-20点
+   - 普通のタイトル: 8-14点
+   - 平凡なタイトル: 0-7点
 
 記事リスト：
 ${articleList}
 
-注意: 同じような重要度の記事がある場合、少しバリエーションを持たせてください。
+注意: 
+- 同じような重要度の記事がある場合、少しバリエーションを持たせてください
+- 関連性の評価を最優先してください
 生成時刻: ${timestamp}
 
 各記事の重要度スコア（0-100）をJSON形式で返してください：

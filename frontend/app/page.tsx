@@ -84,7 +84,12 @@ export default function Home() {
     setIsGenerating(true);
 
     try {
-      const articles = await generateNewspaper(selectedFeeds, theme);
+      // Extract default feed URLs (feeds marked as default/fallback)
+      const defaultFeedUrls = suggestions
+        .filter(s => s.isDefault)
+        .map(s => s.url);
+      
+      const articles = await generateNewspaper(selectedFeeds, theme, defaultFeedUrls);
       
       // Store data in sessionStorage for the newspaper page
       sessionStorage.setItem('newspaperArticles', JSON.stringify(articles));

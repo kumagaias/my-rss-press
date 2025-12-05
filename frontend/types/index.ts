@@ -15,6 +15,7 @@ export interface FeedSuggestion {
   url: string;
   title: string;
   reasoning: string;
+  isDefault?: boolean; // Flag to indicate if this is a default/fallback feed
 }
 
 export interface NewspaperData {

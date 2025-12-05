@@ -158,6 +158,7 @@ export async function getPublicNewspapers(
     name: item.name,
     userName: item.userName,
     feedUrls: item.feedUrls,
+    articles: item.articles, // Include articles in the response
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
     viewCount: item.viewCount,

@@ -136,16 +136,18 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     console.log(`[Validation] Completed in ${validationTime}ms`);
 
     const validatedSuggestions: FeedSuggestion[] = validationResults
-      .filter(result => {
-        if (!result.isValid) {
-          console.log(`[Validation] ❌ Invalid feed URL: ${result.suggestion.url}`);
-        } else {
-          console.log(`[Validation] ✅ Valid feed URL: ${result.suggestion.url}`);
-        }
-        return result.isValid;
-      })
+      .filter(result => result.isValid)
       .map(result => result.suggestion);
 
+    // Log invalid feeds in one consolidated message
+    const invalidFeeds = validationResults
+      .filter(r => !r.isValid)
+      .map(r => r.suggestion.url);
+    
+    if (invalidFeeds.length > 0) {
+      console.log(`[Validation] Invalid feeds (${invalidFeeds.length}): ${invalidFeeds.join(', ')}`);
+    }
+    
     console.log(`[Validation] Result: ${validatedSuggestions.length}/${suggestions.length} feeds are valid`);
 
     // If we have less than 3 valid feeds, supplement with defaults (max 2 default feeds)
@@ -200,7 +202,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 
 重要な制約：
 1. 実際に存在し、現在もアクティブな日本語のRSSフィードのURLのみを提案してください
-2. 大手メディア、公式サイト、有名ブログの確実にアクセス可能なフィードを優先してください
+2. 日本の大手メディア、公式サイト、有名ブログの確実にアクセス可能なフィードを優先してください
 3. 架空のURLや存在しないフィードは絶対に提案しないでください
 4. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml、/index.xml などで終わる正しい形式にしてください
 5. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
@@ -209,7 +211,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 各フィードについて、以下の情報をJSON形式で返してください：
 - url: RSSフィードのURL（必ず実在する日本語のもの）
 - title: フィードの名前（日本語）
-- reasoning: なぜこのフィードを提案するのか（日本語で1文、簡潔に）
+- reasoning: なぜこのフィードを提案するのか（日本語で1-2文で簡潔に）
 
 レスポンス形式（必ず完全なJSONで返してください）：
 {
@@ -281,7 +283,11 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     // Decode response body
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
     const content = responseBody.content[0].text;
-    console.log('[Bedrock] Raw AI response:', content.substring(0, 500) + '...');
+    
+    // Log raw response only in local development
+    if (config.isLocal) {
+      console.log('[Bedrock] Raw AI response:', content.substring(0, 200) + '...');
+    }
 
     // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -298,11 +304,12 @@ function parseAIResponse(response: any): FeedSuggestion[] {
       console.error('[Bedrock] JSON parse error, attempting to fix:', jsonError);
       
       // Try to extract feeds array even if JSON is incomplete
-      const feedsMatch = content.match(/"feeds"\s*:\s*\[([\s\S]*?)\]/);
+      // Use greedy quantifier to capture entire feeds array
+      const feedsMatch = content.match(/"feeds"\s*:\s*\[[\s\S]*\]/);
       if (feedsMatch) {
         // Try to parse just the feeds array
         try {
-          const feedsJson = `{"feeds":[${feedsMatch[1]}]}`;
+          const feedsJson = `{${feedsMatch[0]}}`;
           parsed = JSON.parse(feedsJson);
           console.log('[Bedrock] Successfully recovered feeds from partial JSON');
         } catch (recoveryError) {

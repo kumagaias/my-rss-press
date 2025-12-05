@@ -145,9 +145,10 @@ function extractImageUrl(item: any): string | undefined {
     return item.image.url;
   }
 
-  // Try to extract from content
-  if (item.content) {
-    const imgMatch = item.content.match(/<img[^>]+src="([^">]+)"/);
+  // Try to extract from content or contentSnippet
+  const contentToSearch = item.content || item.contentSnippet || '';
+  if (contentToSearch) {
+    const imgMatch = contentToSearch.match(/<img[^>]+src=["']([^"']+)["']/);
     if (imgMatch) {
       return imgMatch[1];
     }

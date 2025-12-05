@@ -272,3 +272,10 @@ MyRSSPressは、RSSフィードを視覚的に魅力的な新聞スタイルの�
   - Fisher-Yatesシャッフルアルゴリズムを実装（パフォーマンス改善）
   - 新聞の視覚的魅力を向上
   - 関連Issue: [#17](https://github.com/kumagaias/my-rss-press/issues/17)
+
+- **2025-12-05**: モバイルレスポンシブ対応を実装
+  - ホームページと新聞ページのモバイル最適化
+  - タッチフレンドリーなボタンサイズ（44px以上）
+  - レスポンシブなレイアウト（モバイル: 1カラム、デスクトップ: 3カラム）
+  - 320px-768pxの画面サイズに対応
+  - 関連Issue: [#19](https://github.com/kumagaias/my-rss-press/issues/19)

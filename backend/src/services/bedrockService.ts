@@ -30,8 +30,11 @@ async function validateFeedUrl(url: string): Promise<boolean> {
     });
     
     if (headResponse.ok) {
+      console.log(`[Validation] HEAD request succeeded for ${url} (${headResponse.status})`);
       return true;
     }
+    
+    console.log(`[Validation] HEAD request failed for ${url} (${headResponse.status}), trying GET...`);
     
     // If HEAD fails, try GET (some servers don't support HEAD)
     const getResponse = await fetch(url, {
@@ -42,9 +45,12 @@ async function validateFeedUrl(url: string): Promise<boolean> {
       signal: AbortSignal.timeout(5000),
     });
     
-    return getResponse.ok;
+    const isValid = getResponse.ok;
+    console.log(`[Validation] GET request ${isValid ? 'succeeded' : 'failed'} for ${url} (${getResponse.status})`);
+    return isValid;
   } catch (error) {
-    console.log(`Feed URL validation failed for ${url}:`, error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.log(`[Validation] Feed URL validation failed for ${url}: ${errorMessage}`);
     return false;
   }
 }
@@ -82,6 +88,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
   try {
     // Build prompt for feed suggestions
     const prompt = buildPrompt(theme, locale);
+    console.log(`[Bedrock] Requesting feed suggestions for theme: "${theme}", locale: "${locale}"`);
 
     // Invoke Bedrock model (using Claude 3 Haiku - most cost-effective)
     const systemPrompt = locale === 'en' 
@@ -94,7 +101,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       accept: 'application/json',
       body: JSON.stringify({
         anthropic_version: 'bedrock-2023-05-31',
-        max_tokens: 1024,
+        max_tokens: 2048, // Increased from 1024 to prevent JSON truncation
         system: systemPrompt,
         messages: [
           {
@@ -105,29 +112,44 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       }),
     });
 
+    const startTime = Date.now();
     const response = await bedrockClient.send(command);
+    const bedrockTime = Date.now() - startTime;
+    console.log(`[Bedrock] API call completed in ${bedrockTime}ms`);
+    
     const suggestions = parseAIResponse(response);
+    console.log(`[Bedrock] AI suggested ${suggestions.length} feeds:`, suggestions.map(s => ({ url: s.url, title: s.title })));
 
     // Validate feed URLs in parallel for better performance
+    console.log(`[Validation] Starting validation of ${suggestions.length} feed URLs...`);
+    const validationStartTime = Date.now();
+    
     const validationResults = await Promise.all(
       suggestions.map(async (suggestion) => ({
         suggestion,
         isValid: await validateFeedUrl(suggestion.url),
       }))
     );
+    
+    const validationTime = Date.now() - validationStartTime;
+    console.log(`[Validation] Completed in ${validationTime}ms`);
 
     const validatedSuggestions: FeedSuggestion[] = validationResults
       .filter(result => {
         if (!result.isValid) {
-          console.log(`Skipping invalid feed URL: ${result.suggestion.url}`);
+          console.log(`[Validation] ❌ Invalid feed URL: ${result.suggestion.url}`);
+        } else {
+          console.log(`[Validation] ✅ Valid feed URL: ${result.suggestion.url}`);
         }
         return result.isValid;
       })
       .map(result => result.suggestion);
 
+    console.log(`[Validation] Result: ${validatedSuggestions.length}/${suggestions.length} feeds are valid`);
+
     // If we have less than 5 valid feeds, supplement with defaults
     if (validatedSuggestions.length < 5) {
-      console.log(`Only ${validatedSuggestions.length} valid feeds found, supplementing with defaults`);
+      console.log(`[Fallback] Only ${validatedSuggestions.length} valid feeds found, supplementing with defaults`);
       const defaultFeeds = getDefaultFeedSuggestions(theme);
       
       // Add default feeds that aren't already in the list
@@ -135,6 +157,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       for (const defaultFeed of defaultFeeds) {
         if (!existingUrls.has(defaultFeed.url) && validatedSuggestions.length < 10) {
           validatedSuggestions.push(defaultFeed);
+          console.log(`[Fallback] Added default feed: ${defaultFeed.url}`);
         }
       }
     }
@@ -146,12 +169,13 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
 
     return validatedSuggestions;
   } catch (error) {
-    console.error('Bedrock API error:', error);
+    console.error('[Bedrock] API error occurred:', error);
     if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
+      console.error('[Bedrock] Error message:', error.message);
+      console.error('[Bedrock] Error stack:', error.stack);
     }
     // Fallback to default feeds on error
+    console.log('[Fallback] Using default feeds due to Bedrock error');
     return getDefaultFeedSuggestions(theme);
   }
 }
@@ -165,34 +189,35 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 
 重要な制約：
 1. 実際に存在し、現在もアクティブな日本語のRSSフィードのURLのみを提案してください
-2. 日本のメディア、ブログ、ニュースサイトを優先してください
+2. 大手メディア、公式サイト、有名ブログの確実にアクセス可能なフィードを優先してください
 3. 架空のURLや存在しないフィードは絶対に提案しないでください
-4. 大手メディアや公式サイトの確実にアクセス可能なフィードを優先してください
-5. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml、/index.xml などで終わる正しい形式にしてください
-6. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
+4. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml、/index.xml などで終わる正しい形式にしてください
+5. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
+6. 必ず完全なJSON形式で返してください（途中で切れないように）
 
 各フィードについて、以下の情報をJSON形式で返してください：
 - url: RSSフィードのURL（必ず実在する日本語のもの）
 - title: フィードの名前（日本語）
-- reasoning: なぜこのフィードを提案するのか（日本語で1-2文）
+- reasoning: なぜこのフィードを提案するのか（日本語で1文、簡潔に）
 
-レスポンス形式：
+レスポンス形式（必ず完全なJSONで返してください）：
 {
   "feeds": [
     {
       "url": "https://example.jp/feed",
       "title": "サンプルフィード",
-      "reasoning": "このフィードは${theme}に関する最新情報を日本語で提供します"
+      "reasoning": "${theme}に関する最新情報を提供"
     }
   ]
 }
 
-日本語フィードの例：
-- 技術系: https://www.itmedia.co.jp/rss/2.0/news_bursts.xml, https://japan.cnet.com/rss/index.rdf
-- ニュース: https://www3.nhk.or.jp/rss/news/cat0.xml, https://news.yahoo.co.jp/rss/topics/top-picks.xml
-- ブログ: https://blog.example.jp/feed/
+信頼できる日本語フィードの例：
+- 技術: https://www.itmedia.co.jp/rss/2.0/news_bursts.xml
+- ニュース: https://www3.nhk.or.jp/rss/news/cat0.xml
+- Yahoo: https://news.yahoo.co.jp/rss/topics/top-picks.xml
 
-必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。`;
+必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。
+レスポンスは必ず完全なJSON形式で終わらせてください（}で閉じる）。`;
   } else {
     return `The user is interested in "${theme}". Please suggest 10 related RSS feeds.
 
@@ -245,15 +270,41 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     // Decode response body
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
     const content = responseBody.content[0].text;
+    console.log('[Bedrock] Raw AI response:', content.substring(0, 500) + '...');
 
     // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error('[Bedrock] No JSON found in response');
       throw new Error('No JSON found in response');
     }
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch (jsonError) {
+      // If JSON parsing fails, try to fix common issues
+      console.error('[Bedrock] JSON parse error, attempting to fix:', jsonError);
+      
+      // Try to extract feeds array even if JSON is incomplete
+      const feedsMatch = content.match(/"feeds"\s*:\s*\[([\s\S]*?)\]/);
+      if (feedsMatch) {
+        // Try to parse just the feeds array
+        try {
+          const feedsJson = `{"feeds":[${feedsMatch[1]}]}`;
+          parsed = JSON.parse(feedsJson);
+          console.log('[Bedrock] Successfully recovered feeds from partial JSON');
+        } catch (recoveryError) {
+          console.error('[Bedrock] Failed to recover feeds:', recoveryError);
+          throw jsonError;
+        }
+      } else {
+        throw jsonError;
+      }
+    }
+
     const feeds = parsed.feeds || [];
+    console.log(`[Bedrock] Parsed ${feeds.length} feeds from AI response`);
 
     // Validate and return suggestions (up to 10)
     return feeds.slice(0, 10).map((feed: any) => ({
@@ -262,7 +313,10 @@ function parseAIResponse(response: any): FeedSuggestion[] {
       reasoning: feed.reasoning || '',
     }));
   } catch (error) {
-    console.error('Failed to parse AI response:', error);
+    console.error('[Bedrock] Failed to parse AI response:', error);
+    if (error instanceof Error) {
+      console.error('[Bedrock] Parse error details:', error.message);
+    }
     throw error;
   }
 }

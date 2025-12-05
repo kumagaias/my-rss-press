@@ -473,6 +473,29 @@ PR #43 が作成されました
 Copilotレビューをリクエストしました
 ```
 
+**8-1. Copilotレビューコメントを確認（必須）**
+
+エージェントはCopilotのレビューコメントを取得して確認します：
+
+```
+エージェント: "Copilotのレビューコメントを確認します..."
+
+[GitHub MCP経由でレビューコメントを取得]
+- PR番号: #43
+- method: get_review_comments
+
+Copilotのコメント:
+- ファイル: backend/src/services/rssFetcherService.ts
+  行: 195
+  コメント: "Consider adding error handling for empty arrays"
+  
+- ファイル: backend/src/services/rssFetcherService.ts
+  行: 200
+  コメント: "This shuffle logic could be extracted to a utility function"
+
+エージェント: "Copilotから2件の指摘がありました。対応が必要か確認します。"
+```
+
 **9. コードレビュー（エージェント）**
 
 エージェントがGitHub MCPを使用してコードレビューを実施：
@@ -487,6 +510,7 @@ Copilotレビューをリクエストしました
 - [x] パフォーマンスへの影響
 - [x] ドキュメントの更新
 - [x] Copilotレビューの指摘事項を確認
+- [x] Copilotコメントへの対応を評価
 
 [GitHub MCP経由でレビュー]
 - 変更内容を確認
@@ -653,6 +677,12 @@ export GITHUB_PERSONAL_ACCESS_TOKEN="ghp_your_token_here"
 エージェント: "GitHub Copilotにレビューをリクエストします。"
 [✅ ステップ7: GitHub MCP: Copilotレビューをリクエスト]
 
+エージェント: "Copilotのレビューコメントを確認します。"
+[✅ ステップ7-1: GitHub MCP: レビューコメントを取得]
+
+エージェント: "Copilotから指摘がありました。内容を確認して対応します。"
+[✅ ステップ7-2: Copilotコメントの評価]
+
 エージェント: "コードレビューを実施します。"
 [✅ ステップ8: GitHub MCP: レビュー実施]
 
@@ -675,7 +705,9 @@ export GITHUB_PERSONAL_ACCESS_TOKEN="ghp_your_token_here"
 - [ ] **ステップ5**: PRのタイトルと本文にIssue番号を含めたか？
 - [ ] **ステップ6**: `Fixes #42`をコミットメッセージに含めたか？
 - [ ] **ステップ7**: GitHub Copilotレビューをリクエストしたか？
-- [ ] **ステップ8**: Copilotの指摘事項を確認したか？
+- [ ] **ステップ7-1**: Copilotのレビューコメントを取得したか？
+- [ ] **ステップ7-2**: Copilotの指摘事項を確認・評価したか？
+- [ ] **ステップ8**: コードレビューを実施したか？
 - [ ] **ステップ9**: ユーザーの承認を得てからマージしたか？
 
 **これらのステップをスキップした場合:**

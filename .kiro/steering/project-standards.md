@@ -235,6 +235,31 @@ Task: 1.1"
 git push origin feat/task-1.1-setup-hono-app
 ```
 
+**⚠️ 重要: git pushコマンドの実行ルール**
+
+エージェントは以下のルールに従うこと：
+
+1. **`git push`を`&&`で他のコマンドと繋げない**
+   - ❌ 悪い例: `git commit ... && git push origin main`
+   - ✅ 良い例: 個別に実行してユーザー承認を求める
+
+2. **`git push`は必ず単独で実行**
+   ```bash
+   # ステップ1: ビルド
+   npm run build
+   
+   # ステップ2: コミット
+   git add ... && git commit -m "..."
+   
+   # ステップ3: プッシュ（ユーザー承認が必要）
+   git push origin main
+   ```
+
+3. **理由**
+   - `&&`で繋げると自動承認される可能性がある
+   - ユーザーが意図しないプッシュを防ぐ
+   - デプロイ前の最終確認を確保
+
 **4. レビュー & マージ**
 - GitHub上でPull Requestを作成
 - エージェントまたはチームメンバーがレビュー

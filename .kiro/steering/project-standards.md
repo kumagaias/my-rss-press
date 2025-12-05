@@ -1,55 +1,55 @@
-# プロジェクト標準
+# Project Standards
 
-## コミュニケーション標準
+## Communication Standards
 
-- エージェントとのチャットは日本語で行うこと。
-- `.kiro`ディレクトリ内のファイルは日本語で記述すること。
-- READMEファイルは英語で記述し、200行以内に収めること。
-- **GitHub Pull RequestとIssueは英語で記述すること。**
-  - タイトル、説明文、コメントはすべて英語
-  - **コミットメッセージも英語で記述すること**
-  - PRとIssueは公開情報として英語で統一
-- **コード中のコメントは英語で記述すること。**
-  - 関数、クラス、変数の説明コメント
-  - インラインコメント
-  - JSDoc、TSDoc、Pythonのdocstringなど
-  - 理由：コードは国際的に共有される可能性があるため
+- Agent chat should be conducted in Japanese.
+- Files in the `.kiro` directory should be written in Japanese.
+- README files should be written in English and kept within 200 lines.
+- **GitHub Pull Requests and Issues must be written in English.**
+  - Titles, descriptions, and comments should all be in English
+  - **Commit messages must also be written in English**
+  - PRs and Issues are public information and should be unified in English
+- **Code comments must be written in English.**
+  - Function, class, and variable description comments
+  - Inline comments
+  - JSDoc, TSDoc, Python docstrings, etc.
+  - Reason: Code may be shared internationally
 
-## ツールバージョン管理
+## Tool Version Management
 
 ### .tool-versions
 
-プロジェクトルートに`.tool-versions`ファイルを配置し、必要なツールとそのバージョンを定義すること：
+Place a `.tool-versions` file in the project root and define required tools and their versions:
 
-**必須ツール:**
-- **Node.js**: 24.x (Active LTS) または 22.x (Maintenance LTS)
+**Required Tools:**
+- **Node.js**: 24.x (Active LTS) or 22.x (Maintenance LTS)
 - **Terraform**: >= 1.11.0
 - **AWS CLI**: >= 2.0
 - **Docker**: >= 20.0
-- **Gitleaks**: 最新版（セキュリティチェック用）
+- **Gitleaks**: Latest version (for security checks)
 
-**ツールのインストール:**
+**Tool Installation:**
 
-asdfを使用する場合（推奨）:
+Using asdf (recommended):
 ```bash
-# asdfのインストール（未インストールの場合）
+# Install asdf (if not installed)
 # macOS: brew install asdf
 # Linux: https://asdf-vm.com/guide/getting-started.html
 
-# プラグインの追加
+# Add plugins
 asdf plugin add nodejs
 asdf plugin add terraform
 
-# .tool-versionsに基づいてインストール
+# Install based on .tool-versions
 asdf install
 ```
 
-手動でインストールする場合:
+Manual installation:
 ```bash
-# ツールの確認
+# Check tools
 make check-tools
 
-# 各ツールを個別にインストール
+# Install each tool individually
 # Node.js: https://nodejs.org/
 # Terraform: https://www.terraform.io/downloads.html
 # AWS CLI: https://aws.amazon.com/cli/
@@ -59,259 +59,259 @@ make check-tools
 
 ### Makefile
 
-プロジェクトルートに`Makefile`を配置し、以下のコマンドを提供すること：
+Place a `Makefile` in the project root and provide the following commands:
 
-**ツール管理コマンド:**
+**Tool Management Commands:**
 ```bash
-make check-tools       # 必須ツールのインストール状況を確認
-make install-tools     # asdf経由でツールをインストール（asdfがある場合）
+make check-tools       # Check installation status of required tools
+make install-tools     # Install tools via asdf (if asdf is available)
 ```
 
-**テストコマンド:**
+**Test Commands:**
 ```bash
-make test              # すべてのテスト（ユニット + セキュリティ）
-make test-unit         # ユニットテストのみ
-make test-security     # セキュリティチェックのみ
-make security-check    # セキュリティチェック（エイリアス）
+make test              # All tests (unit + security)
+make test-unit         # Unit tests only
+make test-security     # Security checks only
+make security-check    # Security check (alias)
 ```
 
-**開発コマンド:**
+**Development Commands:**
 ```bash
-make install           # 依存関係のインストール（check-toolsを自動実行）
-make clean             # ビルド成果物のクリーンアップ
-make help              # 利用可能なコマンドの表示
+make install           # Install dependencies (automatically runs check-tools)
+make clean             # Clean build artifacts
+make help              # Display available commands
 ```
 
-**ログ表示:**（将来実装）
+**Log Display:** (Future implementation)
 ```bash
-make logs              # CloudWatch Logsの表示
-make logs-frontend     # フロントエンドログ
-make logs-backend      # バックエンドログ
+make logs              # Display CloudWatch Logs
+make logs-frontend     # Frontend logs
+make logs-backend      # Backend logs
 ```
 
-### テスト実行の原則
+### Test Execution Principles
 
-- すべてのテストコマンドはMakefileからアクセス可能にすること
-- `make test`は常にユニットテストとセキュリティチェックの両方を実行すること
-- テストが失敗した場合は非ゼロの終了コードを返すこと
-- CI/CDパイプラインでは`make test`を実行すること
+- All test commands should be accessible from the Makefile
+- `make test` should always run both unit tests and security checks
+- Tests should return a non-zero exit code on failure
+- CI/CD pipelines should run `make test`
 
-## ドキュメント要件
+## Documentation Requirements
 
-以下のドキュメントファイルを作成・維持すること：
+Create and maintain the following documentation files:
 
-- `product.md` - 製品仕様（機能、ユーザーフロー、用語集）
-- `tech.md` - 技術アーキテクチャと設計判断
-- `tech-common.md` - 汎用的なベストプラクティス
-- `structure.md` - プロジェクト構造と構成
-- `project-standards.md` - プロジェクト標準（このファイル）
-- `review.md` - コードレビュー対応ガイド
-- `postmortem.md` - ポストモーテムガイドライン
+- `product.md` - Product specifications (features, user flows, glossary)
+- `tech.md` - Technical architecture and design decisions
+- `tech-common.md` - General best practices
+- `structure.md` - Project structure and organization
+- `project-standards.md` - Project standards (this file)
+- `review.md` - Code review response guide
+- `postmortem.md` - Postmortem guidelines
 
-### ドキュメント更新ルール
+### Documentation Update Rules
 
-**製品仕様の変更時:**
-1. **必ず`product.md`を更新すること**
-2. 新機能追加、仕様変更、パフォーマンス改善などを反映
-3. 更新履歴セクションに変更内容を記録
+**When product specifications change:**
+1. **Always update `product.md`**
+2. Reflect new features, specification changes, performance improvements, etc.
+3. Record changes in the update history section
 
-**技術実装の変更時:**
-1. **`tech.md`を更新すること**（アーキテクチャ、パフォーマンス最適化等）
-2. **`tech-common.md`を更新すること**（汎用的なベストプラクティス）
+**When technical implementation changes:**
+1. **Update `tech.md`** (architecture, performance optimization, etc.)
+2. **Update `tech-common.md`** (general best practices)
 
-**プロジェクト構造の変更時:**
-1. **`structure.md`を更新すること**
+**When project structure changes:**
+1. **Update `structure.md`**
 
-**更新のタイミング:**
-- 機能実装完了時
-- PR作成時
-- 仕様変更時
+**Update Timing:**
+- When feature implementation is complete
+- When creating a PR
+- When specifications change
 
-これらのファイルは関連する変更があれば必ず更新すること。
+These files must be updated whenever there are related changes.
 
-## Steering Files管理
+## Steering Files Management
 
-### ファイルサイズの制限
+### File Size Limits
 
-**1ファイルあたりの行数:**
-- **推奨**: 500-1000行
-- **上限**: 1500行
-- **1500行を超えた場合**: セクションごとに分割すること
+**Lines per file:**
+- **Recommended**: 500-1000 lines
+- **Maximum**: 1500 lines
+- **If exceeding 1500 lines**: Split by section
 
-**分割例:**
+**Split Example:**
 ```
-tech.md (1600行) → 分割
-├── tech-architecture.md    # アーキテクチャ概要
-├── tech-frontend.md        # フロントエンド技術
-└── tech-backend.md         # バックエンド技術
+tech.md (1600 lines) → Split
+├── tech-architecture.md    # Architecture overview
+├── tech-frontend.md        # Frontend technology
+└── tech-backend.md         # Backend technology
 ```
 
-### ファイル数の制限
+### File Count Limits
 
-**Steering filesの総数:**
-- **推奨**: 3-5ファイル
-- **上限**: 10ファイル
-- **10ファイルを超えた場合**: 統合できるものを統合すること
+**Total steering files:**
+- **Recommended**: 3-5 files
+- **Maximum**: 10 files
+- **If exceeding 10 files**: Consolidate where possible
 
-### 現在のSteering Files
+### Current Steering Files
 
 ```
 .kiro/steering/
-├── project-standards.md    # プロジェクト標準（このファイル）
-├── tech.md                 # 技術アーキテクチャ
-└── structure.md            # プロジェクト構造
+├── project-standards.md    # Project standards (this file)
+├── tech.md                 # Technical architecture
+└── structure.md            # Project structure
 ```
 
-### 管理ルール
+### Management Rules
 
-1. **定期的な確認**: 月1回、ファイルサイズを確認すること
-2. **分割の判断**: 1500行を超えたら即座に分割を検討すること
-3. **統合の判断**: 小さなファイル（100行未満）は統合を検討すること
-4. **命名規則**: `<カテゴリ>-<サブカテゴリ>.md`の形式を使用すること
-5. **相互参照**: 分割したファイル間で相互参照を明記すること
+1. **Regular checks**: Check file sizes monthly
+2. **Split decision**: Consider splitting immediately if exceeding 1500 lines
+3. **Consolidation decision**: Consider consolidating small files (< 100 lines)
+4. **Naming convention**: Use `<category>-<subcategory>.md` format
+5. **Cross-references**: Clearly indicate cross-references between split files
 
-### ファイルサイズの確認方法
+### File Size Check Method
 
 ```bash
-# すべてのsteering filesの行数を確認
+# Check line count of all steering files
 wc -l .kiro/steering/*.md
 
-# 1500行を超えるファイルを検出
+# Detect files exceeding 1500 lines
 find .kiro/steering -name "*.md" -exec wc -l {} \; | awk '$1 > 1500 {print $2 " has " $1 " lines (exceeds limit)"}'
 ```
 
-## 開発フロー
+## Development Flow
 
-### 基本的な開発フロー
+### Basic Development Flow
 
-すべての機能開発とバグ修正は以下のフローに従うこと：
+All feature development and bug fixes should follow this flow:
 
-**1. ブランチを切る**
+**1. Create a branch**
 ```bash
-# タスク番号を使用してブランチを作成
+# Create a branch using task number
 git checkout -b feat/task-1.1-setup-hono-app
 
-# または、説明的な名前を使用
+# Or use a descriptive name
 git checkout -b feat/setup-hono-application
 ```
 
-**ブランチ命名規則:**
-- `feat/task-X.X-<description>` - 新機能
-- `fix/task-X.X-<description>` - バグ修正
-- `refactor/task-X.X-<description>` - リファクタリング
-- `test/task-X.X-<description>` - テスト追加
+**Branch Naming Convention:**
+- `feat/task-X.X-<description>` - New feature
+- `fix/task-X.X-<description>` - Bug fix
+- `refactor/task-X.X-<description>` - Refactoring
+- `test/task-X.X-<description>` - Test addition
 
-**2. ローカルで動作確認**
+**2. Verify locally**
 ```bash
-# テストを実行
+# Run tests
 make test
 
-# ローカルサーバーで動作確認
+# Verify with local server
 cd frontend && npm run dev
-# または
+# or
 cd backend && npm run dev
 
-# 手動テスト
-# - 実装した機能が正しく動作することを確認
-# - 既存の機能に影響がないことを確認
-# - ブラウザで実際に操作して確認
+# Manual testing
+# - Verify implemented feature works correctly
+# - Verify no impact on existing features
+# - Verify by actually operating in browser
 ```
 
-**3. Push して main に PR 作成**
+**3. Push and create PR to main**
 ```bash
-# 変更をステージング
+# Stage changes
 git add .
 
-# コミット（タスク番号を含める）
-git commit -m "feat: Honoアプリケーションのセットアップ (task-1.1)
+# Commit (include task number)
+git commit -m "feat: Set up Hono application (task-1.1)
 
-- backend/src/app.tsを作成
-- GET /api/healthエンドポイントを実装
-- CORSとロギングミドルウェアを追加
+- Create backend/src/app.ts
+- Implement GET /api/health endpoint
+- Add CORS and logging middleware
 
 Task: 1.1"
 
-# プッシュ
+# Push
 git push origin feat/task-1.1-setup-hono-app
 ```
 
-**⚠️ 重要: git pushコマンドの実行ルール**
+**⚠️ Important: git push Command Execution Rules**
 
-エージェントは以下のルールに従うこと：
+Agents must follow these rules:
 
-1. **`git push`を`&&`で他のコマンドと繋げない**
-   - ❌ 悪い例: `git commit ... && git push origin main`
-   - ✅ 良い例: 個別に実行してユーザー承認を求める
+1. **Do not chain `git push` with `&&` to other commands**
+   - ❌ Bad example: `git commit ... && git push origin main`
+   - ✅ Good example: Execute separately and request user approval
 
-2. **`git push`は必ず単独で実行**
+2. **Always execute `git push` independently**
    ```bash
-   # ステップ1: ビルド
+   # Step 1: Build
    npm run build
    
-   # ステップ2: コミット
+   # Step 2: Commit
    git add ... && git commit -m "..."
    
-   # ステップ3: プッシュ（ユーザー承認が必要）
+   # Step 3: Push (requires user approval)
    git push origin main
    ```
 
-3. **理由**
-   - `&&`で繋げると自動承認される可能性がある
-   - ユーザーが意図しないプッシュを防ぐ
-   - デプロイ前の最終確認を確保
+3. **Reason**
+   - Chaining with `&&` may result in automatic approval
+   - Prevents unintended pushes by user
+   - Ensures final confirmation before deployment
 
-**4. レビュー & マージ**
-- GitHub上でPull Requestを作成
-- エージェントまたはチームメンバーがレビュー
-- 承認後、mainブランチにマージ
-- ブランチを削除
+**4. Review & Merge**
+- Create Pull Request on GitHub
+- Agent or team member reviews
+- After approval, merge to main branch
+- Delete branch
 
-### 自動化されたワークフロー
+### Automated Workflow
 
-エージェントは以下を自動的に実行します：
+Agents automatically execute the following:
 
-**タスク開始時:**
-1. ✅ タスク番号からブランチ名を生成
-2. ✅ `git checkout -b feat/task-X.X-<description>`を実行
-3. ✅ タスクの実装を開始
+**When starting a task:**
+1. ✅ Generate branch name from task number
+2. ✅ Execute `git checkout -b feat/task-X.X-<description>`
+3. ✅ Start task implementation
 
-**タスク完了時:**
-1. ✅ `make test`を実行して全テストが通ることを確認
-2. ✅ ローカルで動作確認（必要に応じて）
-3. ✅ 変更をコミット（タスク番号を含む）
-4. ✅ ブランチをプッシュ
-5. ✅ GitHub MCPを使用してPRを作成
-6. ✅ コードレビューを実施
-7. ✅ 承認後、PRをマージ
-8. ✅ ブランチを削除
+**When completing a task:**
+1. ✅ Run `make test` to verify all tests pass
+2. ✅ Verify locally (as needed)
+3. ✅ Commit changes (include task number)
+4. ✅ Push branch
+5. ✅ Create PR using GitHub MCP
+6. ✅ Conduct code review
+7. ✅ After approval, merge PR
+8. ✅ Delete branch
 
-**エージェントとの対話例:**
+**Agent Interaction Example:**
 ```
-ユーザー: "タスク1.1を実装して"
+User: "Implement task 1.1"
 
-エージェント: 
-1. ブランチを作成します: feat/task-1.1-setup-hono-app
-2. Honoアプリケーションをセットアップします
-3. ローカルでテストします
-4. PRを作成します
+Agent: 
+1. Creating branch: feat/task-1.1-setup-hono-app
+2. Setting up Hono application
+3. Testing locally
+4. Creating PR
 
-[実装完了後]
+[After implementation complete]
 
-エージェント: "実装が完了しました。PRを作成してレビューしますか？"
+Agent: "Implementation complete. Shall I create a PR and review?"
 
-ユーザー: "お願いします"
+User: "Please do"
 
-エージェント: "PR #1を作成しました。レビューして承認します。"
-[レビュー完了]
+Agent: "Created PR #1. Reviewing and approving."
+[Review complete]
 
-エージェント: "PRをマージしました。次のタスクに進みますか？"
+Agent: "Merged PR. Proceed to next task?"
 ```
 
-### コミットメッセージの規約
+### Commit Message Convention
 
-**言語: 英語で記述すること**
+**Language: Write in English**
 
-**フォーマット:**
+**Format:**
 ```
 <type>: <subject> (task-X.X)
 
@@ -329,7 +329,7 @@ Task: X.X
 - `test`: Adding or updating tests
 - `chore`: Changes to build process or tools
 
-**例:**
+**Example:**
 ```
 feat: Set up Hono application (task-1.1)
 
@@ -341,241 +341,241 @@ feat: Set up Hono application (task-1.1)
 Task: 1.1
 ```
 
-### PR作成のテンプレート
+### PR Creation Template
 
 ```markdown
-## 概要
-タスク1.1: Honoアプリケーションのセットアップ
+## Overview
+Task 1.1: Set up Hono application
 
-## 変更内容
-- backend/src/app.tsを作成
-- GET /api/healthエンドポイントを実装
-- CORSとロギングミドルウェアを追加
+## Changes
+- Create backend/src/app.ts
+- Implement GET /api/health endpoint
+- Add CORS and logging middleware
 
-## 受け入れ条件
-- [x] backend/src/app.tsが作成されている
-- [x] GET /api/healthエンドポイントが実装されている
-- [x] npm run devでローカルサーバーが起動する
-- [x] curl http://localhost:3001/api/healthが{"status":"ok"}を返す
+## Acceptance Criteria
+- [x] backend/src/app.ts is created
+- [x] GET /api/health endpoint is implemented
+- [x] Local server starts with npm run dev
+- [x] curl http://localhost:3001/api/health returns {"status":"ok"}
 
-## テスト
-- [x] make testが通る
-- [x] ローカルで動作確認済み
+## Testing
+- [x] make test passes
+- [x] Verified locally
 
-## スクリーンショット（必要に応じて）
-[スクリーンショットを添付]
+## Screenshots (if applicable)
+[Attach screenshots]
 
 Task: 1.1
 ```
 
-## 不具合報告とバグ修正ワークフロー
+## Bug Report and Bug Fix Workflow
 
-### ⚠️ 重要: このワークフローは必須です
+### ⚠️ Important: This workflow is mandatory
 
-**エージェントへの指示:**
-- バグや不具合を発見したら、**必ず**このワークフローに従うこと
-- 直接mainブランチで修正しないこと
-- Issue作成をスキップしないこと
+**Instructions for agents:**
+- When a bug or issue is discovered, **always** follow this workflow
+- Do not fix directly on main branch
+- Do not skip Issue creation
 
-### 不具合報告の流れ
+### Bug Report Flow
 
-**1. ユーザーがエージェントに報告**
+**1. User reports to agent**
 ```
-ユーザー: "新聞生成ボタンをクリックしてもエラーが出ます"
-```
-
-**2. エージェントがGitHub Issueを作成（必須）**
-
-エージェントはGitHub MCPを使用してIssueを**必ず**作成します：
-
-```
-エージェント: "GitHub Issueを作成します..."
-
-[GitHub MCP経由でIssueを作成]
-- タイトル: "Bug: 新聞生成ボタンでエラーが発生"
-- 本文: 問題の説明、再現手順、期待される動作、環境情報
-- ラベル: "bug"
-- 担当者: 自動設定
-
-Issue #42 が作成されました
+User: "Error occurs when clicking newspaper generation button"
 ```
 
-**❌ 禁止: Issue作成をスキップすること**
-- 「小さな修正だから」という理由でIssueをスキップしない
-- すべてのバグ修正はIssueで追跡する
+**2. Agent creates GitHub Issue (mandatory)**
 
-**3. 修正ブランチを作成（必須）**
+Agent **must** create an Issue using GitHub MCP:
+
+```
+Agent: "Creating GitHub Issue..."
+
+[Create Issue via GitHub MCP]
+- Title: "Bug: Error occurs on newspaper generation button"
+- Body: Problem description, reproduction steps, expected behavior, environment info
+- Label: "bug"
+- Assignee: Auto-set
+
+Issue #42 created
+```
+
+**❌ Prohibited: Skipping Issue creation**
+- Do not skip Issues because "it's a small fix"
+- Track all bug fixes with Issues
+
+**3. Create fix branch (mandatory)**
 ```bash
-# Issue番号を取得（例: #42）
+# Get Issue number (e.g., #42)
 ISSUE_NUMBER=42
 
-# fix/ブランチを作成（必須）
+# Create fix/ branch (mandatory)
 git checkout -b fix/issue-${ISSUE_NUMBER}-newspaper-generation-error
 
-# または、説明的な名前を使用
+# Or use descriptive name
 git checkout -b fix/newspaper-generation-button-error
 ```
 
-**❌ 禁止: mainブランチで直接修正すること**
-- 必ず修正用のブランチを作成する
-- ブランチ名にはIssue番号を含める
+**❌ Prohibited: Fixing directly on main branch**
+- Always create a fix branch
+- Include Issue number in branch name
 
-### バグ修正の流れ
+### Bug Fix Flow
 
-**4. 修正作業**
+**4. Fix work**
 ```bash
-# 問題を特定して修正
-# - コードの調査
-# - 修正の実装
-# - テストの追加/更新
+# Identify and fix the problem
+# - Code investigation
+# - Implement fix
+# - Add/update tests
 ```
 
-**5. ローカルで動作確認**
+**5. Verify locally**
 ```bash
-# テストを実行
+# Run tests
 make test
 
-# ローカルサーバーで動作確認
+# Verify with local server
 cd frontend && npm run dev
-# または
+# or
 cd backend && npm run dev
 
-# 手動テスト
-# 1. 再現手順を実行
-# 2. 修正が機能することを確認
-# 3. 他の機能に影響がないことを確認
+# Manual testing
+# 1. Execute reproduction steps
+# 2. Verify fix works
+# 3. Verify no impact on other features
 ```
 
-**6. コミットとプッシュ**
+**6. Commit and push**
 ```bash
-# 変更をステージング
+# Stage changes
 git add .
 
-# コミット（Issue番号を含める）
-git commit -m "fix: 新聞生成ボタンのエラーを修正 (#42)
+# Commit (include Issue number)
+git commit -m "fix: Fix newspaper generation button error (#42)
 
-- フィード選択時のバリデーションを追加
-- エラーハンドリングを改善
-- 関連するテストを追加
+- Add validation for feed selection
+- Improve error handling
+- Add related tests
 
 Fixes #42"
 
-# プッシュ
+# Push
 git push origin fix/issue-42-newspaper-generation-error
 ```
 
-**7. Pull Requestを作成**
+**7. Create Pull Request**
 
-エージェントはGitHub MCPを使用してPRを自動作成します：
-
-```
-エージェント: "Pull Requestを作成します..."
-
-[GitHub MCP経由でPRを作成]
-- タイトル: "fix: 新聞生成ボタンのエラーを修正 (#42)"
-- ベースブランチ: main
-- ヘッドブランチ: fix/issue-42-newspaper-generation-error
-- 本文: 変更内容、修正内容、テスト結果
-- ラベル: "bug"
-- 関連Issue: #42
-
-PR #43 が作成されました
-```
-
-**8. GitHub Copilotレビューをリクエスト（必須）**
-
-エージェントはGitHub MCPを使用してCopilotレビューをリクエストします：
+Agent automatically creates PR using GitHub MCP:
 
 ```
-エージェント: "GitHub Copilotにレビューをリクエストします..."
+Agent: "Creating Pull Request..."
 
-[GitHub MCP経由でCopilotレビューをリクエスト]
-- PR番号: #43
-- 自動的にコードを分析
-- 潜在的な問題を検出
-- 改善提案を提供
+[Create PR via GitHub MCP]
+- Title: "fix: Fix newspaper generation button error (#42)"
+- Base branch: main
+- Head branch: fix/issue-42-newspaper-generation-error
+- Body: Changes, fixes, test results
+- Label: "bug"
+- Related Issue: #42
 
-Copilotレビューをリクエストしました
+PR #43 created
 ```
 
-**8-1. Copilotレビューコメントを確認（必須）**
+**8. Request GitHub Copilot review (mandatory)**
 
-エージェントはCopilotのレビューコメントを取得して確認します：
+Agent requests Copilot review using GitHub MCP:
 
 ```
-エージェント: "Copilotのレビューコメントを確認します..."
+Agent: "Requesting GitHub Copilot review..."
 
-[GitHub MCP経由でレビューコメントを取得]
-- PR番号: #43
+[Request Copilot review via GitHub MCP]
+- PR number: #43
+- Automatically analyze code
+- Detect potential issues
+- Provide improvement suggestions
+
+Copilot review requested
+```
+
+**8-1. Check Copilot review comments (mandatory)**
+
+Agent retrieves and checks Copilot review comments:
+
+```
+Agent: "Checking Copilot review comments..."
+
+[Get review comments via GitHub MCP]
+- PR number: #43
 - method: get_review_comments
 
-Copilotのコメント:
-- ファイル: backend/src/services/rssFetcherService.ts
-  行: 195
-  コメント: "Consider adding error handling for empty arrays"
+Copilot comments:
+- File: backend/src/services/rssFetcherService.ts
+  Line: 195
+  Comment: "Consider adding error handling for empty arrays"
   
-- ファイル: backend/src/services/rssFetcherService.ts
-  行: 200
-  コメント: "This shuffle logic could be extracted to a utility function"
+- File: backend/src/services/rssFetcherService.ts
+  Line: 200
+  Comment: "This shuffle logic could be extracted to a utility function"
 
-エージェント: "Copilotから2件の指摘がありました。対応が必要か確認します。"
+Agent: "Received 2 comments from Copilot. Checking if action is needed."
 ```
 
-**9. コードレビュー（エージェント）**
+**9. Code review (Agent)**
 
-エージェントがGitHub MCPを使用してコードレビューを実施：
-
-```
-エージェント: "コードレビューを実施します..."
-
-[レビュー項目]
-- [x] コードの品質
-- [x] テストの網羅性
-- [x] セキュリティチェック
-- [x] パフォーマンスへの影響
-- [x] ドキュメントの更新
-- [x] Copilotレビューの指摘事項を確認
-- [x] Copilotコメントへの対応を評価
-
-[GitHub MCP経由でレビュー]
-- 変更内容を確認
-- Copilotの指摘を確認
-- 必要に応じてコメントを追加
-- 問題なければ承認
-
-レビュー完了: APPROVED
-```
-
-**注**: 自分のPRは承認できないため、エージェントは承認をスキップしてユーザーに確認を求めます。
-
-**10. マージ（ユーザー承認後）**
-
-エージェントはユーザーの承認を得てからマージします：
+Agent conducts code review using GitHub MCP:
 
 ```
-エージェント: "Copilotレビューとコードレビューが完了しました。マージしてよろしいでしょうか？"
+Agent: "Conducting code review..."
 
-ユーザー: "お願いします"
+[Review items]
+- [x] Code quality
+- [x] Test coverage
+- [x] Security check
+- [x] Performance impact
+- [x] Documentation updates
+- [x] Check Copilot review points
+- [x] Evaluate response to Copilot comments
 
-エージェント: "PRをマージします..."
+[Review via GitHub MCP]
+- Check changes
+- Check Copilot points
+- Add comments as needed
+- Approve if no issues
 
-[GitHub MCP経由でマージ]
-- マージ方法: Squash and merge（推奨）
-- ブランチ削除: 自動
-
-PR #43 がマージされました
-Issue #42 が自動的にクローズされました
+Review complete: APPROVED
 ```
 
-**❌ 禁止: ユーザーの承認なしにマージすること**
-- 必ずユーザーに「マージしてよろしいでしょうか？」と確認すること
-- ユーザーの承認を得てからマージすること
+**Note**: Since you cannot approve your own PR, agent skips approval and asks user for confirmation.
 
-### コミットメッセージの規約
+**10. Merge (after user approval)**
 
-**言語: 英語で記述すること**
+Agent merges after getting user approval:
 
-**フォーマット:**
+```
+Agent: "Copilot review and code review complete. May I merge?"
+
+User: "Please do"
+
+Agent: "Merging PR..."
+
+[Merge via GitHub MCP]
+- Merge method: Squash and merge (recommended)
+- Branch deletion: Automatic
+
+PR #43 merged
+Issue #42 automatically closed
+```
+
+**❌ Prohibited: Merging without user approval**
+- Always ask user "May I merge?"
+- Get user approval before merging
+
+### Commit Message Convention
+
+**Language: Write in English**
+
+**Format:**
 ```
 <type>: <subject> (#issue-number)
 
@@ -593,7 +593,7 @@ Issue #42 が自動的にクローズされました
 - `test`: Adding or updating tests
 - `chore`: Changes to build process or tools
 
-**例:**
+**Example:**
 ```
 fix: Fix newspaper generation button error (#42)
 
@@ -607,36 +607,36 @@ when clicking the generate button with an empty feed list.
 Fixes #42
 ```
 
-### ブランチ命名規則
+### Branch Naming Convention
 
-**フォーマット:**
+**Format:**
 ```
 <type>/<issue-number>-<short-description>
 ```
 
-**例:**
+**Examples:**
 - `fix/42-newspaper-generation-error`
 - `feat/15-bookmark-feature`
 - `docs/23-update-readme`
 - `refactor/31-improve-layout-algorithm`
 
-### GitHub MCPのセットアップ
+### GitHub MCP Setup
 
-**前提条件:**
-- GitHubアカウント
-- GitHubパーソナルアクセストークン
+**Prerequisites:**
+- GitHub account
+- GitHub Personal Access Token
 
-**設定方法:**
+**Setup Method:**
 
-1. **GitHubトークンの作成:**
+1. **Create GitHub token:**
    - GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
    - Generate new token (classic)
-   - 必要なスコープ:
-     - `repo` (フルアクセス)
-     - `workflow` (GitHub Actionsの管理)
-   - トークンをコピー
+   - Required scopes:
+     - `repo` (full access)
+     - `workflow` (GitHub Actions management)
+   - Copy token
 
-2. **MCP設定ファイルの更新:**
+2. **Update MCP config file:**
 ```json
 // .kiro/settings/mcp.json
 {
@@ -652,9 +652,9 @@ Fixes #42
 }
 ```
 
-3. **環境変数での管理（推奨）:**
+3. **Manage with environment variables (recommended):**
 ```bash
-# ~/.zshrc または ~/.bashrc
+# ~/.zshrc or ~/.bashrc
 export GITHUB_PERSONAL_ACCESS_TOKEN="ghp_your_token_here"
 ```
 
@@ -673,413 +673,413 @@ export GITHUB_PERSONAL_ACCESS_TOKEN="ghp_your_token_here"
 }
 ```
 
-4. **MCPサーバーの再起動:**
-   - Kiroを再起動、またはMCP Serverビューから再接続
+4. **Restart MCP server:**
+   - Restart Kiro, or reconnect from MCP Server view
 
-### エージェントとの対話例
+### Agent Interaction Example
 
-**バグ報告から修正まで:**
+**From bug report to fix:**
 
 ```
-ユーザー: "新聞生成ボタンをクリックするとエラーが出ます"
+User: "Error occurs when clicking newspaper generation button"
 
-エージェント: "問題を確認しました。まずGitHub Issueを作成します。"
-[✅ ステップ1: GitHub MCP: Issue #42 を作成]
+Agent: "Confirmed the issue. First, creating GitHub Issue."
+[✅ Step 1: GitHub MCP: Create Issue #42]
 
-エージェント: "Issue #42を作成しました。次に修正ブランチを作成します。"
-[✅ ステップ2: Git: fix/issue-42-newspaper-generation-error ブランチを作成]
+Agent: "Created Issue #42. Next, creating fix branch."
+[✅ Step 2: Git: Create fix/issue-42-newspaper-generation-error branch]
 
-エージェント: "問題を特定しました。フィード選択のバリデーションが不足していました。修正します。"
-[✅ ステップ3: コード修正、テスト追加]
+Agent: "Identified the problem. Feed selection validation was missing. Fixing."
+[✅ Step 3: Code fix, add tests]
 
-エージェント: "ローカルで動作確認しました。問題が解決しています。"
-[✅ ステップ4: make test 実行、手動テスト]
+Agent: "Verified locally. Problem is resolved."
+[✅ Step 4: Run make test, manual testing]
 
-エージェント: "変更をコミットしてPull Requestを作成します。"
-[✅ ステップ5: Git: commit & push]
-[✅ ステップ6: GitHub MCP: PR #43 を作成]
+Agent: "Committing changes and creating Pull Request."
+[✅ Step 5: Git: commit & push]
+[✅ Step 6: GitHub MCP: Create PR #43]
 
-エージェント: "GitHub Copilotにレビューをリクエストします。"
-[✅ ステップ7: GitHub MCP: Copilotレビューをリクエスト]
+Agent: "Requesting GitHub Copilot review."
+[✅ Step 7: GitHub MCP: Request Copilot review]
 
-エージェント: "Copilotのレビューコメントを確認します。"
-[✅ ステップ7-1: GitHub MCP: レビューコメントを取得]
+Agent: "Checking Copilot review comments."
+[✅ Step 7-1: GitHub MCP: Get review comments]
 
-エージェント: "Copilotから指摘がありました。内容を確認して対応します。"
-[✅ ステップ7-2: Copilotコメントの評価]
+Agent: "Received comments from Copilot. Checking content and responding."
+[✅ Step 7-2: Evaluate Copilot comments]
 
-エージェント: "コードレビューを実施します。"
-[✅ ステップ8: GitHub MCP: レビュー実施]
+Agent: "Conducting code review."
+[✅ Step 8: GitHub MCP: Conduct review]
 
-エージェント: "Copilotレビューとコードレビューが完了しました。マージしてよろしいでしょうか？"
+Agent: "Copilot review and code review complete. May I merge?"
 
-ユーザー: "お願いします"
+User: "Please do"
 
-エージェント: "マージしました。Issue #42 もクローズされました。"
-[✅ ステップ9: GitHub MCP: PR #43 をマージ]
+Agent: "Merged. Issue #42 also closed."
+[✅ Step 9: GitHub MCP: Merge PR #43]
 ```
 
-### ワークフローチェックリスト（エージェント用）
+### Workflow Checklist (for agents)
 
-バグ修正を開始する前に、このチェックリストを確認すること：
+Check this checklist before starting bug fix:
 
-- [ ] **ステップ1**: GitHub Issueを作成したか？
-- [ ] **ステップ2**: 修正ブランチ（`fix/issue-{番号}-{説明}`）を作成したか？
-- [ ] **ステップ3**: mainブランチで直接作業していないか？
-- [ ] **ステップ4**: コミットメッセージにIssue番号（`#42`）を含めたか？
-- [ ] **ステップ5**: PRのタイトルと本文にIssue番号を含めたか？
-- [ ] **ステップ6**: `Fixes #42`をコミットメッセージに含めたか？
-- [ ] **ステップ7**: GitHub Copilotレビューをリクエストしたか？
-- [ ] **ステップ7-1**: Copilotのレビューコメントを取得したか？
-- [ ] **ステップ7-2**: Copilotの指摘事項を確認・評価したか？
-- [ ] **ステップ8**: コードレビューを実施したか？
-- [ ] **ステップ9**: ユーザーの承認を得てからマージしたか？
+- [ ] **Step 1**: Created GitHub Issue?
+- [ ] **Step 2**: Created fix branch (`fix/issue-{number}-{description}`)?
+- [ ] **Step 3**: Not working directly on main branch?
+- [ ] **Step 4**: Included Issue number (`#42`) in commit message?
+- [ ] **Step 5**: Included Issue number in PR title and body?
+- [ ] **Step 6**: Included `Fixes #42` in commit message?
+- [ ] **Step 7**: Requested GitHub Copilot review?
+- [ ] **Step 7-1**: Retrieved Copilot review comments?
+- [ ] **Step 7-2**: Checked and evaluated Copilot points?
+- [ ] **Step 8**: Conducted code review?
+- [ ] **Step 9**: Got user approval before merging?
 
-**これらのステップをスキップした場合:**
-- トレーサビリティが失われる
-- 変更履歴が追跡できない
-- コード品質の問題を見逃す可能性がある
-- プロジェクト標準に違反する
+**If these steps are skipped:**
+- Traceability is lost
+- Change history cannot be tracked
+- May miss code quality issues
+- Violates project standards
 
-### 自動化（オプション）
+### Automation (Optional)
 
-エージェントフックで自動化することも可能：
+Can also automate with agent hooks:
 
 ```json
 // .kiro/hooks/create-bug-fix-branch.json
 {
-  "name": "バグ修正ブランチ作成",
-  "description": "GitHub Issueからバグ修正ブランチを作成",
+  "name": "Create bug fix branch",
+  "description": "Create bug fix branch from GitHub Issue",
   "trigger": {
     "type": "manual"
   },
   "action": {
     "type": "message",
-    "message": "バグ修正のIssue番号を教えてください。ブランチを作成してバグ修正を開始します。"
+    "message": "Please provide the Issue number for the bug fix. I will create a branch and start the bug fix."
   }
 }
 ```
 
-## Spec実装の優先順位
+## Spec Implementation Priority
 
-機能実装は以下の優先順位で進めること：
+Feature implementation should proceed in the following priority order:
 
-### 1. MVP（最優先）
+### 1. MVP (Highest Priority)
 
-**ディレクトリ**: `.kiro/specs/mvp/`
+**Directory**: `.kiro/specs/mvp/`
 
-MVPは最小限の機能で動作する製品を提供します。以下の機能を含みます：
+MVP provides a product that works with minimal features. Includes:
 
-- 基本的なUI/UX
-- コア機能の実装
-- 本番環境へのデプロイ
+- Basic UI/UX
+- Core feature implementation
+- Production environment deployment
 
-**実装順序:**
-1. `mvp/requirements.md`の要件を確認
-2. `mvp/design.md`の設計に従って実装
-3. すべてのテストが通ることを確認
-4. 本番環境にデプロイ
+**Implementation Order:**
+1. Check requirements in `mvp/requirements.md`
+2. Implement according to design in `mvp/design.md`
+3. Verify all tests pass
+4. Deploy to production environment
 
-### 2. MyRSSPress（次の優先）
+### 2. MyRSSPress (Next Priority)
 
-**ディレクトリ**: `.kiro/specs/mvp/`
+**Directory**: `.kiro/specs/mvp/`
 
-MVPの次に実装する機能セットです。以下を含みます：
+Feature set to implement after MVP. Includes:
 
-- 多言語対応（日本語/英語）
-- 新聞設定とメタデータ
-- 人気の新聞表示
-- レスポンシブデザイン
+- Multi-language support (Japanese/English)
+- Newspaper settings and metadata
+- Popular newspapers display
+- Responsive design
 
-**実装順序:**
-1. MVPが完成していることを確認
-2. `phase-2/requirements.md`の要件を確認
-3. `phase-2/design.md`の設計に従って実装
-4. 段階的にデプロイ
+**Implementation Order:**
+1. Verify MVP is complete
+2. Check requirements in `phase-2/requirements.md`
+3. Implement according to design in `phase-2/design.md`
+4. Deploy incrementally
 
-**実装タイミング:**
-- Phase 1の実装が完了してから
-- ユーザーフィードバックを元に優先順位を調整
+**Implementation Timing:**
+- After Phase 1 implementation is complete
+- Adjust priorities based on user feedback
 
-### Spec実装のルール
+### Spec Implementation Rules
 
-1. **順序を守る**: Phase 1 → Phase 2
-2. **完成させる**: 各specは完全に実装してから次に進む
-3. **テストを書く**: すべての要件に対してテストを書く
-4. **ドキュメント更新**: 実装に合わせてtech.md、structure.mdを更新
-5. **レビュー**: 各spec完了時にコードレビューを実施
+1. **Follow order**: Phase 1 → Phase 2
+2. **Complete**: Fully implement each spec before moving to next
+3. **Write tests**: Write tests for all requirements
+4. **Update documentation**: Update tech.md, structure.md according to implementation
+5. **Review**: Conduct code review upon completion of each spec
 
-### タスクの受け入れ条件
+### Task Acceptance Criteria
 
-**すべてのタスクには受け入れ条件を記載すること**
+**All tasks must include acceptance criteria**
 
-**受け入れ条件の形式:**
+**Acceptance Criteria Format:**
 ```markdown
-- [ ] 1. タスク名
-  - 実装内容の説明
-  - **受け入れ条件:**
-    - [ ] 条件1: 具体的な検証可能な条件
-    - [ ] 条件2: 具体的な検証可能な条件
-    - [ ] 条件3: 具体的な検証可能な条件
+- [ ] 1. Task name
+  - Implementation description
+  - **Acceptance Criteria:**
+    - [ ] Criterion 1: Specific verifiable condition
+    - [ ] Criterion 2: Specific verifiable condition
+    - [ ] Criterion 3: Specific verifiable condition
   - _Requirements: X.X_
 ```
 
-**受け入れ条件の書き方:**
-- **具体的**: 曖昧な表現を避ける
-- **検証可能**: テストや確認で検証できる
-- **完了の定義**: この条件を満たせばタスク完了と判断できる
+**How to write acceptance criteria:**
+- **Specific**: Avoid ambiguous expressions
+- **Verifiable**: Can be verified through testing or confirmation
+- **Definition of done**: Task is complete when these conditions are met
 
-**良い例:**
+**Good Example:**
 ```markdown
-- [ ] 1.1 Honoアプリケーションのセットアップ
-  - **受け入れ条件:**
-    - [ ] `backend/src/app.ts`が作成されている
-    - [ ] `GET /api/health`エンドポイントが実装されている
-    - [ ] `npm run dev`でローカルサーバーが起動する
-    - [ ] `curl http://localhost:3001/api/health`が`{"status":"ok"}`を返す
+- [ ] 1.1 Set up Hono application
+  - **Acceptance Criteria:**
+    - [ ] `backend/src/app.ts` is created
+    - [ ] `GET /api/health` endpoint is implemented
+    - [ ] Local server starts with `npm run dev`
+    - [ ] `curl http://localhost:3001/api/health` returns `{"status":"ok"}`
 ```
 
-**悪い例:**
+**Bad Example:**
 ```markdown
-- [ ] 1.1 Honoアプリケーションのセットアップ
-  - **受け入れ条件:**
-    - [ ] 正しく動作する（❌ 曖昧）
-    - [ ] きれいなコードを書く（❌ 検証不可能）
+- [ ] 1.1 Set up Hono application
+  - **Acceptance Criteria:**
+    - [ ] Works correctly (❌ Ambiguous)
+    - [ ] Write clean code (❌ Not verifiable)
 ```
 
-**受け入れ条件のカテゴリ:**
-1. **ファイル/コードの存在**: 必要なファイルが作成されている
-2. **機能の動作**: 特定の操作で期待される結果が得られる
-3. **テストの合格**: 関連するテストがすべて通る
-4. **パフォーマンス**: レスポンス時間などの性能要件を満たす
-5. **デプロイ**: 本番環境で正しく動作する
+**Acceptance Criteria Categories:**
+1. **File/Code existence**: Required files are created
+2. **Feature operation**: Expected results from specific operations
+3. **Test passing**: All related tests pass
+4. **Performance**: Meets performance requirements like response time
+5. **Deployment**: Works correctly in production environment
 
-## エージェントフック
+## Agent Hooks
 
-品質チェックを自動化するエージェントフックを作成すること：
+Create agent hooks to automate quality checks:
 
-### 利用可能なフック
+### Available Hooks
 
-1. **ユニットテスト実行** (`.kiro/hooks/run-tests.json`)
-   - コマンド: `make test-unit`
-   - 用途: ユニットテストのみを実行
-   - トリガー: 手動実行
+1. **Run unit tests** (`.kiro/hooks/run-tests.json`)
+   - Command: `make test-unit`
+   - Purpose: Run unit tests only
+   - Trigger: Manual execution
 
-2. **すべてのテスト実行** (`.kiro/hooks/run-all-tests.json`)
-   - コマンド: `make test`
-   - 用途: ユニットテスト + セキュリティチェック
-   - トリガー: タスク完了時に自動実行
+2. **Run all tests** (`.kiro/hooks/run-all-tests.json`)
+   - Command: `make test`
+   - Purpose: Unit tests + security checks
+   - Trigger: Auto-execute on task completion
 
-3. **セキュリティチェック** (`.kiro/hooks/pre-commit-security.json`)
-   - コマンド: `make security-check`
-   - 用途: コミット前の機密情報チェック
-   - トリガー: 手動実行
+3. **Security check** (`.kiro/hooks/pre-commit-security.json`)
+   - Command: `make security-check`
+   - Purpose: Check for sensitive information before commit
+   - Trigger: Manual execution
 
-### フックの実行方法（manual トリガーの場合）
+### How to Execute Hooks (for manual trigger)
 
-**方法1: コマンドパレット（推奨）**
-1. `Cmd + Shift + P`（macOS）または`Ctrl + Shift + P`（Windows/Linux）でコマンドパレットを開く
-2. 「Agent Hooks」または「フック」と入力して検索
-3. 実行したいフック（例：「ユニットテスト実行」）を選択
+**Method 1: Command Palette (Recommended)**
+1. Open command palette with `Cmd + Shift + P` (macOS) or `Ctrl + Shift + P` (Windows/Linux)
+2. Search for "Agent Hooks"
+3. Select the hook you want to execute (e.g., "Run unit tests")
 
-**方法2: Agent Hooksビュー**
-1. サイドバーの「Agent Hooks」セクションを開く
-2. 実行したいフックをクリック
+**Method 2: Agent Hooks View**
+1. Open "Agent Hooks" section in sidebar
+2. Click the hook you want to execute
 
-**方法3: Makefileから直接実行（フックを使わない場合）**
+**Method 3: Execute directly from Makefile (without using hooks)**
 ```bash
-make test-unit          # ユニットテストのみ
-make test               # すべてのテスト
-make security-check     # セキュリティチェックのみ
+make test-unit          # Unit tests only
+make test               # All tests
+make security-check     # Security check only
 ```
 
-### フック作成のガイドライン
+### Hook Creation Guidelines
 
-新しいフックを作成する際は以下に従うこと：
+When creating new hooks, follow these guidelines:
 
-- フック定義ファイルは`.kiro/hooks/`に配置
-- JSON形式で記述
-- `name`は日本語で分かりやすく
-- `description`で目的を明確に記述
-- `command`はMakefileコマンドを使用
-- `trigger.type`は基本的に`manual`（手動実行）
+- Place hook definition files in `.kiro/hooks/`
+- Write in JSON format
+- Use clear Japanese for `name`
+- Clearly describe purpose in `description`
+- Use Makefile commands for `command`
+- `trigger.type` should generally be `manual` (manual execution)
 
-これらのフックにより、コード品質とドキュメントが実装と同期した状態を保つ。
+These hooks keep code quality and documentation synchronized with implementation.
 
-## デプロイと動作確認
+## Deployment and Verification
 
-### デプロイのタイミング
+### Deployment Timing
 
-**原則**: デプロイできるタイミングで積極的にデプロイして動作確認すること
+**Principle**: Deploy proactively when deployment is possible and verify operation
 
-**デプロイ可能なタイミング:**
-1. **インフラ構築完了時**
-   - Terraformでインフラを構築したら即座にデプロイ
-   - Route53、Amplify、API Gateway、Lambdaなどの基本構成が整った時点
+**Deployment Opportunities:**
+1. **When infrastructure construction is complete**
+   - Deploy immediately after building infrastructure with Terraform
+   - When basic configuration like Route53, Amplify, API Gateway, Lambda is ready
 
-2. **機能単位の完成時**
-   - 1つの機能（例：フィード提案API）が完成したらデプロイ
-   - フロントエンドとバックエンドが連携できる状態になったらデプロイ
+2. **When feature unit is complete**
+   - Deploy when one feature (e.g., feed suggestion API) is complete
+   - Deploy when frontend and backend can work together
 
-3. **バグ修正完了時**
-   - 修正が完了し、ローカルテストが通ったらデプロイ
-   - 本番環境で動作確認
+3. **When bug fix is complete**
+   - Deploy after fix is complete and local tests pass
+   - Verify operation in production environment
 
-**デプロイ手順:**
+**Deployment Procedure:**
 ```bash
-# バックエンドのデプロイ
+# Backend deployment
 cd backend
 npm run build
-# GitHub Actionsが自動的にECR + Lambdaにデプロイ
+# GitHub Actions automatically deploys to ECR + Lambda
 
-# フロントエンドのデプロイ
+# Frontend deployment
 cd frontend
 git push origin main
-# Amplifyが自動的にビルド&デプロイ
+# Amplify automatically builds & deploys
 
-# インフラの変更
+# Infrastructure changes
 cd infra/environments/production
 terraform plan
 terraform apply
 ```
 
-**動作確認:**
-1. **ヘルスチェック**: `https://api.my-rss-press.com/api/health`
-2. **フロントエンド**: `https://my-rss-press.com`
-3. **機能テスト**: 実際にUIから操作して確認
-4. **ログ確認**: CloudWatch Logsでエラーがないか確認
+**Verification:**
+1. **Health check**: `https://api.my-rss-press.com/api/health`
+2. **Frontend**: `https://my-rss-press.com`
+3. **Feature test**: Verify by actually operating from UI
+4. **Log check**: Check CloudWatch Logs for errors
 
-### E2Eテストの方針
+### E2E Testing Policy
 
-**原則**: E2Eテストは各機能単位で書いていくこと
+**Principle**: Write E2E tests for each feature unit
 
-**機能単位のE2Eテスト:**
+**E2E Tests by Feature:**
 ```
 frontend/tests/e2e/specs/
 ├── newspaper/
-│   ├── create-newspaper.spec.ts    # 新聞作成フロー
-│   ├── view-newspaper.spec.ts      # 新聞閲覧
-│   └── share-newspaper.spec.ts     # 新聞共有
+│   ├── create-newspaper.spec.ts    # Newspaper creation flow
+│   ├── view-newspaper.spec.ts      # Newspaper viewing
+│   └── share-newspaper.spec.ts     # Newspaper sharing
 ├── feed/
-│   ├── select-feeds.spec.ts        # フィード選択
-│   └── suggest-feeds.spec.ts       # AI提案
+│   ├── select-feeds.spec.ts        # Feed selection
+│   └── suggest-feeds.spec.ts       # AI suggestions
 └── home/
-    ├── popular-newspapers.spec.ts  # 人気の新聞
-    └── recent-newspapers.spec.ts   # 新着新聞
+    ├── popular-newspapers.spec.ts  # Popular newspapers
+    └── recent-newspapers.spec.ts   # Recent newspapers
 ```
 
-**E2Eテストの実装タイミング:**
-1. **機能実装と同時**: 機能を実装したら、その機能のE2Eテストも書く
-2. **デプロイ前**: デプロイ前にE2Eテストを実行して動作確認
-3. **継続的に追加**: 新しい機能を追加するたびにE2Eテストも追加
+**E2E Test Implementation Timing:**
+1. **With feature implementation**: Write E2E tests when implementing features
+2. **Before deployment**: Run E2E tests before deployment to verify operation
+3. **Continuous addition**: Add E2E tests whenever adding new features
 
-**E2Eテストの実行:**
+**E2E Test Execution:**
 ```bash
-# ローカル環境でテスト
+# Test in local environment
 cd frontend
 npm run test:e2e
 
-# 本番環境でテスト（デプロイ後）
+# Test in production environment (after deployment)
 BASE_URL=https://my-rss-press.com npm run test:e2e
 ```
 
-**E2Eテストのベストプラクティス:**
-- 各テストは独立して実行可能にする
-- テストデータはフィクスチャで管理
-- Page Object Modelパターンを使用
-- 失敗時のスクリーンショットを自動保存
-- CI/CDパイプラインに組み込む
+**E2E Test Best Practices:**
+- Make each test independently executable
+- Manage test data with fixtures
+- Use Page Object Model pattern
+- Automatically save screenshots on failure
+- Integrate into CI/CD pipeline
 
-## セキュリティチェック
+## Security Checks
 
-### 概要
+### Overview
 
-コミットやプッシュ前に機密情報が含まれていないかチェックすること。これにより、AWS認証情報、秘密鍵、トークンなどの漏洩を防ぐ。
+Check for sensitive information before commits or pushes. This prevents leakage of AWS credentials, private keys, tokens, etc.
 
-### 使用ツール
+### Tools Used
 
-**Gitleaks** - 機密情報検出ツール
+**Gitleaks** - Sensitive information detection tool
 - AWS Access Key ID / Secret Access Key
-- 秘密鍵（RSA、DSA、EC）
+- Private keys (RSA, DSA, EC)
 - GitHub Token / OAuth Token
-- 一般的なパスワードやAPIキーのパターン
+- Common password and API key patterns
 
-### セットアップ
+### Setup
 
-1. **Gitleaksのインストール:**
+1. **Install Gitleaks:**
    ```bash
    # macOS
    brew install gitleaks
    
-   # その他のプラットフォーム
+   # Other platforms
    # https://github.com/gitleaks/gitleaks#installing
    ```
 
-2. **設定ファイル:**
-   - `.gitleaks.toml` - 検出ルールと除外設定
-   - `scripts/security-check.sh` - チェックスクリプト
-   - `.kiro/hooks/pre-commit-security.json` - Kiroフック設定
+2. **Configuration files:**
+   - `.gitleaks.toml` - Detection rules and exclusion settings
+   - `scripts/security-check.sh` - Check script
+   - `.kiro/hooks/pre-commit-security.json` - Kiro hook configuration
 
-### 実行方法
+### Execution Methods
 
-**方法1: スクリプト直接実行**
+**Method 1: Direct script execution**
 ```bash
 ./scripts/security-check.sh
 ```
 
-**方法2: Kiroエージェントフック**
-1. コマンドパレットを開く（Cmd/Ctrl + Shift + P）
-2. 「Agent Hooks」を検索
-3. 「セキュリティチェック（コミット前）」を実行
+**Method 2: Kiro agent hook**
+1. Open command palette (Cmd/Ctrl + Shift + P)
+2. Search for "Agent Hooks"
+3. Execute "Security check (pre-commit)"
 
-**方法3: Makefileから実行**
+**Method 3: Execute from Makefile**
 ```bash
 make security-check
 ```
 
-### チェック内容
+### Check Content
 
-スクリプトは以下をチェックします：
+Script checks the following:
 
-1. **AWS認証情報**
+1. **AWS credentials**
    - Access Key ID: `AKIA[0-9A-Z]{16}`
-   - Secret Access Key: 40文字の英数字文字列
+   - Secret Access Key: 40-character alphanumeric string
 
-2. **秘密鍵**
-   - `-----BEGIN PRIVATE KEY-----`パターン
+2. **Private keys**
+   - `-----BEGIN PRIVATE KEY-----` pattern
 
 3. **GitHub Token**
    - Personal Access Token: `ghp_[0-9a-zA-Z]{36}`
    - OAuth Token: `gho_[0-9a-zA-Z]{36}`
 
-4. **一般的なパスワード/APIキー**
-   - `password=`, `api_key=`などのパターン
+4. **Common passwords/API keys**
+   - Patterns like `password=`, `api_key=`
 
-### 除外設定
+### Exclusion Settings
 
-以下のファイルは自動的に除外されます：
-- Markdownファイル（`.md`）
+The following files are automatically excluded:
+- Markdown files (`.md`)
 - `package-lock.json`
-- `.gitleaks.toml`（設定ファイル自体）
+- `.gitleaks.toml` (configuration file itself)
 
-### エラー時の対応
+### Error Response
 
-機密情報が検出された場合：
+When sensitive information is detected:
 
-1. **検出されたファイルから機密情報を削除**
-2. **環境変数に移動**
-   - `.env.local`（gitignore済み）
+1. **Remove sensitive information from detected files**
+2. **Move to environment variables**
+   - `.env.local` (gitignored)
    - AWS Secrets Manager
-   - 環境変数として設定
-3. **必要に応じて`.gitignore`に追加**
-4. **既にコミット済みの場合**
-   - Git履歴から削除（`git filter-branch`または`BFG Repo-Cleaner`）
-   - 認証情報をローテーション（無効化して再発行）
+   - Set as environment variables
+3. **Add to `.gitignore` as needed**
+4. **If already committed**
+   - Remove from Git history (`git filter-branch` or `BFG Repo-Cleaner`)
+   - Rotate credentials (invalidate and reissue)
 
-### ベストプラクティス
+### Best Practices
 
-- コミット前に必ずセキュリティチェックを実行すること
-- 機密情報は環境変数で管理すること
-- `.env`ファイルは`.gitignore`に含めること
-- サンプルコードには`your-api-key-here`などのプレースホルダーを使用すること
-- 本番環境の認証情報はAWS Secrets Managerで管理すること
+- Always run security checks before commits
+- Manage sensitive information with environment variables
+- Include `.env` files in `.gitignore`
+- Use placeholders like `your-api-key-here` in sample code
+- Manage production credentials with AWS Secrets Manager

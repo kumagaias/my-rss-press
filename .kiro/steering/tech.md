@@ -1,23 +1,23 @@
 # Technical Architecture - MyRSSPress
 
-このドキュメントはMyRSSPress固有の技術詳細を記載しています。
+This document describes MyRSSPress-specific technical details.
 
-**関連ドキュメント:**
-- [tech-common.md](./tech-common.md) - 汎用的なベストプラクティス（TypeScript規約、テスト戦略、セキュリティ等）
-- [structure.md](./structure.md) - プロジェクト構造
-- [project-standards.md](./project-standards.md) - プロジェクト標準
+**Related Documents:**
+- [tech-common.md](./tech-common.md) - General best practices (TypeScript conventions, testing strategy, security, etc.)
+- [structure.md](./structure.md) - Project structure
+- [project-standards.md](./project-standards.md) - Project standards
 
 ---
 
 ## Overview
 
-MyRSSPressは、AWS上にデプロイされるサーバーレスアーキテクチャを採用したWebアプリケーションです。フロントエンドはNext.js + Amplify、バックエンドはLambda + Honoで構築されます。
+MyRSSPress is a web application deployed on AWS using a serverless architecture. The frontend is built with Next.js + Amplify, and the backend with Lambda + Hono.
 
 ## Technology Stack
 
 ### Frontend
 - **Framework**: Next.js 15.x (App Router)
-- **Runtime**: Node.js 24.x LTS (Active LTS) または 22.x LTS (Maintenance LTS)
+- **Runtime**: Node.js 24.x LTS (Active LTS) or 22.x LTS (Maintenance LTS)
 - **Language**: TypeScript 5.9.x
 - **Styling**: Tailwind CSS 3.x
 - **Hosting**: AWS Amplify
@@ -25,7 +25,7 @@ MyRSSPressは、AWS上にデプロイされるサーバーレスアーキテク�
 - **HTTP Client**: Fetch API
 
 ### Backend
-- **Runtime**: AWS Lambda (Node.js 24.x または 22.x)
+- **Runtime**: AWS Lambda (Node.js 24.x or 22.x)
 - **Framework**: Hono 4.x
 - **Language**: TypeScript 5.9.x
 - **Database**: DynamoDB
@@ -33,13 +33,13 @@ MyRSSPressは、AWS上にデプロイされるサーバーレスアーキテク�
 - **Validation**: Zod 3.x
 
 ### Infrastructure
-- **IaC**: Terraform 1.11.x (安定版)
+- **IaC**: Terraform 1.11.x (stable version)
 - **Container Registry**: Amazon ECR
 - **CI/CD**: AWS Amplify (Frontend), GitHub Actions (Backend)
 - **Monitoring**: CloudWatch
 - **CDN**: CloudFront
 - **Primary Region**: ap-northeast-1 (Tokyo)
-- **ACM Region**: us-east-1 (CloudFront用証明書のみ)
+- **ACM Region**: us-east-1 (CloudFront certificates only)
 
 ## Architecture Diagram
 
@@ -91,31 +91,31 @@ MyRSSPressは、AWS上にデプロイされるサーバーレスアーキテク�
 
 ### Hosting & Deployment
 
-- AWS Amplifyを使用してNext.jsアプリケーションをホスティング
-- Amplify Hostingの自動デプロイ機能を活用
-- ブランチごとに環境を分離（main → production、develop → staging）
-- CloudFront CDNを活用してパフォーマンスを最適化
+- Host Next.js application using AWS Amplify
+- Leverage Amplify Hosting's automatic deployment features
+- Separate environments by branch (main → production, develop → staging)
+- Optimize performance using CloudFront CDN
 
 ### Component Architecture
 
-- 関数コンポーネントとフックを使用
-- Container/Presentationalパターンに従う
-- ビジネスロジックとUIコンポーネントを分離
-- 各コンポーネントは単一責任の原則に従う
+- Use functional components and hooks
+- Follow Container/Presentational pattern
+- Separate business logic from UI components
+- Each component follows single responsibility principle
 
 ### State Management
 
-- グローバルステートにはReact Contextを使用
-- ローカルコンポーネントステートには`useState`を優先
-- 複雑なステートロジックには`useReducer`を使用
-- 状態の更新は不変性を保つ
+- Use React Context for global state
+- Prefer `useState` for local component state
+- Use `useReducer` for complex state logic
+- Maintain immutability when updating state
 
 ### Performance Optimization
 
-- 高コストな計算は`useMemo`でメモ化
-- 不要な再レンダリングは`React.memo`で防止
-- 子コンポーネントに渡すイベントハンドラーには`useCallback`を使用
-- SSR/SSGを適切に使い分けてパフォーマンスを最適化
+- Memoize expensive calculations with `useMemo`
+- Prevent unnecessary re-renders with `React.memo`
+- Use `useCallback` for event handlers passed to child components
+- Optimize performance by appropriately using SSR/SSG
 
 ### API Integration
 
@@ -128,11 +128,11 @@ export const fetchNewspapers = async (sortBy: 'popular' | 'recent') => {
 };
 ```
 
-- バックエンドAPIとの通信には`fetch`を使用
-- API呼び出しは`lib/api`ディレクトリに集約
-- エラーハンドリングを適切に実装
-- ローディング状態を管理
-- APIレスポンスの型定義を共有
+- Use `fetch` for backend API communication
+- Consolidate API calls in `lib/api` directory
+- Implement proper error handling
+- Manage loading states
+- Share API response type definitions
 
 ### Environment Variables
 
@@ -141,18 +141,18 @@ NEXT_PUBLIC_API_BASE_URL=https://api.example.com
 NEXT_PUBLIC_APP_ENV=production
 ```
 
-- 環境変数は`NEXT_PUBLIC_`プレフィックスを使用してクライアント側で利用可能に
-- 機密情報はサーバー側の環境変数として管理
-- `.env.local`、`.env.development`、`.env.production`で環境ごとに設定を分離
+- Use `NEXT_PUBLIC_` prefix to make environment variables available on client side
+- Manage sensitive information as server-side environment variables
+- Separate settings by environment with `.env.local`, `.env.development`, `.env.production`
 
 ## Backend Architecture (Lambda + Hono)
 
 ### Serverless Architecture
 
-- AWS Lambdaを使用したサーバーレスアーキテクチャ
-- Honoフレームワークを使用してAPIエンドポイントを構築
-- TypeScriptで型安全なコードを記述
-- 関数は単一責任の原則に従う
+- Serverless architecture using AWS Lambda
+- Build API endpoints using Hono framework
+- Write type-safe code with TypeScript
+- Functions follow single responsibility principle
 
 ### Layered Architecture
 
@@ -160,9 +160,9 @@ NEXT_PUBLIC_APP_ENV=production
 Routes (Hono) → Services → Repositories → DynamoDB
 ```
 
-1. **Routes Layer**: HTTPリクエストの受付とレスポンス
-2. **Services Layer**: ビジネスロジックの実装
-3. **Repositories Layer**: データアクセスの抽象化
+1. **Routes Layer**: Accept HTTP requests and return responses
+2. **Services Layer**: Implement business logic
+3. **Repositories Layer**: Abstract data access
 4. **Data Layer**: DynamoDB
 
 ### Hono Best Practices
@@ -177,36 +177,36 @@ app.post('/api/newspapers', async (c) => {
 });
 ```
 
-- ルートハンドラーは簡潔に保ち、ビジネスロジックはservicesレイヤーに配置
-- ミドルウェアを活用して横断的関心事（認証、ログ、エラーハンドリング）を処理
-- バリデーションはルートレベルで実行
-- レスポンスは一貫した形式で返す
+- Keep route handlers concise, place business logic in services layer
+- Leverage middleware for cross-cutting concerns (authentication, logging, error handling)
+- Execute validation at route level
+- Return responses in consistent format
 
 ### Hono Local Development
 
-Honoはローカル開発とLambda本番環境の両方で動作します。
+Hono works in both local development and Lambda production environments.
 
-#### アプリケーション構造
+#### Application Structure
 
 ```typescript
-// backend/src/app.ts - Honoアプリケーション（共通）
+// backend/src/app.ts - Hono application (common)
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 
 export const app = new Hono();
 
-// ミドルウェア
+// Middleware
 app.use('*', cors());
 app.use('*', logger());
 
-// ルート
+// Routes
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
 app.post('/api/newspapers', async (c) => {
-  // ... ビジネスロジック
+  // ... business logic
 });
 
-// backend/src/dev.ts - ローカル開発用サーバー
+// backend/src/dev.ts - Local development server
 import { serve } from '@hono/node-server';
 import { app } from './app';
 
@@ -219,13 +219,13 @@ serve({
 
 console.log(`🚀 Server running at http://localhost:${port}`);
 
-// backend/src/lambda.ts - Lambda用ハンドラー
+// backend/src/lambda.ts - Lambda handler
 import { app } from './app';
 
 export const handler = app.fetch;
 ```
 
-#### ローカル開発コマンド
+#### Local Development Commands
 
 ```json
 // backend/package.json
@@ -247,66 +247,66 @@ export const handler = app.fetch;
 }
 ```
 
-#### ローカル実行
+#### Local Execution
 
 ```bash
-# 開発サーバー起動（ホットリロード付き）
+# Start development server (with hot reload)
 cd backend
 npm run dev
 
-# ブラウザまたはcurlでテスト
+# Test with browser or curl
 curl http://localhost:3001/api/health
 ```
 
-#### 環境変数の管理
+#### Environment Variable Management
 
 ```typescript
 // backend/src/config.ts
 export const config = {
-  // ローカル開発ではダミー値、本番ではAWS Secrets Manager
+  // Dummy values for local development, AWS Secrets Manager for production
   bedrockRegion: process.env.BEDROCK_REGION || 'ap-northeast-1',
   dynamodbTable: process.env.DYNAMODB_TABLE || 'newspapers-local',
   isLocal: process.env.NODE_ENV !== 'production',
 };
 
-// backend/.env.local（gitignore済み）
+// backend/.env.local (gitignored)
 BEDROCK_REGION=ap-northeast-1
 DYNAMODB_TABLE=newspapers-local
 NODE_ENV=development
 ```
 
-#### ローカルでのAWSサービステスト
+#### Testing AWS Services Locally
 
 **DynamoDB Local:**
 ```bash
-# DynamoDB Localを起動
+# Start DynamoDB Local
 docker run -p 8000:8000 amazon/dynamodb-local
 
-# 接続設定
+# Connection configuration
 const dynamoClient = new DynamoDBClient({
   endpoint: process.env.DYNAMODB_ENDPOINT || 'http://localhost:8000',
   region: 'ap-northeast-1',
 });
 ```
 
-**Bedrock（ローカルから実際のAPIを使用）:**
+**Bedrock (Use actual API from local):**
 
-Bedrockにはローカルエミュレーターがないため、ローカル開発でも実際のAWS Bedrock APIを使用します。
+Since Bedrock has no local emulator, use the actual AWS Bedrock API even in local development.
 
 ```typescript
 // backend/src/services/bedrockService.ts
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config';
 
-// ローカル開発でも本番でも同じクライアントを使用
+// Use same client for both local development and production
 const bedrockClient = new BedrockRuntimeClient({
   region: config.bedrockRegion,
-  // ローカル開発時はAWS CLIの認証情報を使用
-  // 本番環境ではLambdaのIAMロールを使用
+  // Use AWS CLI credentials for local development
+  // Use Lambda IAM role for production
 });
 
 export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
-  const prompt = `ユーザーが「${theme}」に興味があります。関連するRSSフィードを3つ提案してください。`;
+  const prompt = `User is interested in "${theme}". Please suggest 3 related RSS feeds.`;
   
   const command = new InvokeModelCommand({
     modelId: 'anthropic.claude-3-5-haiku-20241022-v1:0',
@@ -322,7 +322,7 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
   const response = await bedrockClient.send(command);
   const suggestions = parseBedrockResponse(response);
   
-  // フィードURLの検証（Bedrock後の処理）
+  // Validate feed URLs (post-Bedrock processing)
   const validatedSuggestions = [];
   for (const suggestion of suggestions) {
     const isValid = await validateFeedUrl(suggestion.url);
@@ -336,79 +336,79 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
     : getDefaultFeeds();
 }
 
-// フィードURL検証（HEAD リクエスト）
+// Feed URL validation (HEAD request)
 async function validateFeedUrl(url: string): Promise<boolean> {
   try {
     const response = await fetch(url, {
       method: 'HEAD',
-      signal: AbortSignal.timeout(5000), // 5秒タイムアウト
+      signal: AbortSignal.timeout(5000), // 5 second timeout
     });
-    return response.ok; // 200 OK の場合のみtrue
+    return response.ok; // true only for 200 OK
   } catch (error) {
     return false;
   }
 }
 ```
 
-**フィード提案の処理フロー:**
+**Feed Suggestion Processing Flow:**
 
 ```
-1. ユーザー入力 (テーマ)
+1. User input (theme)
    ↓
-2. Bedrock API呼び出し
-   - Claude 3 Haikuに10個のフィード提案を要求
-   - 実在するフィードのみを要求する制約を含む
+2. Bedrock API call
+   - Request 10 feed suggestions from Claude 3 Haiku
+   - Include constraint to request only real feeds
    ↓
-3. AIレスポンス解析
-   - JSON形式で最大10個のフィードを抽出
+3. Parse AI response
+   - Extract up to 10 feeds in JSON format
    ↓
-4. フィードURL検証（並列実行） ★ここで存在確認
-   - 各URLにHEAD リクエスト（5秒タイムアウト）
-   - 200 OKの場合のみ有効と判定
-   - 無効なURLはスキップ
-   - Promise.allで並列実行（最大15倍高速化）
+4. Feed URL validation (parallel execution) ★Existence check here
+   - HEAD request to each URL (5 second timeout)
+   - Valid only if 200 OK
+   - Skip invalid URLs
+   - Parallel execution with Promise.all (up to 15x faster)
    ↓
-5. 結果の返却
-   - 有効なフィードのみを返す
-   - 5個未満の場合はデフォルトフィード（BBC, NYT等）で補充
-   - 最大10個のフィードを返す
+5. Return results
+   - Return only valid feeds
+   - Supplement with default feeds (BBC, NYT, etc.) if less than 5
+   - Return maximum 10 feeds
 ```
 
-**パフォーマンス最適化:**
+**Performance Optimization:**
 
-1. **フィード提案数の調整** (Issue #15)
-   - 当初: 15個のフィード提案 → レスポンス時間 ~60秒
-   - 最適化後: 10個のフィード提案 → レスポンス時間 ~30-40秒
-   - 理由: Bedrockのトークン生成量削減、URL検証数削減
+1. **Feed suggestion count adjustment** (Issue #15)
+   - Initial: 15 feed suggestions → Response time ~60 seconds
+   - Optimized: 10 feed suggestions → Response time ~30-40 seconds
+   - Reason: Reduced Bedrock token generation, reduced URL validation count
 
-2. **URL検証の並列化**
-   - 順次実行: 15個 × 5秒 = 最大75秒
-   - 並列実行: 最大5秒（全て並列で実行）
-   - 改善: 最大15倍の高速化
+2. **URL validation parallelization**
+   - Sequential execution: 15 feeds × 5 seconds = max 75 seconds
+   - Parallel execution: max 5 seconds (all executed in parallel)
+   - Improvement: up to 15x faster
 
-3. **Lambda タイムアウト設定**
-   - 初期: 30秒 → 504 Gateway Timeout発生
-   - 最適化後: 60秒 → 十分な処理時間を確保
+3. **Lambda timeout setting**
+   - Initial: 30 seconds → 504 Gateway Timeout occurred
+   - Optimized: 60 seconds → Sufficient processing time secured
 
-**検証のメリット:**
-- 架空のURLや存在しないフィードを除外
-- ユーザーに確実にアクセス可能なフィードのみ提供
-- AIの幻覚（hallucination）による誤った提案を防止
+**Benefits of validation:**
+- Exclude fake URLs and non-existent feeds
+- Provide only reliably accessible feeds to users
+- Prevent incorrect suggestions due to AI hallucination
 
-**フィード数の設計判断:**
-- **10個提案**: Bedrockへのリクエスト数
-- **5個最低保証**: デフォルトフィードで補充する閾値
-- **5個デフォルト**: 信頼性の高いフィード（BBC, NYT, Reuters等）
-- 理由: 無効なURLが多い場合でも、ユーザーに十分な選択肢を提供
+**Feed count design decisions:**
+- **10 suggestions**: Number of requests to Bedrock
+- **5 minimum guarantee**: Threshold for supplementing with default feeds
+- **5 default feeds**: Reliable feeds (BBC, NYT, Reuters, etc.)
+- Reason: Provide sufficient choices to users even when many URLs are invalid
 
-**ローカル開発のセットアップ:**
+**Local Development Setup:**
 
-1. **AWS CLIの設定:**
+1. **AWS CLI configuration:**
 ```bash
-# AWS CLIをインストール（未インストールの場合）
+# Install AWS CLI (if not installed)
 brew install awscli
 
-# AWS認証情報を設定
+# Configure AWS credentials
 aws configure
 # AWS Access Key ID: <your-key>
 # AWS Secret Access Key: <your-secret>
@@ -416,16 +416,16 @@ aws configure
 # Default output format: json
 ```
 
-2. **Bedrock Model Accessの有効化:**
+2. **Enable Bedrock Model Access:**
 ```bash
-# AWSコンソールで以下を実行：
-# 1. Bedrockコンソールにアクセス
+# Execute in AWS Console:
+# 1. Access Bedrock console
 # 2. Model access → Manage model access
-# 3. Claude 3 Haikuを有効化
+# 3. Enable Claude 3 Haiku
 ```
 
-3. **IAM権限の確認:**
-ローカル開発用のIAMユーザーに以下の権限が必要：
+3. **Check IAM permissions:**
+IAM user for local development needs the following permissions:
 ```json
 {
   "Version": "2012-10-17",
@@ -443,16 +443,16 @@ aws configure
 }
 ```
 
-4. **環境変数の設定:**
+4. **Environment variable configuration:**
 ```bash
 # backend/.env.local
 BEDROCK_REGION=ap-northeast-1
-AWS_PROFILE=default  # 複数のAWSプロファイルを使用する場合
+AWS_PROFILE=default  # When using multiple AWS profiles
 ```
 
-**コスト管理:**
+**Cost Management:**
 
-ローカル開発でBedrockを使用する際のコスト管理：
+Cost management when using Bedrock in local development:
 
 ```typescript
 // backend/src/config.ts
@@ -460,7 +460,7 @@ export const config = {
   bedrockRegion: process.env.BEDROCK_REGION || 'ap-northeast-1',
   isLocal: process.env.NODE_ENV !== 'production',
   
-  // ローカル開発時はキャッシュを有効化してコストを削減
+  // Enable cache in local development to reduce costs
   enableCache: process.env.ENABLE_BEDROCK_CACHE !== 'false',
 };
 
@@ -468,7 +468,7 @@ export const config = {
 const cache = new Map<string, FeedSuggestion[]>();
 
 export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
-  // ローカル開発時はキャッシュを使用
+  // Use cache in local development
   if (config.isLocal && config.enableCache) {
     const cached = cache.get(theme);
     if (cached) {
@@ -477,10 +477,10 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
     }
   }
   
-  // Bedrock APIを呼び出し
+  // Call Bedrock API
   const result = await callBedrockAPI(theme);
   
-  // キャッシュに保存
+  // Save to cache
   if (config.isLocal && config.enableCache) {
     cache.set(theme, result);
   }
@@ -489,9 +489,9 @@ export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
 }
 ```
 
-**モックモード（オプション）:**
+**Mock Mode (Optional):**
 
-Bedrock APIの呼び出しを完全に避けたい場合：
+To completely avoid Bedrock API calls:
 
 ```typescript
 // backend/.env.local
@@ -499,35 +499,35 @@ USE_BEDROCK_MOCK=true
 
 // backend/src/services/bedrockService.ts
 export async function suggestFeeds(theme: string): Promise<FeedSuggestion[]> {
-  // モックモードが有効な場合
+  // If mock mode is enabled
   if (process.env.USE_BEDROCK_MOCK === 'true') {
     console.log('Using mock Bedrock response');
     return [
       {
         url: 'https://news.ycombinator.com/rss',
         title: 'Hacker News',
-        reasoning: `${theme}に関連する技術ニュース`,
+        reasoning: `Tech news related to ${theme}`,
       },
       {
         url: 'https://techcrunch.com/feed/',
         title: 'TechCrunch',
-        reasoning: `${theme}のスタートアップニュース`,
+        reasoning: `Startup news about ${theme}`,
       },
     ];
   }
   
-  // 実際のBedrock APIを呼び出し
+  // Call actual Bedrock API
   return await callBedrockAPI(theme);
 }
 ```
 
-**推奨アプローチ:**
+**Recommended Approach:**
 
-1. **通常の開発**: 実際のBedrock APIを使用（キャッシュ有効）
-2. **オフライン開発**: モックモードを使用
-3. **テスト**: モックを使用してコストを削減
+1. **Normal development**: Use actual Bedrock API (cache enabled)
+2. **Offline development**: Use mock mode
+3. **Testing**: Use mocks to reduce costs
 
-#### デバッグ
+#### Debugging
 
 ```json
 // .vscode/launch.json
@@ -558,10 +558,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 };
 ```
 
-- 各Lambda関数は単一の責任を持つ
-- コールドスタート時間を最小化するため、依存関係を最小限に保つ
-- 環境変数を使用して設定を管理
-- Lambda関数のハンドラーは薄く保ち、ロジックはservicesに委譲
+- Each Lambda function has a single responsibility
+- Keep dependencies minimal to minimize cold start time
+- Manage configuration using environment variables
+- Keep Lambda function handlers thin, delegate logic to services
 
 ### Error Handling
 
@@ -574,39 +574,39 @@ class NotFoundError extends Error {
   }
 }
 
-// エラーハンドリングミドルウェア
+// Error handling middleware
 app.onError((err, c) => {
   const statusCode = err.statusCode || 500;
   return c.json({ error: err.message }, statusCode);
 });
 ```
 
-- カスタムエラークラスを定義して使用
-- エラーは適切なHTTPステータスコードとともに返す
-- エラーメッセージは多言語対応
-- 本番環境では詳細なエラー情報を隠蔽
+- Define and use custom error classes
+- Return errors with appropriate HTTP status codes
+- Support multi-language error messages
+- Hide detailed error information in production
 
 ### API Design
 
 ```typescript
-// 成功レスポンス
+// Success response
 {
   "data": { ... },
   "meta": { "timestamp": "2025-11-28T..." }
 }
 
-// エラーレスポンス
+// Error response
 {
   "error": "Error message",
   "code": "ERROR_CODE"
 }
 ```
 
-- RESTful APIの原則に従う
-- エンドポイントは名詞を使用し、動詞は避ける
-- バージョニングを考慮（例：`/api/v1/newspapers`）
-- ページネーションをサポート
-- レスポンスは一貫した構造を持つ
+- Follow RESTful API principles
+- Use nouns for endpoints, avoid verbs
+- Consider versioning (e.g., `/api/v1/newspapers`)
+- Support pagination
+- Responses have consistent structure
 
 ### Validation
 
@@ -622,9 +622,9 @@ const NewspaperSchema = z.object({
 type NewspaperInput = z.infer<typeof NewspaperSchema>;
 ```
 
-- 入力データは必ずバリデーション
-- Zodなどのバリデーションライブラリを使用
-- バリデーションエラーは明確なメッセージとともに返す
+- Always validate input data
+- Use validation libraries like Zod
+- Return validation errors with clear messages
 
 ## Data Architecture
 
@@ -651,7 +651,7 @@ Attributes:
 ```
 PK: PUBLIC
 SK: VIEWS#{viewCount}#{newspaperId}
-Purpose: 人気順での新聞取得
+Purpose: Retrieve newspapers sorted by popularity
 ```
 
 #### GSI: RecentNewspapers
@@ -659,134 +659,134 @@ Purpose: 人気順での新聞取得
 ```
 PK: PUBLIC
 SK: CREATED#{createdAt}#{newspaperId}
-Purpose: 新着順での新聞取得
+Purpose: Retrieve newspapers sorted by recency
 ```
 
 ### Access Patterns
 
-1. 新聞IDで取得: `GetItem(PK=NEWSPAPER#{id}, SK=METADATA)`
-2. 人気順で公開新聞を取得: `Query(GSI=PublicNewspapers, PK=PUBLIC, SK begins_with VIEWS#)`
-3. 新着順で公開新聞を取得: `Query(GSI=RecentNewspapers, PK=PUBLIC, SK begins_with CREATED#)`
+1. Get by newspaper ID: `GetItem(PK=NEWSPAPER#{id}, SK=METADATA)`
+2. Get public newspapers by popularity: `Query(GSI=PublicNewspapers, PK=PUBLIC, SK begins_with VIEWS#)`
+3. Get public newspapers by recency: `Query(GSI=RecentNewspapers, PK=PUBLIC, SK begins_with CREATED#)`
 
 ## Security
 
 ### Frontend Security
 
-- 環境変数で機密情報を管理
-- XSS対策（Reactのデフォルト保護）
-- CSRF対策（SameSite Cookie）
-- Content Security Policy (CSP)の設定
+- Manage sensitive information with environment variables
+- XSS protection (React default protection)
+- CSRF protection (SameSite Cookie)
+- Content Security Policy (CSP) configuration
 
 ### Backend Security
 
-- 環境変数に機密情報を保存し、コードにハードコードしない
-- AWS Secrets Managerを使用して機密情報を管理
-- CORSを適切に設定
-- レート制限を実装
-- 入力データをサニタイズ
-- IAMロールで最小権限の原則を適用
+- Store sensitive information in environment variables, do not hardcode in code
+- Manage sensitive information using AWS Secrets Manager
+- Configure CORS appropriately
+- Implement rate limiting
+- Sanitize input data
+- Apply principle of least privilege with IAM roles
 
-### Dependency Security (npm脆弱性チェック)
+### Dependency Security (npm vulnerability check)
 
-**概要:**
+**Overview:**
 
-npm依存関係の脆弱性を自動的にチェックし、Medium以上の深刻度の脆弱性が見つかった場合はプッシュを防止します。
+Automatically check npm dependency vulnerabilities and prevent pushes if Medium or higher severity vulnerabilities are found.
 
-**チェックツール:**
-- `npm audit` - npm公式の脆弱性チェックツール
-- 深刻度レベル: Critical, High, Moderate, Low
+**Check Tool:**
+- `npm audit` - npm official vulnerability check tool
+- Severity levels: Critical, High, Moderate, Low
 
-**自動チェックのタイミング:**
-1. **pre-pushフック**: `git push`実行時に自動チェック
-2. **手動実行**: `make test-vulnerabilities`または`make audit`
+**Automatic Check Timing:**
+1. **pre-push hook**: Automatic check on `git push` execution
+2. **Manual execution**: `make test-vulnerabilities` or `make audit`
 
-**深刻度の対応方針:**
-- **Critical/High/Moderate**: プッシュをブロック、即座に修正が必要
-- **Low**: 警告のみ、プッシュは許可（定期的に修正を検討）
+**Severity Response Policy:**
+- **Critical/High/Moderate**: Block push, immediate fix required
+- **Low**: Warning only, push allowed (consider periodic fixes)
 
-**実行方法:**
+**Execution Method:**
 
 ```bash
-# 手動で脆弱性チェック
+# Manual vulnerability check
 make test-vulnerabilities
-# または
+# or
 make audit
 
-# すべてのテスト（ユニット + セキュリティ + 脆弱性）
+# All tests (unit + security + vulnerabilities)
 make test
 ```
 
-**脆弱性が見つかった場合の対応:**
+**Response When Vulnerabilities Found:**
 
 ```bash
-# 1. 該当ディレクトリに移動
-cd frontend  # または backend
+# 1. Navigate to relevant directory
+cd frontend  # or backend
 
-# 2. 脆弱性の詳細を確認
+# 2. Check vulnerability details
 npm audit
 
-# 3. 自動修正を試みる（非破壊的）
+# 3. Attempt automatic fix (non-destructive)
 npm audit fix
 
-# 4. 自動修正できない場合は破壊的変更を含む修正
+# 4. If automatic fix fails, fix with destructive changes
 npm audit fix --force
 
-# 5. package-lock.jsonをコミット
+# 5. Commit package-lock.json
 git add package-lock.json
 git commit -m "fix: Update dependencies to fix vulnerabilities"
 ```
 
-**スクリプトの場所:**
-- `scripts/npm-audit-check.sh` - 脆弱性チェックスクリプト
-- `.husky/pre-push` - pre-pushフック設定
+**Script Locations:**
+- `scripts/npm-audit-check.sh` - Vulnerability check script
+- `.husky/pre-push` - pre-push hook configuration
 
-**チェック対象:**
-- `frontend/` - フロントエンド依存関係
-- `backend/` - バックエンド依存関係
-- ルートディレクトリ（package.jsonが存在する場合）
+**Check Targets:**
+- `frontend/` - Frontend dependencies
+- `backend/` - Backend dependencies
+- Root directory (if package.json exists)
 
-**出力例:**
+**Output Example:**
 
 ```
-🔍 npm脆弱性チェックを開始...
+🔍 Starting npm vulnerability check...
 
-📦 Frontend の脆弱性をチェック中...
-❌ Frontend に脆弱性が見つかりました:
+📦 Checking Frontend vulnerabilities...
+❌ Vulnerabilities found in Frontend:
   Critical: 0
   High: 0
   Moderate: 2
 
-修正方法:
+Fix method:
   cd frontend
   npm audit fix
-  # または破壊的変更を含む修正:
+  # Or fix with destructive changes:
   npm audit fix --force
 
-❌ Medium以上の脆弱性が見つかりました。修正してから再度プッシュしてください。
+❌ Medium or higher vulnerabilities found. Please fix and push again.
 ```
 
-**ベストプラクティス:**
-1. 定期的に`npm audit`を実行して脆弱性を確認
-2. 依存関係の更新は慎重に行い、テストを実行
-3. `npm audit fix --force`は破壊的変更を含むため、実行後は必ずテスト
-4. 修正できない脆弱性は、代替パッケージの検討またはissue報告
-5. CI/CDパイプラインでも脆弱性チェックを実行
+**Best Practices:**
+1. Regularly run `npm audit` to check vulnerabilities
+2. Update dependencies carefully and run tests
+3. `npm audit fix --force` includes destructive changes, always test after execution
+4. For unfixable vulnerabilities, consider alternative packages or report issue
+5. Run vulnerability checks in CI/CD pipeline
 
-**修正できない脆弱性の対応:**
+**Response to Unfixable Vulnerabilities:**
 
-依存関係の競合などで即座に修正できない脆弱性がある場合：
+When vulnerabilities cannot be fixed immediately due to dependency conflicts:
 
-1. **影響範囲を評価**: 開発環境のみか、本番環境にも影響するか
-2. **GitHub Issueを作成**: 脆弱性の詳細と修正計画を記録
-3. **一時的な回避策**: 
-   - 開発環境のみの脆弱性の場合、本番ビルドに影響しないことを確認
-   - 本番環境に影響する場合は、代替パッケージの検討または緊急対応
-4. **定期的な再評価**: 依存関係の更新時に再度修正を試みる
+1. **Assess impact**: Development environment only, or production affected?
+2. **Create GitHub Issue**: Record vulnerability details and fix plan
+3. **Temporary workaround**: 
+   - If development environment only, verify no impact on production build
+   - If production affected, consider alternative packages or emergency response
+4. **Periodic re-evaluation**: Retry fix when updating dependencies
 
-**例: esbuild脆弱性（GHSA-67mh-4wv8-2f99）**
-- 影響: 開発サーバーのみ（本番ビルドには影響なし）
-- 対応: Storybook/Viteの互換性問題により即座の修正は困難
-- 計画: Storybook 9.x リリース後に再評価
+**Example: esbuild vulnerability (GHSA-67mh-4wv8-2f99)**
+- Impact: Development server only (no impact on production build)
+- Response: Immediate fix difficult due to Storybook/Vite compatibility issues
+- Plan: Re-evaluate after Storybook 9.x release
 
 ## Monitoring & Logging
 
@@ -809,33 +809,33 @@ const logger = {
 };
 ```
 
-- 構造化ログを使用（JSON形式）
-- CloudWatch Logsにログを出力
-- エラーと警告を適切にログに記録
-- パフォーマンスメトリクスを記録
+- Use structured logging (JSON format)
+- Output logs to CloudWatch Logs
+- Properly log errors and warnings
+- Record performance metrics
 
 ### Monitoring
 
-- CloudWatch Metricsでパフォーマンス監視
-- CloudWatch Alarmsでアラート設定
-- X-Rayでトレーシング
-- Lambda Insightsで詳細なメトリクス取得
+- Monitor performance with CloudWatch Metrics
+- Set alerts with CloudWatch Alarms
+- Tracing with X-Ray
+- Get detailed metrics with Lambda Insights
 
 ## Performance Optimization
 
 ### Frontend
 
-- SSR/SSGを適切に使い分け
-- 画像最適化（Next.js Image）
-- コード分割（Dynamic Import）
-- CloudFront CDNでキャッシュ
+- Appropriately use SSR/SSG
+- Image optimization (Next.js Image)
+- Code splitting (Dynamic Import)
+- Cache with CloudFront CDN
 
 ### Backend
 
-- Lambda関数のウォームアップ
-- DynamoDBクエリの最適化
-- 並列処理の活用（Promise.all）
-- ElastiCacheでキャッシュ（将来の拡張）
+- Lambda function warm-up
+- DynamoDB query optimization
+- Leverage parallel processing (Promise.all)
+- Cache with ElastiCache (future enhancement)
 
 ## Testing Strategy
 
@@ -844,23 +844,23 @@ const logger = {
 - **Unit Tests**: Jest/Vitest
 - **Component Tests**: React Testing Library
 - **E2E Tests**: Playwright
-- **Coverage Target**: 60%以上
+- **Coverage Target**: 60% or higher
 
 #### E2E Testing with Playwright
 
-**テストフレームワーク**: Playwright 1.40.x以上
+**Test Framework**: Playwright 1.40.x or higher
 
-**テスト構成:**
+**Test Structure:**
 ```
 frontend/tests/e2e/
-├── fixtures/              # テストフィクスチャ
-│   ├── auth.ts           # 認証関連のフィクスチャ
-│   └── test-data.ts      # テストデータ
+├── fixtures/              # Test fixtures
+│   ├── auth.ts           # Authentication fixtures
+│   └── test-data.ts      # Test data
 ├── pages/                 # Page Object Model
 │   ├── HomePage.ts
 │   ├── NewspaperPage.ts
 │   └── FeedSelectorPage.ts
-├── specs/                 # テストスペック（機能別）
+├── specs/                 # Test specs (by feature)
 │   ├── newspaper/
 │   │   ├── create-newspaper.spec.ts
 │   │   ├── view-newspaper.spec.ts
@@ -871,10 +871,10 @@ frontend/tests/e2e/
 │   └── home/
 │       ├── popular-newspapers.spec.ts
 │       └── recent-newspapers.spec.ts
-├── utils/                 # ヘルパー関数
+├── utils/                 # Helper functions
 │   ├── api-helpers.ts
 │   └── test-helpers.ts
-└── setup/                 # セットアップファイル
+└── setup/                 # Setup files
     ├── global-setup.ts
     └── global-teardown.ts
 ```
@@ -892,7 +892,7 @@ export class HomePage {
 
   constructor(page: Page) {
     this.page = page;
-    this.createButton = page.getByRole('button', { name: /新聞を作成/i });
+    this.createButton = page.getByRole('button', { name: /Create Newspaper/i });
     this.popularNewspapers = page.getByTestId('popular-newspapers');
     this.recentNewspapers = page.getByTestId('recent-newspapers');
   }
@@ -911,7 +911,7 @@ export class HomePage {
 }
 ```
 
-**テストスペック例:**
+**Test Spec Example:**
 ```typescript
 // tests/e2e/specs/newspaper/create-newspaper.spec.ts
 import { test, expect } from '@playwright/test';
@@ -919,15 +919,15 @@ import { HomePage } from '../../pages/HomePage';
 import { FeedSelectorPage } from '../../pages/FeedSelectorPage';
 import { NewspaperPage } from '../../pages/NewspaperPage';
 
-test.describe('新聞作成フロー', () => {
-  test('テーマからフィードを選択して新聞を作成できる', async ({ page }) => {
+test.describe('Newspaper creation flow', () => {
+  test('Can create newspaper by selecting feeds from theme', async ({ page }) => {
     const homePage = new HomePage(page);
     const feedSelector = new FeedSelectorPage(page);
     const newspaperPage = new NewspaperPage(page);
 
     await homePage.goto();
     await homePage.clickCreateNewspaper();
-    await feedSelector.enterTheme('テクノロジー');
+    await feedSelector.enterTheme('Technology');
     await feedSelector.clickSuggestFeeds();
     await expect(feedSelector.suggestedFeeds).toBeVisible();
     await feedSelector.selectFeed(0);
@@ -939,7 +939,7 @@ test.describe('新聞作成フロー', () => {
 });
 ```
 
-**Playwright設定:**
+**Playwright Configuration:**
 ```typescript
 // playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
@@ -985,7 +985,7 @@ export default defineConfig({
 });
 ```
 
-**実行コマンド:**
+**Execution Commands:**
 ```json
 // package.json
 {
@@ -998,38 +998,38 @@ export default defineConfig({
 }
 ```
 
-**ベストプラクティス:**
-- Page Object Modelで再利用性を高める
-- 機能ごとにテストスペックを整理
-- テストデータはフィクスチャで管理
-- CI環境ではリトライを有効化
-- スクリーンショットとトレースで問題を診断
-- 複数ブラウザでテストを実行
+**Best Practices:**
+- Increase reusability with Page Object Model
+- Organize test specs by feature
+- Manage test data with fixtures
+- Enable retries in CI environment
+- Diagnose issues with screenshots and traces
+- Run tests on multiple browsers
 
 ### Backend Testing
 
 - **Unit Tests**: Jest/Vitest
 - **Integration Tests**: Supertest + Hono
 - **Mock**: AWS SDK Mock
-- **Coverage Target**: 60%以上
+- **Coverage Target**: 60% or higher
 
 ## Deployment
 
 ### CI/CD Strategy
 
-**インフラ（Terraform）**: ローカルから手動デプロイ
-**フロントエンド**: AWS Amplify（自動デプロイ）
-**バックエンド**: GitHub Actions + ECR + Lambda
+**Infrastructure (Terraform)**: Manual deployment from local
+**Frontend**: AWS Amplify (automatic deployment)
+**Backend**: GitHub Actions + ECR + Lambda
 
 ### Infrastructure Deployment (Terraform)
 
-**デプロイ方法:**
-ローカル環境から`terraform apply`を実行
+**Deployment Method:**
+Execute `terraform apply` from local environment
 
-**ディレクトリ構造:**
+**Directory Structure:**
 ```
 infra/
-├── bootstrap/            # Terraform state管理用リソース（初回のみ）
+├── bootstrap/            # Terraform state management resources (initial only)
 │   ├── main.tf
 │   ├── variables.tf
 │   ├── outputs.tf
@@ -1037,60 +1037,60 @@ infra/
 ├── environments/
 │   └── production/
 │       ├── main.tf
-│       ├── backend.tf    # S3バックエンド設定
+│       ├── backend.tf    # S3 backend configuration
 │       ├── variables.tf
 │       ├── outputs.tf
 │       └── terraform.tfvars
 └── modules/
-    ├── secrets-manager/  # Secrets Manager（機密情報管理）
-    ├── ecr/              # ECRリポジトリ
-    ├── lambda/           # Lambda関数（ECRイメージ使用）
+    ├── secrets-manager/  # Secrets Manager (sensitive information management)
+    ├── ecr/              # ECR repository
+    ├── lambda/           # Lambda functions (using ECR images)
     ├── api-gateway/      # API Gateway
     ├── dynamodb/         # DynamoDB
     └── amplify/          # Amplify Hosting
 ```
 
-**初回セットアップ（Bootstrap）:**
+**Initial Setup (Bootstrap):**
 
-Terraform stateを管理するS3バケットとDynamoDBテーブルを作成：
+Create S3 bucket and DynamoDB table to manage Terraform state:
 
 ```bash
-# 1. Bootstrap実行（初回のみ）
+# 1. Execute Bootstrap (initial only)
 cd infra/bootstrap
 terraform init
 terraform plan
 terraform apply
 
-# 出力を確認
+# Check output
 terraform output
 # state_bucket_name = "myrsspress-terraform-state"
 # lock_table_name = "myrsspress-terraform-locks"
 ```
 
-**本番環境デプロイ:**
+**Production Environment Deployment:**
 
 ```bash
 cd infra/environments/production
 
-# 初回のみ（stateをS3に移行）
+# Initial only (migrate state to S3)
 terraform init -migrate-state
 
-# 変更内容を確認
+# Check changes
 terraform plan
 
-# デプロイ実行
+# Execute deployment
 terraform apply
 
-# 出力確認
+# Check output
 terraform output
 ```
 
-**Terraform State管理:**
+**Terraform State Management:**
 
-- **S3バックエンド**: Terraform stateをS3に保存
-- **DynamoDBロック**: 複数人での同時実行を防止
-- **暗号化**: S3バケットでAES256暗号化を有効化
-- **バージョニング**: state履歴を保持
+- **S3 Backend**: Store Terraform state in S3
+- **DynamoDB Lock**: Prevent concurrent execution by multiple people
+- **Encryption**: Enable AES256 encryption on S3 bucket
+- **Versioning**: Retain state history
 
 ```hcl
 # infra/environments/production/backend.tf
@@ -1105,9 +1105,9 @@ terraform {
 }
 ```
 
-**Secrets Manager統合:**
+**Secrets Manager Integration:**
 
-機密情報（GitHubトークン等）はSecrets Managerで管理：
+Manage sensitive information (GitHub tokens, etc.) with Secrets Manager:
 
 ```hcl
 # infra/modules/secrets-manager/main.tf
@@ -1134,20 +1134,20 @@ resource "aws_amplify_app" "main" {
 }
 ```
 
-**メリット:**
-- GitHubトークンがTerraform stateに保存されない
-- トークンのローテーションが容易
-- 監査ログで追跡可能
-- AWS KMSで自動暗号化
+**Benefits:**
+- GitHub token not stored in Terraform state
+- Easy token rotation
+- Trackable with audit logs
+- Automatic encryption with AWS KMS
 
-**Terraform設定例:**
+**Terraform Configuration Example:**
 ```hcl
 # infra/modules/lambda/main.tf
 resource "aws_lambda_function" "api" {
   function_name = "myrsspress-api"
   role          = aws_iam_role.lambda_exec.arn
   
-  # ECRイメージを使用
+  # Use ECR image
   package_type  = "Image"
   image_uri     = "${var.ecr_repository_url}:${var.image_tag}"
   
@@ -1165,38 +1165,38 @@ resource "aws_lambda_function" "api" {
 
 ### Frontend Deployment
 
-**自動デプロイフロー:**
-1. コードをGitHubの`main`ブランチにプッシュ
-2. AWS Amplifyが自動的に検知
-3. ビルド実行（Next.js）
-4. CloudFrontでキャッシュ配信
-5. デプロイ完了通知
+**Automatic Deployment Flow:**
+1. Push code to GitHub `main` branch
+2. AWS Amplify automatically detects
+3. Execute build (Next.js)
+4. Distribute cache with CloudFront
+5. Deployment completion notification
 
-**設定:**
-- `amplify.yml`でビルド設定を定義
-- 環境変数はAmplifyコンソールで管理
-- プレビュー環境は自動的に作成（PRごと）
+**Configuration:**
+- Define build configuration in `amplify.yml`
+- Manage environment variables in Amplify console
+- Preview environments automatically created (per PR)
 
 ### Backend Deployment
 
 **GitHub Actions + ECR + Lambda**
 
-#### デプロイフロー
+#### Deployment Flow
 
 ```
 GitHub Push (main) 
   ↓
-GitHub Actions トリガー
+GitHub Actions trigger
   ↓
-1. テスト実行（make test）
+1. Run tests (make test)
   ↓
-2. セキュリティチェック
+2. Security check
   ↓
-3. Dockerイメージビルド
+3. Build Docker image
   ↓
-4. ECRにプッシュ
+4. Push to ECR
   ↓
-5. Lambda関数を更新（新しいイメージを使用）
+5. Update Lambda function (use new image)
 ```
 
 #### Dockerfile
@@ -1205,18 +1205,18 @@ GitHub Actions トリガー
 # backend/Dockerfile
 FROM public.ecr.aws/lambda/nodejs:20
 
-# 依存関係をコピー
+# Copy dependencies
 COPY package*.json ./
 RUN npm ci --production
 
-# アプリケーションコードをコピー
+# Copy application code
 COPY dist/ ./
 
-# Lambda関数ハンドラーを指定
+# Specify Lambda function handler
 CMD ["lambda.handler"]
 ```
 
-#### GitHub Actions設定
+#### GitHub Actions Configuration
 
 ```yaml
 # .github/workflows/deploy-backend.yml
@@ -1285,20 +1285,20 @@ jobs:
             --function-name myrsspress-api \
             --image-uri $IMAGE_URI
           
-          # 更新完了を待機
+          # Wait for update completion
           aws lambda wait function-updated \
             --function-name myrsspress-api
       
       - name: Verify deployment
         run: |
-          # Lambda関数の状態を確認
+          # Check Lambda function state
           aws lambda get-function \
             --function-name myrsspress-api \
             --query 'Configuration.[State,LastUpdateStatus]' \
             --output text
 ```
 
-#### package.json設定
+#### package.json Configuration
 
 ```json
 // backend/package.json
@@ -1313,138 +1313,138 @@ jobs:
 }
 ```
 
-#### ローカルでのDockerテスト
+#### Local Docker Testing
 
 ```bash
-# Dockerイメージをビルド
+# Build Docker image
 cd backend
 npm run build
 docker build -t myrsspress-backend .
 
-# ローカルでLambdaをテスト
+# Test Lambda locally
 docker run -p 9000:8080 myrsspress-backend
 
-# 別のターミナルでテスト
+# Test in another terminal
 curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
   -d '{"path": "/api/health", "httpMethod": "GET"}'
 ```
 
 ### Environment Strategy
 
-**現在（本番環境のみ）:**
-- **Production**: mainブランチ → production環境
-- 環境ごとに独立したリソース
-- 環境変数で設定を分離
+**Current (Production only):**
+- **Production**: main branch → production environment
+- Independent resources per environment
+- Separate configuration with environment variables
 
-**将来（複数環境）:**
-- **Development**: developブランチ → development環境
-- **Staging**: stagingブランチ → staging環境
-- **Production**: mainブランチ → production環境
+**Future (Multiple environments):**
+- **Development**: develop branch → development environment
+- **Staging**: staging branch → staging environment
+- **Production**: main branch → production environment
 
 ### Secrets Management
 
-**GitHub Secrets（必須）:**
-- `AWS_ACCESS_KEY_ID` - AWSアクセスキーID
-- `AWS_SECRET_ACCESS_KEY` - AWSシークレットアクセスキー
+**GitHub Secrets (Required):**
+- `AWS_ACCESS_KEY_ID` - AWS access key ID
+- `AWS_SECRET_ACCESS_KEY` - AWS secret access key
 
-**設定方法:**
-1. GitHubリポジトリの Settings → Secrets and variables → Actions
-2. New repository secret をクリック
-3. 上記のシークレットを追加
+**Configuration Method:**
+1. GitHub repository Settings → Secrets and variables → Actions
+2. Click New repository secret
+3. Add above secrets
 
-**AWS IAM権限:**
-GitHub Actionsに必要な権限：
-- ECR（イメージのプッシュ）
-- Lambda（関数コードの更新）
-- CloudWatch Logs（ログの読み取り）
+**AWS IAM Permissions:**
+Permissions required for GitHub Actions:
+- ECR (image push)
+- Lambda (function code update)
+- CloudWatch Logs (log reading)
 
-**Terraform用IAM権限:**
-ローカルからのTerraform実行に必要な権限：
-- Lambda（作成・更新・削除）
-- API Gateway（作成・更新・削除）
-- DynamoDB（作成・更新・削除）
-- ECR（リポジトリ作成・管理）
-- IAM（ロール作成）
-- S3（Terraformステート保存・読み取り）
-- Secrets Manager（シークレット作成・読み取り）
-- Amplify（アプリケーション作成・管理）
+**Terraform IAM Permissions:**
+Permissions required for Terraform execution from local:
+- Lambda (create/update/delete)
+- API Gateway (create/update/delete)
+- DynamoDB (create/update/delete)
+- ECR (repository creation/management)
+- IAM (role creation)
+- S3 (Terraform state save/read)
+- Secrets Manager (secret creation/reading)
+- Amplify (application creation/management)
 
-**AWS Secrets Managerの使用:**
+**Using AWS Secrets Manager:**
 
-機密情報はAWS Secrets Managerで管理：
+Manage sensitive information with AWS Secrets Manager:
 
-1. **GitHubトークン**: Amplifyデプロイ用
-   - Secret名: `myrsspress-github-amplify-token-{environment}`
-   - Terraformで自動作成・管理
-   - Terraform stateに保存されない
+1. **GitHub Token**: For Amplify deployment
+   - Secret name: `myrsspress-github-amplify-token-{environment}`
+   - Automatically created and managed by Terraform
+   - Not stored in Terraform state
 
-2. **セットアップ手順:**
+2. **Setup Procedure:**
 ```bash
-# Terraformが自動的にSecrets Managerにトークンを保存
+# Terraform automatically saves token to Secrets Manager
 cd infra/environments/production
 terraform apply
 
-# 手動でトークンを更新する場合
+# To manually update token
 aws secretsmanager update-secret \
   --secret-id myrsspress-github-amplify-token-production \
   --secret-string "ghp_new_token_here"
 ```
 
-3. **ローテーション:**
-   - GitHubでトークンを再生成
-   - Secrets Managerで更新
-   - Terraformは次回実行時に自動的に新しいトークンを使用
+3. **Rotation:**
+   - Regenerate token in GitHub
+   - Update in Secrets Manager
+   - Terraform automatically uses new token on next execution
 
 ### Deployment Best Practices
 
-1. **プッシュ前にプル**: `git push`前に必ず`git pull`を実行してリモートの変更を取り込む
-2. **テストを必ず実行**: デプロイ前に`make test`を実行
-3. **インフラ変更の確認**: `terraform plan`で変更内容を確認
-4. **段階的デプロイ**: 重要な変更は段階的にデプロイ
-5. **イメージタグ管理**: GitコミットSHAをイメージタグとして使用
-6. **ロールバック準備**: 前のイメージタグに戻せるようにする
-7. **モニタリング**: CloudWatch Logsでデプロイ後の動作を確認
-8. **通知設定**: デプロイ成功/失敗をSlackなどに通知
+1. **Pull before push**: Always run `git pull` before `git push` to incorporate remote changes
+2. **Always run tests**: Run `make test` before deployment
+3. **Check infrastructure changes**: Check changes with `terraform plan`
+4. **Gradual deployment**: Deploy important changes gradually
+5. **Image tag management**: Use Git commit SHA as image tag
+6. **Rollback preparation**: Be able to revert to previous image tag
+7. **Monitoring**: Check post-deployment operation with CloudWatch Logs
+8. **Notification setup**: Notify deployment success/failure to Slack, etc.
 
-**プッシュの正しい手順:**
+**Correct Push Procedure:**
 ```bash
-# 1. 変更をコミット
+# 1. Commit changes
 git add .
 git commit -m "feat: Add new feature"
 
-# 2. リモートの変更を取り込む（重要！）
+# 2. Incorporate remote changes (Important!)
 git pull origin feat/your-branch
 
-# 3. コンフリクトがあれば解決
-# （コンフリクトがある場合は手動で解決してコミット）
+# 3. Resolve conflicts if any
+# (Manually resolve and commit if conflicts exist)
 
-# 4. プッシュ
+# 4. Push
 git push origin feat/your-branch
 ```
 
 ### Rollback Strategy
 
-**バックエンドのロールバック:**
+**Backend Rollback:**
 ```bash
-# 前のイメージタグを確認
+# Check previous image tags
 aws ecr describe-images \
   --repository-name myrsspress-backend \
   --query 'sort_by(imageDetails,& imagePushedAt)[-5:]'
 
-# 特定のイメージタグに戻す
+# Revert to specific image tag
 aws lambda update-function-code \
   --function-name myrsspress-api \
   --image-uri <ECR_REGISTRY>/myrsspress-backend:<PREVIOUS_TAG>
 ```
 
-**インフラのロールバック:**
+**Infrastructure Rollback:**
 ```bash
 cd infra/environments/production
 
-# 前の状態に戻す
+# Revert to previous state
 terraform apply -target=<resource>
 
-# または、Terraformステートから復元
+# Or restore from Terraform state
 terraform state pull > backup.tfstate
 ```
 
@@ -1452,10 +1452,10 @@ terraform state pull > backup.tfstate
 
 ### Implementation Strategy
 
-- アプリケーションは日本語と英語の両方をサポート
-- すべてのユーザー向けテキストは翻訳ファイルで管理
-- UIテキストをハードコードせず、必ず翻訳キーを使用
-- ブラウザの言語設定に基づいて自動的に言語を検出
+- Application supports both Japanese and English
+- Manage all user-facing text in translation files
+- Always use translation keys, do not hardcode UI text
+- Automatically detect language based on browser language settings
 
 ### Translation File Structure
 
@@ -1506,8 +1506,8 @@ export default function MyComponent({ locale }: { locale: Locale }) {
 
 ### Locale-Specific Formatting
 
-- 日付、数値、通貨などのフォーマットは選択された言語のロケールに従う
-- `toLocaleDateString()`、`toLocaleString()`を活用
+- Format dates, numbers, currencies according to selected language locale
+- Leverage `toLocaleDateString()`, `toLocaleString()`
 
 ```typescript
 const dateLocale = locale === 'ja' ? 'ja-JP' : 'en-US';
@@ -1521,51 +1521,50 @@ const formattedDate = new Date().toLocaleDateString(dateLocale, {
 
 ### Translation Management Rules
 
-- 各言語の翻訳は同じキー構造を維持すること
-- 新しいUIテキストを追加する際は、必ず両言語の翻訳を同時に追加すること
-- 翻訳キーは説明的な名前を使用すること（例：`buttonSubmit`ではなく`generateNewspaper`）
+- Maintain same key structure for each language translation
+- When adding new UI text, always add translations for both languages simultaneously
+- Use descriptive names for translation keys (e.g., `generateNewspaper` instead of `buttonSubmit`)
 
-**注**: TypeScript規約、コード構成、テスト戦略、セキュリティの汎用的なベストプラクティスは [tech-common.md](./tech-common.md) を参照してください。
+**Note**: For general best practices on TypeScript conventions, code organization, testing strategy, and security, refer to [tech-common.md](./tech-common.md).
 
 ## Scalability Considerations
 
 ### Current Architecture
 
-- Lambda: 自動スケーリング
-- DynamoDB: オンデマンドキャパシティ
-- CloudFront: グローバルCDN
-- Amplify: 自動スケーリング
+- Lambda: Auto-scaling
+- DynamoDB: On-demand capacity
+- CloudFront: Global CDN
+- Amplify: Auto-scaling
 
 ### Future Enhancements
 
-- ElastiCacheでキャッシュ層追加
-- SQSで非同期処理
-- Step Functionsで複雑なワークフロー
-- Aurora Serverlessでリレーショナルデータ（必要に応じて）
+- Add cache layer with ElastiCache
+- Asynchronous processing with SQS
+- Complex workflows with Step Functions
+- Relational data with Aurora Serverless (as needed)
 
+## Prohibited Practices
 
-## Prohibited Practices (禁止事項)
-
-このセクションでは、プロジェクトで絶対に行ってはいけない開発プラクティスを定義します。
+This section defines development practices that must never be performed in the project.
 
 ### Terraform State Management
 
-**❌ 禁止: Terraform stateをlocalで管理すること**
-- Terraform stateは必ずS3バックエンドで管理すること
-- ローカルstateファイル（`terraform.tfstate`）をGitにコミットしないこと
-- 複数人での作業時にstate競合が発生するため、localバックエンドは使用禁止
+**❌ Prohibited: Managing Terraform state locally**
+- Always manage Terraform state with S3 backend
+- Do not commit local state files (`terraform.tfstate`) to Git
+- Local backend is prohibited as state conflicts occur when multiple people work
 
-**❌ 禁止: エラー発生時のトラブルシュートでterraform stateを一時的にlocalで管理すること**
-- エラーが発生した場合でも、stateをlocalに移行してはいけない
-- 正しいアプローチ：
-  1. エラーの根本原因を調査する
-  2. Terraform planで変更内容を確認する
-  3. 必要に応じて`terraform state`コマンドでリソースをインポート/削除する
-  4. S3バックエンドを維持したまま問題を解決する
+**❌ Prohibited: Temporarily managing terraform state locally when troubleshooting errors**
+- Even if errors occur, do not migrate state to local
+- Correct approach:
+  1. Investigate root cause of error
+  2. Check changes with Terraform plan
+  3. Import/remove resources with `terraform state` command as needed
+  4. Resolve issues while maintaining S3 backend
 
-**✅ 正しい方法:**
+**✅ Correct Method:**
 ```bash
-# S3バックエンドの設定
+# S3 backend configuration
 terraform {
   backend "s3" {
     bucket         = "myrsspress-production-843925270284-terraform-state"
@@ -1577,60 +1576,60 @@ terraform {
 }
 ```
 
-**トラブルシューティング例:**
+**Troubleshooting Examples:**
 ```bash
-# ロックが残っている場合
+# If lock remains
 terraform force-unlock <LOCK_ID>
 
-# リソースをstateから削除
+# Remove resource from state
 terraform state rm <resource_address>
 
-# リソースをstateにインポート
+# Import resource to state
 terraform import <resource_address> <resource_id>
 
-# stateの確認
+# Check state
 terraform state list
 terraform state show <resource_address>
 ```
 
 ### Infrastructure as Code
 
-**❌ 禁止: AWSコンソールで手動リソース作成**
-- すべてのインフラリソースはTerraformで管理すること
-- 緊急時でもコンソールでの手動変更は避け、Terraformコードを更新すること
-- 例外: 初回セットアップ時のS3バケット作成のみ許可
+**❌ Prohibited: Manual resource creation in AWS Console**
+- Manage all infrastructure resources with Terraform
+- Even in emergencies, avoid manual changes in console, update Terraform code
+- Exception: S3 bucket creation during initial setup only
 
-**❌ 禁止: Terraform管理外のリソース変更**
-- Terraform管理下のリソースをAWS CLIやコンソールで直接変更しないこと
-- 変更が必要な場合は、Terraformコードを更新してapplyすること
+**❌ Prohibited: Changing resources outside Terraform management**
+- Do not directly change Terraform-managed resources with AWS CLI or console
+- If changes needed, update Terraform code and apply
 
 ### Deployment
 
-**❌ 禁止: 本番環境への直接デプロイ**
-- ローカルから直接本番環境にデプロイしないこと（Terraformを除く）
-- バックエンドのデプロイはGitHub Actionsを経由すること
-- フロントエンドのデプロイはAmplifyの自動デプロイを使用すること
+**❌ Prohibited: Direct deployment to production**
+- Do not deploy directly to production from local (except Terraform)
+- Backend deployment goes through GitHub Actions
+- Frontend deployment uses Amplify automatic deployment
 
-**❌ 禁止: テストをスキップしたデプロイ**
-- `make test`が失敗している状態でデプロイしないこと
-- CI/CDパイプラインでテストが失敗した場合は、必ず修正してから再デプロイすること
+**❌ Prohibited: Deployment skipping tests**
+- Do not deploy when `make test` fails
+- If tests fail in CI/CD pipeline, always fix before redeploying
 
 ### Security
 
-**❌ 禁止: 機密情報のハードコード**
-- AWS認証情報、APIキー、パスワードをコードにハードコードしないこと
-- 環境変数またはAWS Secrets Managerを使用すること
+**❌ Prohibited: Hardcoding sensitive information**
+- Do not hardcode AWS credentials, API keys, passwords in code
+- Use environment variables or AWS Secrets Manager
 
-**❌ 禁止: Access KeysをGitHub Secretsに保存**
-- GitHub ActionsではOIDC認証を使用すること
-- 長期的なAccess Keysは使用禁止
+**❌ Prohibited: Storing Access Keys in GitHub Secrets**
+- Use OIDC authentication for GitHub Actions
+- Long-term Access Keys are prohibited
 
-**❌ 禁止: セキュリティチェックの無効化**
-- Gitleaksによるセキュリティチェックを無効化しないこと
-- pre-commitフックを削除しないこと
+**❌ Prohibited: Disabling security checks**
+- Do not disable security checks by Gitleaks
+- Do not delete pre-commit hooks
 
-**注**: Code Quality、Git Workflow、Performanceの汎用的な禁止事項は [tech-common.md](./tech-common.md) を参照してください。
+**Note**: For general prohibited practices on Code Quality, Git Workflow, and Performance, refer to [tech-common.md](./tech-common.md).
 
 ---
 
-これらの禁止事項に違反した場合、システムの安定性、セキュリティ、保守性に重大な影響を与える可能性があります。必ず遵守してください。
+Violating these prohibited practices can seriously impact system stability, security, and maintainability. Always comply.

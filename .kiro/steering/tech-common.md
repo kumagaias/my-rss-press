@@ -1,133 +1,133 @@
-# 技術ベストプラクティス（汎用）
+# Technical Best Practices (General)
 
-このドキュメントは、Next.js/React/TypeScript/AWSプロジェクトで再利用可能な汎用的なベストプラクティスを記載しています。
+This document describes general best practices reusable across Next.js/React/TypeScript/AWS projects.
 
-**適用プロジェクト:**
+**Applicable Projects:**
 - Next.js + TypeScript
-- AWS Serverless (Lambda, DynamoDB等)
-- React コンポーネント開発
+- AWS Serverless (Lambda, DynamoDB, etc.)
+- React component development
 
-**プロジェクト固有の情報:**
-- MyRSSPress固有の実装詳細は [tech.md](./tech.md) を参照
+**Project-Specific Information:**
+- For MyRSSPress-specific implementation details, refer to [tech.md](./tech.md)
 
 ---
 
 ## TypeScript/JavaScript Conventions
 
-### 命名規則
+### Naming Conventions
 
-- 変数と関数にはcamelCaseを使用すること（例：`userName`, `fetchData`）
-- クラスとReactコンポーネントにはPascalCaseを使用すること（例：`UserProfile`, `NewspaperCard`）
-- 定数にはUPPER_SNAKE_CASEを使用すること（例：`MAX_RETRY_COUNT`, `API_BASE_URL`）
-- ブール値の変数には`is`, `has`, `should`などのプレフィックスを使用すること（例：`isLoading`, `hasError`）
-- イベントハンドラーには`handle`プレフィックスを使用すること（例：`handleClick`, `handleSubmit`）
+- Use camelCase for variables and functions (e.g., `userName`, `fetchData`)
+- Use PascalCase for classes and React components (e.g., `UserProfile`, `NewspaperCard`)
+- Use UPPER_SNAKE_CASE for constants (e.g., `MAX_RETRY_COUNT`, `API_BASE_URL`)
+- Use prefixes like `is`, `has`, `should` for boolean variables (e.g., `isLoading`, `hasError`)
+- Use `handle` prefix for event handlers (e.g., `handleClick`, `handleSubmit`)
 
-### ファイル構造
+### File Structure
 
-- 1ファイルにつき1コンポーネントを配置すること
-- 関連するコンポーネントはフォルダーにまとめること
-- エクスポートにはindex.tsファイルを使用すること
-- ファイル名はコンポーネント名と一致させること（例：`UserProfile.tsx`）
-- テストファイルは同じディレクトリに配置し、`.test.ts`または`.spec.ts`の拡張子を使用すること
+- Place one component per file
+- Group related components in folders
+- Use index.ts files for exports
+- Match file names with component names (e.g., `UserProfile.tsx`)
+- Place test files in the same directory with `.test.ts` or `.spec.ts` extension
 
-### TypeScriptのベストプラクティス
+### TypeScript Best Practices
 
-- パブリックAPIにはtypeよりもinterfaceを優先すること
-- エクスポートされる関数には明示的な戻り値の型を指定すること
-- `any`型の使用を避けること（やむを得ない場合は`unknown`を検討）
-- 型アサーション（`as`）は最小限に抑えること
-- ユニオン型とインターセクション型を適切に使用すること
-- ジェネリクスを活用して再利用可能な型を作成すること
-- `null`と`undefined`を明確に区別すること
-- オプショナルチェイニング（`?.`）とnullish coalescing（`??`）を活用すること
+- Prefer interface over type for public APIs
+- Specify explicit return types for exported functions
+- Avoid using `any` type (consider `unknown` if unavoidable)
+- Minimize type assertions (`as`)
+- Use union and intersection types appropriately
+- Leverage generics to create reusable types
+- Clearly distinguish between `null` and `undefined`
+- Leverage optional chaining (`?.`) and nullish coalescing (`??`)
 
-### コーディングスタイル
+### Coding Style
 
-- セミコロンを使用すること
-- シングルクォート（`'`）を優先すること（JSX内ではダブルクォート）
-- インデントは2スペースを使用すること
-- 行の長さは100文字以内を目安とすること
-- アロー関数を優先すること（`function`キーワードは特別な理由がある場合のみ）
-- 分割代入を積極的に使用すること
-- テンプレートリテラルを使用して文字列を構築すること
+- Use semicolons
+- Prefer single quotes (`'`) (double quotes in JSX)
+- Use 2 spaces for indentation
+- Aim for line length within 100 characters
+- Prefer arrow functions (`function` keyword only for special reasons)
+- Actively use destructuring
+- Use template literals for string construction
 
 ### Import/Export
 
-- 名前付きエクスポートを優先すること（デフォルトエクスポートは最小限に）
-- インポートは以下の順序でグループ化すること：
-  1. 外部ライブラリ（React、Next.js等）
-  2. 内部モジュール（`@/`から始まるパス）
-  3. 相対パス（`./`、`../`）
-  4. 型のみのインポート（`import type`）
-- 未使用のインポートは削除すること
+- Prefer named exports (minimize default exports)
+- Group imports in the following order:
+  1. External libraries (React, Next.js, etc.)
+  2. Internal modules (paths starting with `@/`)
+  3. Relative paths (`./`, `../`)
+  4. Type-only imports (`import type`)
+- Remove unused imports
 
-### テストとドキュメントでの固有サービス名の使用禁止
+### Prohibition of Real Service Names in Tests and Documentation
 
-**原則**: テストコード、仕様書、設計書、ドキュメントでは実在するサービス名を使用しないこと
+**Principle**: Do not use real service names in test code, specifications, design documents, and documentation
 
-**理由**:
-1. 商標権の侵害リスクを避ける
-2. サービスの仕様変更や終了の影響を受けない
-3. 汎用的で理解しやすいコードを保つ
-4. 特定のサービスへの依存を示唆しない
+**Reasons**:
+1. Avoid trademark infringement risks
+2. Not affected by service specification changes or termination
+3. Keep code generic and understandable
+4. Do not suggest dependency on specific services
 
-**禁止例**:
+**Prohibited Examples**:
 - ❌ TechCrunch, Hacker News, Reddit, Twitter/X
-- ❌ Google, Facebook, Amazon（サービス名として）
-- ❌ その他の実在するWebサービス、企業名、製品名
+- ❌ Google, Facebook, Amazon (as service names)
+- ❌ Other real web services, company names, product names
 
-**推奨する代替名**:
+**Recommended Alternatives**:
 ```typescript
-// ❌ Bad: 実在のサービス名
+// ❌ Bad: Real service names
 const mockFeeds = [
   { url: 'https://techcrunch.com/feed/', title: 'TechCrunch', reasoning: 'Tech news' },
   { url: 'https://news.ycombinator.com/rss', title: 'Hacker News', reasoning: 'Tech community' },
 ];
 
-// ✅ Good: 汎用的な名前
+// ✅ Good: Generic names
 const mockFeeds = [
   { url: 'https://example.com/tech-feed', title: 'Tech News Feed', reasoning: 'Technology news' },
   { url: 'https://example.com/community-feed', title: 'Tech Community Feed', reasoning: 'Community discussions' },
 ];
 
-// ✅ Good: より説明的な名前
+// ✅ Good: More descriptive names
 const mockFeeds = [
   { url: 'https://example.com/feed1', title: 'Sample Tech Blog', reasoning: 'Technology articles' },
   { url: 'https://example.com/feed2', title: 'Sample News Site', reasoning: 'General news' },
 ];
 ```
 
-**適用範囲**:
-- ユニットテスト（`*.test.ts`, `*.spec.ts`）
-- E2Eテスト（Playwright等）
-- 仕様書（`.kiro/specs/`）
-- 設計書（`design.md`, `requirements.md`）
-- ドキュメント（`README.md`, `docs/`）
-- コード内のコメント例
+**Scope of Application**:
+- Unit tests (`*.test.ts`, `*.spec.ts`)
+- E2E tests (Playwright, etc.)
+- Specifications (`.kiro/specs/`)
+- Design documents (`design.md`, `requirements.md`)
+- Documentation (`README.md`, `docs/`)
+- Example comments in code
 
-**例外**:
-- 本番コードで実際にそのサービスのAPIを使用する場合（例：AWS SDK、Bedrock API）
-- 統合テストで実際のサービスに接続する場合（明示的にマークすること）
-- ユーザー向けドキュメントで具体例として説明する場合（「例：」と明記すること）
+**Exceptions**:
+- When actually using that service's API in production code (e.g., AWS SDK, Bedrock API)
+- When connecting to actual service in integration tests (explicitly mark)
+- When explaining as concrete example in user-facing documentation (explicitly state "Example:")
 
 ## Code Organization
 
 ### File Size Limits
 
-- 各ファイルは300行以内に収めること
-- 超える場合は複数ファイルに分割すること
-- ファイル分割時は関心の分離を明確に保つこと
+- Keep each file within 300 lines
+- Split into multiple files if exceeding
+- Maintain clear separation of concerns when splitting files
 
 ### Component Splitting Example
 
 ```typescript
-// ❌ Bad: 1つの大きなコンポーネント (500行)
+// ❌ Bad: One large component (500 lines)
 export default function NewspaperPage() {
-  // すべてのロジックとUIが1つのファイルに...
+  // All logic and UI in one file...
 }
 
-// ✅ Good: 複数の小さなコンポーネントに分割
-// NewspaperPage.tsx (100行)
+// ✅ Good: Split into multiple small components
+// NewspaperPage.tsx (100 lines)
 export default function NewspaperPage() {
   return (
     <>
@@ -138,17 +138,17 @@ export default function NewspaperPage() {
   );
 }
 
-// NewspaperHeader.tsx (50行)
-// NewspaperContent.tsx (150行)
-// NewspaperFooter.tsx (50行)
+// NewspaperHeader.tsx (50 lines)
+// NewspaperContent.tsx (150 lines)
+// NewspaperFooter.tsx (50 lines)
 ```
 
 ### Separation of Concerns
 
-- **Presentation Components**: UIのみを担当
-- **Container Components**: ロジックとデータ取得を担当
-- **Hooks**: 再利用可能なロジックを抽出
-- **Utils**: 汎用的なヘルパー関数
+- **Presentation Components**: Handle UI only
+- **Container Components**: Handle logic and data fetching
+- **Hooks**: Extract reusable logic
+- **Utils**: Generic helper functions
 
 ## Testing Strategy
 
@@ -157,28 +157,28 @@ export default function NewspaperPage() {
 - **Unit Tests**: Jest/Vitest
 - **Component Tests**: React Testing Library
 - **E2E Tests**: Playwright
-- **Coverage Target**: 60%以上
+- **Coverage Target**: 60% or higher
 
 ### Backend Testing
 
 - **Unit Tests**: Jest/Vitest
 - **Integration Tests**: Supertest + Hono
 - **Mock**: AWS SDK Mock
-- **Coverage Target**: 60%以上
+- **Coverage Target**: 60% or higher
 
 ### Property-Based Testing
 
-**原則**: 例ベースのテストに加えて、プロパティベーステストを使用すること
+**Principle**: Use property-based testing in addition to example-based testing
 
-**ライブラリ**: `fast-check`
+**Library**: `fast-check`
 
-**プロパティの例**:
-- **完全性**: すべての入力が出力に含まれる
-- **順序性**: ソート結果が正しい順序である
-- **不変性**: 元のデータが変更されない
-- **べき等性**: 同じ入力で同じ出力が得られる
+**Property Examples**:
+- **Completeness**: All inputs are included in output
+- **Ordering**: Sort results are in correct order
+- **Immutability**: Original data is not modified
+- **Idempotency**: Same input produces same output
 
-**実装例**:
+**Implementation Example**:
 ```typescript
 import * as fc from 'fast-check';
 
@@ -200,9 +200,9 @@ it('Property: All items must be included (Completeness)', () => {
 
 ### ESLint Configuration
 
-**原則**: すべてのプロジェクトでESLintを使用してコード品質を保つこと
+**Principle**: Use ESLint in all projects to maintain code quality
 
-**フロントエンド (Next.js)**:
+**Frontend (Next.js)**:
 ```json
 // frontend/.eslintrc.json
 {
@@ -219,7 +219,7 @@ it('Property: All items must be included (Completeness)', () => {
 }
 ```
 
-**バックエンド (Node.js + TypeScript)**:
+**Backend (Node.js + TypeScript)**:
 ```json
 // backend/.eslintrc.json
 {
@@ -246,116 +246,116 @@ it('Property: All items must be included (Completeness)', () => {
 }
 ```
 
-**実行方法**:
+**Execution Method**:
 ```bash
-# 個別実行
+# Individual execution
 cd frontend && npm run lint
 cd backend && npm run lint
 
-# Makefileから実行（推奨）
+# Execute from Makefile (recommended)
 make test-lint
 
-# すべてのテストを実行（ユニット + ESLint + セキュリティ + 脆弱性）
+# Run all tests (unit + ESLint + security + vulnerabilities)
 make test
 ```
 
-**ベストプラクティス**:
-- コミット前に必ずESLintを実行すること
-- 警告は可能な限り修正すること
-- `any`型の使用は最小限に抑えること
-- 未使用変数は削除すること
-- CI/CDパイプラインでESLintを実行すること
+**Best Practices**:
+- Always run ESLint before commits
+- Fix warnings as much as possible
+- Minimize use of `any` type
+- Remove unused variables
+- Run ESLint in CI/CD pipeline
 
 ## Security
 
 ### General Security Practices
 
-- 環境変数で機密情報を管理
-- 機密情報をコードにハードコードしない
-- CORSを適切に設定
-- レート制限を実装
-- 入力データをサニタイズ
-- 最小権限の原則を適用
+- Manage sensitive information with environment variables
+- Do not hardcode sensitive information in code
+- Configure CORS appropriately
+- Implement rate limiting
+- Sanitize input data
+- Apply principle of least privilege
 
 ### Frontend Security
 
-- XSS対策（Reactのデフォルト保護）
-- CSRF対策（SameSite Cookie）
-- Content Security Policy (CSP)の設定
+- XSS protection (React default protection)
+- CSRF protection (SameSite Cookie)
+- Content Security Policy (CSP) configuration
 
 ### Backend Security
 
-- 環境変数に機密情報を保存
-- Secrets Managerを使用して機密情報を管理
-- IAMロールで最小権限の原則を適用
+- Store sensitive information in environment variables
+- Manage sensitive information using Secrets Manager
+- Apply principle of least privilege with IAM roles
 
-### Dependency Security (npm脆弱性チェック)
+### Dependency Security (npm vulnerability check)
 
-**概要:**
+**Overview:**
 
-npm依存関係の脆弱性を自動的にチェックし、Medium以上の深刻度の脆弱性が見つかった場合はプッシュを防止します。
+Automatically check npm dependency vulnerabilities and prevent pushes if Medium or higher severity vulnerabilities are found.
 
-**チェックツール:**
-- `npm audit` - npm公式の脆弱性チェックツール
-- 深刻度レベル: Critical, High, Moderate, Low
+**Check Tool:**
+- `npm audit` - npm official vulnerability check tool
+- Severity levels: Critical, High, Moderate, Low
 
-**自動チェックのタイミング:**
-1. **pre-pushフック**: `git push`実行時に自動チェック（オプション）
-2. **手動実行**: `make test-vulnerabilities`または`make audit`
+**Automatic Check Timing:**
+1. **pre-push hook**: Automatic check on `git push` execution (optional)
+2. **Manual execution**: `make test-vulnerabilities` or `make audit`
 
-**深刻度の対応方針:**
-- **Critical/High/Moderate**: プッシュをブロック、即座に修正が必要
-- **Low**: 警告のみ、プッシュは許可（定期的に修正を検討）
+**Severity Response Policy:**
+- **Critical/High/Moderate**: Block push, immediate fix required
+- **Low**: Warning only, push allowed (consider periodic fixes)
 
-**実行方法:**
+**Execution Method:**
 
 ```bash
-# 手動で脆弱性チェック
+# Manual vulnerability check
 make test-vulnerabilities
-# または
+# or
 make audit
 
-# すべてのテスト（ユニット + セキュリティ + 脆弱性）
+# All tests (unit + security + vulnerabilities)
 make test
 ```
 
-**脆弱性が見つかった場合の対応:**
+**Response When Vulnerabilities Found:**
 
 ```bash
-# 1. 該当ディレクトリに移動
-cd frontend  # または backend
+# 1. Navigate to relevant directory
+cd frontend  # or backend
 
-# 2. 脆弱性の詳細を確認
+# 2. Check vulnerability details
 npm audit
 
-# 3. 自動修正を試みる（非破壊的）
+# 3. Attempt automatic fix (non-destructive)
 npm audit fix
 
-# 4. 自動修正できない場合は破壊的変更を含む修正
+# 4. If automatic fix fails, fix with destructive changes
 npm audit fix --force
 
-# 5. package-lock.jsonをコミット
+# 5. Commit package-lock.json
 git add package-lock.json
 git commit -m "fix: Update dependencies to fix vulnerabilities"
 ```
 
-**ベストプラクティス:**
-1. 定期的に`npm audit`を実行して脆弱性を確認
-2. 依存関係の更新は慎重に行い、テストを実行
-3. `npm audit fix --force`は破壊的変更を含むため、実行後は必ずテスト
-4. 修正できない脆弱性は、代替パッケージの検討またはissue報告
-5. CI/CDパイプラインでも脆弱性チェックを実行
+**Best Practices:**
+1. Regularly run `npm audit` to check vulnerabilities
+2. Update dependencies carefully and run tests
+3. `npm audit fix --force` includes destructive changes, always test after execution
+4. For unfixable vulnerabilities, consider alternative packages or report issue
+5. Run vulnerability checks in CI/CD pipeline
 
-**修正できない脆弱性の対応:**
+**Response to Unfixable Vulnerabilities:**
 
-依存関係の競合などで即座に修正できない脆弱性がある場合：
+When vulnerabilities cannot be fixed immediately due to dependency conflicts:
 
-1. **影響範囲を評価**: 開発環境のみか、本番環境にも影響するか
-2. **GitHub Issueを作成**: 脆弱性の詳細と修正計画を記録
-3. **一時的な回避策**: 
-   - 開発環境のみの脆弱性の場合、本番ビルドに影響しないことを確認
-   - 本番環境に影響する場合は、代替パッケージの検討または緊急対応
-4. **定期的な再評価**: 依存関係の更新時に再度修正を試みる
+1. **Assess impact**: Development environment only, or production affected?
+2. **Create GitHub Issue**: Record vulnerability details and fix plan
+3. **Temporary workaround**: 
+   - If development environment only, verify no impact on production build
+   - If production affected, consider alternative packages or emergency response
+4. **Periodic re-evaluation**: Retry fix when updating dependencies
 
 ## Monitoring & Logging
 
@@ -378,97 +378,97 @@ const logger = {
 };
 ```
 
-- 構造化ログを使用（JSON形式）
-- エラーと警告を適切にログに記録
-- パフォーマンスメトリクスを記録
+- Use structured logging (JSON format)
+- Properly log errors and warnings
+- Record performance metrics
 
 ### Monitoring
 
-- メトリクスでパフォーマンス監視
-- アラームでアラート設定
-- トレーシングで詳細な追跡
-- 詳細なメトリクス取得
+- Monitor performance with metrics
+- Set alerts with alarms
+- Detailed tracking with tracing
+- Get detailed metrics
 
 ## Performance Optimization
 
 ### Frontend
 
-- SSR/SSGを適切に使い分け
-- 画像最適化（Next.js Image）
-- コード分割（Dynamic Import）
-- CDNでキャッシュ
+- Appropriately use SSR/SSG
+- Image optimization (Next.js Image)
+- Code splitting (Dynamic Import)
+- Cache with CDN
 
 ### Backend
 
-- 関数のウォームアップ
-- クエリの最適化
-- 並列処理の活用（Promise.all）
-- キャッシュの活用
+- Function warm-up
+- Query optimization
+- Leverage parallel processing (Promise.all)
+- Leverage caching
 
 ## Deployment Best Practices
 
-1. **プッシュ前にプル**: `git push`前に必ず`git pull`を実行してリモートの変更を取り込む
-2. **テストを必ず実行**: デプロイ前に`make test`を実行
-3. **インフラ変更の確認**: `terraform plan`で変更内容を確認
-4. **段階的デプロイ**: 重要な変更は段階的にデプロイ
-5. **イメージタグ管理**: GitコミットSHAをイメージタグとして使用
-6. **ロールバック準備**: 前のイメージタグに戻せるようにする
-7. **モニタリング**: ログでデプロイ後の動作を確認
-8. **通知設定**: デプロイ成功/失敗をSlackなどに通知
+1. **Pull before push**: Always run `git pull` before `git push` to incorporate remote changes
+2. **Always run tests**: Run `make test` before deployment
+3. **Check infrastructure changes**: Check changes with `terraform plan`
+4. **Gradual deployment**: Deploy important changes gradually
+5. **Image tag management**: Use Git commit SHA as image tag
+6. **Rollback preparation**: Be able to revert to previous image tag
+7. **Monitoring**: Check post-deployment operation with logs
+8. **Notification setup**: Notify deployment success/failure to Slack, etc.
 
-**プッシュの正しい手順:**
+**Correct Push Procedure:**
 ```bash
-# 1. 変更をコミット
+# 1. Commit changes
 git add .
 git commit -m "feat: Add new feature"
 
-# 2. リモートの変更を取り込む（重要！）
+# 2. Incorporate remote changes (Important!)
 git pull origin feat/your-branch
 
-# 3. コンフリクトがあれば解決
-# （コンフリクトがある場合は手動で解決してコミット）
+# 3. Resolve conflicts if any
+# (Manually resolve and commit if conflicts exist)
 
-# 4. プッシュ
+# 4. Push
 git push origin feat/your-branch
 ```
 
-## Prohibited Practices (禁止事項)
+## Prohibited Practices
 
-このセクションでは、プロジェクトで絶対に行ってはいけない開発プラクティスを定義します。
+This section defines development practices that must never be performed in the project.
 
 ### Code Quality
 
-**❌ 禁止: TypeScriptの`any`型の多用**
-- `any`型は最小限に抑えること
-- やむを得ない場合は`unknown`を検討すること
+**❌ Prohibited: Excessive use of TypeScript `any` type**
+- Minimize use of `any` type
+- Consider `unknown` if unavoidable
 
-**❌ 禁止: エラーハンドリングの省略**
-- すべての非同期処理にエラーハンドリングを実装すること
-- try-catchまたは.catch()を必ず使用すること
+**❌ Prohibited: Omitting error handling**
+- Implement error handling for all asynchronous processing
+- Always use try-catch or .catch()
 
-**❌ 禁止: コンソールログの本番環境への残置**
-- `console.log()`は開発時のみ使用すること
-- 本番環境では構造化ログ（JSON形式）を使用すること
+**❌ Prohibited: Leaving console logs in production**
+- Use `console.log()` only during development
+- Use structured logging (JSON format) in production
 
 ### Internationalization (i18n)
 
-**❌ 禁止: コンポーネント内で翻訳を直接分岐すること**
-- `locale === 'ja' ? '日本語' : 'English'`のような直接分岐は禁止
-- 必ず`lib/i18n.ts`の翻訳ファイルを使用すること
-- `useTranslations(locale)`を使って翻訳を取得すること
+**❌ Prohibited: Direct translation branching in components**
+- Direct branching like `locale === 'ja' ? '日本語' : 'English'` is prohibited
+- Always use translation files in `lib/i18n.ts`
+- Get translations using `useTranslations(locale)`
 
-**悪い例:**
+**Bad Example:**
 ```typescript
-// ❌ Bad: 直接分岐
+// ❌ Bad: Direct branching
 const buttonText = locale === 'ja' ? '保存' : 'Save';
 const placeholder = locale === 'ja' 
   ? 'テーマを入力してください'
   : 'Enter your theme';
 ```
 
-**良い例:**
+**Good Example:**
 ```typescript
-// ✅ Good: i18nファイルを使用
+// ✅ Good: Use i18n file
 import { useTranslations } from '@/lib/i18n';
 
 const t = useTranslations(locale);
@@ -476,161 +476,160 @@ const buttonText = t.save;
 const placeholder = t.themeInputPlaceholder;
 ```
 
-**理由:**
-- 翻訳の一元管理が可能
-- 翻訳の追加・変更が容易
-- コードの可読性が向上
-- 翻訳漏れを防止
-- 将来的な多言語対応が容易
+**Reasons:**
+- Centralized translation management
+- Easy to add/change translations
+- Improved code readability
+- Prevent translation omissions
+- Easy future multi-language support
 
 ### Git Workflow
 
-**❌ 禁止: mainブランチへの直接コミット**
-- 必ずfeatureブランチを作成してPRを経由すること
-- 例外: 緊急のホットフィックスのみ
+**❌ Prohibited: Direct commits to main branch**
+- Always create feature branch and go through PR
+- Exception: Emergency hotfixes only
 
-**❌ 禁止: 大きすぎるPR**
-- 1つのPRは500行以内を目安とすること
-- 大きな変更は複数のPRに分割すること
+**❌ Prohibited: Oversized PRs**
+- Aim for PRs within 500 lines
+- Split large changes into multiple PRs
 
 ### Performance
 
-**❌ 禁止: 無制限のデータ取得**
-- クエリには必ずLimitを設定すること
-- ページネーションを実装すること
+**❌ Prohibited: Unlimited data fetching**
+- Always set Limit on queries
+- Implement pagination
 
-**❌ 禁止: 同期的な大量API呼び出し**
-- 複数のAPI呼び出しは`Promise.all()`で並列化すること
-- レート制限を考慮すること
+**❌ Prohibited: Synchronous mass API calls**
+- Parallelize multiple API calls with `Promise.all()`
+- Consider rate limiting
 
 ---
 
-これらの禁止事項に違反した場合、システムの安定性、セキュリティ、保守性に重大な影響を与える可能性があります。必ず遵守してください。
-
+Violating these prohibited practices can seriously impact system stability, security, and maintainability. Always comply.
 
 ## Bug Fix Workflow
 
-バグを発見した場合、以下のワークフローに従って修正すること。
+When a bug is discovered, follow this workflow to fix it.
 
-### 1. Issue作成
+### 1. Create Issue
 
-バグを発見したら、まずGitHub Issueを作成する：
+When a bug is discovered, first create a GitHub Issue:
 
 ```markdown
 ## Description
-バグの詳細な説明
+Detailed description of the bug
 
 ## Steps to Reproduce
-1. 手順1
-2. 手順2
-3. 手順3
+1. Step 1
+2. Step 2
+3. Step 3
 
 ## Expected Behavior
-期待される動作
+Expected behavior
 
 ## Current Behavior
-現在の動作
+Current behavior
 
 ## Technical Details
-- Location: ファイルパスと行番号
-- Suspected Cause: 疑わしい原因
+- Location: File path and line number
+- Suspected Cause: Suspected cause
 
 ## Investigation Needed
-調査が必要な項目のリスト
+List of items requiring investigation
 
 ## Priority
 High/Medium/Low
 ```
 
-**Issueのラベル:**
-- `bug`: バグ修正
-- 影響範囲に応じて: `frontend`, `backend`, `database`, `infrastructure`
+**Issue Labels:**
+- `bug`: Bug fix
+- Depending on impact: `frontend`, `backend`, `database`, `infrastructure`
 
-### 2. ブランチ作成
+### 2. Create Branch
 
-Issue番号を含むブランチを作成：
+Create branch including Issue number:
 
 ```bash
-git checkout -b fix/issue-{番号}-{短い説明}
+git checkout -b fix/issue-{number}-{short-description}
 
-# 例
+# Example
 git checkout -b fix/issue-13-saved-newspapers-no-articles
 ```
 
-### 3. 問題の調査
+### 3. Investigate Problem
 
-**調査手順:**
+**Investigation Steps:**
 
-1. **再現確認**: バグを実際に再現できるか確認
-2. **コードレビュー**: 関連するコードを読んで原因を特定
-3. **ログ確認**: エラーログやコンソール出力を確認
-4. **データ確認**: データベースやAPIレスポンスを確認
+1. **Confirm reproduction**: Verify bug can actually be reproduced
+2. **Code review**: Read related code to identify cause
+3. **Check logs**: Check error logs and console output
+4. **Check data**: Check database and API responses
 
-**調査のポイント:**
-- フロントエンドとバックエンドの両方を確認
-- データの流れを追跡（UI → API → Service → Database）
-- 型定義とインターフェースの不一致を確認
-- 戻り値に必要なフィールドが含まれているか確認
+**Investigation Points:**
+- Check both frontend and backend
+- Track data flow (UI → API → Service → Database)
+- Check type definition and interface mismatches
+- Check if return value includes required fields
 
-### 4. 修正実装
+### 4. Implement Fix
 
-**修正の原則:**
-- **最小限の変更**: 問題を解決する最小限のコードのみ変更
-- **影響範囲の確認**: 変更が他の機能に影響しないか確認
-- **型安全性**: TypeScriptの型チェックを活用
-- **テスト**: 既存のテストが通ることを確認
+**Fix Principles:**
+- **Minimal changes**: Change only minimum code to solve problem
+- **Check impact**: Verify changes don't affect other features
+- **Type safety**: Leverage TypeScript type checking
+- **Testing**: Verify existing tests pass
 
-**修正例（Issue #13の場合）:**
+**Fix Example (Issue #13 case):**
 
 ```typescript
-// ❌ Bad: articlesフィールドが欠落
+// ❌ Bad: articles field missing
 return result.Items.map(item => ({
   newspaperId: item.newspaperId,
   name: item.name,
-  // ... articles が含まれていない
+  // ... articles not included
 }));
 
-// ✅ Good: articlesフィールドを追加
+// ✅ Good: Add articles field
 return result.Items.map(item => ({
   newspaperId: item.newspaperId,
   name: item.name,
-  articles: item.articles, // 追加
+  articles: item.articles, // Added
   // ...
 }));
 ```
 
-### 5. テスト実行
+### 5. Run Tests
 
-修正後、必ずテストを実行：
+After fix, always run tests:
 
 ```bash
-# ユニットテスト
+# Unit tests
 make test-unit
 
-# 全テスト
+# All tests
 make test
 
-# 手動テスト
-# 1. バグの再現手順を実行
-# 2. 修正が機能することを確認
-# 3. 他の機能に影響がないことを確認
+# Manual testing
+# 1. Execute bug reproduction steps
+# 2. Verify fix works
+# 3. Verify no impact on other features
 ```
 
-### 6. コミットとプッシュ
+### 6. Commit and Push
 
-**コミットメッセージの形式:**
+**Commit Message Format:**
 
 ```
-fix: {簡潔な説明}
+fix: {concise description}
 
-- 変更内容1
-- 変更内容2
-- 根本原因の説明
+- Change 1
+- Change 2
+- Root cause explanation
 
-Fixes #{Issue番号}
+Fixes #{Issue number}
 ```
 
-**例:**
+**Example:**
 ```bash
 git add backend/src/services/newspaperService.ts
 git commit -m "fix: Include articles in getPublicNewspapers response
@@ -644,94 +643,94 @@ Fixes #13"
 git push origin fix/issue-13-saved-newspapers-no-articles
 ```
 
-### 7. Pull Request作成
+### 7. Create Pull Request
 
-**PRの内容:**
+**PR Content:**
 
 ```markdown
 ## Overview
-Fixes #{Issue番号} - 問題の簡潔な説明
+Fixes #{Issue number} - Concise problem description
 
 ## Problem
-バグの詳細な説明
+Detailed bug description
 
 ## Root Cause
-根本原因の説明
+Root cause explanation
 
 ## Solution
-修正内容の説明
+Fix description
 
 ## Changes
-- **Backend**: 変更したファイルと内容
-- **Frontend**: 変更したファイルと内容
+- **Backend**: Changed files and content
+- **Frontend**: Changed files and content
 
 ## Testing
-- ✅ テスト項目1
-- ✅ テスト項目2
+- ✅ Test item 1
+- ✅ Test item 2
 
 ## Verification Steps
-修正を確認する手順
+Steps to verify fix
 
-Fixes #{Issue番号}
+Fixes #{Issue number}
 ```
 
-### 8. レビューとマージ
+### 8. Review and Merge
 
-1. PRを作成
-2. CI/CDが通ることを確認
-3. コードレビュー（必要に応じて）
-4. mainブランチにマージ
-5. Issueが自動的にクローズされることを確認
+1. Create PR
+2. Verify CI/CD passes
+3. Code review (as needed)
+4. Merge to main branch
+5. Verify Issue automatically closes
 
-### バグ修正のチェックリスト
+### Bug Fix Checklist
 
-修正前に以下を確認：
+Check the following before fixing:
 
-- [ ] Issueを作成した
-- [ ] 適切なブランチ名を使用した
-- [ ] 問題の根本原因を特定した
-- [ ] 最小限の変更で修正した
-- [ ] テストが通ることを確認した
-- [ ] 手動テストで動作確認した
-- [ ] コミットメッセージに`Fixes #番号`を含めた
-- [ ] PRの説明が明確である
-- [ ] 他の機能に影響がないことを確認した
+- [ ] Created Issue
+- [ ] Used appropriate branch name
+- [ ] Identified root cause of problem
+- [ ] Fixed with minimal changes
+- [ ] Verified tests pass
+- [ ] Verified operation with manual testing
+- [ ] Included `Fixes #number` in commit message
+- [ ] PR description is clear
+- [ ] Verified no impact on other features
 
-### よくあるバグのパターン
+### Common Bug Patterns
 
-**1. APIレスポンスのフィールド欠落**
-- 症状: フロントエンドでデータが表示されない
-- 原因: バックエンドのレスポンスに必要なフィールドが含まれていない
-- 修正: レスポンスマッピングにフィールドを追加
+**1. Missing API response fields**
+- Symptom: Data not displayed on frontend
+- Cause: Backend response doesn't include required fields
+- Fix: Add fields to response mapping
 
-**2. 型定義の不一致**
-- 症状: TypeScriptのコンパイルエラー
-- 原因: インターフェースと実装が一致していない
-- 修正: 型定義を更新するか、実装を修正
+**2. Type definition mismatch**
+- Symptom: TypeScript compilation error
+- Cause: Interface and implementation don't match
+- Fix: Update type definition or fix implementation
 
-**3. 非同期処理のエラーハンドリング不足**
-- 症状: エラーが発生してもユーザーに通知されない
-- 原因: try-catchが不足している
-- 修正: 適切なエラーハンドリングを追加
+**3. Insufficient async error handling**
+- Symptom: Errors not notified to users
+- Cause: Missing try-catch
+- Fix: Add appropriate error handling
 
-**4. 状態管理の問題**
-- 症状: UIが更新されない、または予期しない動作
-- 原因: Reactの状態更新が正しく行われていない
-- 修正: useEffectの依存配列を確認、状態更新ロジックを修正
+**4. State management issues**
+- Symptom: UI not updating or unexpected behavior
+- Cause: React state updates not performed correctly
+- Fix: Check useEffect dependency array, fix state update logic
 
-### デバッグのヒント
+### Debugging Tips
 
-**フロントエンド:**
-- ブラウザのDevToolsでネットワークタブを確認
-- Consoleでエラーメッセージを確認
-- React DevToolsで状態を確認
+**Frontend:**
+- Check Network tab in browser DevTools
+- Check error messages in Console
+- Check state with React DevTools
 
-**バックエンド:**
-- CloudWatch Logsでエラーログを確認
-- ローカルで`console.log`を使ってデバッグ
-- APIレスポンスをcurlやPostmanで確認
+**Backend:**
+- Check error logs in CloudWatch Logs
+- Debug locally with `console.log`
+- Check API responses with curl or Postman
 
-**データベース:**
-- DynamoDBコンソールでデータを直接確認
-- クエリ条件が正しいか確認
-- GSI（Global Secondary Index）が正しく設定されているか確認
+**Database:**
+- Check data directly in DynamoDB console
+- Verify query conditions are correct
+- Verify GSI (Global Secondary Index) is configured correctly

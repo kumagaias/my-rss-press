@@ -1,281 +1,281 @@
 # Product Specification - MyRSSPress
 
-このドキュメントはMyRSSPressの製品仕様を記載しています。
+This document describes the product specifications for MyRSSPress.
 
-**関連ドキュメント:**
-- [tech.md](./tech.md) - 技術アーキテクチャ
-- [tech-common.md](./tech-common.md) - 汎用的なベストプラクティス
-- [structure.md](./structure.md) - プロジェクト構造
-- [project-standards.md](./project-standards.md) - プロジェクト標準
+**Related Documents:**
+- [tech.md](./tech.md) - Technical architecture
+- [tech-common.md](./tech-common.md) - General best practices
+- [structure.md](./structure.md) - Project structure
+- [project-standards.md](./project-standards.md) - Project standards
 
 ---
 
-## 製品概要
+## Product Overview
 
-MyRSSPressは、RSSフィードを視覚的に魅力的な新聞スタイルのレイアウトに変換するWebアプリケーションです。ユーザーは興味のあるトピックを入力し、AIによるRSSフィード提案を受け取り、フィードを選択して、リアルな紙のテクスチャとインテリジェントな記事レイアウトを備えたパーソナライズされたデジタル新聞を生成します。
+MyRSSPress is a web application that transforms RSS feeds into visually appealing newspaper-style layouts. Users enter topics of interest, receive AI-powered RSS feed suggestions, select feeds, and generate personalized digital newspapers with realistic paper textures and intelligent article layouts.
 
-## コア機能
+## Core Features
 
-### 1. 多言語対応
+### 1. Multi-language Support
 
-**機能:** ブラウザの言語設定に基づいて日本語または英語でインターフェースを表示
+**Feature:** Display interface in Japanese or English based on browser language settings
 
-**仕様:**
-- ブラウザ言語が日本語 → 日本語UI
-- ブラウザ言語が日本語以外 → 英語UI
-- すべてのUIテキスト、ラベル、メッセージを翻訳
-- 日付フォーマットもロケールに対応
+**Specifications:**
+- Browser language is Japanese → Japanese UI
+- Browser language is not Japanese → English UI
+- Translate all UI text, labels, and messages
+- Date formatting also adapts to locale
 
-**実装:**
-- `lib/i18n.ts`で翻訳管理
-- `useTranslations(locale)`フックで翻訳取得
-- `detectLocale()`でブラウザ言語を自動検出
+**Implementation:**
+- Manage translations in `lib/i18n.ts`
+- Get translations with `useTranslations(locale)` hook
+- Auto-detect browser language with `detectLocale()`
 
-### 2. 統合ホーム画面
+### 2. Unified Home Screen
 
-**機能:** 1つの画面で興味入力、フィード管理、人気の新聞閲覧を実現
+**Feature:** Achieve interest input, feed management, and popular newspaper browsing on one screen
 
-**セクション:**
-1. **興味入力セクション**
-   - テーマキーワード入力
-   - Enterキーまたはボタンで送信
-   - AI駆動のフィード提案
+**Sections:**
+1. **Interest Input Section**
+   - Theme keyword input
+   - Submit with Enter key or button
+   - AI-driven feed suggestions
 
-2. **フィード管理セクション**
-   - 手動フィードURL追加
-   - フィード削除
-   - 重複防止機能
+2. **Feed Management Section**
+   - Manual feed URL addition
+   - Feed deletion
+   - Duplicate prevention
 
-3. **人気の新聞セクション**
-   - 他のユーザーが作成した公開新聞を表示
-   - 並び替え: 人気順（閲覧数）/ 新着順（作成日）
-   - 新聞カード: サムネイル、タイトル、作成者、日付、トピック、閲覧数
+3. **Popular Newspapers Section**
+   - Display public newspapers created by other users
+   - Sort: By popularity (view count) / By recency (creation date)
+   - Newspaper cards: Thumbnail, title, creator, date, topics, view count
 
-### 3. AIフィード提案
+### 3. AI Feed Suggestions
 
-**機能:** テーマに基づいてAIがRSSフィードを提案
+**Feature:** AI suggests RSS feeds based on theme
 
-**仕様:**
+**Specifications:**
 - **AI**: AWS Bedrock (Claude 3 Haiku)
-- **提案数**: 10個のフィード
-- **検証**: 各URLの存在確認（HEAD リクエスト、5秒タイムアウト）
-- **並列処理**: Promise.allで並列検証（最大15倍高速化）
-- **フォールバック**: 無効なURLが多い場合、デフォルトフィード（BBC, NYT等）で補充
-- **最低保証**: 5個のフィード
+- **Suggestion count**: 10 feeds
+- **Validation**: Check URL existence (HEAD request, 5 second timeout)
+- **Parallel processing**: Parallel validation with Promise.all (up to 15x faster)
+- **Fallback**: Supplement with default feeds (BBC, NYT, etc.) if many invalid URLs
+- **Minimum guarantee**: 5 feeds
 
-**パフォーマンス:**
-- レスポンス時間: ~30-40秒
-- Lambda タイムアウト: 60秒
+**Performance:**
+- Response time: ~30-40 seconds
+- Lambda timeout: 60 seconds
 
-**プロンプト制約:**
-- 実在するフィードのみ提案
-- 大手メディアや公式サイトを優先
-- 正しいフィードURL形式（/rss, /feed, /rss.xml等）
-- テーマとの関連度順に並べる
+**Prompt Constraints:**
+- Suggest only real feeds
+- Prioritize major media and official sites
+- Correct feed URL format (/rss, /feed, /rss.xml, etc.)
+- Sort by relevance to theme
 
-### 4. 新聞生成
+### 4. Newspaper Generation
 
-**機能:** 選択したフィードから新聞を生成
+**Feature:** Generate newspaper from selected feeds
 
-**記事取得:**
-- **記事数**: 8〜15記事（ランダム）
-- **期間**: 最新3日間 → 不足時は7日間まで拡張
-- **優先順位**: RSS公開日の新しい順
-- **データ**: タイトル、説明、リンク、画像、公開日
+**Article Retrieval:**
+- **Article count**: 8-15 articles (random)
+- **Period**: Latest 3 days → Extend to 7 days if insufficient
+- **Priority**: Newest RSS publication date first
+- **Data**: Title, description, link, image, publication date
 
-**記事の重要度計算:**
+**Article Importance Calculation:**
 - **AI**: AWS Bedrock (Claude 3 Haiku)
-- **考慮要素**:
-  1. テーマとの関連性（最優先）
-  2. 画像の有無（+10点ボーナス）
-  3. タイトルの長さ
-- **フォールバック**: Bedrock失敗時はタイトル長と画像有無で計算
+- **Consideration factors**:
+  1. Theme relevance (highest priority)
+  2. Image presence (+10 point bonus)
+  3. Title length
+- **Fallback**: Calculate from title length and image presence if Bedrock fails
 
-**レイアウト:**
-- **リード記事**: 最も重要度の高い記事（大きく表示）
-  - 画像ありの記事を優先的に配置
-  - Fisher-Yatesシャッフルで真のランダム性を実現
-- **トップストーリー**: 次に重要な記事（3カラム）
-- **その他**: 残りの記事（2カラム）
+**Layout:**
+- **Lead article**: Highest importance article (displayed large)
+  - Prioritize articles with images
+  - Achieve true randomness with Fisher-Yates shuffle
+- **Top stories**: Next important articles (3 columns)
+- **Others**: Remaining articles (2 columns)
 
-**パフォーマンス:**
-- 目標: 5秒以内
-- 高負荷時: 8秒未満
+**Performance:**
+- Target: Within 5 seconds
+- High load: Under 8 seconds
 
-### 5. 新聞設定とメタデータ
+### 5. Newspaper Settings and Metadata
 
-**機能:** 新聞生成後にユーザー名と新聞名を設定
+**Feature:** Set user name and newspaper name after newspaper generation
 
-**設定項目:**
-- **新聞名**: デフォルト自動生成、ユーザーが変更可能
-- **ユーザー名**: 任意入力
-- **公開設定**: 公開/非公開
+**Settings:**
+- **Newspaper name**: Auto-generated default, user can change
+- **User name**: Optional input
+- **Public setting**: Public/Private
 
-**表示:**
-- 新聞ヘッダーに新聞名、作成日、ユーザー名を表示
-- 保存済みステータスの表示
+**Display:**
+- Display newspaper name, creation date, user name in newspaper header
+- Display saved status
 
-### 6. 紙テクスチャデザイン
+### 6. Paper Texture Design
 
-**機能:** 本物の新聞のような視覚体験
+**Feature:** Visual experience like real newspaper
 
-**デザイン要素:**
-- **背景**: リアルな紙のテクスチャ
-- **フォント**: セリフフォント（伝統的な新聞タイポグラフィ）
-- **一貫性**: すべての要素で統一された視覚テーマ
+**Design Elements:**
+- **Background**: Realistic paper texture
+- **Font**: Serif font (traditional newspaper typography)
+- **Consistency**: Unified visual theme across all elements
 
-**パフォーマンス:**
-- テクスチャアセットの読み込み: 2秒以内
+**Performance:**
+- Texture asset loading: Within 2 seconds
 
-### 7. 画像表示
+### 7. Image Display
 
-**機能:** 記事に画像がある場合は表示
+**Feature:** Display images if article has them
 
-**画像ソース:**
-- RSS enclosure（`<enclosure>`タグ）
-- Media RSS（`media:content`, `media:thumbnail`）
-- 記事コンテンツ内の`<img>`タグ
-- フィードの`<image>`タグ
+**Image Sources:**
+- RSS enclosure (`<enclosure>` tag)
+- Media RSS (`media:content`, `media:thumbnail`)
+- `<img>` tags in article content
+- Feed's `<image>` tag
 
-**実装:**
-- `rssFetcherService.ts`の`extractImageUrl()`で抽出
-- `Article`インターフェースに`imageUrl?: string`フィールド
+**Implementation:**
+- Extract with `extractImageUrl()` in `rssFetcherService.ts`
+- `imageUrl?: string` field in `Article` interface
 
-### 8. レスポンシブデザイン
+### 8. Responsive Design
 
-**機能:** すべてのデバイスで快適に表示
+**Feature:** Display comfortably on all devices
 
-**ブレークポイント:**
-- **モバイル**: 1カラムレイアウト
-- **タブレット**: 適切なブレークポイントで調整
-- **デスクトップ**: 3カラムレイアウト
+**Breakpoints:**
+- **Mobile**: 1 column layout
+- **Tablet**: Adjust with appropriate breakpoints
+- **Desktop**: 3 column layout
 
-**要件:**
-- テキストの可読性を維持
-- レイアウトの適切な調整
+**Requirements:**
+- Maintain text readability
+- Appropriate layout adjustments
 
-## 技術仕様
+## Technical Specifications
 
-### フロントエンド
+### Frontend
 - **Framework**: Next.js 15.x (App Router)
 - **Language**: TypeScript 5.9.x
 - **Styling**: Tailwind CSS 3.x
 - **Hosting**: AWS Amplify
 
-### バックエンド
+### Backend
 - **Runtime**: AWS Lambda (Node.js 24.x)
 - **Framework**: Hono 4.x
 - **Language**: TypeScript 5.9.x
 - **Database**: DynamoDB
 - **AI**: AWS Bedrock (Claude 3 Haiku)
 
-### インフラ
+### Infrastructure
 - **IaC**: Terraform 1.11.x
 - **CI/CD**: AWS Amplify (Frontend), GitHub Actions (Backend)
 - **Region**: ap-northeast-1 (Tokyo)
 
-## 品質要件
+## Quality Requirements
 
-### テスト
-- **カバレッジ**: 60%以上
-- **ユニットテスト**: Jest/Vitest
-- **E2Eテスト**: Playwright
-- **テストシナリオ**:
-  - 新聞作成フロー
-  - 手動フィード追加と削除
-  - 新聞設定の保存
-  - 人気の新聞の閲覧と並び替え
-  - レスポンシブデザイン
+### Testing
+- **Coverage**: 60% or higher
+- **Unit Tests**: Jest/Vitest
+- **E2E Tests**: Playwright
+- **Test Scenarios**:
+  - Newspaper creation flow
+  - Manual feed addition and deletion
+  - Newspaper settings save
+  - Popular newspapers browsing and sorting
+  - Responsive design
 
-### セキュリティ
-- **機密情報チェック**: Gitleaks（pre-commit/pre-push）
-- **環境変数管理**: `.env.local`（gitignore済み）
-- **AWS認証**: 環境変数またはAWS Secrets Manager
-- **入力検証**: すべてのAPIエンドポイントでバリデーション
-- **CORS**: 許可されたオリジンのみ
+### Security
+- **Sensitive information check**: Gitleaks (pre-commit/pre-push)
+- **Environment variable management**: `.env.local` (gitignored)
+- **AWS authentication**: Environment variables or AWS Secrets Manager
+- **Input validation**: Validation at all API endpoints
+- **CORS**: Allowed origins only
 
-### パフォーマンス
-- **新聞生成**: 5秒以内（目標）、8秒未満（高負荷時）
-- **フィード提案**: 30-40秒
-- **並列処理**: フィード取得、URL検証
+### Performance
+- **Newspaper generation**: Within 5 seconds (target), under 8 seconds (high load)
+- **Feed suggestions**: 30-40 seconds
+- **Parallel processing**: Feed retrieval, URL validation
 
-## ユーザーフロー
+## User Flows
 
-### 新聞作成フロー
+### Newspaper Creation Flow
 ```
-1. ホーム画面にアクセス
+1. Access home screen
    ↓
-2. テーマキーワードを入力
+2. Enter theme keyword
    ↓
-3. AIがフィードを提案（自動追加）
+3. AI suggests feeds (auto-added)
    ↓
-4. 必要に応じて手動でフィード追加/削除
+4. Manually add/delete feeds as needed
    ↓
-5. 「新聞を生成」ボタンをクリック
+5. Click "Generate Newspaper" button
    ↓
-6. 新聞ページが表示される
+6. Newspaper page is displayed
    ↓
-7. 「保存」ボタンで設定モーダルを開く
+7. Open settings modal with "Save" button
    ↓
-8. 新聞名、ユーザー名、公開設定を入力
+8. Enter newspaper name, user name, public setting
    ↓
-9. 保存完了
-```
-
-### 人気の新聞閲覧フロー
-```
-1. ホーム画面にアクセス
-   ↓
-2. 人気の新聞セクションをスクロール
-   ↓
-3. 並び替え（人気順/新着順）を選択
-   ↓
-4. 新聞カードをクリック
-   ↓
-5. 新聞詳細ページが表示される
+9. Save complete
 ```
 
-## 用語集
-
-- **テーマキーワード**: ユーザーが入力する興味分野（例：「Tech」「スポーツ」）
-- **RSSフィード**: Webサイトからのコンテンツ配信形式
-- **フィード提案**: AIが生成するRSSフィードURLの推薦
-- **新聞ページ**: 新聞スタイルで記事を表示する生成された出力
-- **記事重要度**: 視覚的な目立ち度を決定する計算されたメトリック
-- **紙テクスチャ**: 物理的な新聞の外観をシミュレートする視覚スタイル
-- **ロケール**: ユーザーの言語設定（日本語または英語）
-- **統合ホーム画面**: 興味入力、フィード管理、人気の新聞を1画面に統合
-- **新聞設定**: 新聞名、ユーザー名、公開/非公開設定
-
-## 更新履歴
-
-このドキュメントは製品仕様の変更に応じて更新されます。
-
-**フォーマット:**
+### Popular Newspapers Browsing Flow
 ```
-- **YYYY-MM-DD**: 変更内容の概要
-  - 詳細1
-  - 詳細2
-  - 関連Issue: #番号 または URL
+1. Access home screen
+   ↓
+2. Scroll popular newspapers section
+   ↓
+3. Select sort (by popularity/by recency)
+   ↓
+4. Click newspaper card
+   ↓
+5. Newspaper detail page is displayed
+```
+
+## Glossary
+
+- **Theme keyword**: Interest area entered by user (e.g., "Tech", "Sports")
+- **RSS feed**: Content distribution format from websites
+- **Feed suggestion**: RSS feed URL recommendations generated by AI
+- **Newspaper page**: Generated output displaying articles in newspaper style
+- **Article importance**: Calculated metric determining visual prominence
+- **Paper texture**: Visual style simulating physical newspaper appearance
+- **Locale**: User's language setting (Japanese or English)
+- **Unified home screen**: Integrate interest input, feed management, popular newspapers on one screen
+- **Newspaper settings**: Newspaper name, user name, public/private settings
+
+## Update History
+
+This document is updated according to product specification changes.
+
+**Format:**
+```
+- **YYYY-MM-DD**: Summary of changes
+  - Detail 1
+  - Detail 2
+  - Related Issue: #number or URL
 ```
 
 ---
 
-- **2025-12-05**: 初版作成
-  - Phase 1 (MVP) の仕様を統合
-  - フィード提案のパフォーマンス最適化を反映（15個→10個）
-  - 画像表示機能を追加
-  - 関連Issue: [#15](https://github.com/kumagaias/my-rss-press/issues/15)
+- **2025-12-05**: Initial version created
+  - Integrated Phase 1 (MVP) specifications
+  - Reflected feed suggestion performance optimization (15→10 feeds)
+  - Added image display feature
+  - Related Issue: [#15](https://github.com/kumagaias/my-rss-press/issues/15)
 
-- **2025-12-05**: メイン記事の画像優先機能を追加
-  - リード記事（一番上）に画像ありの記事を優先配置
-  - Fisher-Yatesシャッフルアルゴリズムを実装（パフォーマンス改善）
-  - 新聞の視覚的魅力を向上
-  - 関連Issue: [#17](https://github.com/kumagaias/my-rss-press/issues/17)
+- **2025-12-05**: Added image priority feature for main article
+  - Prioritize articles with images for lead article (top)
+  - Implemented Fisher-Yates shuffle algorithm (performance improvement)
+  - Improved visual appeal of newspaper
+  - Related Issue: [#17](https://github.com/kumagaias/my-rss-press/issues/17)
 
-- **2025-12-05**: モバイルレスポンシブ対応を実装
-  - ホームページと新聞ページのモバイル最適化
-  - タッチフレンドリーなボタンサイズ（44px以上）
-  - レスポンシブなレイアウト（モバイル: 1カラム、デスクトップ: 3カラム）
-  - 320px-768pxの画面サイズに対応
-  - 関連Issue: [#19](https://github.com/kumagaias/my-rss-press/issues/19)
+- **2025-12-05**: Implemented mobile responsive support
+  - Mobile optimization for home page and newspaper page
+  - Touch-friendly button size (44px or larger)
+  - Responsive layout (mobile: 1 column, desktop: 3 columns)
+  - Support for 320px-768px screen sizes
+  - Related Issue: [#19](https://github.com/kumagaias/my-rss-press/issues/19)

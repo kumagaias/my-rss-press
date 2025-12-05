@@ -1,6 +1,6 @@
 {
-  "name": "すべてのテスト実行",
-  "description": "タスク完了時にユニットテストとセキュリティチェックを自動実行します",
+  "name": "Run All Tests",
+  "description": "Automatically run unit tests and security checks on task completion",
   "trigger": {
     "type": "onExecutionComplete"
   },

@@ -2,34 +2,34 @@
 
 ## Overview
 
-MyRSSPressプロジェクトは、フロントエンド（Next.js）とバックエンド（Lambda + Hono）を分離したモノレポ構造を採用します。
+The MyRSSPress project adopts a monorepo structure with separated frontend (Next.js) and backend (Lambda + Hono).
 
 ## Root Directory Structure
 
 ```
 myrsspress/
-├── frontend/              # Next.jsフロントエンドアプリケーション
-├── backend/               # Lambda + Honoバックエンド
-├── infra/                 # インフラストラクチャ（Terraform）
-│   ├── environments/     # 環境別設定
-│   │   └── production/  # 本番環境（現在）
-│   └── modules/          # 再利用可能なTerraformモジュール
-├── .kiro/                 # Kiro設定とspec
-│   ├── specs/            # 機能仕様
-│   │   ├── phase-1/     # Phase 1（MVP）
-│   │   └── phase-2/     # Phase 2（拡張機能）
-│   ├── steering/         # 開発ガイドライン
-│   │   ├── project-standards.md  # プロジェクト標準
-│   │   ├── tech.md              # 技術アーキテクチャとコーディング規約
-│   │   └── structure.md         # プロジェクト構造（このファイル）
-│   └── hooks/            # エージェントフック
-├── scripts/              # ユーティリティスクリプト
-│   ├── verify-production.sh           # 本番環境検証スクリプト
-│   ├── test-production-functionality.sh  # 本番機能テストスクリプト
-│   ├── npm-audit-check.sh             # npm脆弱性チェック
-│   └── security-check.sh              # セキュリティチェック
-├── Makefile              # 開発タスク
-└── README.md             # プロジェクト概要
+├── frontend/              # Next.js frontend application
+├── backend/               # Lambda + Hono backend
+├── infra/                 # Infrastructure (Terraform)
+│   ├── environments/     # Environment-specific configuration
+│   │   └── production/  # Production environment (current)
+│   └── modules/          # Reusable Terraform modules
+├── .kiro/                 # Kiro configuration and specs
+│   ├── specs/            # Feature specifications
+│   │   ├── phase-1/     # Phase 1 (MVP)
+│   │   └── phase-2/     # Phase 2 (Extended features)
+│   ├── steering/         # Development guidelines
+│   │   ├── project-standards.md  # Project standards
+│   │   ├── tech.md              # Technical architecture and coding conventions
+│   │   └── structure.md         # Project structure (this file)
+│   └── hooks/            # Agent hooks
+├── scripts/              # Utility scripts
+│   ├── verify-production.sh           # Production verification script
+│   ├── test-production-functionality.sh  # Production functionality test script
+│   ├── npm-audit-check.sh             # npm vulnerability check
+│   └── security-check.sh              # Security check
+├── Makefile              # Development tasks
+└── README.md             # Project overview
 ```
 
 ## Frontend Structure (Next.js + Amplify)
@@ -37,52 +37,52 @@ myrsspress/
 ```
 frontend/
 ├── app/                   # Next.js App Router
-│   ├── layout.tsx        # ルートレイアウト
-│   ├── page.tsx          # ホームページ
-│   ├── globals.css       # グローバルスタイル
-│   └── favicon.ico       # ファビコン
-├── components/            # 再利用可能なコンポーネント
-│   ├── ui/               # 基本UIコンポーネント
-│   ├── features/         # 機能別コンポーネント
-│   └── layouts/          # レイアウトコンポーネント
-├── lib/                   # ユーティリティとヘルパー
-│   ├── api/              # API呼び出し
-│   ├── i18n.ts           # 多言語対応
-│   └── utils.ts          # 汎用ユーティリティ
-├── types/                 # TypeScript型定義
-│   └── index.ts          # 共通型定義
-├── hooks/                 # カスタムフック
-├── public/                # 静的ファイル
-├── tests/                 # テストファイル
-│   ├── unit/             # ユニットテスト
-│   ├── integration/      # 統合テスト
-│   └── e2e/              # E2Eテスト（Playwright）
-│       ├── fixtures/     # テストフィクスチャ
+│   ├── layout.tsx        # Root layout
+│   ├── page.tsx          # Home page
+│   ├── globals.css       # Global styles
+│   └── favicon.ico       # Favicon
+├── components/            # Reusable components
+│   ├── ui/               # Basic UI components
+│   ├── features/         # Feature-specific components
+│   └── layouts/          # Layout components
+├── lib/                   # Utilities and helpers
+│   ├── api/              # API calls
+│   ├── i18n.ts           # Internationalization
+│   └── utils.ts          # Generic utilities
+├── types/                 # TypeScript type definitions
+│   └── index.ts          # Common type definitions
+├── hooks/                 # Custom hooks
+├── public/                # Static files
+├── tests/                 # Test files
+│   ├── unit/             # Unit tests
+│   ├── integration/      # Integration tests
+│   └── e2e/              # E2E tests (Playwright)
+│       ├── fixtures/     # Test fixtures
 │       ├── pages/        # Page Object Model
-│       ├── specs/        # テストスペック（機能別）
-│       ├── utils/        # ヘルパー関数
-│       └── setup/        # セットアップファイル
-├── playwright.config.ts  # Playwright設定
-├── .env.local            # ローカル環境変数
-├── .env.development      # 開発環境変数
-├── .env.production       # 本番環境変数
-├── amplify.yml           # Amplifyビルド設定
-├── next.config.ts        # Next.js設定
-├── tailwind.config.ts    # Tailwind CSS設定
-├── tsconfig.json         # TypeScript設定
-└── package.json          # 依存関係
+│       ├── specs/        # Test specs (by feature)
+│       ├── utils/        # Helper functions
+│       └── setup/        # Setup files
+├── playwright.config.ts  # Playwright configuration
+├── .env.local            # Local environment variables
+├── .env.development      # Development environment variables
+├── .env.production       # Production environment variables
+├── amplify.yml           # Amplify build configuration
+├── next.config.ts        # Next.js configuration
+├── tailwind.config.ts    # Tailwind CSS configuration
+├── tsconfig.json         # TypeScript configuration
+└── package.json          # Dependencies
 ```
 
 ### Frontend Component Organization
 
 ```
 components/
-├── ui/                    # 基本UIコンポーネント
+├── ui/                    # Basic UI components
 │   ├── Button.tsx
 │   ├── Input.tsx
 │   ├── Card.tsx
 │   └── Modal.tsx
-├── features/              # 機能別コンポーネント
+├── features/              # Feature-specific components
 │   ├── newspaper/
 │   │   ├── NewspaperRenderer.tsx
 │   │   ├── NewspaperCard.tsx
@@ -94,7 +94,7 @@ components/
 │   └── home/
 │       ├── UnifiedHome.tsx
 │       └── PopularNewspapers.tsx
-└── layouts/               # レイアウトコンポーネント
+└── layouts/               # Layout components
     ├── Header.tsx
     ├── Footer.tsx
     └── Container.tsx
@@ -105,61 +105,61 @@ components/
 ```
 backend/
 ├── src/
-│   ├── handlers/          # Lambda関数ハンドラー
-│   │   ├── api.ts        # メインAPIハンドラー
-│   │   └── cron.ts       # スケジュール実行ハンドラー
-│   ├── routes/            # Honoルート定義
-│   │   ├── newspapers.ts # 新聞関連ルート
-│   │   ├── feeds.ts      # フィード関連ルート
-│   │   └── index.ts      # ルート集約
-│   ├── services/          # ビジネスロジック
+│   ├── handlers/          # Lambda function handlers
+│   │   ├── api.ts        # Main API handler
+│   │   └── cron.ts       # Scheduled execution handler
+│   ├── routes/            # Hono route definitions
+│   │   ├── newspapers.ts # Newspaper-related routes
+│   │   ├── feeds.ts      # Feed-related routes
+│   │   └── index.ts      # Route aggregation
+│   ├── services/          # Business logic
 │   │   ├── newspaperService.ts
 │   │   ├── feedService.ts
 │   │   └── rssParserService.ts
-│   ├── repositories/      # データアクセス層
+│   ├── repositories/      # Data access layer
 │   │   ├── newspaperRepository.ts
 │   │   └── feedRepository.ts
-│   ├── models/            # データモデルと型定義
+│   ├── models/            # Data models and type definitions
 │   │   ├── newspaper.ts
 │   │   ├── feed.ts
 │   │   └── article.ts
-│   ├── middleware/        # Honoミドルウェア
+│   ├── middleware/        # Hono middleware
 │   │   ├── errorHandler.ts
 │   │   ├── logger.ts
 │   │   └── cors.ts
-│   └── utils/             # ユーティリティ関数
+│   └── utils/             # Utility functions
 │       ├── logger.ts
 │       └── validation.ts
-├── tests/                 # テストファイル
-│   ├── unit/             # ユニットテスト
-│   └── integration/      # 統合テスト
-├── infrastructure/        # IaCコード
+├── tests/                 # Test files
+│   ├── unit/             # Unit tests
+│   └── integration/      # Integration tests
+├── infrastructure/        # IaC code
 │   ├── cdk/              # AWS CDK
 │   │   ├── lib/
 │   │   └── bin/
-│   └── sam/              # AWS SAM（代替）
-├── .env.development      # 開発環境変数
-├── .env.production       # 本番環境変数
-├── tsconfig.json         # TypeScript設定
-└── package.json          # 依存関係
+│   └── sam/              # AWS SAM (alternative)
+├── .env.development      # Development environment variables
+├── .env.production       # Production environment variables
+├── tsconfig.json         # TypeScript configuration
+└── package.json          # Dependencies
 ```
 
 ## Infrastructure Structure (Terraform)
 
 ```
 infra/
-├── environments/          # 環境別設定
-│   └── production/       # 本番環境
-│       ├── main.tf       # メイン設定
-│       ├── variables.tf  # 変数定義
-│       ├── outputs.tf    # 出力定義
-│       └── terraform.tfvars  # 環境固有の値
-└── modules/               # 再利用可能なモジュール
+├── environments/          # Environment-specific configuration
+│   └── production/       # Production environment
+│       ├── main.tf       # Main configuration
+│       ├── variables.tf  # Variable definitions
+│       ├── outputs.tf    # Output definitions
+│       └── terraform.tfvars  # Environment-specific values
+└── modules/               # Reusable modules
     ├── amplify/          # Amplify Hosting
     │   ├── main.tf
     │   ├── variables.tf
     │   └── outputs.tf
-    ├── lambda/           # Lambda関数
+    ├── lambda/           # Lambda functions
     │   ├── main.tf
     │   ├── variables.tf
     │   └── outputs.tf
@@ -171,7 +171,7 @@ infra/
     │   ├── main.tf
     │   ├── variables.tf
     │   └── outputs.tf
-    └── bedrock/          # Bedrock設定
+    └── bedrock/          # Bedrock configuration
         ├── main.tf
         ├── variables.tf
         └── outputs.tf
@@ -179,39 +179,39 @@ infra/
 
 ### Infrastructure Best Practices
 
-- 現在は本番環境（production）のみ
-- 将来的にdevelopment、staging環境を追加予定
-- モジュールで共通リソースを抽象化
-- `terraform.tfvars`は`.gitignore`に追加（機密情報を含む場合）
-- リモートバックエンド（S3 + DynamoDB）でstate管理
-- 環境変数は`terraform.tfvars`で管理
+- Currently production environment only
+- Development and staging environments planned for future
+- Abstract common resources with modules
+- Add `terraform.tfvars` to `.gitignore` (if containing sensitive information)
+- Manage state with remote backend (S3 + DynamoDB)
+- Manage environment variables with `terraform.tfvars`
 
 ## Shared Types
 
-フロントエンドとバックエンドで共有する型定義は、以下のように管理します：
+Manage type definitions shared between frontend and backend as follows:
 
 ```
 shared/
 └── types/
-    ├── newspaper.ts      # 新聞関連の型
-    ├── feed.ts           # フィード関連の型
-    ├── article.ts        # 記事関連の型
-    └── api.ts            # APIレスポンスの型
+    ├── newspaper.ts      # Newspaper-related types
+    ├── feed.ts           # Feed-related types
+    ├── article.ts        # Article-related types
+    └── api.ts            # API response types
 ```
 
-または、バックエンドの型定義をフロントエンドからインポートする形式も検討できます。
+Alternatively, consider importing backend type definitions from frontend.
 
 ## File Naming Conventions
 
-- **コンポーネントファイル**: PascalCase（例：`NewspaperCard.tsx`）
-- **ユーティリティファイル**: camelCase（例：`formatDate.ts`）
-- **テストファイル**: `*.test.ts`または`*.spec.ts`
-- **型定義ファイル**: camelCase（例：`newspaper.ts`）
-- **設定ファイル**: kebab-case（例：`next.config.ts`）
+- **Component files**: PascalCase (e.g., `NewspaperCard.tsx`)
+- **Utility files**: camelCase (e.g., `formatDate.ts`)
+- **Test files**: `*.test.ts` or `*.spec.ts`
+- **Type definition files**: camelCase (e.g., `newspaper.ts`)
+- **Configuration files**: kebab-case (e.g., `next.config.ts`)
 
 ## Import Path Aliases
 
-TypeScriptのパスエイリアスを使用して、インポートを簡潔にします：
+Use TypeScript path aliases to simplify imports:
 
 ```typescript
 // tsconfig.json
@@ -227,7 +227,7 @@ TypeScriptのパスエイリアスを使用して、インポートを簡潔に�
 }
 ```
 
-使用例：
+Usage example:
 ```typescript
 import { NewspaperCard } from '@/components/features/newspaper/NewspaperCard';
 import { useTranslations } from '@/lib/i18n';
@@ -236,63 +236,63 @@ import type { Newspaper } from '@/types';
 
 ## E2E Test Structure (Playwright)
 
-### ディレクトリ構成の詳細
+### Detailed Directory Structure
 
 ```
 frontend/tests/e2e/
-├── fixtures/              # テストフィクスチャ
-│   ├── auth.ts           # 認証関連のフィクスチャ
-│   └── test-data.ts      # テストデータ（フィードURL、テーマ等）
+├── fixtures/              # Test fixtures
+│   ├── auth.ts           # Authentication fixtures
+│   └── test-data.ts      # Test data (feed URLs, themes, etc.)
 ├── pages/                 # Page Object Model
-│   ├── HomePage.ts       # ホームページのPOM
-│   ├── NewspaperPage.ts  # 新聞ページのPOM
-│   └── FeedSelectorPage.ts  # フィード選択ページのPOM
-├── specs/                 # テストスペック（機能別に整理）
-│   ├── newspaper/        # 新聞機能のテスト
+│   ├── HomePage.ts       # Home page POM
+│   ├── NewspaperPage.ts  # Newspaper page POM
+│   └── FeedSelectorPage.ts  # Feed selector page POM
+├── specs/                 # Test specs (organized by feature)
+│   ├── newspaper/        # Newspaper feature tests
 │   │   ├── create-newspaper.spec.ts
 │   │   ├── view-newspaper.spec.ts
 │   │   └── share-newspaper.spec.ts
-│   ├── feed/             # フィード機能のテスト
+│   ├── feed/             # Feed feature tests
 │   │   ├── select-feeds.spec.ts
 │   │   └── suggest-feeds.spec.ts
-│   └── home/             # ホーム画面のテスト
+│   └── home/             # Home screen tests
 │       ├── popular-newspapers.spec.ts
 │       └── recent-newspapers.spec.ts
-├── utils/                 # ヘルパー関数
-│   ├── api-helpers.ts    # API呼び出しヘルパー
-│   └── test-helpers.ts   # 汎用テストヘルパー
-└── setup/                 # セットアップファイル
-    ├── global-setup.ts   # グローバルセットアップ
-    └── global-teardown.ts  # グローバルティアダウン
+├── utils/                 # Helper functions
+│   ├── api-helpers.ts    # API call helpers
+│   └── test-helpers.ts   # Generic test helpers
+└── setup/                 # Setup files
+    ├── global-setup.ts   # Global setup
+    └── global-teardown.ts  # Global teardown
 ```
 
-### ファイル命名規則
+### File Naming Conventions
 
-- **Page Object**: PascalCase（例：`HomePage.ts`）
-- **テストスペック**: kebab-case + `.spec.ts`（例：`create-newspaper.spec.ts`）
-- **フィクスチャ**: kebab-case（例：`test-data.ts`）
-- **ヘルパー**: kebab-case（例：`api-helpers.ts`）
+- **Page Object**: PascalCase (e.g., `HomePage.ts`)
+- **Test specs**: kebab-case + `.spec.ts` (e.g., `create-newspaper.spec.ts`)
+- **Fixtures**: kebab-case (e.g., `test-data.ts`)
+- **Helpers**: kebab-case (e.g., `api-helpers.ts`)
 
-### テストの整理方針
+### Test Organization Policy
 
-1. **機能別にディレクトリを分割**: `specs/`配下を機能ごとに整理
-2. **Page Object Modelを活用**: ページごとにPOMクラスを作成
-3. **共通ロジックはヘルパーに**: 再利用可能なロジックは`utils/`に配置
-4. **テストデータは外部化**: フィクスチャで管理して再利用性を高める
+1. **Split directories by feature**: Organize under `specs/` by feature
+2. **Leverage Page Object Model**: Create POM class per page
+3. **Common logic in helpers**: Place reusable logic in `utils/`
+4. **Externalize test data**: Manage with fixtures to increase reusability
 
-### ベストプラクティス
+### Best Practices
 
-- 各テストスペックは独立して実行可能にすること
-- テストの依存関係を最小限に抑えること
-- Page Objectで要素のセレクタを一元管理すること
-- テストデータはハードコードせず、フィクスチャから読み込むこと
-- 非同期処理には適切なタイムアウトを設定すること
+- Make each test spec independently executable
+- Minimize test dependencies
+- Centrally manage element selectors with Page Objects
+- Don't hardcode test data, load from fixtures
+- Set appropriate timeouts for async processing
 
 ## Documentation Location
 
-- **プロジェクト標準**: `.kiro/steering/project-standards.md`
-- **技術アーキテクチャとコーディング規約**: `.kiro/steering/tech.md`
-- **プロジェクト構造**: `.kiro/steering/structure.md`（このファイル）
-- **機能仕様**: 
-  - Phase 1（MVP）: `.kiro/specs/phase-1/`
-  - Phase 2（拡張機能）: `.kiro/specs/phase-2/`
+- **Project Standards**: `.kiro/steering/project-standards.md`
+- **Technical Architecture and Coding Conventions**: `.kiro/steering/tech.md`
+- **Project Structure**: `.kiro/steering/structure.md` (this file)
+- **Feature Specifications**: 
+  - Phase 1 (MVP): `.kiro/specs/phase-1/`
+  - Phase 2 (Extended features): `.kiro/specs/phase-2/`

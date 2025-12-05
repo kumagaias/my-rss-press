@@ -1,105 +1,105 @@
-# ポストモーテムガイドライン
+# Postmortem Guidelines
 
-## 概要
+## Overview
 
-ポストモーテムは、インシデントや問題が発生した際に、その原因と対策を記録するドキュメントです。
+A postmortem is a document that records the causes and countermeasures when an incident or problem occurs.
 
-## 目的
+## Purpose
 
-- 同じ問題の再発を防ぐ
-- チーム全体で知識を共有する
-- プロセスとツールを改善する
-- 透明性を保ち、学習文化を促進する
+- Prevent recurrence of the same problem
+- Share knowledge across the team
+- Improve processes and tools
+- Maintain transparency and promote learning culture
 
-## 記録すべき事象
+## Events to Record
 
-以下のような事象が発生した場合、ポストモーテムを作成すること：
+Create a postmortem when the following events occur:
 
-1. **セキュリティインシデント**
-   - 機密情報の漏洩
-   - 認証情報の誤コミット
-   - セキュリティチェックの失敗
+1. **Security Incidents**
+   - Sensitive information leakage
+   - Incorrect commit of credentials
+   - Security check failures
 
-2. **本番環境の障害**
-   - サービスダウン
-   - データ損失
-   - パフォーマンス劣化
+2. **Production Environment Failures**
+   - Service downtime
+   - Data loss
+   - Performance degradation
 
-3. **重大なバグ**
-   - ユーザーに影響を与えるバグ
-   - データ整合性の問題
-   - デプロイの失敗
+3. **Critical Bugs**
+   - Bugs affecting users
+   - Data consistency issues
+   - Deployment failures
 
-4. **プロセスの問題**
-   - ツールの誤用
-   - ドキュメント不足による問題
-   - コミュニケーションの失敗
+4. **Process Issues**
+   - Tool misuse
+   - Problems due to insufficient documentation
+   - Communication failures
 
-## ポストモーテムの構成
+## Postmortem Structure
 
-### 1. インシデント概要
-- 何が起きたか（1-2文で簡潔に）
-- いつ発生したか
-- 重要度（High/Medium/Low）
+### 1. Incident Overview
+- What happened (concisely in 1-2 sentences)
+- When it occurred
+- Severity (High/Medium/Low)
 
-### 2. タイムライン
-- 発生から解決までの時系列
-- 各ステップでの対応
+### 2. Timeline
+- Chronological order from occurrence to resolution
+- Actions taken at each step
 
-### 3. 根本原因
-- なぜ問題が発生したか
-- 技術的な原因
-- プロセス上の原因
+### 3. Root Cause
+- Why the problem occurred
+- Technical causes
+- Process causes
 
-### 4. 影響範囲
-- 何が影響を受けたか
-- ユーザーへの影響
-- システムへの影響
+### 4. Impact Scope
+- What was affected
+- Impact on users
+- Impact on system
 
-### 5. 解決策
-- どのように問題を解決したか
-- 実施した対応
+### 5. Resolution
+- How the problem was resolved
+- Actions taken
 
-### 6. 再発防止策
-- 今後同じ問題を防ぐための対策
-- プロセスの改善
-- ツールの改善
-- ドキュメントの更新
+### 6. Prevention Measures
+- Measures to prevent the same problem in the future
+- Process improvements
+- Tool improvements
+- Documentation updates
 
-## 作成手順
+## Creation Procedure
 
-1. **テンプレートを使用**
+1. **Use Template**
    ```bash
    cp docs/postmortem/TEMPLATE.md docs/postmortem/YYYY-MM-DD-{{title}}.md
    ```
 
-2. **内容を記入**
-   - 事実を正確に記録
-   - 簡潔に書く（冗長な説明は避ける）
-   - 具体的な対策を記載
+2. **Fill in Content**
+   - Record facts accurately
+   - Write concisely (avoid verbose explanations)
+   - Describe specific countermeasures
 
-3. **READMEを更新**
-   - `docs/postmortem/README.md`のインデックスに追加
+3. **Update README**
+   - Add to index in `docs/postmortem/README.md`
 
-4. **コミット**
+4. **Commit**
    ```bash
    git add docs/postmortem/
    git commit -m "docs: Add postmortem for [incident]"
    ```
 
-## ベストプラクティス
+## Best Practices
 
-- **非難しない**: 個人を責めるのではなく、システムとプロセスの改善に焦点を当てる
-- **簡潔に**: 長文は避け、要点を明確に
-- **具体的に**: 曖昧な表現ではなく、具体的な事実と対策を記載
-- **タイムリーに**: インシデント解決後、できるだけ早く作成
-- **共有する**: チーム全体で読み、学びを共有
+- **Don't blame**: Focus on system and process improvements, not blaming individuals
+- **Be concise**: Avoid long text, clarify key points
+- **Be specific**: Describe specific facts and countermeasures, not vague expressions
+- **Be timely**: Create as soon as possible after incident resolution
+- **Share**: Read and share learnings across the team
 
-## 過去のインシデント（教訓）
+## Past Incidents (Lessons Learned)
 
-### 2025-12-02: Terraform tfplan漏洩
-- **原因**: tfplanファイルをコミット、gitleaksが`--staged`のみでコミット後をチェックせず
-- **対策**: tfplanを.gitignoreに追加、gitleaksで最新コミットもチェック
-- **教訓**: バイナリファイルは明示的に除外、セキュリティチェックはコミット後も実行
+### 2025-12-02: Terraform tfplan Leakage
+- **Cause**: Committed tfplan file, gitleaks only checked `--staged`, not after commit
+- **Countermeasure**: Added tfplan to .gitignore, gitleaks now checks latest commit too
+- **Lesson**: Explicitly exclude binary files, run security checks after commits too
 
-詳細: `docs/postmortem/` ディレクトリを参照
+Details: Refer to `docs/postmortem/` directory

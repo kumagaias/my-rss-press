@@ -1,6 +1,6 @@
 {
-  "name": "ユニットテスト実行",
-  "description": "すべてのユニットテストを実行します",
+  "name": "Run Unit Tests",
+  "description": "Run all unit tests",
   "trigger": {
     "type": "manual"
   },

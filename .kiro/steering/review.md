@@ -1,23 +1,23 @@
-# コードレビュー対応ガイド
+# Code Review Response Guide
 
-## 概要
+## Overview
 
-このドキュメントは、GitHub Copilot Pull Request Reviewerなどからよく指摘される項目と、その対応方針をまとめたものです。
+This document summarizes commonly pointed out items from GitHub Copilot Pull Request Reviewer and others, along with response policies.
 
 ---
 
-## 対応すべき指摘
+## Points to Address
 
-### 1. エラーメッセージの改善
+### 1. Improve Error Messages
 
-**指摘例:**
+**Example Comment:**
 ```
 Generic error messages make debugging difficult.
 ```
 
-**対応:**
-- HTTPステータスコードを含める
-- 具体的なエラー内容を記載
+**Response:**
+- Include HTTP status code
+- Describe specific error content
 
 ```typescript
 // ❌ Bad
@@ -29,16 +29,16 @@ throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}
 
 ---
 
-### 2. useEffect依存配列の不足
+### 2. Missing useEffect Dependencies
 
-**指摘例:**
+**Example Comment:**
 ```
 Missing dependency in useEffect.
 ```
 
-**対応:**
-- 使用する変数・関数をすべて依存配列に含める
-- 関数は`useCallback`でラップ
+**Response:**
+- Include all used variables and functions in dependency array
+- Wrap functions with `useCallback`
 
 ```typescript
 // ❌ Bad
@@ -58,16 +58,16 @@ useEffect(() => {
 
 ---
 
-### 3. ハードコードされたテキスト
+### 3. Hardcoded Text
 
-**指摘例:**
+**Example Comment:**
 ```
 Hardcoded English text that should be localized.
 ```
 
-**対応:**
-- `lib/i18n.ts`に翻訳を追加
-- `t.translationKey`を使用
+**Response:**
+- Add translation to `lib/i18n.ts`
+- Use `t.translationKey`
 
 ```typescript
 // ❌ Bad
@@ -79,15 +79,15 @@ Hardcoded English text that should be localized.
 
 ---
 
-### 4. URL解析エラーの未処理
+### 4. Unhandled URL Parsing Errors
 
-**指摘例:**
+**Example Comment:**
 ```
 Potential URL parsing error not handled.
 ```
 
-**対応:**
-- `lib/utils.ts`の`getHostnameFromUrl`を使用
+**Response:**
+- Use `getHostnameFromUrl` from `lib/utils.ts`
 
 ```typescript
 // ❌ Bad
@@ -99,16 +99,16 @@ const hostname = getHostnameFromUrl(url);
 
 ---
 
-### 5. 入力バリデーションの不足
+### 5. Missing Input Validation
 
-**指摘例:**
+**Example Comment:**
 ```
 Missing input validation for API parameters.
 ```
 
-**対応:**
-- 関数の先頭でバリデーション
-- 明確なエラーメッセージ
+**Response:**
+- Validate at function start
+- Clear error messages
 
 ```typescript
 // ✅ Good
@@ -125,16 +125,16 @@ export async function generateNewspaper(feedUrls: string[]) {
 
 ---
 
-### 6. 空配列・空データのハンドリング
+### 6. Empty Array/Data Handling
 
-**指摘例:**
+**Example Comment:**
 ```
 Missing error handling for empty array.
 ```
 
-**対応:**
-- 関数呼び出し前にチェック
-- 適切なフォールバックUI
+**Response:**
+- Check before function call
+- Appropriate fallback UI
 
 ```typescript
 // ✅ Good
@@ -146,15 +146,15 @@ const layout = calculateLayout(articles);
 
 ---
 
-### 7. アクセシビリティ（alt属性）
+### 7. Accessibility (alt attribute)
 
-**指摘例:**
+**Example Comment:**
 ```
 Missing alt text for images could impact accessibility.
 ```
 
-**対応:**
-- alt属性に必ずフォールバックを設定
+**Response:**
+- Always set fallback for alt attribute
 
 ```typescript
 // ❌ Bad
@@ -166,15 +166,15 @@ Missing alt text for images could impact accessibility.
 
 ---
 
-### 8. パフォーマンス最適化
+### 8. Performance Optimization
 
-**指摘例:**
+**Example Comment:**
 ```
 Inefficient array operation inside render.
 ```
 
-**対応:**
-- `useMemo`でMapを作成してO(1)ルックアップ
+**Response:**
+- Create Map with `useMemo` for O(1) lookup
 
 ```typescript
 // ✅ Good
@@ -183,90 +183,90 @@ const suggestionMap = useMemo(
   [suggestions]
 );
 
-// レンダー内
+// Inside render
 const suggestion = suggestionMap.get(url);
 ```
 
 ---
 
-## 対応不要な指摘
+## Points Not Requiring Response
 
-### 1. Nitpick（細かい指摘）
+### 1. Nitpick (Minor Points)
 
-**指摘例:**
+**Example Comment:**
 ```
 [nitpick] Inconsistent timeout values in test configuration.
 ```
 
-**判断:**
-- `[nitpick]`タグがついている場合は対応不要
-- 機能に影響しない細かい指摘
+**Decision:**
+- No response needed if tagged with `[nitpick]`
+- Minor points not affecting functionality
 
 ---
 
-### 2. 未使用変数（意図的な場合）
+### 2. Unused Variables (When Intentional)
 
-**指摘例:**
+**Example Comment:**
 ```
 Unused variable t.
 ```
 
-**判断:**
-- 将来使用予定の場合は対応不要
-- 本当に不要なら削除
+**Decision:**
+- No response needed if planned for future use
+- Delete if truly unnecessary
 
 ---
 
-### 3. 安定したオブジェクトの依存配列
+### 3. Stable Object Dependencies
 
-**指摘例:**
+**Example Comment:**
 ```
 Missing router dependency in useEffect.
 ```
 
-**判断:**
-- `router`、`searchParams`などNext.jsの安定したオブジェクトは省略可能
-- ただし、明示的に含めても問題ない
+**Decision:**
+- Next.js stable objects like `router`, `searchParams` can be omitted
+- However, no problem including them explicitly
 
 ---
 
-## 判断が必要な指摘
+## Points Requiring Judgment
 
-### 1. コードの重複
+### 1. Code Duplication
 
-**指摘例:**
+**Example Comment:**
 ```
 Duplicated error handling logic.
 ```
 
-**判断基準:**
-- 3回以上の重複 → ユーティリティ関数に抽出
-- 2回以下 → そのまま（過度な抽象化を避ける）
+**Decision Criteria:**
+- 3+ duplications → Extract to utility function
+- 2 or fewer → Leave as is (avoid excessive abstraction)
 
 ---
 
-### 2. 型定義の重複
+### 2. Duplicate Type Definitions
 
-**指摘例:**
+**Example Comment:**
 ```
 Duplicate type definitions.
 ```
 
-**判断基準:**
-- 同じプロジェクト内 → `types/index.ts`に統一
-- 異なるパッケージ間 → 各パッケージで定義（依存を避ける）
+**Decision Criteria:**
+- Within same project → Unify in `types/index.ts`
+- Between different packages → Define in each package (avoid dependencies)
 
 ---
 
-## 対応の優先順位
+## Response Priority
 
-1. **High**: セキュリティ、エラーハンドリング、アクセシビリティ
-2. **Medium**: パフォーマンス、型の一貫性、i18n
-3. **Low**: コードの重複、nitpick
+1. **High**: Security, error handling, accessibility
+2. **Medium**: Performance, type consistency, i18n
+3. **Low**: Code duplication, nitpick
 
 ---
 
-## 参考
+## References
 
-- [tech-common.md](./tech-common.md) - 汎用的なベストプラクティス
-- [tech.md](./tech.md) - プロジェクト固有の技術詳細
+- [tech-common.md](./tech-common.md) - General best practices
+- [tech.md](./tech.md) - Project-specific technical details

@@ -1,6 +1,6 @@
 {
-  "name": "セキュリティチェック（コミット前）",
-  "description": "Git commit前に機密情報がないかチェックします",
+  "name": "Security Check (Pre-commit)",
+  "description": "Check for sensitive information before Git commit",
   "trigger": {
     "type": "manual"
   },

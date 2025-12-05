@@ -1,11 +1,11 @@
 {
-  "name": "製品ドキュメント更新リマインダー",
-  "description": "機能実装やPR作成時に、product.mdの更新が必要かリマインドします",
+  "name": "Product Documentation Update Reminder",
+  "description": "Remind to update product.md when implementing features or creating PRs",
   "trigger": {
     "type": "manual"
   },
   "action": {
     "type": "message",
-    "message": "機能実装が完了しました。以下のドキュメントの更新が必要か確認してください：\n\n1. **product.md**: 製品仕様の変更（新機能、仕様変更、パフォーマンス改善等）\n2. **tech.md**: 技術実装の変更（アーキテクチャ、最適化等）\n3. **structure.md**: プロジェクト構造の変更\n\n更新が必要な場合は、変更内容を反映し、更新履歴セクションに記録してください。"
+    "message": "Feature implementation complete. Please check if the following documents need updates:\n\n1. **product.md**: Product specification changes (new features, spec changes, performance improvements, etc.)\n2. **tech.md**: Technical implementation changes (architecture, optimization, etc.)\n3. **structure.md**: Project structure changes\n\nIf updates are needed, reflect the changes and record in the update history section."
   }
 }

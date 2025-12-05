@@ -1,11 +1,11 @@
 {
-  "name": "タスクブランチ作成",
-  "description": "tasks.mdのタスクを実装する前にデフォルトブランチから新しいブランチを作成します",
+  "name": "Create Task Branch",
+  "description": "Create a new branch from default branch before implementing tasks from tasks.md",
   "trigger": {
     "type": "manual"
   },
   "action": {
     "type": "message",
-    "message": ".kiro/specs/phase-1/tasks.mdを確認して、実装するタスク番号を教えてください。デフォルトブランチ（main）から新しいブランチを作成します。\n\n手順:\n1. tasks.mdから実装するタスクを選択\n2. タスク番号（例: 1.1）を教えてください\n3. デフォルトブランチに切り替えて最新をpull\n4. 新しいブランチを作成（例: feat/task-1.1-setup-hono-app）\n5. タスクの実装を開始"
+    "message": "Please check .kiro/specs/phase-1/tasks.md and tell me which task number to implement. I will create a new branch from the default branch (main).\n\nSteps:\n1. Select task to implement from tasks.md\n2. Tell me the task number (e.g., 1.1)\n3. Switch to default branch and pull latest\n4. Create new branch (e.g., feat/task-1.1-setup-hono-app)\n5. Start task implementation"
   }
 }

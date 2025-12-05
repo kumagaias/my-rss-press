@@ -1,32 +1,32 @@
-# 設計書 MVP
+# Design Document MVP
 
-## 概要
+## Overview
 
-MyRSSPressは、RSSフィードを視覚的に魅力的な新聞スタイルのレイアウトに変換するWebアプリケーションです。システムは、Next.jsベースのフロントエンド（Amplify Hosting）、TypeScript/HonoバックエンドAPI（Lambda）、AWS BedrockによるAIフィード提案、DynamoDBによる新聞データ保存で構成されています。アーキテクチャは、サーバーレス構成と並行フィード取得を通じて、高速な生成時間（5秒未満）とコスト効率を優先します。
+MyRSSPress is a web application that transforms RSS feeds into visually appealing newspaper-style layouts. The system consists of a Next.js-based frontend (Amplify Hosting), TypeScript/Hono backend API (Lambda), AI feed suggestions via AWS Bedrock, and newspaper data storage in DynamoDB. The architecture prioritizes fast generation times (under 5 seconds) and cost efficiency through serverless composition and parallel feed fetching.
 
-アプリケーションフローは4つの主要段階に従います：
-1. テーマ入力とAI駆動のフィード提案（Bedrock）
-2. ユーザーによるフィード選択
-3. 記事収集と重要度計算（Lambda）
-4. 紙テクスチャスタイリングを使用した新聞レイアウト生成（フロントエンド）
+The application flow follows four main stages:
+1. Theme input and AI-driven feed suggestions (Bedrock)
+2. User feed selection
+3. Article collection and importance calculation (Lambda)
+4. Newspaper layout generation with paper texture styling (Frontend)
 
-プロジェクト構造：
-- `backend/` - TypeScript/Hono APIサーバー（Lambda用）
-- `frontend/` - Next.js + TailwindCSS（Amplify Hosting用）
-- `infra/` - Terraform IaCコード
-- `prototype/` - プロトタイプ実装（Next.js）
+Project structure:
+- `backend/` - TypeScript/Hono API server (for Lambda)
+- `frontend/` - Next.js + TailwindCSS (for Amplify Hosting)
+- `infra/` - Terraform IaC code
+- `prototype/` - Prototype implementation (Next.js)
 
-## アーキテクチャ
+## Architecture
 
-### システムアーキテクチャ
+### System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              フロントエンド (Next.js + TailwindCSS)          │
+│              Frontend (Next.js + TailwindCSS)                │
 │                    [Amplify Hosting]                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ 統合ホーム   │  │ 新聞         │  │ レイアウト   │      │
-│  │ 画面         │→ │ レンダラー   │→ │ 計算         │      │
+│  │ Unified Home │  │ Newspaper    │  │ Layout       │      │
+│  │ Screen       │→ │ Renderer     │→ │ Calculator   │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 │         ↓                  ↓                  ↓              │
 └─────────┼──────────────────┼──────────────────┼─────────────┘
@@ -39,85 +39,85 @@ MyRSSPressは、RSSフィードを視覚的に魅力的な新聞スタイルの�
           │                  │                  │
           ↓                  ↓                  ↓
 ┌─────────────────────────────────────────────────────────────┐
-│           バックエンドAPI (TypeScript/Hono on Lambda)        │
+│           Backend API (TypeScript/Hono on Lambda)            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Bedrock提案  │  │ RSS取得      │  │ 重要度       │      │
-│  │ サービス     │  │ サービス     │  │ 計算         │      │
+│  │ Bedrock      │  │ RSS Fetcher  │  │ Importance   │      │
+│  │ Suggester    │  │ Service      │  │ Calculator   │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 │         ↓                  ↓                  ↓              │
 └─────────┼──────────────────┼──────────────────┼─────────────┘
           │                  │                  │
           ↓                  ↓                  ↓
 ┌──────────────────┐  ┌──────────────────┐  ┌──────────────┐
-│   AWS Bedrock    │  │   RSSフィード    │  │  DynamoDB    │
-│   (Claude 3      │  │   (外部)         │  │  (新聞保存)  │
-│    Haiku)        │  │                  │  │              │
+│   AWS Bedrock    │  │   RSS Feeds      │  │  DynamoDB    │
+│   (Claude 3      │  │   (External)     │  │  (Newspaper  │
+│    Haiku)        │  │                  │  │   Storage)   │
 └──────────────────┘  └──────────────────┘  └──────────────┘
 ```
 
-### 技術スタック
+### Technology Stack
 
-**フロントエンド:**
+**Frontend:**
 - Next.js 15.x (App Router)
-- Node.js 24.x LTS (Active LTS) または 22.x LTS (Maintenance LTS)
+- Node.js 24.x LTS (Active LTS) or 22.x LTS (Maintenance LTS)
 - TypeScript 5.9.x
-- TailwindCSS 3.x による紙テクスチャスタイリング
-- Storybook 8.x（UIコンポーネント開発・ドキュメント）
-- fetchによるAPI通信
+- TailwindCSS 3.x for paper texture styling
+- Storybook 8.x (UI component development & documentation)
+- API communication via fetch
 
-**バックエンド:**
-- AWS Lambda (Node.js 24.x または 22.x)
+**Backend:**
+- AWS Lambda (Node.js 24.x or 22.x)
 - Hono 4.x framework
 - TypeScript 5.9.x
-- AWS Bedrock Runtime API (Claude 3 Haiku)によるフィード提案
-- RSSフィード解析ライブラリ
-- Zod 3.x によるバリデーション
+- AWS Bedrock Runtime API (Claude 3 Haiku) for feed suggestions
+- RSS feed parsing library
+- Zod 3.x for validation
 
-**データベース:**
-- DynamoDB（新聞メタデータ、フィードURL保存）
+**Database:**
+- DynamoDB (newspaper metadata, feed URL storage)
 
-**インフラ (Terraform 1.10.x):**
-- AWS Amplify Hosting（フロントエンド）
-- Route53（DNSホストゾーン、ドメイン: my-rss-press.com）
-- API Gateway REST（APIエンドポイント）
-- AWS Lambda（TypeScript/Honoバックエンド、ECRイメージ使用）
-- Amazon ECR（コンテナレジストリ）
-- AWS Bedrock Runtime API（Claude 3 Haiku）
-- DynamoDB（データストレージ）
-- CloudWatch Logs（ログ記録）
-- CloudFront（CDN）
+**Infrastructure (Terraform 1.10.x):**
+- AWS Amplify Hosting (frontend)
+- Route53 (DNS hosted zone, domain: my-rss-press.com)
+- API Gateway REST (API endpoints)
+- AWS Lambda (TypeScript/Hono backend, using ECR images)
+- Amazon ECR (container registry)
+- AWS Bedrock Runtime API (Claude 3 Haiku)
+- DynamoDB (data storage)
+- CloudWatch Logs (logging)
+- CloudFront (CDN)
 
-## デザインシステム
+## Design System
 
-### カラーパレット
+### Color Palette
 
-**プライマリカラー:**
+**Primary Colors:**
 ```typescript
 const colors = {
-  // ブランドカラー
+  // Brand colors
   primary: {
     50: '#f0f9ff',
     100: '#e0f2fe',
-    500: '#0ea5e9',  // メインカラー
+    500: '#0ea5e9',  // Main color
     600: '#0284c7',
     700: '#0369a1',
   },
   
-  // 新聞テーマカラー
+  // Newspaper theme colors
   newspaper: {
-    paper: '#f5f5dc',      // 紙の色（ベージュ）
-    ink: '#1a1a1a',        // インクの色（ダークグレー）
-    border: '#333333',     // ボーダー
-    accent: '#8b4513',     // アクセント（茶色）
+    paper: '#f5f5dc',      // Paper color (beige)
+    ink: '#1a1a1a',        // Ink color (dark gray)
+    border: '#333333',     // Border
+    accent: '#8b4513',     // Accent (brown)
   },
   
-  // セマンティックカラー
+  // Semantic colors
   success: '#10b981',
   warning: '#f59e0b',
   error: '#ef4444',
   info: '#3b82f6',
   
-  // グレースケール
+  // Grayscale
   gray: {
     50: '#f9fafb',
     100: '#f3f4f6',
@@ -133,7 +133,7 @@ const colors = {
 };
 ```
 
-**Tailwind設定:**
+**Tailwind Configuration:**
 ```typescript
 // tailwind.config.ts
 export default {
@@ -152,23 +152,23 @@ export default {
 };
 ```
 
-### タイポグラフィ
+### Typography
 
-**フォントファミリー:**
+**Font Families:**
 ```typescript
 const fonts = {
-  // UI用フォント
+  // UI fonts
   sans: ['Inter', 'system-ui', 'sans-serif'],
   
-  // 新聞用フォント
+  // Newspaper fonts
   serif: ['Georgia', 'Times New Roman', 'serif'],
   
-  // コード用フォント
+  // Code fonts
   mono: ['Fira Code', 'monospace'],
 };
 ```
 
-**フォントサイズ:**
+**Font Sizes:**
 ```typescript
 const fontSize = {
   xs: '0.75rem',    // 12px
@@ -184,7 +184,7 @@ const fontSize = {
 };
 ```
 
-### スペーシング
+### Spacing
 
 ```typescript
 const spacing = {
@@ -202,9 +202,9 @@ const spacing = {
 };
 ```
 
-### UIコンポーネントライブラリ
+### UI Component Library
 
-**基本コンポーネント（`components/ui/`）:**
+**Basic Components (`components/ui/`):**
 
 #### Button
 ```typescript
@@ -348,18 +348,18 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 }
 ```
 
-### Storybook設定
+### Storybook Configuration
 
-**セットアップ:**
+**Setup:**
 ```bash
-# Storybookのインストール
+# Install Storybook
 npx storybook@latest init
 
-# 依存関係
+# Dependencies
 npm install --save-dev @storybook/react @storybook/addon-essentials @storybook/addon-a11y
 ```
 
-**設定ファイル:**
+**Configuration File:**
 ```typescript
 // .storybook/main.ts
 import type { StorybookConfig } from '@storybook/nextjs';
@@ -379,7 +379,7 @@ const config: StorybookConfig = {
 export default config;
 ```
 
-**Storybookストーリー例:**
+**Storybook Story Example:**
 ```typescript
 // components/ui/Button.stories.tsx
 import type { Meta, StoryObj } from '@storybook/react';
@@ -430,7 +430,7 @@ export const Loading: Story = {
 };
 ```
 
-**実行コマンド:**
+**Run Commands:**
 ```json
 // package.json
 {
@@ -441,20 +441,21 @@ export const Loading: Story = {
 }
 ```
 
-### デザインシステムのベストプラクティス
+### Design System Best Practices
 
-1. **一貫性**: すべてのUIコンポーネントは統一されたカラーパレットとスペーシングを使用
-2. **再利用性**: 基本コンポーネントを組み合わせて複雑なUIを構築
-3. **アクセシビリティ**: すべてのコンポーネントはWCAG 2.1 AA基準に準拠
-4. **ドキュメント**: Storybookですべてのコンポーネントを文書化
-5. **テスト**: 各コンポーネントにユニットテストとビジュアルリグレッションテストを実装
+1. **Consistency**: All UI components use unified color palette and spacing
+2. **Reusability**: Build complex UIs by combining basic components
+3. **Accessibility**: All components comply with WCAG 2.1 AA standards
+4. **Documentation**: Document all components in Storybook
+5. **Testing**: Implement unit tests and visual regression tests for each component
 
-## コンポーネントとインターフェース
 
-### フロントエンドコンポーネント
+## Components and Interfaces
+
+### Frontend Components
 
 #### TopicMarqueeComponent
-**目的:** 人気トピックキーワードを左から右にスクロール表示し、クリックで自動入力
+**Purpose:** Display popular topic keywords scrolling from left to right, auto-fill on click
 
 **Props:**
 ```typescript
@@ -464,19 +465,19 @@ interface TopicMarqueeProps {
 }
 ```
 
-**機能:**
-- 50個のトピックキーワードを左から右に無限スクロール
-- キーワードをクリック/タップでテーマ入力欄に自動入力
-- 自動的にフィード提案を取得
-- 新聞風デザイン（黒枠、ホバーで白黒反転）
-- 60秒でループするアニメーション
+**Features:**
+- Infinite scroll of 50 topic keywords from left to right
+- Auto-fill theme input field on keyword click/tap
+- Automatically fetch feed suggestions
+- Newspaper-style design (black border, white-black inversion on hover)
+- 60-second loop animation
 
-**キーワード例:**
-- 英語: Technology, Sports, Business, Politics, Entertainment...
-- 日本語: テクノロジー、スポーツ、ビジネス、政治、エンタメ...
+**Keyword Examples:**
+- English: Technology, Sports, Business, Politics, Entertainment...
+- Japanese: テクノロジー、スポーツ、ビジネス、政治、エンタメ...
 
 #### ThemeInputComponent
-**目的:** ユーザーの興味トピックをキャプチャ
+**Purpose:** Capture user's interest topic
 
 **Props:**
 ```typescript
@@ -487,15 +488,15 @@ interface ThemeInputProps {
 ```
 
 **State:**
-- `themeKeyword: string` - 現在の入力値
-- `error: string | null` - 検証エラーメッセージ
+- `themeKeyword: string` - Current input value
+- `error: string | null` - Validation error message
 
-**メソッド:**
-- `handleSubmit()` - テーマを検証して送信
-- `validateInput(input: string): boolean` - 空でない入力を保証
+**Methods:**
+- `handleSubmit()` - Validate and submit theme
+- `validateInput(input: string): boolean` - Ensure non-empty input
 
 #### FeedSelectorComponent
-**目的:** AI提案フィードを表示し、選択を許可
+**Purpose:** Display AI-suggested feeds and allow selection
 
 **Props:**
 ```typescript
@@ -513,14 +514,14 @@ interface FeedSuggestion {
 ```
 
 **State:**
-- `selectedFeeds: Set<string>` - 現在選択されているフィードURL
+- `selectedFeeds: Set<string>` - Currently selected feed URLs
 
-**メソッド:**
-- `toggleFeed(url: string)` - 選択からフィードを追加/削除
-- `isGenerateEnabled(): boolean` - 少なくとも1つのフィードが選択されているか確認
+**Methods:**
+- `toggleFeed(url: string)` - Add/remove feed from selection
+- `isGenerateEnabled(): boolean` - Check if at least one feed is selected
 
 #### NewspaperRenderer
-**目的:** 紙テクスチャを使用した新聞レイアウトで記事を表示
+**Purpose:** Display articles in newspaper layout with paper texture
 
 **Props:**
 ```typescript
@@ -549,38 +550,38 @@ interface NewspaperSettings {
 ```
 
 **State:**
-- `isSaved: boolean` - 新聞が保存されているか
-- `showSettingsModal: boolean` - 設定モーダルの表示状態
+- `isSaved: boolean` - Whether newspaper is saved
+- `showSettingsModal: boolean` - Settings modal display state
 
-**メソッド:**
-- `calculateLayout(articles: Article[]): LayoutGrid` - 記事の位置を決定（フロントエンドで実行）
-- `handleSave(settings: NewspaperSettings): void` - 新聞設定を保存
-- `renderArticle(article: Article, size: ArticleSize): JSX.Element` - 個別記事をレンダリング
+**Methods:**
+- `calculateLayout(articles: Article[]): LayoutGrid` - Determine article positions (executed on frontend)
+- `handleSave(settings: NewspaperSettings): void` - Save newspaper settings
+- `renderArticle(article: Article, size: ArticleSize): JSX.Element` - Render individual article
 
-**レイアウトアルゴリズム（記事数に応じて動的に変化）:**
+**Layout Algorithm (dynamically changes based on article count):**
 ```typescript
 function calculateLayout(articles: Article[]): LayoutGrid {
-  // 重要度でソート（降順）
+  // Sort by importance (descending)
   const sorted = [...articles].sort((a, b) => b.importance - a.importance);
   const totalArticles = sorted.length;
   
-  // 記事数に応じてレイアウトを調整
+  // Adjust layout based on article count
   if (totalArticles <= 4) {
-    // 少ない記事数（1-4記事）: すべて大きく表示
+    // Few articles (1-4): Display all large
     return {
       lead: sorted[0],
       topStories: sorted.slice(1),
       remaining: [],
     };
   } else if (totalArticles <= 8) {
-    // 中程度の記事数（5-8記事）: リード1 + トップ3 + 残り
+    // Medium articles (5-8): Lead 1 + Top 3 + Remaining
     return {
       lead: sorted[0],
       topStories: sorted.slice(1, 4),
       remaining: sorted.slice(4),
     };
   } else {
-    // 多い記事数（9記事以上）: リード1 + トップ4 + 残り
+    // Many articles (9+): Lead 1 + Top 4 + Remaining
     return {
       lead: sorted[0],
       topStories: sorted.slice(1, 5),
@@ -590,10 +591,10 @@ function calculateLayout(articles: Article[]): LayoutGrid {
 }
 ```
 
-**記事数の決定（ランダム性を持たせる）:**
+**Article Count Determination (with randomness):**
 ```typescript
 function determineArticleCount(): number {
-  // 8〜15記事の範囲でランダムに決定
+  // Randomly determine between 8-15 articles
   const min = 8;
   const max = 15;
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -603,24 +604,24 @@ async function fetchArticles(feedUrls: string[], theme: string): Promise<Article
   const minArticles = 8;
   const targetCount = determineArticleCount();
   
-  // すべてのフィードから記事を取得
+  // Fetch articles from all feeds
   const allArticles = await Promise.all(
     feedUrls.map(url => parseFeed(url))
   ).then(results => results.flat());
   
-  // 公開日でソート（新しい順）
+  // Sort by publication date (newest first)
   const sortedByDate = allArticles.sort((a, b) => 
     new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
   );
   
-  // ステップ1: 最新3日間の記事を取得
+  // Step 1: Get articles from last 3 days
   const threeDaysAgo = new Date();
   threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
   let recentArticles = sortedByDate.filter(
     article => new Date(article.pubDate) >= threeDaysAgo
   );
   
-  // ステップ2: 最小記事数に満たない場合、7日間まで拡張
+  // Step 2: If below minimum, extend to 7 days
   if (recentArticles.length < minArticles) {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -629,33 +630,33 @@ async function fetchArticles(feedUrls: string[], theme: string): Promise<Article
     );
   }
   
-  // ステップ3: それでも足りない場合は取得できた全記事を使用
+  // Step 3: If still insufficient, use all fetched articles
   if (recentArticles.length < minArticles) {
-    console.warn(`最小記事数（${minArticles}）に満たない: ${recentArticles.length}記事`);
+    console.warn(`Below minimum articles (${minArticles}): ${recentArticles.length} articles`);
     recentArticles = sortedByDate;
   }
   
-  // ステップ4: 目標記事数まで選択（最新記事を優先）
+  // Step 4: Select up to target count (prioritize newest)
   const selectedArticles = recentArticles.slice(0, Math.min(targetCount, recentArticles.length));
   
-  // ステップ5: 選択された記事をランダムにシャッフル（レイアウトのバリエーション）
+  // Step 5: Randomly shuffle selected articles (for layout variation)
   const shuffled = selectedArticles.sort(() => Math.random() - 0.5);
   
   return shuffled;
 }
 ```
 
-**エラーハンドリング:**
+**Error Handling:**
 ```typescript
-// 記事が極端に少ない場合の処理
+// Handle extremely low article count
 if (articles.length < 3) {
   throw new Error(
-    '記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。'
+    'Insufficient articles. Please add more feeds or try again later.'
   );
 }
 ```
 
-**レイアウト実装（CSS Grid）:**
+**Layout Implementation (CSS Grid):**
 
 ```typescript
 // components/features/newspaper/NewspaperLayout.tsx
@@ -664,13 +665,13 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
   
   return (
     <div className="newspaper-container">
-      {/* ヘッダー */}
+      {/* Header */}
       <header className="newspaper-header">
         <h1 className="newspaper-title">MyRSSPress</h1>
         <div className="newspaper-date">{new Date().toLocaleDateString()}</div>
       </header>
       
-      {/* リード記事（最も重要） */}
+      {/* Lead article (most important) */}
       <article className="lead-article">
         {layout.lead.imageUrl && (
           <img src={layout.lead.imageUrl} alt={layout.lead.title} />
@@ -678,11 +679,11 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
         <h2 className="lead-title">{layout.lead.title}</h2>
         <p className="lead-description">{layout.lead.description}</p>
         <a href={layout.lead.link} target="_blank" rel="noopener noreferrer">
-          続きを読む
+          Read more
         </a>
       </article>
       
-      {/* トップストーリー（3カラム） */}
+      {/* Top stories (3 columns) */}
       <div className="top-stories">
         {layout.topStories.map((article) => (
           <article key={article.link} className="top-story">
@@ -692,20 +693,20 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
             <h3 className="top-story-title">{article.title}</h3>
             <p className="top-story-description">{article.description}</p>
             <a href={article.link} target="_blank" rel="noopener noreferrer">
-              続きを読む
+              Read more
             </a>
           </article>
         ))}
       </div>
       
-      {/* 残りの記事（2カラム） */}
+      {/* Remaining articles (2 columns) */}
       <div className="remaining-articles">
         {layout.remainingArticles.map((article) => (
           <article key={article.link} className="article">
             <h4 className="article-title">{article.title}</h4>
             <p className="article-description">{article.description}</p>
             <a href={article.link} target="_blank" rel="noopener noreferrer">
-              続きを読む
+              Read more
             </a>
           </article>
         ))}
@@ -715,18 +716,18 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
 }
 ```
 
-**CSS実装（Tailwind CSS）:**
+**CSS Implementation (Tailwind CSS):**
 
 ```css
-/* globals.css または newspaper.css */
+/* globals.css or newspaper.css */
 
 .newspaper-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  background: #f5f5dc; /* 紙のような色 */
-  background-image: url('/paper-texture.png'); /* 紙テクスチャ */
-  font-family: 'Georgia', 'Times New Roman', serif; /* 新聞フォント */
+  background: #f5f5dc; /* Paper-like color */
+  background-image: url('/paper-texture.png'); /* Paper texture */
+  font-family: 'Georgia', 'Times New Roman', serif; /* Newspaper font */
 }
 
 .newspaper-header {
@@ -739,10 +740,10 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
 .newspaper-title {
   font-size: 3rem;
   font-weight: bold;
-  font-family: 'Old English Text MT', serif; /* 新聞タイトル風 */
+  font-family: 'Old English Text MT', serif; /* Newspaper title style */
 }
 
-/* リード記事（全幅、大きく） */
+/* Lead article (full width, large) */
 .lead-article {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -771,7 +772,7 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
   margin-bottom: 1rem;
 }
 
-/* トップストーリー（3カラム） */
+/* Top stories (3 columns) */
 .top-stories {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -801,7 +802,7 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
   margin-bottom: 0.5rem;
 }
 
-/* 残りの記事（2カラム） */
+/* Remaining articles (2 columns) */
 .remaining-articles {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -828,7 +829,7 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
   margin-bottom: 0.5rem;
 }
 
-/* レスポンシブ対応 */
+/* Responsive design */
 @media (max-width: 768px) {
   .lead-article {
     grid-template-columns: 1fr;
@@ -844,7 +845,7 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
 }
 ```
 
-**Tailwind CSS版（推奨）:**
+**Tailwind CSS Version (Recommended):**
 
 ```tsx
 // components/features/newspaper/NewspaperLayout.tsx
@@ -853,16 +854,16 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
   
   return (
     <div className="max-w-7xl mx-auto p-8 bg-[#f5f5dc] font-serif">
-      {/* 新聞のヘッダー（新聞レイアウト内） */}
+      {/* Newspaper header (within newspaper layout) */}
       <header className="text-center border-b-4 border-black pb-4 mb-8">
         <h1 className="text-6xl font-bold">{newspaperName || 'MyRSSPress'}</h1>
         <div className="text-sm mt-2 space-y-1">
           <div>{new Date(createdAt).toLocaleDateString()}</div>
-          {userName && <div className="text-gray-600">作成者: {userName}</div>}
+          {userName && <div className="text-gray-600">Created by: {userName}</div>}
         </div>
       </header>
       
-      {/* リード記事 */}
+      {/* Lead article */}
       <article className="grid md:grid-cols-2 gap-8 mb-8 pb-8 border-b-2 border-gray-800">
         {layout.lead.imageUrl && (
           <img 
@@ -884,12 +885,12 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            続きを読む →
+            Read more →
           </a>
         </div>
       </article>
       
-      {/* トップストーリー（記事数に応じて3または4カラム） */}
+      {/* Top stories (3 or 4 columns based on article count) */}
       <div className={`grid gap-8 mb-8 pb-8 border-b border-gray-600 ${
         layout.topStories.length <= 3 ? 'md:grid-cols-3' : 'md:grid-cols-4'
       }`}>
@@ -914,13 +915,13 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              続きを読む →
+              Read more →
             </a>
           </article>
         ))}
       </div>
       
-      {/* 残りの記事 */}
+      {/* Remaining articles */}
       <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
         {layout.remainingArticles.map((article) => (
           <article 
@@ -939,7 +940,7 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              続きを読む →
+              Read more →
             </a>
           </article>
         ))}
@@ -949,70 +950,70 @@ export function NewspaperLayout({ articles }: { articles: Article[] }) {
 }
 ```
 
-### バックエンドサービス
+### Backend Services
 
 #### AISuggesterService
-**目的:** AIを使用してRSSフィード提案を生成
+**Purpose:** Generate RSS feed suggestions using AI
 
-**インターフェース:**
+**Interface:**
 ```typescript
 interface AISuggesterService {
   suggestFeeds(theme: string): Promise<FeedSuggestion[]>;
 }
 ```
 
-**メソッド:**
-- `suggestFeeds(theme)` - Bedrock Runtime APIを呼び出してフィード提案を取得
-- `buildPrompt(theme)` - フィード提案用のAIプロンプトを構築
-- `parseAIResponse(response)` - 構造化されたフィードデータを抽出
-- `validateFeedUrl(url)` - フィードURLの存在確認（HEAD リクエスト）
+**Methods:**
+- `suggestFeeds(theme)` - Call Bedrock Runtime API to get feed suggestions
+- `buildPrompt(theme)` - Build AI prompt for feed suggestions
+- `parseAIResponse(response)` - Extract structured feed data
+- `validateFeedUrl(url)` - Verify feed URL existence (HEAD request)
 
-**フィード提案フロー:**
+**Feed Suggestion Flow:**
 ```
-1. ユーザーがテーマを入力
+1. User enters theme
    ↓
-2. buildPrompt(theme) でプロンプト生成
-   - 10個のフィード提案を要求
-   - 実在するフィードのみを要求する制約を含む
+2. buildPrompt(theme) generates prompt
+   - Request 10 feed suggestions
+   - Include constraint to suggest only real feeds
    ↓
-3. Bedrock (Claude 3 Haiku) にリクエスト
+3. Request to Bedrock (Claude 3 Haiku)
    ↓
-4. parseAIResponse() でJSON解析
-   - 最大10個のフィードを抽出
+4. parseAIResponse() parses JSON
+   - Extract up to 10 feeds
    ↓
-5. 各フィードURLに対してvalidateFeedUrl()を実行
-   - HEAD リクエストで存在確認（5秒タイムアウト）
-   - 200 OK の場合のみ有効と判定
+5. Execute validateFeedUrl() for each feed URL
+   - HEAD request to verify existence (5 second timeout)
+   - Only valid if 200 OK
    ↓
-6. 有効なフィードのみをフィルタリング
+6. Filter to valid feeds only
    ↓
-7. 有効なフィードが0個の場合
-   - デフォルトフィード（BBC, NYT等）を返す
+7. If 0 valid feeds
+   - Return default feeds (BBC, NYT, etc.)
    ↓
-8. フロントエンドに返却
+8. Return to frontend
 ```
 
-**フィードURL検証の詳細:**
-- **タイミング**: Bedrockからのレスポンス取得後、フロントエンドに返す前
-- **方法**: HTTP HEAD リクエスト
-- **タイムアウト**: 5秒
-- **判定基準**: HTTPステータス 200 OK
-- **失敗時**: そのフィードをスキップ、他の有効なフィードのみ返す
-- **全て失敗時**: デフォルトフィード（10個）にフォールバック
+**Feed URL Validation Details:**
+- **Timing**: After Bedrock response, before returning to frontend
+- **Method**: HTTP HEAD request
+- **Timeout**: 5 seconds
+- **Criteria**: HTTP status 200 OK
+- **On failure**: Skip that feed, return only valid feeds
+- **All fail**: Fallback to default feeds (10)
 
-**使用モデル:**
+**Model Used:**
 - **Claude 3 Haiku** (`anthropic.claude-3-haiku-20240307-v1:0`)
-- コスト効率を重視した選択
-- 高速なレスポンス時間
-- フィード提案に十分な品質
+- Cost-efficient choice
+- Fast response time
+- Sufficient quality for feed suggestions
 
-**Bedrock Runtime API呼び出し例:**
+**Bedrock Runtime API Call Example:**
 ```typescript
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 
 const client = new BedrockRuntimeClient({ region: 'us-east-1' });
 
-const prompt = `ユーザーが「${theme}」に興味があります。関連するRSSフィードを3つ提案してください。`;
+const prompt = `User is interested in "${theme}". Please suggest 3 related RSS feeds.`;
 
 const command = new InvokeModelCommand({
   modelId: 'anthropic.claude-3-5-haiku-20241022-v1:0',
@@ -1033,74 +1034,74 @@ const command = new InvokeModelCommand({
 const response = await client.send(command);
 ```
 
-**依存関係:**
+**Dependencies:**
 - `@aws-sdk/client-bedrock-runtime`
 
 #### RSSFetcherService
-**目的:** RSSフィードを並行して取得・解析
+**Purpose:** Fetch and parse RSS feeds in parallel
 
-**インターフェース:**
+**Interface:**
 ```typescript
 interface RSSFetcherService {
   fetchArticles(feedUrls: string[], daysBack: number): Promise<Article[]>;
 }
 ```
 
-**メソッド:**
-- `fetchArticles(feedUrls, daysBack)` - Promise.allですべてのフィードを並行して取得
-- `parseFeed(url)` - RSSパーサーライブラリで単一のRSSフィードを解析
-- `filterByDate(articles, daysBack)` - 日付範囲で記事をフィルタリング
+**Methods:**
+- `fetchArticles(feedUrls, daysBack)` - Fetch all feeds in parallel with Promise.all
+- `parseFeed(url)` - Parse single RSS feed with RSS parser library
+- `filterByDate(articles, daysBack)` - Filter articles by date range
 
-**依存関係:**
-- `rss-parser` または同等のライブラリ
-- `node-fetch` または標準fetch API
+**Dependencies:**
+- `rss-parser` or equivalent library
+- `node-fetch` or standard fetch API
 
 #### ImportanceCalculator
-**目的:** レイアウト優先順位付けのための記事重要度を計算（バックエンドで実行）
+**Purpose:** Calculate article importance for layout prioritization (executed on backend)
 
-**インターフェース:**
+**Interface:**
 ```typescript
 interface ImportanceCalculator {
   calculateImportance(articles: Article[], userTheme: string): Promise<Article[]>;
 }
 ```
 
-**メソッド:**
-- `calculateImportance(articles, userTheme)` - Bedrockを使用して記事に重要度スコアを付与
-- `buildImportancePrompt(articles, userTheme)` - 重要度判定用のAIプロンプトを構築
-- `parseImportanceResponse(response)` - Bedrockレスポンスから重要度スコアを抽出
+**Methods:**
+- `calculateImportance(articles, userTheme)` - Assign importance scores to articles using Bedrock
+- `buildImportancePrompt(articles, userTheme)` - Build AI prompt for importance judgment
+- `parseImportanceResponse(response)` - Extract importance scores from Bedrock response
 
-**アルゴリズム（Bedrock使用）:**
+**Algorithm (Using Bedrock):**
 ```typescript
 async function calculateImportance(articles: Article[], userTheme: string): Promise<Article[]> {
-  // ランダム性を持たせるための要素
+  // Elements for randomness
   const perspectives = [
-    '今日の気分で',
-    '新鮮な視点で',
-    '異なる角度から',
-    'ユニークな観点で',
-    '多様な視点で',
+    'with today\'s mood',
+    'from a fresh perspective',
+    'from a different angle',
+    'with a unique viewpoint',
+    'from diverse perspectives',
   ];
   const randomPerspective = perspectives[Math.floor(Math.random() * perspectives.length)];
   const timestamp = new Date().toISOString();
   
-  // Bedrockに記事リストとユーザーテーマを送信
+  // Send article list and user theme to Bedrock
   const prompt = `
-ユーザーは「${userTheme}」に興味があります。
-${randomPerspective}、以下の記事リストからユーザーにとっての重要度を0-100のスコアで評価してください。
+User is interested in "${userTheme}".
+${randomPerspective}, please evaluate the importance of the following articles for the user with a score from 0-100.
 
-評価基準：
-1. ユーザーのテーマとの関連性（最重要）
-2. 画像の有無（画像付きは+10点）
-3. タイトルの魅力度と新鮮さ
+Evaluation criteria:
+1. Relevance to user's theme (highest priority)
+2. Presence of image (+10 point bonus)
+3. Title attractiveness and freshness
 
-記事リスト：
-${articles.map((a, i) => `${i + 1}. タイトル: ${a.title}, 説明: ${a.description}, 画像: ${a.imageUrl ? 'あり' : 'なし'}`).join('\n')}
+Article list:
+${articles.map((a, i) => `${i + 1}. Title: ${a.title}, Description: ${a.description}, Image: ${a.imageUrl ? 'Yes' : 'No'}`).join('\n')}
 
-注意: 同じような重要度の記事がある場合、少しバリエーションを持たせてください。
-生成時刻: ${timestamp}
+Note: If articles have similar importance, please add some variation.
+Generation time: ${timestamp}
 
-各記事の重要度スコア（0-100）をJSON形式で返してください：
+Return importance scores (0-100) for each article in JSON format:
 {"scores": [85, 70, 60, ...]}
 `;
 
@@ -1112,28 +1113,28 @@ ${articles.map((a, i) => `${i + 1}. タイトル: ${a.title}, 説明: ${a.descri
       anthropic_version: 'bedrock-2023-05-31',
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.8, // ランダム性を高める（0.0-1.0、デフォルト1.0）
+      temperature: 0.8, // Increase randomness (0.0-1.0, default 1.0)
     }),
   });
 
   const response = await bedrockClient.send(command);
   const scores = parseImportanceResponse(response);
   
-  // 記事に重要度スコアを付与
+  // Assign importance scores to articles
   return articles.map((article, index) => ({
     ...article,
-    importance: scores[index] || 50, // デフォルト50
+    importance: scores[index] || 50, // Default 50
   }));
 }
 ```
 
-**フォールバック（Bedrock失敗時）:**
+**Fallback (When Bedrock Fails):**
 ```typescript
 function calculateImportanceFallback(article: Article): number {
   const titleLength = article.title.length;
   const hasImage = !!article.imageUrl;
   
-  // シンプルなスコアリング
+  // Simple scoring
   const titleScore = Math.min(titleLength * 0.6, 60);
   const imageBonus = hasImage ? 40 : 0;
   
@@ -1141,23 +1142,23 @@ function calculateImportanceFallback(article: Article): number {
 }
 ```
 
-**実装場所:** `backend/src/services/importanceCalculator.ts`
+**Implementation Location:** `backend/src/services/importanceCalculator.ts`
 
-**ランダム性の実現:**
-- `temperature: 0.8`を設定してAIの出力にバリエーションを持たせる
-- プロンプトにランダムな視点（「今日の気分で」など）を追加
-- タイムスタンプを含めて毎回異なるコンテキストを提供
-- 同じ記事リストでも生成ごとに異なるレイアウトになる
+**Achieving Randomness:**
+- Set `temperature: 0.8` to add variation to AI output
+- Add random perspective to prompt ("with today's mood", etc.)
+- Include timestamp to provide different context each time
+- Same article list produces different layouts each generation
 
-**パフォーマンス考慮:**
-- 記事数が多い場合（20件以上）は、バッチ処理または上位候補のみBedrockで評価
-- タイムアウト: 5秒以内
-- エラー時はフォールバックアルゴリズムを使用
+**Performance Considerations:**
+- For many articles (20+), use batch processing or evaluate only top candidates with Bedrock
+- Timeout: Within 5 seconds
+- Use fallback algorithm on error
 
 #### NewspaperService
-**目的:** 新聞のメタデータを管理
+**Purpose:** Manage newspaper metadata
 
-**インターフェース:**
+**Interface:**
 ```typescript
 interface NewspaperService {
   saveNewspaper(newspaper: NewspaperData): Promise<string>;
@@ -1171,7 +1172,7 @@ interface NewspaperData {
   newspaperId: string;
   name: string;
   userName: string;
-  userId?: string;      // 将来のログイン機能用（オプショナル）
+  userId?: string;      // For future login feature (optional)
   feedUrls: string[];
   createdAt: string;
   updatedAt: string;
@@ -1180,42 +1181,42 @@ interface NewspaperData {
 }
 ```
 
-**メソッド:**
-- `saveNewspaper(newspaper)` - DynamoDBに新聞を保存
-- `getNewspaper(newspaperId)` - IDで新聞を取得
-- `getPublicNewspapers(sortBy, limit)` - 公開新聞を取得（人気順または新着順）
-- `getUserNewspapers(userId, limit)` - ユーザーが作成した新聞を取得（将来のログイン機能用）
-- `incrementViewCount(newspaperId)` - 閲覧数をインクリメント
+**Methods:**
+- `saveNewspaper(newspaper)` - Save newspaper to DynamoDB
+- `getNewspaper(newspaperId)` - Get newspaper by ID
+- `getPublicNewspapers(sortBy, limit)` - Get public newspapers (by popularity or recency)
+- `getUserNewspapers(userId, limit)` - Get newspapers created by user (for future login feature)
+- `incrementViewCount(newspaperId)` - Increment view count
 
-**依存関係:**
+**Dependencies:**
 - `@aws-sdk/client-dynamodb`
 - `@aws-sdk/lib-dynamodb`
 
-### APIエンドポイント
+### API Endpoints
 
 #### POST /api/suggest-feeds
-**リクエスト:**
+**Request:**
 ```json
 {
   "theme": "Tech"
 }
 ```
 
-**レスポンス:**
+**Response:**
 ```json
 {
   "suggestions": [
     {
       "url": "https://example.com/tech-feed",
       "title": "Tech News Feed",
-      "reasoning": "スタートアップとイノベーションをカバーする主要なテクノロジーニュース"
+      "reasoning": "Major technology news covering startups and innovation"
     }
   ]
 }
 ```
 
 #### POST /api/generate-newspaper
-**リクエスト:**
+**Request:**
 ```json
 {
   "feedUrls": ["https://example.com/tech-feed"],
@@ -1224,12 +1225,12 @@ interface NewspaperData {
 }
 ```
 
-**レスポンス:**
+**Response:**
 ```json
 {
   "articles": [
     {
-      "title": "2025年のAIブレークスルー",
+      "title": "AI Breakthroughs in 2025",
       "description": "...",
       "link": "https://...",
       "pubDate": "2025-11-26T10:00:00Z",
@@ -1240,10 +1241,10 @@ interface NewspaperData {
 }
 ```
 
-**注:** `theme`パラメータは記事の重要度計算に使用されます。
+**Note:** The `theme` parameter is used for article importance calculation.
 
 #### POST /api/newspapers
-**リクエスト:**
+**Request:**
 ```json
 {
   "name": "Tech Morning Digest",
@@ -1254,9 +1255,9 @@ interface NewspaperData {
 }
 ```
 
-**注:** MVPでは`userId`は常に`null`。将来のログイン機能実装時に使用。
+**Note:** In MVP, `userId` is always `null`. Will be used when login feature is implemented.
 
-**レスポンス:**
+**Response:**
 ```json
 {
   "newspaperId": "uuid-1234",
@@ -1265,7 +1266,7 @@ interface NewspaperData {
 ```
 
 #### GET /api/newspapers/:newspaperId
-**レスポンス:**
+**Response:**
 ```json
 {
   "newspaperId": "uuid-1234",
@@ -1281,7 +1282,7 @@ interface NewspaperData {
 ```
 
 #### GET /api/newspapers?sort=popular&limit=10
-**レスポンス:**
+**Response:**
 ```json
 {
   "newspapers": [
@@ -1298,26 +1299,27 @@ interface NewspaperData {
 }
 ```
 
-## DNS設定（Route53）
 
-### ドメイン情報
+## DNS Configuration (Route53)
 
-**ドメイン名**: `my-rss-press.com`  
-**レジストラ**: XServer  
-**DNS管理**: AWS Route53
+### Domain Information
 
-### Route53セットアップ手順
+**Domain Name**: `my-rss-press.com`  
+**Registrar**: XServer  
+**DNS Management**: AWS Route53
 
-#### 1. Route53ホストゾーンの作成
+### Route53 Setup Procedure
+
+#### 1. Create Route53 Hosted Zone
 
 ```bash
-# AWS CLIでホストゾーンを作成
+# Create hosted zone with AWS CLI
 aws route53 create-hosted-zone \
   --name my-rss-press.com \
   --caller-reference $(date +%s)
 ```
 
-または、Terraformで：
+Or with Terraform:
 
 ```hcl
 # infra/modules/route53/main.tf
@@ -1332,13 +1334,13 @@ resource "aws_route53_zone" "main" {
 
 output "name_servers" {
   value       = aws_route53_zone.main.name_servers
-  description = "Route53ネームサーバー（XServerに設定する）"
+  description = "Route53 name servers (configure in XServer)"
 }
 ```
 
-#### 2. XServerでネームサーバーを変更
+#### 2. Change Name Servers in XServer
 
-Route53ホストゾーン作成後、以下のネームサーバーが割り当てられます：
+After creating Route53 hosted zone, the following name servers will be assigned:
 
 ```
 ns-xxxx.awsdns-xx.com
@@ -1347,22 +1349,22 @@ ns-xxxx.awsdns-xx.org
 ns-xxxx.awsdns-xx.co.uk
 ```
 
-**XServerでの設定手順：**
-1. XServerのサーバーパネルにログイン
-2. 「ドメイン設定」→「ネームサーバー設定」を選択
-3. `my-rss-press.com` を選択
-4. 「その他のネームサーバーを使用」を選択
-5. Route53の4つのネームサーバーを入力
-6. 設定を保存
+**XServer Configuration Steps:**
+1. Log in to XServer control panel
+2. Select "Domain Settings" → "Name Server Settings"
+3. Select `my-rss-press.com`
+4. Select "Use other name servers"
+5. Enter the 4 Route53 name servers
+6. Save settings
 
-**注意**: DNS変更の反映には最大48時間かかる場合があります（通常は数時間）。
+**Note**: DNS changes can take up to 48 hours to propagate (usually a few hours).
 
-#### 3. Route53 DNSレコードの設定
+#### 3. Configure Route53 DNS Records
 
 ```hcl
 # infra/modules/route53/records.tf
 
-# Amplify Hostingへのルーティング（フロントエンド）
+# Route to Amplify Hosting (frontend)
 resource "aws_route53_record" "root" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "my-rss-press.com"
@@ -1383,7 +1385,7 @@ resource "aws_route53_record" "www" {
   records = [aws_amplify_app.main.default_domain]
 }
 
-# API Gateway（バックエンド）
+# API Gateway (backend)
 resource "aws_route53_record" "api" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "api.my-rss-press.com"
@@ -1396,7 +1398,7 @@ resource "aws_route53_record" "api" {
   }
 }
 
-# メール認証用（オプション）
+# Email verification (optional)
 resource "aws_route53_record" "mx" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "my-rss-press.com"
@@ -1407,7 +1409,7 @@ resource "aws_route53_record" "mx" {
   ]
 }
 
-# SPFレコード（メール送信認証）
+# SPF record (email sending verification)
 resource "aws_route53_record" "spf" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "my-rss-press.com"
@@ -1419,19 +1421,19 @@ resource "aws_route53_record" "spf" {
 }
 ```
 
-### DNSレコード一覧
+### DNS Record List
 
-| レコードタイプ | 名前 | 値 | 用途 |
-|--------------|------|-----|------|
-| A (Alias) | my-rss-press.com | Amplify CloudFront | ルートドメイン（フロントエンド） |
-| CNAME | www.my-rss-press.com | Amplify Domain | wwwサブドメイン |
-| A (Alias) | api.my-rss-press.com | API Gateway CloudFront | バックエンドAPI |
-| MX | my-rss-press.com | mail.my-rss-press.com | メールサーバー（オプション） |
-| TXT | my-rss-press.com | SPFレコード | メール送信認証（オプション） |
+| Record Type | Name | Value | Purpose |
+|------------|------|-------|---------|
+| A (Alias) | my-rss-press.com | Amplify CloudFront | Root domain (frontend) |
+| CNAME | www.my-rss-press.com | Amplify Domain | www subdomain |
+| A (Alias) | api.my-rss-press.com | API Gateway CloudFront | Backend API |
+| MX | my-rss-press.com | mail.my-rss-press.com | Mail server (optional) |
+| TXT | my-rss-press.com | SPF record | Email sending verification (optional) |
 
-### SSL/TLS証明書（ACM）
+### SSL/TLS Certificate (ACM)
 
-AWS Certificate Manager（ACM）で無料のSSL証明書を取得：
+Obtain free SSL certificate with AWS Certificate Manager (ACM):
 
 ```hcl
 # infra/modules/acm/main.tf
@@ -1449,7 +1451,7 @@ resource "aws_acm_certificate" "main" {
   }
 }
 
-# DNS検証レコードの自動作成
+# Auto-create DNS validation records
 resource "aws_route53_record" "cert_validation" {
   for_each = {
     for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => {
@@ -1467,14 +1469,14 @@ resource "aws_route53_record" "cert_validation" {
   zone_id         = aws_route53_zone.main.zone_id
 }
 
-# 証明書の検証完了を待機
+# Wait for certificate validation completion
 resource "aws_acm_certificate_validation" "main" {
   certificate_arn         = aws_acm_certificate.main.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
 ```
 
-### Amplifyカスタムドメイン設定
+### Amplify Custom Domain Configuration
 
 ```hcl
 # infra/modules/amplify/domain.tf
@@ -1482,13 +1484,13 @@ resource "aws_amplify_domain_association" "main" {
   app_id      = aws_amplify_app.main.id
   domain_name = "my-rss-press.com"
   
-  # ルートドメイン
+  # Root domain
   sub_domain {
     branch_name = "main"
     prefix      = ""
   }
   
-  # wwwサブドメイン
+  # www subdomain
   sub_domain {
     branch_name = "main"
     prefix      = "www"
@@ -1498,7 +1500,7 @@ resource "aws_amplify_domain_association" "main" {
 }
 ```
 
-### API Gatewayカスタムドメイン設定
+### API Gateway Custom Domain Configuration
 
 ```hcl
 # infra/modules/api-gateway/domain.tf
@@ -1518,54 +1520,54 @@ resource "aws_api_gateway_base_path_mapping" "api" {
 }
 ```
 
-### DNS伝播の確認
+### Verify DNS Propagation
 
 ```bash
-# ネームサーバーの確認
+# Check name servers
 dig NS my-rss-press.com
 
-# Aレコードの確認
+# Check A record
 dig A my-rss-press.com
 
-# CNAMEレコードの確認
+# Check CNAME record
 dig CNAME www.my-rss-press.com
 
-# API エンドポイントの確認
+# Check API endpoint
 dig A api.my-rss-press.com
 
-# 全世界のDNS伝播状況を確認
-# https://www.whatsmydns.net/ でmy-rss-press.comを検索
+# Check global DNS propagation status
+# Visit https://www.whatsmydns.net/ and search for my-rss-press.com
 ```
 
-### コスト
+### Cost
 
-- **Route53ホストゾーン**: $0.50/月
-- **DNSクエリ**: 最初の10億クエリまで $0.40/100万クエリ
-- **ACM証明書**: 無料
+- **Route53 Hosted Zone**: $0.50/month
+- **DNS Queries**: $0.40/million queries for first 1 billion queries
+- **ACM Certificate**: Free
 
-**月額合計**: 約$0.50（DNSクエリは無料枠内と想定）
+**Monthly Total**: Approximately $0.50 (assuming DNS queries within free tier)
 
-## データモデル
+## Data Models
 
 ### Article
 ```typescript
 interface Article {
-  title: string;        // 記事見出し
-  description: string;  // 記事要約/コンテンツ
-  link: string;         // 元記事URL
-  pubDate: Date;        // 公開日
-  imageUrl?: string;    // オプションの特集画像
-  importance: number;   // 計算された重要度（0-100）
-  feedSource: string;   // ソースRSSフィードURL
+  title: string;        // Article headline
+  description: string;  // Article summary/content
+  link: string;         // Original article URL
+  pubDate: Date;        // Publication date
+  imageUrl?: string;    // Optional featured image
+  importance: number;   // Calculated importance (0-100)
+  feedSource: string;   // Source RSS feed URL
 }
 ```
 
 ### FeedSuggestion
 ```typescript
 interface FeedSuggestion {
-  url: string;       // RSSフィードURL
-  title: string;     // フィード名
-  reasoning: string; // 提案のAI説明
+  url: string;       // RSS feed URL
+  title: string;     // Feed name
+  reasoning: string; // AI explanation for suggestion
 }
 ```
 
@@ -1573,140 +1575,140 @@ interface FeedSuggestion {
 ```typescript
 interface Newspaper {
   newspaperId: string;  // UUID
-  name: string;         // 新聞名
-  userName: string;     // 作成者名（表示用）
-  userId?: string;      // ユーザーID（将来のログイン機能用、オプショナル）
-  feedUrls: string[];   // RSSフィードURLリスト
-  createdAt: string;    // 作成日時（ISO 8601）
-  updatedAt: string;    // 更新日時（ISO 8601）
-  viewCount: number;    // 閲覧数
-  isPublic: boolean;    // 公開/非公開
+  name: string;         // Newspaper name
+  userName: string;     // Creator name (for display)
+  userId?: string;      // User ID (for future login feature, optional)
+  feedUrls: string[];   // RSS feed URL list
+  createdAt: string;    // Creation date (ISO 8601)
+  updatedAt: string;    // Update date (ISO 8601)
+  viewCount: number;    // View count
+  isPublic: boolean;    // Public/private
 }
 ```
 
-**DynamoDBテーブル設計:**
+**DynamoDB Table Design:**
 
-**Newspapersテーブル:**
-- パーティションキー: `PK` = `NEWSPAPER#{newspaperId}` (String)
-- ソートキー: `SK` = `METADATA` (String)
-- 属性: `newspaperId`, `name`, `userName`, `userId`, `feedUrls`, `createdAt`, `updatedAt`, `viewCount`, `isPublic`
+**Newspapers Table:**
+- Partition Key: `PK` = `NEWSPAPER#{newspaperId}` (String)
+- Sort Key: `SK` = `METADATA` (String)
+- Attributes: `newspaperId`, `name`, `userName`, `userId`, `feedUrls`, `createdAt`, `updatedAt`, `viewCount`, `isPublic`
 
-**GSI: UserNewspapers（将来のログイン機能用）:**
-- パーティションキー: `PK` = `USER#{userId}` (String)
-- ソートキー: `SK` = `CREATED#{createdAt}#{newspaperId}` (String)
-- 用途: ユーザーが作成した新聞の一覧取得（ログイン後）
+**GSI: UserNewspapers (for future login feature):**
+- Partition Key: `PK` = `USER#{userId}` (String)
+- Sort Key: `SK` = `CREATED#{createdAt}#{newspaperId}` (String)
+- Purpose: Get list of newspapers created by user (after login)
 
-**GSI: PublicNewspapers（人気順）:**
-- パーティションキー: `PK` = `PUBLIC` (String)
-- ソートキー: `SK` = `VIEWS#{viewCount}#{newspaperId}` (String)
-- 用途: 人気順での新聞取得
+**GSI: PublicNewspapers (by popularity):**
+- Partition Key: `PK` = `PUBLIC` (String)
+- Sort Key: `SK` = `VIEWS#{viewCount}#{newspaperId}` (String)
+- Purpose: Get newspapers sorted by popularity
 
-**GSI: RecentNewspapers（新着順）:**
-- パーティションキー: `PK` = `PUBLIC` (String)
-- ソートキー: `SK` = `CREATED#{createdAt}#{newspaperId}` (String)
-- 用途: 新着順での新聞取得
+**GSI: RecentNewspapers (by recency):**
+- Partition Key: `PK` = `PUBLIC` (String)
+- Sort Key: `SK` = `CREATED#{createdAt}#{newspaperId}` (String)
+- Purpose: Get newspapers sorted by recency
 
 ### LayoutGrid
 ```typescript
 interface LayoutGrid {
-  columns: number;        // グリッド列数（例：3）
-  rows: number;          // グリッド行数
-  cells: LayoutCell[];   // 記事配置
+  columns: number;        // Grid column count (e.g., 3)
+  rows: number;          // Grid row count
+  cells: LayoutCell[];   // Article placement
 }
 
 interface LayoutCell {
   article: Article;
-  row: number;           // 開始行
-  col: number;           // 開始列
-  rowSpan: number;       // 占有行数
-  colSpan: number;       // 占有列数
+  row: number;           // Starting row
+  col: number;           // Starting column
+  rowSpan: number;       // Rows occupied
+  colSpan: number;       // Columns occupied
   fontSize: 'large' | 'medium' | 'small';
 }
 ```
 
-## 正確性プロパティ
+## Correctness Properties
 
-*プロパティとは、システムのすべての有効な実行において真であるべき特性または動作です。本質的には、システムが何をすべきかについての形式的な記述です。プロパティは、人間が読める仕様と機械で検証可能な正確性保証との橋渡しとして機能します。*
+*A property is a characteristic or behavior that should be true across all valid executions of the system. Essentially, it's a formal description of what the system should do. Properties serve as a bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-### プロパティ1: 空入力の拒否
-*任意の*空文字列または空白のみの文字列に対して、テーマ入力検証はそれを拒否し、エラーを返すべきです
-**検証: 要件 1.3**
+### Property 1: Empty Input Rejection
+*For any* empty string or whitespace-only string, theme input validation should reject it and return an error
+**Verifies: Requirement 1.3**
 
-### プロパティ2: 有効入力の受入
-*任意の*少なくとも1つの非空白文字を含む文字列に対して、テーマ入力検証はそれを受け入れるべきです
-**検証: 要件 1.2**
+### Property 2: Valid Input Acceptance
+*For any* string containing at least one non-whitespace character, theme input validation should accept it
+**Verifies: Requirement 1.2**
 
-### プロパティ3: 提案生成の完全性
-*任意の*有効なテーマキーワードに対して、AI提案サービスは少なくとも3つのフィード提案を返すべきです
-**検証: 要件 2.1, 2.3**
+### Property 3: Suggestion Generation Completeness
+*For any* valid theme keyword, the AI suggestion service should return at least 3 feed suggestions
+**Verifies: Requirements 2.1, 2.3**
 
-### プロパティ4: 提案メタデータの完全性
-*任意の*生成されたフィード提案に対して、それはタイトル、URL、理由フィールドをすべて含むべきです
-**検証: 要件 2.2, 2.4**
+### Property 4: Suggestion Metadata Completeness
+*For any* generated feed suggestion, it should contain all of title, URL, and reasoning fields
+**Verifies: Requirements 2.2, 2.4**
 
-### プロパティ5: 複数選択の許可
-*任意の*フィード提案リストに対して、ユーザーは1つ以上のフィードを同時に選択できるべきです
-**検証: 要件 3.2**
+### Property 5: Multiple Selection Allowance
+*For any* feed suggestion list, users should be able to select one or more feeds simultaneously
+**Verifies: Requirement 3.2**
 
-### プロパティ6: 選択状態の一貫性
-*任意の*フィード選択操作に対して、選択状態は即座に更新され、UIに反映されるべきです
-**検証: 要件 3.3**
+### Property 6: Selection State Consistency
+*For any* feed selection operation, the selection state should update immediately and be reflected in the UI
+**Verifies: Requirement 3.3**
 
-### プロパティ7: 生成有効化条件
-*任意の*フィード選択状態に対して、少なくとも1つのフィードが選択されている場合にのみ、生成ボタンが有効になるべきです
-**検証: 要件 3.4**
+### Property 7: Generation Enable Condition
+*For any* feed selection state, the generate button should only be enabled when at least one feed is selected
+**Verifies: Requirement 3.4**
 
-### プロパティ8: 日付範囲フィルタリング
-*任意の*RSSフィードから取得された記事に対して、すべての返される記事は過去1〜3日以内に公開されたものであるべきです
-**検証: 要件 4.1**
+### Property 8: Date Range Filtering
+*For any* articles fetched from RSS feeds, all returned articles should be published within the past 1-3 days
+**Verifies: Requirement 4.1**
 
-### プロパティ9: RSS解析の完全性
-*任意の*有効なRSSフィードに対して、解析された記事はタイトル、説明、リンクフィールドを含むべきです
-**検証: 要件 4.2**
+### Property 9: RSS Parsing Completeness
+*For any* valid RSS feed, parsed articles should contain title, description, and link fields
+**Verifies: Requirement 4.2**
 
-### プロパティ10: 重要度計算の決定性
-*任意の*記事に対して、重要度計算は0〜100の範囲の数値を返すべきです
-**検証: 要件 4.3**
+### Property 10: Importance Calculation Determinism
+*For any* article, importance calculation should return a numeric value in the range 0-100
+**Verifies: Requirement 4.3**
 
-### プロパティ11: 重要度計算の完全性
-*任意の*記事リストに対して、重要度計算はすべての記事にスコアを付与するべきです（Bedrock失敗時はフォールバックを使用）
-**検証: 要件 6.1**
+### Property 11: Importance Calculation Completeness
+*For any* article list, importance calculation should assign scores to all articles (using fallback if Bedrock fails)
+**Verifies: Requirement 6.1**
 
-### プロパティ12: テーマとの関連性
-*任意の*記事リストとユーザーテーマに対して、Bedrockによる重要度計算はテーマとの関連性を考慮するべきです
-**検証: 要件 6.2**
+### Property 12: Theme Relevance
+*For any* article list and user theme, Bedrock importance calculation should consider theme relevance
+**Verifies: Requirement 6.2**
 
-### プロパティ13: レイアウトの完全性
-*任意の*記事セットに対して、生成されたレイアウトはすべての記事を含むべきです
-**検証: 要件 6.5**
+### Property 13: Layout Completeness
+*For any* article set, the generated layout should include all articles
+**Verifies: Requirement 6.5**
 
-### プロパティ14: 重要度とフォントサイズの相関
-*任意の*レイアウトされた記事セットに対して、より高い重要度の記事はより大きなフォントサイズを持つべきです
-**検証: 要件 6.3**
+### Property 14: Importance-Font Size Correlation
+*For any* laid-out article set, articles with higher importance should have larger font sizes
+**Verifies: Requirement 6.3**
 
-### プロパティ15: 重要度と位置の相関
-*任意の*レイアウトされた記事セットに対して、より高い重要度の記事はより目立つ位置（上部、左側）に配置されるべきです
-**検証: 要件 6.4**
+### Property 15: Importance-Position Correlation
+*For any* laid-out article set, articles with higher importance should be placed in more prominent positions (top, left)
+**Verifies: Requirement 6.4**
 
-### プロパティ16: 新聞保存の完全性
-*任意の*新聞設定に対して、それを保存した後、新聞IDで取得すると、同じ設定が返されるべきです
-**検証: 要件 6.1, 6.5**
+### Property 16: Newspaper Save Completeness
+*For any* newspaper settings, after saving them, retrieving by newspaper ID should return the same settings
+**Verifies: Requirements 6.1, 6.5**
 
-### プロパティ17: 公開新聞の並び替え
-*任意の*公開新聞リストに対して、人気順でソートすると閲覧数の降順で返され、新着順でソートすると作成日時の降順で返されるべきです
-**検証: 要件 4.2, 4.3, 4.4**
+### Property 17: Public Newspaper Sorting
+*For any* public newspaper list, sorting by popularity should return in descending order of view count, and sorting by recency should return in descending order of creation date
+**Verifies: Requirements 4.2, 4.3, 4.4**
 
-### プロパティ18: 多言語対応の一貫性
-*任意の*ブラウザ言語設定に対して、日本語の場合は日本語UIが、それ以外の場合は英語UIが表示されるべきです
-**検証: 要件 1.1, 1.2, 1.3**
+### Property 18: Multi-language Consistency
+*For any* browser language setting, Japanese should display Japanese UI, and all others should display English UI
+**Verifies: Requirements 1.1, 1.2, 1.3**
 
-## セキュリティ
+## Security
 
-### API保護戦略
+### API Protection Strategy
 
-**MVPでの方針**: CORS + レート制限による基本的な防御
+**MVP Approach**: Basic defense with CORS + rate limiting
 
-#### 1. CORS設定
+#### 1. CORS Configuration
 
 ```typescript
 // backend/src/middleware/cors.ts
@@ -1716,25 +1718,25 @@ export const corsMiddleware = cors({
   origin: [
     'https://my-rss-press.com',
     'https://www.my-rss-press.com',
-    // 開発環境
+    // Development environment
     process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '',
   ].filter(Boolean),
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400, // 24時間
+  maxAge: 86400, // 24 hours
 });
 ```
 
-**効果:**
-- ブラウザからの不正なクロスオリジンリクエストを防ぐ
-- 他のWebサイトからのJavaScript経由のアクセスを制限
+**Effect:**
+- Prevent unauthorized cross-origin requests from browsers
+- Restrict access via JavaScript from other websites
 
-**制限:**
-- curl、Postman、カスタムアプリからのアクセスは防げない
-- これはSPAの本質的な制限
+**Limitations:**
+- Cannot prevent access from curl, Postman, or custom apps
+- This is an inherent limitation of SPAs
 
-#### 2. レート制限
+#### 2. Rate Limiting
 
 ```typescript
 // backend/src/middleware/rateLimit.ts
@@ -1772,21 +1774,21 @@ export const rateLimit = (maxRequests: number, windowMs: number) => {
   };
 };
 
-// 使用例
-app.use('/api/*', rateLimit(100, 60000)); // 1分間に100リクエストまで
+// Usage example
+app.use('/api/*', rateLimit(100, 60000)); // 100 requests per minute
 ```
 
-**効果:**
-- 大量のリクエストを防ぐ
-- DDoS攻撃を軽減
-- コストの急増を防ぐ
+**Effect:**
+- Prevent mass requests
+- Mitigate DDoS attacks
+- Prevent cost spikes
 
-**設定値:**
-- 一般的なエンドポイント: 100リクエスト/分
-- AI提案エンドポイント: 10リクエスト/分（コスト高いため）
-- 新聞生成エンドポイント: 20リクエスト/分
+**Configuration Values:**
+- General endpoints: 100 requests/minute
+- AI suggestion endpoint: 10 requests/minute (high cost)
+- Newspaper generation endpoint: 20 requests/minute
 
-#### 3. 統合セキュリティミドルウェア
+#### 3. Integrated Security Middleware
 
 ```typescript
 // backend/src/app.ts
@@ -1797,147 +1799,147 @@ import { rateLimit } from './middleware/rateLimit';
 
 export const app = new Hono();
 
-// 1. ログ記録
+// 1. Logging
 app.use('*', logger());
 
-// 2. CORS設定
+// 2. CORS configuration
 app.use('*', corsMiddleware);
 
-// 3. レート制限（エンドポイントごとに設定）
+// 3. Rate limiting (per endpoint)
 app.use('/api/suggest-feeds', rateLimit(10, 60000));
 app.use('/api/generate-newspaper', rateLimit(20, 60000));
 app.use('/api/*', rateLimit(100, 60000));
 
-// ルート定義
+// Route definitions
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
-// ... 他のルート
+// ... other routes
 ```
 
-### セキュリティベストプラクティス
+### Security Best Practices
 
-1. **環境変数の管理**
-   - 機密情報は環境変数で管理
-   - `.env`ファイルは`.gitignore`に追加
-   - AWS Secrets Managerは使用しない（コスト削減）
+1. **Environment Variable Management**
+   - Manage sensitive information with environment variables
+   - Add `.env` files to `.gitignore`
+   - Don't use AWS Secrets Manager (cost reduction)
 
-2. **入力検証**
-   - すべてのユーザー入力をZodで検証
-   - SQLインジェクション対策（DynamoDBなので不要だが念のため）
-   - XSS対策（Reactのデフォルト保護）
+2. **Input Validation**
+   - Validate all user input with Zod
+   - SQL injection protection (not needed for DynamoDB but just in case)
+   - XSS protection (React default protection)
 
-3. **HTTPSの強制**
-   - すべての通信をHTTPSで暗号化
-   - Amplify、API Gateway、CloudFrontがデフォルトで対応
+3. **Force HTTPS**
+   - Encrypt all communication with HTTPS
+   - Amplify, API Gateway, CloudFront support by default
 
-4. **エラーメッセージ**
-   - 本番環境では詳細なエラー情報を隠蔽
-   - ログにのみ詳細を記録
+4. **Error Messages**
+   - Hide detailed error information in production
+   - Log details only
 
-### セキュリティの制限事項
+### Security Limitations
 
-**SPAの本質的な制限:**
-- フロントエンドから叩けるAPI = 誰でも叩ける
-- APIキーをJavaScriptに埋め込んでも、開発者ツールで見える
-- 完全な保護は不可能
+**Inherent SPA Limitations:**
+- API callable from frontend = callable by anyone
+- API keys embedded in JavaScript are visible in developer tools
+- Complete protection is impossible
 
-**実用的な対策:**
-- CORS: ブラウザからの基本的な防御
-- レート制限: 大量アクセスの防止
-- コスト監視: CloudWatch Alarmsで異常検知
+**Practical Countermeasures:**
+- CORS: Basic defense from browsers
+- Rate limiting: Prevent mass access
+- Cost monitoring: Detect anomalies with CloudWatch Alarms
 
-**将来の拡張（Phase 2以降）:**
-- AWS WAF: より高度な防御（月額$5-10）
-- API認証: ユーザーごとのトークン管理
-- Captcha: ボット対策
+**Future Enhancements (Phase 2+):**
+- AWS WAF: More advanced defense ($5-10/month)
+- API authentication: Per-user token management
+- Captcha: Bot protection
 
-## エラーハンドリング
+## Error Handling
 
-### フロントエンドエラー
+### Frontend Errors
 
-**入力検証エラー:**
-- 空のテーマ入力 → ユーザーにエラーメッセージを表示
-- ネットワークタイムアウト → 再試行オプション付きエラーメッセージ
+**Input Validation Errors:**
+- Empty theme input → Display error message to user
+- Network timeout → Error message with retry option
 
-**レンダリングエラー:**
-- 画像読み込み失敗 → プレースホルダー画像を表示
+**Rendering Errors:**
+- Image load failure → Display placeholder image
 
-### バックエンドエラー
+### Backend Errors
 
-**AI提案エラー:**
-- Bedrock APIタイムアウト → デフォルトフィードリストにフォールバック
-- APIレート制限 → 指数バックオフで再試行
-- 無効なレスポンス → エラーログとクライアントへの500エラー
+**AI Suggestion Errors:**
+- Bedrock API timeout → Fallback to default feed list
+- API rate limit → Retry with exponential backoff
+- Invalid response → Error log and 500 error to client
 
-**RSS取得エラー:**
-- フィードURL到達不可 → そのフィードをスキップし、他を続行
-- 解析エラー → エラーログとそのフィードをスキップ
-- タイムアウト（5秒） → そのフィードをスキップ
-- 記事数不足（3記事未満） → ユーザーにエラーメッセージを表示し、フィード追加を促す
+**RSS Fetch Errors:**
+- Feed URL unreachable → Skip that feed and continue with others
+- Parse error → Error log and skip that feed
+- Timeout (5 seconds) → Skip that feed
+- Insufficient articles (< 3) → Display error message to user and prompt to add feeds
 
-**DynamoDBエラー:**
-- 接続失敗 → 再試行ロジック（最大3回、指数バックオフ）
-- 重複新聞ID → 新しいUUIDを生成して再試行
-- スロットリング → 指数バックオフで再試行
-- クエリタイムアウト → エラーログとクライアントへの500エラー
+**DynamoDB Errors:**
+- Connection failure → Retry logic (max 3 times, exponential backoff)
+- Duplicate newspaper ID → Generate new UUID and retry
+- Throttling → Retry with exponential backoff
+- Query timeout → Error log and 500 error to client
 
-### エラーログ
+### Error Logging
 
-すべてのエラーはCloudWatch Logsに記録され、以下を含みます：
-- タイムスタンプ
-- エラータイプ
-- スタックトレース
-- リクエストコンテキスト（ユーザーID、テーマなど）
+All errors are logged to CloudWatch Logs and include:
+- Timestamp
+- Error type
+- Stack trace
+- Request context (user ID, theme, etc.)
 
-## テスト戦略
+## Testing Strategy
 
-### ユニットテスト
+### Unit Tests
 
-**フロントエンド:**
-- コンポーネントレンダリングテスト（React Testing Library）
-- 入力検証ロジック
-- レイアウト計算アルゴリズム
-- 多言語対応（i18n）
+**Frontend:**
+- Component rendering tests (React Testing Library)
+- Input validation logic
+- Layout calculation algorithm
+- Multi-language support (i18n)
 
-**バックエンド:**
-- 各サービスの個別機能（Vitest）
-- API エンドポイントハンドラー（Hono）
-- 重要度計算アルゴリズム
-- データベースクエリ（AWS SDK Mock）
-- エラーハンドリングパス
+**Backend:**
+- Individual service functions (Vitest)
+- API endpoint handlers (Hono)
+- Importance calculation algorithm
+- Database queries (AWS SDK Mock)
+- Error handling paths
 
-**カバレッジ目標:** 60%以上
+**Coverage Goal:** 60% or higher
 
-### プロパティベーステスト
+### Property-Based Testing
 
-**テストフレームワーク:** fast-check（TypeScript用プロパティベーステストライブラリ）
+**Test Framework:** fast-check (property-based testing library for TypeScript)
 
-**設定:**
-- 各プロパティテストは最低100回の反復を実行
-- 各テストは設計書の正確性プロパティを明示的に参照
-- タグ形式: `**Feature: myrsspress, Property {number}: {property_text}**`
+**Configuration:**
+- Each property test runs minimum 100 iterations
+- Each test explicitly references correctness properties from design document
+- Tag format: `**Feature: myrsspress, Property {number}: {property_text}**`
 
-**テスト対象プロパティ:**
-1. 入力検証（プロパティ1, 2）
-2. AI提案生成（プロパティ3, 4）
-3. フィード選択（プロパティ5, 6, 7）
-4. 記事取得とフィルタリング（プロパティ8, 9）
-5. 重要度計算（プロパティ10, 11, 12）
-6. レイアウト生成（プロパティ13, 14, 15）
-7. 新聞保存機能（プロパティ16）
-8. 公開新聞の並び替え（プロパティ17）
-9. 多言語対応（プロパティ18）
+**Properties to Test:**
+1. Input validation (Properties 1, 2)
+2. AI suggestion generation (Properties 3, 4)
+3. Feed selection (Properties 5, 6, 7)
+4. Article fetching and filtering (Properties 8, 9)
+5. Importance calculation (Properties 10, 11, 12)
+6. Layout generation (Properties 13, 14, 15)
+7. Newspaper save functionality (Property 16)
+8. Public newspaper sorting (Property 17)
+9. Multi-language support (Property 18)
 
-**ジェネレーター戦略:**
+**Generator Strategy:**
 ```typescript
 import * as fc from 'fast-check';
 
-// テーマキーワード用
+// For theme keywords
 fc.string({ minLength: 1 });
 
-// フィードURL用
+// For feed URLs
 fc.array(fc.webUrl(), { minLength: 1, maxLength: 10 });
 
-// 記事構造体用
+// For article structures
 fc.record({
   title: fc.string({ minLength: 1 }),
   description: fc.string(),
@@ -1949,38 +1951,38 @@ fc.record({
 });
 ```
 
-### 統合テスト
+### Integration Tests
 
-- API統合：Bedrock、RSSフィード、DynamoDB
-- Lambda関数のローカルテスト（Honoローカルサーバー）
-- バックエンドサービス間の連携テスト
+- API integration: Bedrock, RSS feeds, DynamoDB
+- Local Lambda function testing (Hono local server)
+- Backend service interaction tests
 
-### E2Eテスト（Playwright）
+### E2E Tests (Playwright)
 
-**テストシナリオ:**
-- 新聞作成フロー：テーマ入力 → フィード提案 → 選択 → 生成 → 保存
-- 手動フィード追加と削除
-- 新聞設定の保存
-- 人気の新聞の閲覧と並び替え
-- レスポンシブデザインの動作確認
-- 多言語対応の切り替え
+**Test Scenarios:**
+- Newspaper creation flow: Theme input → Feed suggestions → Selection → Generation → Save
+- Manual feed addition and deletion
+- Newspaper settings save
+- Popular newspapers browsing and sorting
+- Responsive design verification
+- Multi-language switching
 
-**テスト構成:**
-- Page Object Modelパターンを使用
-- 複数ブラウザでテスト（Chrome、Firefox、Safari）
-- モバイルデバイスのエミュレーション
+**Test Structure:**
+- Use Page Object Model pattern
+- Test on multiple browsers (Chrome, Firefox, Safari)
+- Mobile device emulation
 
-### パフォーマンステスト
+### Performance Tests
 
-- 5秒以内の新聞生成時間を測定
-- 複数フィードの並行取得を検証
+- Measure newspaper generation time within 5 seconds
+- Verify parallel fetching of multiple feeds
 
-### テスト実行
+### Test Execution
 
-すべてのテストはMakefileコマンドからアクセス可能：
+All tests accessible from Makefile commands:
 ```makefile
-test:           # すべてのテストを実行
-test-unit:      # ユニットテストのみ
-test-property:  # プロパティベーステストのみ
-test-integration: # 統合テストのみ
+test:           # Run all tests
+test-unit:      # Unit tests only
+test-property:  # Property-based tests only
+test-integration: # Integration tests only
 ```

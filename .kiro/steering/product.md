@@ -92,11 +92,12 @@ MyRSSPress is a web application that transforms RSS feeds into visually appealin
 - **Fallback**: Calculate from title length and image presence if Bedrock fails
 
 **Layout:**
-- **Lead article**: Highest importance article (displayed large)
-  - Prioritize articles with images
-  - Achieve true randomness with Fisher-Yates shuffle
-- **Top stories**: Next important articles (3 columns)
-- **Others**: Remaining articles (2 columns)
+- **Lead article**: Displayed large in main area
+  - **Priority 1**: Articles with images (highest importance among them)
+  - **Priority 2**: If no images, highest importance article overall
+  - Visual appeal is maximized by prioritizing images for main display
+- **Top stories**: Next important articles by importance score (3 columns)
+- **Others**: Remaining articles by importance score (2 columns)
 
 **Performance:**
 - Target: Within 5 seconds

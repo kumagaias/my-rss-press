@@ -17,6 +17,13 @@ export interface LayoutGrid {
  * - 5-8 articles: Lead (1) + Top Stories (3) + Remaining
  * - 9+ articles: Lead (1) + Top Stories (4) + Remaining
  * 
+ * Priority for lead article:
+ * 1. Articles with images are prioritized for lead position
+ * 2. Among articles with images, highest importance wins
+ * 3. If no images, highest importance wins
+ * 
+ * Top stories and remaining articles follow normal importance order.
+ * 
  * @param articles - Array of articles with importance scores
  * @returns Layout grid with categorized articles
  */
@@ -25,31 +32,40 @@ export function calculateLayout(articles: Article[]): LayoutGrid {
     throw new Error('Cannot calculate layout for empty article list');
   }
 
-  // Sort articles by importance (descending)
-  const sorted = [...articles].sort((a, b) => b.importance - a.importance);
-  const totalArticles = sorted.length;
+  // Sort all articles by importance (descending)
+  const sortedByImportance = [...articles].sort((a, b) => b.importance - a.importance);
+
+  // Find the best lead article (prioritize images)
+  const articlesWithImages = sortedByImportance.filter(a => a.imageUrl);
+  const lead = articlesWithImages.length > 0 
+    ? articlesWithImages[0]  // Highest importance article with image
+    : sortedByImportance[0];  // Highest importance article overall
+
+  // Remove lead from sorted list to get remaining articles
+  const remainingArticles = sortedByImportance.filter(a => a !== lead);
+  const totalArticles = articles.length;
 
   // Layout logic based on article count
   if (totalArticles <= 4) {
     // Few articles (1-4): Display all prominently
     return {
-      lead: sorted[0],
-      topStories: sorted.slice(1),
+      lead,
+      topStories: remainingArticles,
       remaining: [],
     };
   } else if (totalArticles <= 8) {
     // Medium article count (5-8): Lead + 3 top stories + remaining
     return {
-      lead: sorted[0],
-      topStories: sorted.slice(1, 4),
-      remaining: sorted.slice(4),
+      lead,
+      topStories: remainingArticles.slice(0, 3),
+      remaining: remainingArticles.slice(3),
     };
   } else {
     // Many articles (9+): Lead + 4 top stories + remaining
     return {
-      lead: sorted[0],
-      topStories: sorted.slice(1, 5),
-      remaining: sorted.slice(5),
+      lead,
+      topStories: remainingArticles.slice(0, 4),
+      remaining: remainingArticles.slice(4),
     };
   }
 }

@@ -13,13 +13,14 @@ const articleArbitrary = fc.record({
 });
 
 // Helper function to create mock articles
-function createMockArticle(importance: number, title: string): Article {
+function createMockArticle(importance: number, title: string, imageUrl?: string): Article {
   return {
     title,
     description: `Description for ${title}`,
     link: `https://example.com/${title.toLowerCase().replace(/\s+/g, '-')}`,
     pubDate: new Date(),
     importance,
+    imageUrl,
   };
 }
 
@@ -127,6 +128,56 @@ describe('calculateLayout', () => {
     expect(layout.remaining).toHaveLength(1);
     expect(validateLayout(articles, layout)).toBe(true);
   });
+
+  it('should prioritize articles with images for lead position only', () => {
+    const articles = [
+      createMockArticle(90, 'High importance, no image'),
+      createMockArticle(85, 'Medium importance, with image', 'https://example.com/image.jpg'),
+      createMockArticle(80, 'Lower importance, no image'),
+    ];
+
+    const layout = calculateLayout(articles);
+
+    // Lead should be the article with image (85) instead of highest importance (90)
+    expect(layout.lead.title).toBe('Medium importance, with image');
+    expect(layout.lead.imageUrl).toBe('https://example.com/image.jpg');
+    // Top stories should follow normal importance order
+    expect(layout.topStories[0].title).toBe('High importance, no image');
+    expect(layout.topStories[0].importance).toBe(90);
+  });
+
+  it('should use highest importance for lead when no images available', () => {
+    const articles = [
+      createMockArticle(90, 'High importance, no image'),
+      createMockArticle(85, 'Medium importance, no image'),
+      createMockArticle(80, 'Lower importance, no image'),
+    ];
+
+    const layout = calculateLayout(articles);
+
+    // Lead should be highest importance when no images
+    expect(layout.lead.title).toBe('High importance, no image');
+    expect(layout.lead.importance).toBe(90);
+  });
+
+  it('should prioritize highest importance among articles with images for lead', () => {
+    const articles = [
+      createMockArticle(90, 'Highest, no image'),
+      createMockArticle(85, 'High with image', 'https://example.com/image1.jpg'),
+      createMockArticle(80, 'Medium with image', 'https://example.com/image2.jpg'),
+      createMockArticle(75, 'Lower, no image'),
+    ];
+
+    const layout = calculateLayout(articles);
+
+    // Lead should be the highest importance article with image (85)
+    expect(layout.lead.title).toBe('High with image');
+    expect(layout.lead.importance).toBe(85);
+    expect(layout.lead.imageUrl).toBe('https://example.com/image1.jpg');
+    // Top stories should include the highest importance article without image
+    expect(layout.topStories[0].title).toBe('Highest, no image');
+    expect(layout.topStories[0].importance).toBe(90);
+  });
 });
 
 describe('validateLayout', () => {
@@ -193,14 +244,23 @@ describe('calculateLayout - Property-Based Tests', () => {
     );
   });
 
-  it('Property: Lead article must have highest importance (Maximum)', () => {
+  it('Property: Lead article must have highest importance OR be highest importance with image (Image Priority)', () => {
     fc.assert(
       fc.property(
         fc.array(articleArbitrary, { minLength: 1, maxLength: 100 }),
         (articles) => {
           const layout = calculateLayout(articles);
-          const maxImportance = Math.max(...articles.map(a => a.importance));
-          return layout.lead.importance === maxImportance;
+          const articlesWithImages = articles.filter(a => a.imageUrl);
+          
+          if (articlesWithImages.length > 0) {
+            // If images exist, lead should be highest importance article with image
+            const maxImportanceWithImage = Math.max(...articlesWithImages.map(a => a.importance));
+            return layout.lead.importance === maxImportanceWithImage && layout.lead.imageUrl;
+          } else {
+            // If no images, lead should be highest importance overall
+            const maxImportance = Math.max(...articles.map(a => a.importance));
+            return layout.lead.importance === maxImportance;
+          }
         }
       ),
       { numRuns: 100 }

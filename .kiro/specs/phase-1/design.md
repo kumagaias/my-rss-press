@@ -561,31 +561,40 @@ interface NewspaperSettings {
 **Layout Algorithm (dynamically changes based on article count):**
 ```typescript
 function calculateLayout(articles: Article[]): LayoutGrid {
-  // Sort by importance (descending)
-  const sorted = [...articles].sort((a, b) => b.importance - a.importance);
-  const totalArticles = sorted.length;
+  // Sort all articles by importance (descending)
+  const sortedByImportance = [...articles].sort((a, b) => b.importance - a.importance);
+
+  // Find the best lead article (prioritize images for main area)
+  const articlesWithImages = sortedByImportance.filter(a => a.imageUrl);
+  const lead = articlesWithImages.length > 0 
+    ? articlesWithImages[0]  // Highest importance article with image
+    : sortedByImportance[0];  // Highest importance article overall
+
+  // Remove lead from sorted list to get remaining articles
+  const remainingArticles = sortedByImportance.filter(a => a !== lead);
+  const totalArticles = articles.length;
   
   // Adjust layout based on article count
   if (totalArticles <= 4) {
     // Few articles (1-4): Display all large
     return {
-      lead: sorted[0],
-      topStories: sorted.slice(1),
+      lead,
+      topStories: remainingArticles,
       remaining: [],
     };
   } else if (totalArticles <= 8) {
     // Medium articles (5-8): Lead 1 + Top 3 + Remaining
     return {
-      lead: sorted[0],
-      topStories: sorted.slice(1, 4),
-      remaining: sorted.slice(4),
+      lead,
+      topStories: remainingArticles.slice(0, 3),
+      remaining: remainingArticles.slice(3),
     };
   } else {
     // Many articles (9+): Lead 1 + Top 4 + Remaining
     return {
-      lead: sorted[0],
-      topStories: sorted.slice(1, 5),
-      remaining: sorted.slice(5),
+      lead,
+      topStories: remainingArticles.slice(0, 4),
+      remaining: remainingArticles.slice(4),
     };
   }
 }
@@ -1686,8 +1695,12 @@ interface LayoutCell {
 *For any* laid-out article set, articles with higher importance should have larger font sizes
 **Verifies: Requirement 6.3**
 
-### Property 15: Importance-Position Correlation
-*For any* laid-out article set, articles with higher importance should be placed in more prominent positions (top, left)
+### Property 15: Lead Article Image Priority
+*For any* laid-out article set, the lead article (most prominent position) should be the highest importance article with an image if images exist, otherwise the highest importance article overall
+**Verifies: Requirement 6.4**
+
+### Property 15b: Importance-Position Correlation (Non-Lead)
+*For any* laid-out article set excluding the lead, articles with higher importance should be placed in more prominent positions (top stories before remaining articles)
 **Verifies: Requirement 6.4**
 
 ### Property 16: Newspaper Save Completeness

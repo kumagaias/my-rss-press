@@ -80,198 +80,198 @@ This document defines requirements for future extensions of MyRSSPress. These fe
 5. When a user is logged in, the MyRSSPress system MUST automatically associate creator information when saving newspapers
 6. When a user logs out, the MyRSSPress system MUST terminate the session
 
-### 要件6: 新聞のテーマ（スキン）選択
+### Requirement 6: Newspaper Theme (Skin) Selection
 
-**ユーザーストーリー:** ユーザーとして、新聞の見た目（テーマ/スキン）を選択したい。そうすることで、好みのデザインで新聞を楽しめる。
+**User Story:** As a user, I want to select the appearance (theme/skin) of my newspaper, so that I can enjoy newspapers in my preferred design.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. 新聞設定モーダルを表示するとき、MyRSSPressシステムはテーマ選択オプションを含めなければならない
-2. テーマ選択オプションを表示するとき、MyRSSPressシステムは以下のテーマを提供しなければならない：
-   - クラシック（デフォルト）：伝統的な新聞スタイル
-   - モダン：現代的でクリーンなデザイン
-   - ダーク：ダークモードスタイル
-   - ビンテージ：レトロな新聞スタイル
-3. 各テーマオプションを表示するとき、MyRSSPressシステムはプレビュー画像を含めなければならない
-4. ユーザーがテーマを選択したとき、MyRSSPressシステムは新聞のスタイルを即座に更新しなければならない
-5. 新聞を保存するとき、MyRSSPressシステムは選択されたテーマを新聞メタデータに含めなければならない
-6. 保存された新聞を表示するとき、MyRSSPressシステムは保存されたテーマを適用しなければならない
+1. When displaying the newspaper settings modal, the MyRSSPress system MUST include theme selection options
+2. When displaying theme selection options, the MyRSSPress system MUST provide the following themes:
+   - Classic (default): Traditional newspaper style
+   - Modern: Contemporary and clean design
+   - Dark: Dark mode style
+   - Vintage: Retro newspaper style
+3. When displaying each theme option, the MyRSSPress system MUST include a preview image
+4. When a user selects a theme, the MyRSSPress system MUST immediately update the newspaper style
+5. When saving a newspaper, the MyRSSPress system MUST include the selected theme in newspaper metadata
+6. When displaying a saved newspaper, the MyRSSPress system MUST apply the saved theme
 
-### 要件7: 記事数の調整
+### Requirement 7: Article Count Adjustment
 
-**ユーザーストーリー:** ユーザーとして、新聞に表示する記事数を調整したい。そうすることで、読む時間に合わせて新聞のボリュームを変更できる。
+**User Story:** As a user, I want to adjust the number of articles displayed in the newspaper, so that I can change the newspaper volume according to my reading time.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. 新聞生成前の設定画面を表示するとき、MyRSSPressシステムは記事数選択オプションを含めなければならない
-2. 記事数選択オプションを表示するとき、MyRSSPressシステムは5から20の範囲でスライダーまたはドロップダウンを提供しなければならない
-3. デフォルト値を設定するとき、MyRSSPressシステムは10記事を初期値として設定しなければならない
-4. ユーザーが記事数を変更したとき、MyRSSPressシステムは選択された数の記事を取得しなければならない
-5. 記事数が選択された数より少ないとき、MyRSSPressシステムは取得できたすべての記事を表示しなければならない
-6. 新聞を保存するとき、MyRSSPressシステムは選択された記事数を新聞メタデータに含めなければならない
+1. When displaying the pre-generation settings screen, the MyRSSPress system MUST include article count selection options
+2. When displaying article count selection options, the MyRSSPress system MUST provide a slider or dropdown in the range of 5 to 20
+3. When setting default values, the MyRSSPress system MUST set 10 articles as the initial value
+4. When a user changes the article count, the MyRSSPress system MUST fetch the selected number of articles
+5. When the article count is less than the selected number, the MyRSSPress system MUST display all fetched articles
+6. When saving a newspaper, the MyRSSPress system MUST include the selected article count in newspaper metadata
 
-### 要件8: ページ数の調整
+### Requirement 8: Page Count Adjustment
 
-**ユーザーストーリー:** ユーザーとして、新聞のページ数を調整したい。そうすることで、より多くの記事を複数ページに分けて表示できる。
+**User Story:** As a user, I want to adjust the number of pages in the newspaper, so that I can display more articles across multiple pages.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. 新聞生成前の設定画面を表示するとき、MyRSSPressシステムはページ数選択オプションを含めなければならない
-2. ページ数選択オプションを表示するとき、MyRSSPressシステムは1から4の範囲で選択肢を提供しなければならない
-3. デフォルト値を設定するとき、MyRSSPressシステムは1ページを初期値として設定しなければならない
-4. ユーザーがページ数を選択したとき、MyRSSPressシステムは記事を均等に各ページに配分しなければならない
-5. 複数ページの新聞を表示するとき、MyRSSPressシステムはページナビゲーション（前へ/次へボタン）を提供しなければならない
-6. ユーザーがページを切り替えたとき、MyRSSPressシステムは選択されたページの記事を表示しなければならない
-7. 新聞を保存するとき、MyRSSPressシステムは選択されたページ数を新聞メタデータに含めなければならない
-8. 各ページを表示するとき、MyRSSPressシステムは現在のページ番号と総ページ数を表示しなければならない
+1. When displaying the pre-generation settings screen, the MyRSSPress system MUST include page count selection options
+2. When displaying page count selection options, the MyRSSPress system MUST provide choices in the range of 1 to 4
+3. When setting default values, the MyRSSPress system MUST set 1 page as the initial value
+4. When a user selects page count, the MyRSSPress system MUST distribute articles evenly across each page
+5. When displaying a multi-page newspaper, the MyRSSPress system MUST provide page navigation (previous/next buttons)
+6. When a user switches pages, the MyRSSPress system MUST display articles for the selected page
+7. When saving a newspaper, the MyRSSPress system MUST include the selected page count in newspaper metadata
+8. When displaying each page, the MyRSSPress system MUST display the current page number and total page count
 
-### 要件9: 環境分離（Development/Staging）
+### Requirement 9: Environment Separation (Development/Staging)
 
-**ユーザーストーリー:** 開発者として、本番環境に影響を与えずに新機能をテストしたい。そうすることで、安全に開発とデプロイができる。
+**User Story:** As a developer, I want to test new features without affecting the production environment, so that I can develop and deploy safely.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. インフラストラクチャを構築するとき、MyRSSPressシステムはdevelopment環境を提供しなければならない
-2. インフラストラクチャを構築するとき、MyRSSPressシステムはstaging環境を提供しなければならない
-3. 各環境を構築するとき、MyRSSPressシステムは独立したAWSリソースを作成しなければならない
-4. 環境を切り替えるとき、MyRSSPressシステムは環境固有の設定を使用しなければならない
-5. コードをデプロイするとき、MyRSSPressシステムは以下のフローに従わなければならない：
-   - developブランチ → development環境
-   - stagingブランチ → staging環境
-   - mainブランチ → production環境
+1. When building infrastructure, the MyRSSPress system MUST provide a development environment
+2. When building infrastructure, the MyRSSPress system MUST provide a staging environment
+3. When building each environment, the MyRSSPress system MUST create independent AWS resources
+4. When switching environments, the MyRSSPress system MUST use environment-specific configurations
+5. When deploying code, the MyRSSPress system MUST follow this flow:
+   - develop branch → development environment
+   - staging branch → staging environment
+   - main branch → production environment
 
-## 設計上の考慮事項
+## Design Considerations
 
-これらの機能を将来実装する際に備えて、現在の設計では以下の点を考慮する必要があります：
+To prepare for future implementation of these features, the current design should consider the following points:
 
-1. **データモデル**: 新聞テンプレートと新聞発行版を分離
+1. **Data Model**: Separate newspaper templates and newspaper issues
 
-   **NewspaperTemplate（新聞テンプレート）**:
-   - `templateId`: テンプレートID（UUID）
-   - `userId`: 作成者のユーザーID（Cognito Sub）
-   - `name`: 新聞名
-   - `feedUrls`: RSSフィードURLリスト
-   - `theme`: 選択されたテーマ/スキン
-   - `articleCount`: 記事数
-   - `pageCount`: ページ数
-   - `isPublic`: 公開/非公開フラグ
-   - `autoPublish`: 自動発行の有効/無効フラグ
-   - `enableSummary`: 要約機能の有効/無効フラグ
-   - `createdAt`: テンプレート作成日時
-   - `updatedAt`: テンプレート更新日時
+   **NewspaperTemplate**:
+   - `templateId`: Template ID (UUID)
+   - `userId`: Creator's user ID (Cognito Sub)
+   - `name`: Newspaper name
+   - `feedUrls`: RSS feed URL list
+   - `theme`: Selected theme/skin
+   - `articleCount`: Article count
+   - `pageCount`: Page count
+   - `isPublic`: Public/private flag
+   - `autoPublish`: Auto-publish enable/disable flag
+   - `enableSummary`: Summary feature enable/disable flag
+   - `createdAt`: Template creation datetime
+   - `updatedAt`: Template update datetime
    
-   **NewspaperIssue（新聞発行版）**:
-   - `issueId`: 発行版ID（UUID）
-   - `templateId`: 元のテンプレートID
-   - `publishDate`: 発行日（YYYY-MM-DD形式）
-   - `articles`: 記事データ（JSON配列）
-   - `createdAt`: 発行日時
-   - `viewCount`: 閲覧数
+   **NewspaperIssue**:
+   - `issueId`: Issue ID (UUID)
+   - `templateId`: Original template ID
+   - `publishDate`: Publication date (YYYY-MM-DD format)
+   - `articles`: Article data (JSON array)
+   - `createdAt`: Publication datetime
+   - `viewCount`: View count
    
-   **DynamoDBテーブル設計**:
+   **DynamoDB Table Design**:
    
-   **NewspaperTemplatesテーブル**:
+   **NewspaperTemplates Table**:
    - PK: `TEMPLATE#{templateId}`
    - SK: `METADATA`
-   - 属性: 上記のNewspaperTemplateフィールド
-   - GSI: `UserTemplates`（ユーザーのテンプレート一覧取得用）
+   - Attributes: NewspaperTemplate fields above
+   - GSI: `UserTemplates` (for retrieving user's template list)
      - PK: `USER#{userId}`
      - SK: `CREATED#{createdAt}#{templateId}`
    
-   **NewspaperIssuesテーブル**:
+   **NewspaperIssues Table**:
    - PK: `TEMPLATE#{templateId}`
    - SK: `ISSUE#{publishDate}`
-   - 属性: 上記のNewspaperIssueフィールド
-   - GSI: `PublicIssues`（公開新聞の発行版一覧取得用）
+   - Attributes: NewspaperIssue fields above
+   - GSI: `PublicIssues` (for retrieving public newspaper issue list)
      - PK: `PUBLIC`
      - SK: `PUBLISHED#{publishDate}#{issueId}`
    
-   記事エンティティに以下のフィールドを追加：
-   - `summary`: AI生成された要約テキスト
+   Add the following field to article entity:
+   - `summary`: AI-generated summary text
    
-   **ReadArticle（既読記事）**:
-   - `userId`: ユーザーID（Cognito Sub）
-   - `articleUrl`: 記事URL
-   - `readAt`: 既読日時（ISO 8601）
+   **ReadArticle**:
+   - `userId`: User ID (Cognito Sub)
+   - `articleUrl`: Article URL
+   - `readAt`: Read datetime (ISO 8601)
    
-   **DynamoDBテーブル設計（既読記事）**:
+   **DynamoDB Table Design (Read Articles)**:
    
-   **ReadArticlesテーブル**:
+   **ReadArticles Table**:
    - PK: `USER#{userId}`
    - SK: `ARTICLE#{articleUrl}`
-   - 属性: `userId`, `articleUrl`, `readAt`
-   - TTL: 90日後に自動削除（古い既読記事を削除）
+   - Attributes: `userId`, `articleUrl`, `readAt`
+   - TTL: Auto-delete after 90 days (remove old read articles)
    
-   **アクセスパターン**:
-   - テンプレート取得: `GetItem(PK=TEMPLATE#{templateId}, SK=METADATA)`
-   - ユーザーのテンプレート一覧: `Query(GSI=UserTemplates, PK=USER#{userId})`
-   - 特定日の発行版取得: `GetItem(PK=TEMPLATE#{templateId}, SK=ISSUE#{publishDate})`
-   - テンプレートの全発行版取得: `Query(PK=TEMPLATE#{templateId}, SK begins_with ISSUE#)`
-   - 最新の発行版取得: `Query(PK=TEMPLATE#{templateId}, SK begins_with ISSUE#, ScanIndexForward=false, Limit=1)`
-   - 公開新聞の発行版一覧: `Query(GSI=PublicIssues, PK=PUBLIC)`
+   **Access Patterns**:
+   - Get template: `GetItem(PK=TEMPLATE#{templateId}, SK=METADATA)`
+   - User's template list: `Query(GSI=UserTemplates, PK=USER#{userId})`
+   - Get specific date issue: `GetItem(PK=TEMPLATE#{templateId}, SK=ISSUE#{publishDate})`
+   - Get all template issues: `Query(PK=TEMPLATE#{templateId}, SK begins_with ISSUE#)`
+   - Get latest issue: `Query(PK=TEMPLATE#{templateId}, SK begins_with ISSUE#, ScanIndexForward=false, Limit=1)`
+   - Public newspaper issue list: `Query(GSI=PublicIssues, PK=PUBLIC)`
 
-2. **認証**: AWS Cognitoを使用したユーザー認証
-   - ユーザープール設定
-   - Google OAuth統合
-   - JWTトークン検証
+2. **Authentication**: User authentication using AWS Cognito
+   - User pool configuration
+   - Google OAuth integration
+   - JWT token validation
 
-3. **アクセス制御**: 新聞の閲覧権限をチェックするロジック
-   - 公開新聞：すべてのユーザーが閲覧可能
-   - 非公開新聞：作成者のみ閲覧可能
+3. **Access Control**: Logic to check newspaper viewing permissions
+   - Public newspapers: Viewable by all users
+   - Private newspapers: Viewable only by creator
 
-4. **UI/UX**: 拡張可能なコンポーネント設計
-   - 公開/非公開設定UI
-   - テーマ選択UI
-   - 記事数・ページ数調整UI
-   - ページナビゲーション
-   - 自動発行設定UI
-   - 要約表示UI
-   - 固有URL表示とコピー機能
-   - 発行版履歴表示UI（カレンダービューまたはリスト）
-   - 発行日選択UI
-   - テンプレート/発行版の区別表示
+4. **UI/UX**: Extensible component design
+   - Public/private settings UI
+   - Theme selection UI
+   - Article count/page count adjustment UI
+   - Page navigation
+   - Auto-publish settings UI
+   - Summary display UI
+   - Unique URL display and copy functionality
+   - Issue history display UI (calendar view or list)
+   - Publication date selection UI
+   - Template/issue distinction display
 
-5. **API設計**: 拡張可能なエンドポイント
-   - 認証が必要なエンドポイント（Authorization ヘッダー）
+5. **API Design**: Extensible endpoints
+   - Endpoints requiring authentication (Authorization header)
    
-   **テンプレート管理**:
-   - `POST /templates` - 新聞テンプレート作成
-   - `GET /templates/{templateId}` - テンプレート取得
-   - `PUT /templates/{templateId}` - テンプレート更新
-   - `DELETE /templates/{templateId}` - テンプレート削除
-   - `GET /users/{userId}/templates` - ユーザーのテンプレート一覧
+   **Template Management**:
+   - `POST /templates` - Create newspaper template
+   - `GET /templates/{templateId}` - Get template
+   - `PUT /templates/{templateId}` - Update template
+   - `DELETE /templates/{templateId}` - Delete template
+   - `GET /users/{userId}/templates` - User's template list
    
-   **発行版管理**:
-   - `GET /templates/{templateId}/latest` - 最新の発行版取得（存在しない場合は生成）
-   - `GET /templates/{templateId}/issues/{date}` - 特定日の発行版取得
-   - `GET /templates/{templateId}/issues` - テンプレートの全発行版一覧
-   - `POST /templates/{templateId}/issues` - 手動で発行版を生成
+   **Issue Management**:
+   - `GET /templates/{templateId}/latest` - Get latest issue (generate if not exists)
+   - `GET /templates/{templateId}/issues/{date}` - Get specific date issue
+   - `GET /templates/{templateId}/issues` - All template issues list
+   - `POST /templates/{templateId}/issues` - Manually generate issue
    
-   **既読記事管理**:
-   - `POST /users/{userId}/read-articles` - 既読記事を記録
-   - `GET /users/{userId}/read-articles` - ユーザーの既読記事一覧取得
-   - `DELETE /users/{userId}/read-articles/{articleUrl}` - 既読記事を削除（未読に戻す）
+   **Read Article Management**:
+   - `POST /users/{userId}/read-articles` - Record read article
+   - `GET /users/{userId}/read-articles` - Get user's read articles list
+   - `DELETE /users/{userId}/read-articles/{articleUrl}` - Delete read article (mark as unread)
    
-   **その他**:
-   - 記事要約生成（Bedrock統合）
-   - ブックマークの管理
+   **Other**:
+   - Article summary generation (Bedrock integration)
+   - Bookmark management
 
-6. **インフラストラクチャ**: 
-   - Terraformモジュールは環境を追加しやすい構造
-   - Cognitoユーザープールとアプリクライアント
-   - Google OAuth設定
+6. **Infrastructure**: 
+   - Terraform modules structured for easy environment addition
+   - Cognito user pool and app client
+   - Google OAuth configuration
 
-7. **環境変数**: 環境ごとに異なる設定
+7. **Environment Variables**: Different settings per environment
    - Cognito User Pool ID
    - Cognito App Client ID
    - Google OAuth Client ID/Secret
-   - Bedrock Model ID（要約用）
-   - 要約生成のタイムアウト設定
+   - Bedrock Model ID (for summaries)
+   - Summary generation timeout settings
 
-8. **パフォーマンス**: 要約生成の最適化
-   - 複数記事の要約を並行処理
-   - 要約キャッシュの検討（同じ記事の再要約を避ける）
-   - タイムアウト設定（記事あたり3秒以内）
+8. **Performance**: Summary generation optimization
+   - Parallel processing for multiple article summaries
+   - Consider summary caching (avoid re-summarizing same articles)
+   - Timeout settings (within 3 seconds per article)
 
 
 ### 要件10: 新聞の自動発行（定期更新）

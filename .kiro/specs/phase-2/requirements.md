@@ -1,14 +1,14 @@
-# 要件定義書（将来の拡張機能）
+# Requirements Document (Future Extensions)
 
-## はじめに
+## Introduction
 
-このドキュメントは、MyRSSPressの将来の拡張機能に関する要件を定義します。これらの機能は現在の実装には含まれませんが、設計時に考慮し、将来的な実装を容易にするためのアーキテクチャを準備します。
+This document defines requirements for future extensions of MyRSSPress. These features are not included in the current implementation, but the architecture should be prepared to facilitate future implementation.
 
-## 用語集
+## Glossary
 
-- **プライバシー設定**: 新聞の公開/非公開を制御する設定
-- **非公開新聞**: 作成者のみが閲覧できる新聞
-- **公開新聞**: すべてのユーザーが閲覧できる新聞
+- **Privacy Settings**: Settings to control public/private status of newspapers
+- **Private Newspaper**: Newspaper viewable only by creator
+- **Public Newspaper**: Newspaper viewable by all users
 
 ## 要件
 

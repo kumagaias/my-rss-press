@@ -1,724 +1,724 @@
-# 実装タスクリスト MVP
+# Implementation Task List MVP
 
-## 概要
+## Overview
 
-このタスクリストは、requirements.mdとdesign.mdに基づいて、MyRSSPress MVPを実装するための具体的なタスクを定義します。各タスクには受け入れ条件が含まれており、タスク完了の判断基準を明確にしています。
+This task list defines specific tasks for implementing MyRSSPress MVP based on requirements.md and design.md. Each task includes acceptance criteria to clarify completion standards.
 
-## タスク実行の原則
+## Task Execution Principles
 
-1. **順序を守る**: タスクは番号順に実行すること
-2. **受け入れ条件を確認**: 各タスクの受け入れ条件をすべて満たすこと
-3. **テストを実行**: タスク完了後は必ず`make test`を実行すること
-4. **デプロイして確認**: デプロイ可能なタイミングで本番環境にデプロイして動作確認すること
-5. **ブランチ運用**: `feat/task-X.X-<description>`ブランチで作業し、PRを作成してマージすること
+1. **Follow Order**: Execute tasks in numerical order
+2. **Verify Acceptance Criteria**: Meet all acceptance criteria for each task
+3. **Run Tests**: Always run `make test` after task completion
+4. **Deploy and Verify**: Deploy to production environment when possible and verify operation
+5. **Branch Management**: Work in `feat/task-X.X-<description>` branches, create PRs and merge
 
-## タスク一覧
+## Task List
 
-- [x] 1. プロジェクトセットアップとインフラ基盤
-- [x] 2. デザインシステムとUIコンポーネント
-- [x] 3. バックエンドAPI実装
-- [x] 4. フロントエンド実装
-- [x] 5. 統合とE2Eテスト
-- [x] 6. 最終デプロイと動作確認
+- [x] 1. Project Setup and Infrastructure Foundation
+- [x] 2. Design System and UI Components
+- [x] 3. Backend API Implementation
+- [x] 4. Frontend Implementation
+- [x] 5. Integration and E2E Testing
+- [x] 6. Final Deployment and Verification
 
 ---
 
-## 1. プロジェクトセットアップとインフラ基盤
+## 1. Project Setup and Infrastructure Foundation
 
-### 1.1 プロジェクト構造の作成
+### 1.1 Create Project Structure
 
-- [x] 1.1 プロジェクト構造の作成
-  - ルートディレクトリに`frontend/`, `backend/`, `infra/`ディレクトリを作成
-  - 各ディレクトリに基本的な設定ファイルを配置
-  - **受け入れ条件:**
-    - [ ] `frontend/`, `backend/`, `infra/`ディレクトリが存在する
-    - [ ] `.gitignore`が適切に設定されている
-    - [ ] `README.md`が作成されている（英語、200行以内）
-  - _Requirements: 全般_
+- [x] 1.1 Create Project Structure
+  - Create `frontend/`, `backend/`, `infra/` directories in root
+  - Place basic configuration files in each directory
+  - **Acceptance Criteria:**
+    - [ ] `frontend/`, `backend/`, `infra/` directories exist
+    - [ ] `.gitignore` is properly configured
+    - [ ] `README.md` is created (English, within 200 lines)
+  - _Requirements: General_
 
-### 1.2 Makefileの作成
+### 1.2 Create Makefile
 
-- [x] 1.2 Makefileの作成
-  - プロジェクトルートに`Makefile`を作成
-  - `test`, `test-unit`, `test-security`, `install`, `clean`, `help`コマンドを実装
-  - **受け入れ条件:**
-    - [ ] `make help`でコマンド一覧が表示される
-    - [ ] `make install`で依存関係がインストールされる
-    - [ ] `make test`でテストが実行される
-  - _Requirements: 全般_
+- [x] 1.2 Create Makefile
+  - Create `Makefile` in project root
+  - Implement `test`, `test-unit`, `test-security`, `install`, `clean`, `help` commands
+  - **Acceptance Criteria:**
+    - [ ] `make help` displays command list
+    - [ ] `make install` installs dependencies
+    - [ ] `make test` runs tests
+  - _Requirements: General_
 
 
-### 1.3 バックエンドプロジェクトのセットアップ
+### 1.3 Backend Project Setup
 
-- [x] 1.3 バックエンドプロジェクトのセットアップ
-  - `backend/`ディレクトリにNode.js + TypeScriptプロジェクトを初期化
-  - Hono 4.x、TypeScript 5.9.x、Zod 3.xをインストール
-  - `tsconfig.json`を設定
-  - **受け入れ条件:**
-    - [ ] `backend/package.json`が作成されている
-    - [ ] `backend/tsconfig.json`が作成されている
-    - [ ] `npm install`が成功する
-    - [ ] TypeScriptのコンパイルが成功する
-  - _Requirements: 全般_
+- [x] 1.3 Backend Project Setup
+  - Initialize Node.js + TypeScript project in `backend/` directory
+  - Install Hono 4.x, TypeScript 5.9.x, Zod 3.x
+  - Configure `tsconfig.json`
+  - **Acceptance Criteria:**
+    - [ ] `backend/package.json` is created
+    - [ ] `backend/tsconfig.json` is created
+    - [ ] `npm install` succeeds
+    - [ ] TypeScript compilation succeeds
+  - _Requirements: General_
 
-- [x] 1.3.1 Honoアプリケーションの基本構造を作成
-  - `backend/src/app.ts`を作成
-  - CORSとロギングミドルウェアを設定
-  - `GET /api/health`エンドポイントを実装
-  - **受け入れ条件:**
-    - [ ] `backend/src/app.ts`が作成されている
-    - [ ] `npm run dev`でローカルサーバーが起動する（ポート3001）
-    - [ ] `curl http://localhost:3001/api/health`が`{"status":"ok"}`を返す
-    - [ ] CORSヘッダーが正しく設定されている
-  - _Requirements: 全般_
+- [x] 1.3.1 Create Basic Hono Application Structure
+  - Create `backend/src/app.ts`
+  - Configure CORS and logging middleware
+  - Implement `GET /api/health` endpoint
+  - **Acceptance Criteria:**
+    - [ ] `backend/src/app.ts` is created
+    - [ ] `npm run dev` starts local server (port 3001)
+    - [ ] `curl http://localhost:3001/api/health` returns `{"status":"ok"}`
+    - [ ] CORS headers are correctly configured
+  - _Requirements: General_
 
-- [x] 1.3.2 レート制限ミドルウェアを実装
-  - `backend/src/middleware/rateLimit.ts`を作成
-  - IPベースのレート制限を実装（100リクエスト/分）
-  - **受け入れ条件:**
-    - [ ] レート制限ミドルウェアが実装されている
-    - [ ] 制限を超えると429エラーが返される
-    - [ ] ユニットテストが通る
+- [x] 1.3.2 Implement Rate Limiting Middleware
+  - Create `backend/src/middleware/rateLimit.ts`
+  - Implement IP-based rate limiting (100 requests/minute)
+  - **Acceptance Criteria:**
+    - [ ] Rate limiting middleware is implemented
+    - [ ] Returns 429 error when limit exceeded
+    - [ ] Unit tests pass
   - _Requirements: 13.6_
 
 
-### 1.4 フロントエンドプロジェクトのセットアップ
+### 1.4 Frontend Project Setup
 
-- [x] 1.4 フロントエンドプロジェクトのセットアップ
-  - `frontend/`ディレクトリにNext.js 15.xプロジェクトを作成
-  - TailwindCSS 3.x、TypeScript 5.9.xを設定
-  - **受け入れ条件:**
-    - [ ] `frontend/package.json`が作成されている
-    - [ ] `npm run dev`で開発サーバーが起動する（ポート3000）
-    - [ ] `http://localhost:3000`にアクセスできる
-    - [ ] TailwindCSSが正しく動作する
-  - _Requirements: 全般_
+- [x] 1.4 Frontend Project Setup
+  - Create Next.js 15.x project in `frontend/` directory
+  - Configure TailwindCSS 3.x, TypeScript 5.9.x
+  - **Acceptance Criteria:**
+    - [ ] `frontend/package.json` is created
+    - [ ] `npm run dev` starts development server (port 3000)
+    - [ ] Can access `http://localhost:3000`
+    - [ ] TailwindCSS works correctly
+  - _Requirements: General_
 
-- [x] 1.4.1 多言語対応（i18n）のセットアップ
-  - `frontend/lib/i18n.ts`を作成
-  - 日本語と英語の翻訳ファイルを作成
-  - ブラウザ言語検出機能を実装
-  - **受け入れ条件:**
-    - [ ] `frontend/lib/i18n.ts`が作成されている
-    - [ ] 日本語と英語の翻訳が定義されている
-    - [ ] `detectLocale()`関数が正しく動作する
-    - [ ] ユニットテストが通る
+- [x] 1.4.1 Multi-language Support (i18n) Setup
+  - Create `frontend/lib/i18n.ts`
+  - Create Japanese and English translation files
+  - Implement browser language detection
+  - **Acceptance Criteria:**
+    - [ ] `frontend/lib/i18n.ts` is created
+    - [ ] Japanese and English translations are defined
+    - [ ] `detectLocale()` function works correctly
+    - [ ] Unit tests pass
   - _Requirements: 1.1, 1.2, 1.3_
 
-### 1.5 Terraformインフラのセットアップ
+### 1.5 Terraform Infrastructure Setup
 
-- [x] 1.5 Terraformインフラのセットアップ
-  - `infra/environments/production/`ディレクトリを作成
-  - `main.tf`, `variables.tf`, `outputs.tf`を作成
-  - **受け入れ条件:**
-    - [ ] Terraformファイルが作成されている
-    - [ ] `terraform init`が成功する
-    - [ ] `terraform validate`が成功する
-  - _Requirements: 全般_
+- [x] 1.5 Terraform Infrastructure Setup
+  - Create `infra/environments/production/` directory
+  - Create `main.tf`, `variables.tf`, `outputs.tf`
+  - **Acceptance Criteria:**
+    - [ ] Terraform files are created
+    - [ ] `terraform init` succeeds
+    - [ ] `terraform validate` succeeds
+  - _Requirements: General_
 
-- [x] 1.5.1 Route53ホストゾーンの作成
-  - `infra/modules/route53/`モジュールを作成
-  - `my-rss-press.com`のホストゾーンを作成
-  - **受け入れ条件:**
-    - [ ] Route53ホストゾーンが作成されている
-    - [ ] ネームサーバーが出力される
-    - [ ] XServerでネームサーバーを設定する手順が明確
-  - _Requirements: 全般_
+- [x] 1.5.1 Create Route53 Hosted Zone
+  - Create `infra/modules/route53/` module
+  - Create hosted zone for `my-rss-press.com`
+  - **Acceptance Criteria:**
+    - [ ] Route53 hosted zone is created
+    - [ ] Name servers are output
+    - [ ] Procedure for configuring name servers in XServer is clear
+  - _Requirements: General_
 
-- [x] 1.5.2 ACM証明書の作成
-  - `infra/modules/acm/`モジュールを作成
-  - `my-rss-press.com`と`*.my-rss-press.com`の証明書を作成
-  - DNS検証を設定
-  - **受け入れ条件:**
-    - [ ] ACM証明書が作成されている
-    - [ ] DNS検証レコードが自動作成される
-    - [ ] 証明書が検証済みステータスになる
-  - _Requirements: 全般_
+- [x] 1.5.2 Create ACM Certificate
+  - Create `infra/modules/acm/` module
+  - Create certificate for `my-rss-press.com` and `*.my-rss-press.com`
+  - Configure DNS validation
+  - **Acceptance Criteria:**
+    - [ ] ACM certificate is created
+    - [ ] DNS validation records are automatically created
+    - [ ] Certificate reaches validated status
+  - _Requirements: General_
 
 
-- [x] 1.5.3 DynamoDBテーブルの作成
-  - `infra/modules/dynamodb/`モジュールを作成
-  - Newspapersテーブルを作成（PK: NEWSPAPER#{id}, SK: METADATA）
-  - GSI: PublicNewspapers（人気順）とRecentNewspapers（新着順）を作成
-  - **受け入れ条件:**
-    - [ ] DynamoDBテーブルが作成されている
-    - [ ] GSIが正しく設定されている
-    - [ ] `terraform apply`が成功する
-  - _Requirements: 全般_
+- [x] 1.5.3 Create DynamoDB Table
+  - Create `infra/modules/dynamodb/` module
+  - Create Newspapers table (PK: NEWSPAPER#{id}, SK: METADATA)
+  - Create GSI: PublicNewspapers (by popularity) and RecentNewspapers (by recency)
+  - **Acceptance Criteria:**
+    - [ ] DynamoDB table is created
+    - [ ] GSI is correctly configured
+    - [ ] `terraform apply` succeeds
+  - _Requirements: General_
 
-- [x] 1.5.4 ECRリポジトリの作成
-  - `infra/modules/ecr/`モジュールを作成
-  - バックエンド用のECRリポジトリを作成
-  - **受け入れ条件:**
-    - [ ] ECRリポジトリが作成されている
-    - [ ] リポジトリURLが出力される
-  - _Requirements: 全般_
+- [x] 1.5.4 Create ECR Repository
+  - Create `infra/modules/ecr/` module
+  - Create ECR repository for backend
+  - **Acceptance Criteria:**
+    - [ ] ECR repository is created
+    - [ ] Repository URL is output
+  - _Requirements: General_
 
-- [x] 1.5.5 Lambda関数の作成
-  - `infra/modules/lambda/`モジュールを作成
-  - ECRイメージを使用するLambda関数を作成
-  - 環境変数（BEDROCK_REGION, DYNAMODB_TABLE）を設定
-  - **受け入れ条件:**
-    - [ ] Lambda関数が作成されている
-    - [ ] IAMロールが正しく設定されている
-    - [ ] 環境変数が設定されている
-  - _Requirements: 全般_
+- [x] 1.5.5 Create Lambda Function
+  - Create `infra/modules/lambda/` module
+  - Create Lambda function using ECR image
+  - Configure environment variables (BEDROCK_REGION, DYNAMODB_TABLE)
+  - **Acceptance Criteria:**
+    - [ ] Lambda function is created
+    - [ ] IAM role is correctly configured
+    - [ ] Environment variables are set
+  - _Requirements: General_
 
-- [x] 1.5.6 API Gatewayの作成
-  - `infra/modules/api-gateway/`モジュールを作成
-  - REST APIを作成
-  - Lambda統合を設定
-  - カスタムドメイン（api.my-rss-press.com）を設定
-  - **受け入れ条件:**
-    - [ ] API Gatewayが作成されている
-    - [ ] Lambda統合が動作する
-    - [ ] カスタムドメインが設定されている
-    - [ ] `https://api.my-rss-press.com/api/health`にアクセスできる
-  - _Requirements: 全般_
+- [x] 1.5.6 Create API Gateway
+  - Create `infra/modules/api-gateway/` module
+  - Create REST API
+  - Configure Lambda integration
+  - Configure custom domain (api.my-rss-press.com)
+  - **Acceptance Criteria:**
+    - [ ] API Gateway is created
+    - [ ] Lambda integration works
+    - [ ] Custom domain is configured
+    - [ ] Can access `https://api.my-rss-press.com/api/health`
+  - _Requirements: General_
 
-- [x] 1.5.7 Amplify Hostingの作成
-  - `infra/modules/amplify/`モジュールを作成
-  - GitHubリポジトリと連携
-  - カスタムドメイン（my-rss-press.com）を設定
-  - 環境変数（NEXT_PUBLIC_API_BASE_URL）を設定
-  - **受け入れ条件:**
-    - [ ] Amplify Hostingが作成されている
-    - [ ] GitHubリポジトリと連携されている
-    - [ ] カスタムドメインが設定されている
-    - [ ] 自動デプロイが動作する
-  - _Requirements: 全般_
+- [x] 1.5.7 Create Amplify Hosting
+  - Create `infra/modules/amplify/` module
+  - Integrate with GitHub repository
+  - Configure custom domain (my-rss-press.com)
+  - Configure environment variables (NEXT_PUBLIC_API_BASE_URL)
+  - **Acceptance Criteria:**
+    - [ ] Amplify Hosting is created
+    - [ ] Integrated with GitHub repository
+    - [ ] Custom domain is configured
+    - [ ] Automatic deployment works
+  - _Requirements: General_
 
-### 1.6 チェックポイント：インフラデプロイ
+### 1.6 Checkpoint: Infrastructure Deployment
 
-- [x] 1.6 チェックポイント：インフラデプロイ
-  - すべてのインフラをデプロイ
-  - 動作確認を実施
-  - **受け入れ条件:**
-    - [ ] `terraform apply`が成功する
-    - [ ] `https://my-rss-press.com`にアクセスできる
-    - [ ] `https://api.my-rss-press.com/api/health`が正常に応答する
-    - [ ] SSL証明書が有効
-    - [ ] すべてのテストが通る
+- [x] 1.6 Checkpoint: Infrastructure Deployment
+  - Deploy all infrastructure
+  - Perform operation verification
+  - **Acceptance Criteria:**
+    - [ ] `terraform apply` succeeds
+    - [ ] Can access `https://my-rss-press.com`
+    - [ ] `https://api.my-rss-press.com/api/health` responds normally
+    - [ ] SSL certificate is valid
+    - [ ] All tests pass
 
 
 ---
 
-## 2. デザインシステムとUIコンポーネント
+## 2. Design System and UI Components
 
-### 2.1 Storybookのセットアップ
+### 2.1 Storybook Setup
 
-- [x] 2.1 Storybookのセットアップ
-  - Storybook 8.xをインストール
-  - `.storybook/main.ts`を設定
-  - **受け入れ条件:**
-    - [ ] `npm run storybook`でStorybookが起動する
-    - [ ] `http://localhost:6006`にアクセスできる
-  - _Requirements: 全般_
+- [x] 2.1 Storybook Setup
+  - Install Storybook 8.x
+  - Configure `.storybook/main.ts`
+  - **Acceptance Criteria:**
+    - [ ] Storybook starts with `npm run storybook`
+    - [ ] Can access `http://localhost:6006`
+  - _Requirements: General_
 
-### 2.2 デザインシステムの定義
+### 2.2 Design System Definition
 
-- [x] 2.2 デザインシステムの定義
-  - `frontend/lib/design-system.ts`を作成
-  - カラーパレット、タイポグラフィ、スペーシングを定義
-  - TailwindCSS設定に反映
-  - **受け入れ条件:**
-    - [ ] デザインシステムが定義されている
-    - [ ] `tailwind.config.ts`に反映されている
-    - [ ] カラーパレットが使用できる
-  - _Requirements: 全般_
+- [x] 2.2 Design System Definition
+  - Create `frontend/lib/design-system.ts`
+  - Define color palette, typography, spacing
+  - Reflect in TailwindCSS configuration
+  - **Acceptance Criteria:**
+    - [ ] Design system is defined
+    - [ ] Reflected in `tailwind.config.ts`
+    - [ ] Color palette is usable
+  - _Requirements: General_
 
-### 2.3 基本UIコンポーネントの実装
+### 2.3 Basic UI Component Implementation
 
-- [x] 2.3.1 Buttonコンポーネント
-  - `frontend/components/ui/Button.tsx`を作成
-  - variant（primary, secondary, outline, ghost）を実装
-  - size（sm, md, lg）を実装
-  - Storybookストーリーを作成
-  - **受け入れ条件:**
-    - [x] Buttonコンポーネントが実装されている
-    - [x] すべてのvariantとsizeが動作する
-    - [x] Storybookで確認できる
-    - [x] ユニットテストが通る
-  - _Requirements: 全般_
+- [x] 2.3.1 Button Component
+  - Create `frontend/components/ui/Button.tsx`
+  - Implement variants (primary, secondary, outline, ghost)
+  - Implement sizes (sm, md, lg)
+  - Create Storybook stories
+  - **Acceptance Criteria:**
+    - [x] Button component is implemented
+    - [x] All variants and sizes work
+    - [x] Can verify in Storybook
+    - [x] Unit tests pass
+  - _Requirements: General_
 
-- [x] 2.3.2 Inputコンポーネント
-  - `frontend/components/ui/Input.tsx`を作成
-  - エラー表示機能を実装
-  - Storybookストーリーを作成
-  - **受け入れ条件:**
-    - [x] Inputコンポーネントが実装されている
-    - [x] エラー表示が動作する
-    - [x] Storybookで確認できる
-    - [x] ユニットテストが通る
+- [x] 2.3.2 Input Component
+  - Create `frontend/components/ui/Input.tsx`
+  - Implement error display functionality
+  - Create Storybook stories
+  - **Acceptance Criteria:**
+    - [x] Input component is implemented
+    - [x] Error display works
+    - [x] Can verify in Storybook
+    - [x] Unit tests pass
   - _Requirements: 2.2_
 
-- [x] 2.3.3 Cardコンポーネント
-  - `frontend/components/ui/Card.tsx`を作成
-  - Storybookストーリーを作成
-  - **受け入れ条件:**
-    - [x] Cardコンポーネントが実装されている
-    - [x] Storybookで確認できる
+- [x] 2.3.3 Card Component
+  - Create `frontend/components/ui/Card.tsx`
+  - Create Storybook stories
+  - **Acceptance Criteria:**
+    - [x] Card component is implemented
+    - [x] Can verify in Storybook
   - _Requirements: 4.5_
 
-- [x] 2.3.4 Checkboxコンポーネント
-  - `frontend/components/ui/Checkbox.tsx`を作成
-  - Storybookストーリーを作成
-  - **受け入れ条件:**
-    - [x] Checkboxコンポーネントが実装されている
-    - [x] Storybookで確認できる
-    - [x] ユニットテストが通る
+- [x] 2.3.4 Checkbox Component
+  - Create `frontend/components/ui/Checkbox.tsx`
+  - Create Storybook stories
+  - **Acceptance Criteria:**
+    - [x] Checkbox component is implemented
+    - [x] Can verify in Storybook
+    - [x] Unit tests pass
   - _Requirements: 3.2_
 
-- [x] 2.3.5 Modalコンポーネント
-  - `frontend/components/ui/Modal.tsx`を作成
-  - Storybookストーリーを作成
-  - **受け入れ条件:**
-    - [x] Modalコンポーネントが実装されている
-    - [x] 開閉が正しく動作する
-    - [x] Storybookで確認できる
-    - [x] ユニットテストが通る
+- [x] 2.3.5 Modal Component
+  - Create `frontend/components/ui/Modal.tsx`
+  - Create Storybook stories
+  - **Acceptance Criteria:**
+    - [x] Modal component is implemented
+    - [x] Open/close works correctly
+    - [x] Can verify in Storybook
+    - [x] Unit tests pass
   - _Requirements: 6.2_
 
 
 ---
 
-## 3. バックエンドAPI実装
+## 3. Backend API Implementation
 
-### 3.1 AWS Bedrock統合
+### 3.1 AWS Bedrock Integration
 
-- [x] 3.1 AWS Bedrock統合
-  - `backend/src/services/bedrockService.ts`を作成
-  - Claude 3 Haikuを使用したフィード提案機能を実装
-  - **受け入れ条件:**
-    - [x] BedrockRuntimeClientが正しく設定されている
-    - [x] `suggestFeeds(theme)`関数が実装されている
-    - [x] テーマに基づいて3つのフィード提案が返される
-    - [x] ユニットテスト（モック使用）が通る
+- [x] 3.1 AWS Bedrock Integration
+  - Create `backend/src/services/bedrockService.ts`
+  - Implement feed suggestion functionality using Claude 3 Haiku
+  - **Acceptance Criteria:**
+    - [x] BedrockRuntimeClient is correctly configured
+    - [x] `suggestFeeds(theme)` function is implemented
+    - [x] Returns 3 feed suggestions based on theme
+    - [x] Unit tests (using mocks) pass
   - _Requirements: 3.1, 3.2_
 
-### 3.2 RSS取得サービス
+### 3.2 RSS Fetcher Service
 
-- [x] 3.2 RSS取得サービス
-  - `backend/src/services/rssFetcherService.ts`を作成
-  - 並行フィード取得を実装
-  - 日付フィルタリング（3日間→7日間）を実装
-  - **受け入れ条件:**
-    - [x] `fetchArticles(feedUrls, daysBack)`関数が実装されている
-    - [x] 複数フィードを並行して取得できる
-    - [x] 日付フィルタリングが正しく動作する
-    - [x] タイムアウト処理が実装されている
-    - [x] ユニットテストが通る
+- [x] 3.2 RSS Fetcher Service
+  - Create `backend/src/services/rssFetcherService.ts`
+  - Implement parallel feed fetching
+  - Implement date filtering (3 days → 7 days)
+  - **Acceptance Criteria:**
+    - [x] `fetchArticles(feedUrls, daysBack)` function is implemented
+    - [x] Can fetch multiple feeds in parallel
+    - [x] Date filtering works correctly
+    - [x] Timeout handling is implemented
+    - [x] Unit tests pass
   - _Requirements: 5.3, 5.4, 5.5, 5.6, 5.7_
 
-### 3.3 記事重要度計算サービス
+### 3.3 Article Importance Calculator Service
 
-- [x] 3.3 記事重要度計算サービス
-  - `backend/src/services/importanceCalculator.ts`を作成
-  - Bedrockを使用した重要度計算を実装
-  - フォールバックアルゴリズムを実装
-  - **受け入れ条件:**
-    - [x] `calculateImportance(articles, theme)`関数が実装されている
-    - [x] Bedrockで重要度スコア（0-100）が計算される
-    - [x] Bedrock失敗時にフォールバックが動作する
-    - [x] ユニットテストが通る
+- [x] 3.3 Article Importance Calculator Service
+  - Create `backend/src/services/importanceCalculator.ts`
+  - Implement importance calculation using Bedrock
+  - Implement fallback algorithm
+  - **Acceptance Criteria:**
+    - [x] `calculateImportance(articles, theme)` function is implemented
+    - [x] Importance score (0-100) is calculated with Bedrock
+    - [x] Fallback works when Bedrock fails
+    - [x] Unit tests pass
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-### 3.4 新聞サービス
+### 3.4 Newspaper Service
 
-- [x] 3.4 新聞サービス
-  - `backend/src/services/newspaperService.ts`を作成
-  - DynamoDB操作（保存、取得、一覧取得）を実装
-  - **受け入れ条件:**
-    - [x] `saveNewspaper(newspaper)`関数が実装されている
-    - [x] `getNewspaper(id)`関数が実装されている
-    - [x] `getPublicNewspapers(sortBy, limit)`関数が実装されている
-    - [x] `incrementViewCount(id)`関数が実装されている
-    - [x] ユニットテスト（AWS SDK Mock使用）が通る
+- [x] 3.4 Newspaper Service
+  - Create `backend/src/services/newspaperService.ts`
+  - Implement DynamoDB operations (save, get, list)
+  - **Acceptance Criteria:**
+    - [x] `saveNewspaper(newspaper)` function is implemented
+    - [x] `getNewspaper(id)` function is implemented
+    - [x] `getPublicNewspapers(sortBy, limit)` function is implemented
+    - [x] `incrementViewCount(id)` function is implemented
+    - [x] Unit tests (using AWS SDK Mock) pass
   - _Requirements: 6.1, 6.5, 4.1, 4.2, 4.3, 4.4_
 
 
-### 3.5 APIエンドポイントの実装
+### 3.5 API Endpoint Implementation
 
 - [x] 3.5.1 POST /api/suggest-feeds
-  - `backend/src/routes/feeds.ts`を作成
-  - フィード提案エンドポイントを実装
-  - Zodバリデーションを追加
-  - レート制限（10リクエスト/分）を設定
-  - **受け入れ条件:**
-    - [x] エンドポイントが実装されている
-    - [x] リクエストボディがバリデーションされる
-    - [x] 正しいレスポンスが返される
-    - [x] レート制限が動作する
-    - [x] 統合テストが通る
+  - Create `backend/src/routes/feeds.ts`
+  - Implement feed suggestion endpoint
+  - Add Zod validation
+  - Configure rate limiting (10 requests/minute)
+  - **Acceptance Criteria:**
+    - [x] Endpoint is implemented
+    - [x] Request body is validated
+    - [x] Correct response is returned
+    - [x] Rate limiting works
+    - [x] Integration tests pass
   - _Requirements: 3.1, 3.2_
 
 - [x] 3.5.2 POST /api/generate-newspaper
-  - 新聞生成エンドポイントを実装
-  - RSS取得、重要度計算を統合
-  - レート制限（20リクエスト/分）を設定
-  - **受け入れ条件:**
-    - [x] エンドポイントが実装されている
-    - [x] 記事が正しく取得される
-    - [x] 重要度が計算される
-    - [x] 5秒以内に完了する
-    - [x] 統合テストが通る
+  - Implement newspaper generation endpoint
+  - Integrate RSS fetching and importance calculation
+  - Configure rate limiting (20 requests/minute)
+  - **Acceptance Criteria:**
+    - [x] Endpoint is implemented
+    - [x] Articles are correctly fetched
+    - [x] Importance is calculated
+    - [x] Completes within 5 seconds
+    - [x] Integration tests pass
   - _Requirements: 5.1, 5.2, 5.3, 5.8, 5.9, 5.10, 10.1, 10.2_
 
 - [x] 3.5.3 POST /api/newspapers
-  - 新聞保存エンドポイントを実装
-  - **受け入れ条件:**
-    - [x] エンドポイントが実装されている
-    - [x] 新聞がDynamoDBに保存される
-    - [x] 新聞IDが返される
-    - [x] 統合テストが通る
+  - Implement newspaper save endpoint
+  - **Acceptance Criteria:**
+    - [x] Endpoint is implemented
+    - [x] Newspaper is saved to DynamoDB
+    - [x] Newspaper ID is returned
+    - [x] Integration tests pass
   - _Requirements: 6.1, 6.5_
 
 - [x] 3.5.4 GET /api/newspapers/:id
-  - 新聞取得エンドポイントを実装
-  - 閲覧数インクリメント機能を追加
-  - **受け入れ条件:**
-    - [x] エンドポイントが実装されている
-    - [x] 新聞データが返される
-    - [x] 閲覧数がインクリメントされる
-    - [x] 統合テストが通る
+  - Implement newspaper retrieval endpoint
+  - Add view count increment functionality
+  - **Acceptance Criteria:**
+    - [x] Endpoint is implemented
+    - [x] Newspaper data is returned
+    - [x] View count is incremented
+    - [x] Integration tests pass
   - _Requirements: 4.6_
 
 - [x] 3.5.5 GET /api/newspapers
-  - 公開新聞一覧取得エンドポイントを実装
-  - 並び替え（popular/recent）を実装
-  - **受け入れ条件:**
-    - [x] エンドポイントが実装されている
-    - [x] 人気順と新着順の並び替えが動作する
-    - [x] 統合テストが通る
+  - Implement public newspapers list endpoint
+  - Implement sorting (popular/recent)
+  - **Acceptance Criteria:**
+    - [x] Endpoint is implemented
+    - [x] Sorting by popularity and recency works
+    - [x] Integration tests pass
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-### 3.6 Dockerfileの作成
+### 3.6 Dockerfile Creation
 
-- [x] 3.6 Dockerfileの作成
-  - `backend/Dockerfile`を作成
-  - Lambda用のイメージをビルド
-  - **受け入れ条件:**
-    - [x] Dockerfileが作成されている
-    - [x] `docker build`が成功する
-    - [x] ローカルでLambdaをテストできる
-  - _Requirements: 全般_
+- [x] 3.6 Dockerfile Creation
+  - Create `backend/Dockerfile`
+  - Build image for Lambda
+  - **Acceptance Criteria:**
+    - [x] Dockerfile is created
+    - [x] `docker build` succeeds
+    - [x] Can test Lambda locally
+  - _Requirements: General_
 
-### 3.7 チェックポイント：バックエンドデプロイ
+### 3.7 Checkpoint: Backend Deployment
 
-- [x] 3.7 チェックポイント：バックエンドデプロイ
-  - バックエンドをECR + Lambdaにデプロイ
-  - 動作確認を実施
-  - **受け入れ条件:**
-    - [x] GitHub Actionsでビルド&デプロイが成功する
-    - [x] `https://api.my-rss-press.com/api/health`が正常に応答する
-    - [x] すべてのエンドポイントが動作する
-    - [x] すべてのテストが通る
+- [x] 3.7 Checkpoint: Backend Deployment
+  - Deploy backend to ECR + Lambda
+  - Perform operation verification
+  - **Acceptance Criteria:**
+    - [x] Build & deploy succeeds with GitHub Actions
+    - [x] `https://api.my-rss-press.com/api/health` responds normally
+    - [x] All endpoints work
+    - [x] All tests pass
 
 
 ---
 
-## 4. フロントエンド実装
+## 4. Frontend Implementation
 
-### 4.1 レイアウト計算ロジック
+### 4.1 Layout Calculation Logic
 
-- [x] 4.1 レイアウト計算ロジック
-  - `frontend/lib/layoutCalculator.ts`を作成
-  - 記事数に応じた動的レイアウトを実装
-  - **受け入れ条件:**
-    - [ ] `calculateLayout(articles)`関数が実装されている
-    - [ ] 記事数に応じてレイアウトが変わる
-    - [ ] すべての記事が含まれる
-    - [ ] ユニットテストが通る
+- [x] 4.1 Layout Calculation Logic
+  - Create `frontend/lib/layoutCalculator.ts`
+  - Implement dynamic layout based on article count
+  - **Acceptance Criteria:**
+    - [ ] `calculateLayout(articles)` function is implemented
+    - [ ] Layout changes based on article count
+    - [ ] All articles are included
+    - [ ] Unit tests pass
   - _Requirements: 8.5, 8.6, 8.7, 8.8, 8.9, 8.10_
 
-### 4.2 新聞レイアウトコンポーネント
+### 4.2 Newspaper Layout Component
 
-- [x] 4.2 新聞レイアウトコンポーネント
-  - `frontend/components/features/newspaper/NewspaperLayout.tsx`を作成
-  - 紙テクスチャスタイリングを実装
-  - レスポンシブデザインを実装
-  - **受け入れ条件:**
-    - [ ] 新聞レイアウトが実装されている
-    - [ ] 紙テクスチャが表示される
-    - [ ] セリフフォントが使用されている
-    - [ ] モバイルで1カラムに変わる
-    - [ ] ユニットテストが通る
+- [x] 4.2 Newspaper Layout Component
+  - Create `frontend/components/features/newspaper/NewspaperLayout.tsx`
+  - Implement paper texture styling
+  - Implement responsive design
+  - **Acceptance Criteria:**
+    - [ ] Newspaper layout is implemented
+    - [ ] Paper texture is displayed
+    - [ ] Serif font is used
+    - [ ] Changes to 1 column on mobile
+    - [ ] Unit tests pass
   - _Requirements: 7.1, 7.2, 7.3, 11.1, 11.2, 11.3, 11.4_
 
-### 4.3 テーマ入力コンポーネント
+### 4.3 Theme Input Component
 
-- [x] 4.3 テーマ入力コンポーネント
-  - `frontend/components/features/feed/ThemeInput.tsx`を作成
-  - 入力検証を実装
-  - **受け入れ条件:**
-    - [ ] テーマ入力コンポーネントが実装されている
-    - [ ] 空入力が拒否される
-    - [ ] Enterキーで送信できる
-    - [ ] ユニットテストが通る
+- [x] 4.3 Theme Input Component
+  - Create `frontend/components/features/feed/ThemeInput.tsx`
+  - Implement input validation
+  - **Acceptance Criteria:**
+    - [ ] Theme input component is implemented
+    - [ ] Empty input is rejected
+    - [ ] Can submit with Enter key
+    - [ ] Unit tests pass
   - _Requirements: 2.2, 3.4_
 
-### 4.4 フィード選択コンポーネント
+### 4.4 Feed Selector Component
 
-- [x] 4.4 フィード選択コンポーネント
-  - `frontend/components/features/feed/FeedSelector.tsx`を作成
-  - フィード追加・削除機能を実装
-  - 重複チェックを実装
-  - **受け入れ条件:**
-    - [ ] フィード選択コンポーネントが実装されている
-    - [ ] フィードの追加・削除が動作する
-    - [ ] 重複が防止される
-    - [ ] ユニットテストが通る
+- [x] 4.4 Feed Selector Component
+  - Create `frontend/components/features/feed/FeedSelector.tsx`
+  - Implement feed add/delete functionality
+  - Implement duplicate check
+  - **Acceptance Criteria:**
+    - [ ] Feed selector component is implemented
+    - [ ] Feed add/delete works
+    - [ ] Duplicates are prevented
+    - [ ] Unit tests pass
   - _Requirements: 2.3, 2.4, 2.5, 3.2, 3.3_
 
 
-### 4.5 人気の新聞コンポーネント
+### 4.5 Popular Newspapers Component
 
-- [x] 4.5 人気の新聞コンポーネント
-  - `frontend/components/features/home/PopularNewspapers.tsx`を作成
-  - 並び替え機能を実装
-  - 新聞カードを実装
-  - **受け入れ条件:**
-    - [ ] 人気の新聞コンポーネントが実装されている
-    - [ ] 人気順・新着順の並び替えが動作する
-    - [ ] 新聞カードが正しく表示される
-    - [ ] ユニットテストが通る
+- [x] 4.5 Popular Newspapers Component
+  - Create `frontend/components/features/home/PopularNewspapers.tsx`
+  - Implement sorting functionality
+  - Implement newspaper cards
+  - **Acceptance Criteria:**
+    - [ ] Popular newspapers component is implemented
+    - [ ] Sorting by popularity/recency works
+    - [ ] Newspaper cards display correctly
+    - [ ] Unit tests pass
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-### 4.6 新聞設定モーダル
+### 4.6 Newspaper Settings Modal
 
-- [x] 4.6 新聞設定モーダル
-  - `frontend/components/features/newspaper/NewspaperSettings.tsx`を作成
-  - ユーザー名・新聞名入力を実装
-  - デフォルト値設定を実装
-  - **受け入れ条件:**
-    - [ ] 設定モーダルが実装されている
-    - [ ] 入力フィールドが動作する
-    - [ ] デフォルト値が設定される
-    - [ ] ユニットテストが通る
+- [x] 4.6 Newspaper Settings Modal
+  - Create `frontend/components/features/newspaper/NewspaperSettings.tsx`
+  - Implement user name/newspaper name input
+  - Implement default value configuration
+  - **Acceptance Criteria:**
+    - [ ] Settings modal is implemented
+    - [ ] Input fields work
+    - [ ] Default values are set
+    - [ ] Unit tests pass
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.7_
 
-### 4.7 統合ホーム画面
+### 4.7 Unified Home Screen
 
-- [x] 4.7 統合ホーム画面
-  - `frontend/app/page.tsx`を作成
-  - すべてのコンポーネントを統合
-  - API連携を実装
-  - **受け入れ条件:**
-    - [ ] ホーム画面が実装されている
-    - [ ] テーマ入力→フィード提案が動作する
-    - [ ] フィード選択→新聞生成が動作する
-    - [ ] 人気の新聞が表示される
-    - [ ] ユニットテストが通る
+- [x] 4.7 Unified Home Screen
+  - Create `frontend/app/page.tsx`
+  - Integrate all components
+  - Implement API integration
+  - **Acceptance Criteria:**
+    - [ ] Home screen is implemented
+    - [ ] Theme input → feed suggestion works
+    - [ ] Feed selection → newspaper generation works
+    - [ ] Popular newspapers are displayed
+    - [ ] Unit tests pass
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-### 4.8 新聞詳細ページ
+### 4.8 Newspaper Detail Page
 
-- [x] 4.8 新聞詳細ページ
-  - `frontend/app/newspapers/[id]/page.tsx`を作成
-  - 新聞レイアウトを表示
-  - 保存機能を実装
-  - ホームに戻るボタンを実装
-  - **受け入れ条件:**
-    - [ ] 新聞詳細ページが実装されている
-    - [ ] 新聞が正しく表示される
-    - [ ] 保存機能が動作する
-    - [ ] ホームに戻れる
-    - [ ] ユニットテストが通る
+- [x] 4.8 Newspaper Detail Page
+  - Create `frontend/app/newspapers/[id]/page.tsx`
+  - Display newspaper layout
+  - Implement save functionality
+  - Implement return to home button
+  - **Acceptance Criteria:**
+    - [ ] Newspaper detail page is implemented
+    - [ ] Newspaper displays correctly
+    - [ ] Save functionality works
+    - [ ] Can return to home
+    - [ ] Unit tests pass
   - _Requirements: 5.9, 6.1, 6.5, 6.6, 6.7, 9.1, 9.2_
 
-### 4.9 ローディング・エラー表示
+### 4.9 Loading and Error Display
 
-- [x] 4.9 ローディング・エラー表示
-  - ローディングインジケーターを実装
-  - エラーメッセージ表示を実装
-  - **受け入れ条件:**
-    - [ ] ローディング中に進行状況が表示される
-    - [ ] エラー時に適切なメッセージが表示される
-    - [ ] ユニットテストが通る
+- [x] 4.9 Loading and Error Display
+  - Implement loading indicator
+  - Implement error message display
+  - **Acceptance Criteria:**
+    - [ ] Progress is displayed during loading
+    - [ ] Appropriate messages are displayed on error
+    - [ ] Unit tests pass
   - _Requirements: 5.1, 5.2, 10.4_
 
-### 4.10 チェックポイント：フロントエンドデプロイ
+### 4.10 Checkpoint: Frontend Deployment
 
-- [x] 4.10 チェックポイント：フロントエンドデプロイ
-  - フロントエンドをAmplifyにデプロイ
-  - 動作確認を実施
-  - **受け入れ条件:**
-    - [ ] `git push origin main`で自動デプロイされる
-    - [ ] `https://my-rss-press.com`にアクセスできる
-    - [ ] すべての機能が動作する
-    - [ ] すべてのテストが通る
+- [x] 4.10 Checkpoint: Frontend Deployment
+  - Deploy frontend to Amplify
+  - Perform operation verification
+  - **Acceptance Criteria:**
+    - [ ] Auto-deploys with `git push origin main`
+    - [ ] Can access `https://my-rss-press.com`
+    - [ ] All features work
+    - [ ] All tests pass
 
 
 ---
 
-## 5. 統合とE2Eテスト
+## 5. Integration and E2E Testing
 
-### 5.1 Playwrightのセットアップ
+### 5.1 Playwright Setup
 
-- [x] 5.1 Playwrightのセットアップ
-  - Playwright 1.40.x以上をインストール
-  - `playwright.config.ts`を設定
-  - Page Objectsディレクトリを作成
-  - **受け入れ条件:**
-    - [ ] Playwrightがインストールされている
-    - [ ] `npm run test:e2e`でテストが実行できる
-    - [ ] 設定ファイルが正しく動作する
+- [x] 5.1 Playwright Setup
+  - Install Playwright 1.40.x or higher
+  - Configure `playwright.config.ts`
+  - Create Page Objects directory
+  - **Acceptance Criteria:**
+    - [ ] Playwright is installed
+    - [ ] Tests can run with `npm run test:e2e`
+    - [ ] Configuration file works correctly
   - _Requirements: 12.3, 12.4, 12.5_
 
-### 5.2 Page Objectsの作成
+### 5.2 Page Objects Creation
 
 - [ ] 5.2.1 HomePage Page Object
-  - `frontend/tests/e2e/pages/HomePage.ts`を作成
-  - **受け入れ条件:**
-    - [ ] HomePageクラスが実装されている
-    - [ ] すべての要素セレクタが定義されている
-    - [ ] メソッドが実装されている
+  - Create `frontend/tests/e2e/pages/HomePage.ts`
+  - **Acceptance Criteria:**
+    - [ ] HomePage class is implemented
+    - [ ] All element selectors are defined
+    - [ ] Methods are implemented
   - _Requirements: 12.5_
 
 - [ ] 5.2.2 FeedSelectorPage Page Object
-  - `frontend/tests/e2e/pages/FeedSelectorPage.ts`を作成
-  - **受け入れ条件:**
-    - [ ] FeedSelectorPageクラスが実装されている
-    - [ ] すべての要素セレクタが定義されている
-    - [ ] メソッドが実装されている
+  - Create `frontend/tests/e2e/pages/FeedSelectorPage.ts`
+  - **Acceptance Criteria:**
+    - [ ] FeedSelectorPage class is implemented
+    - [ ] All element selectors are defined
+    - [ ] Methods are implemented
   - _Requirements: 12.5_
 
 - [ ] 5.2.3 NewspaperPage Page Object
-  - `frontend/tests/e2e/pages/NewspaperPage.ts`を作成
-  - **受け入れ条件:**
-    - [ ] NewspaperPageクラスが実装されている
-    - [ ] すべての要素セレクタが定義されている
-    - [ ] メソッドが実装されている
+  - Create `frontend/tests/e2e/pages/NewspaperPage.ts`
+  - **Acceptance Criteria:**
+    - [ ] NewspaperPage class is implemented
+    - [ ] All element selectors are defined
+    - [ ] Methods are implemented
   - _Requirements: 12.5_
 
-### 5.3 E2Eテストの実装
+### 5.3 E2E Test Implementation
 
-- [ ] 5.3.1 新聞作成フローのE2Eテスト
-  - `frontend/tests/e2e/specs/newspaper/create-newspaper.spec.ts`を作成
-  - テーマ入力→フィード提案→選択→生成のフローをテスト
-  - **受け入れ条件:**
-    - [ ] E2Eテストが実装されている
-    - [ ] テストが通る
-    - [ ] 複数ブラウザで動作する
+- [ ] 5.3.1 Newspaper Creation Flow E2E Test
+  - Create `frontend/tests/e2e/specs/newspaper/create-newspaper.spec.ts`
+  - Test theme input → feed suggestion → selection → generation flow
+  - **Acceptance Criteria:**
+    - [ ] E2E test is implemented
+    - [ ] Test passes
+    - [ ] Works on multiple browsers
   - _Requirements: 12.4_
 
-- [ ] 5.3.2 手動フィード追加のE2Eテスト
-  - `frontend/tests/e2e/specs/feed/select-feeds.spec.ts`を作成
-  - 手動フィード追加・削除をテスト
-  - **受け入れ条件:**
-    - [ ] E2Eテストが実装されている
-    - [ ] テストが通る
+- [ ] 5.3.2 Manual Feed Addition E2E Test
+  - Create `frontend/tests/e2e/specs/feed/select-feeds.spec.ts`
+  - Test manual feed addition and deletion
+  - **Acceptance Criteria:**
+    - [ ] E2E test is implemented
+    - [ ] Test passes
   - _Requirements: 12.4_
 
-- [ ] 5.3.3 新聞設定保存のE2Eテスト
-  - `frontend/tests/e2e/specs/newspaper/save-newspaper.spec.ts`を作成
-  - 新聞設定の保存をテスト
-  - **受け入れ条件:**
-    - [ ] E2Eテストが実装されている
-    - [ ] テストが通る
+- [ ] 5.3.3 Newspaper Settings Save E2E Test
+  - Create `frontend/tests/e2e/specs/newspaper/save-newspaper.spec.ts`
+  - Test newspaper settings save
+  - **Acceptance Criteria:**
+    - [ ] E2E test is implemented
+    - [ ] Test passes
   - _Requirements: 12.4_
 
-- [ ] 5.3.4 人気の新聞のE2Eテスト
-  - `frontend/tests/e2e/specs/home/popular-newspapers.spec.ts`を作成
-  - 並び替えと閲覧をテスト
-  - **受け入れ条件:**
-    - [ ] E2Eテストが実装されている
-    - [ ] テストが通る
+- [ ] 5.3.4 Popular Newspapers E2E Test
+  - Create `frontend/tests/e2e/specs/home/popular-newspapers.spec.ts`
+  - Test sorting and viewing
+  - **Acceptance Criteria:**
+    - [ ] E2E test is implemented
+    - [ ] Test passes
   - _Requirements: 12.4_
 
-- [ ] 5.3.5 レスポンシブデザインのE2Eテスト
-  - モバイル・タブレット・デスクトップでテスト
-  - **受け入れ条件:**
-    - [ ] E2Eテストが実装されている
-    - [ ] すべてのデバイスでテストが通る
+- [ ] 5.3.5 Responsive Design E2E Test
+  - Test on mobile, tablet, and desktop
+  - **Acceptance Criteria:**
+    - [ ] E2E test is implemented
+    - [ ] Tests pass on all devices
   - _Requirements: 12.4_
 
 
-### 5.4 セキュリティチェックの実装
+### 5.4 Security Check Implementation
 
-- [x] 5.4 セキュリティチェックの実装
-  - Gitleaksをインストール
-  - `.gitleaks.toml`を作成
-  - `scripts/security-check.sh`を作成
-  - Makefileに統合
-  - **受け入れ条件:**
-    - [ ] Gitleaksがインストールされている
-    - [ ] `make security-check`が動作する
-    - [ ] 機密情報が検出される
+- [x] 5.4 Security Check Implementation
+  - Install Gitleaks
+  - Create `.gitleaks.toml`
+  - Create `scripts/security-check.sh`
+  - Integrate with Makefile
+  - **Acceptance Criteria:**
+    - [ ] Gitleaks is installed
+    - [ ] `make security-check` works
+    - [ ] Sensitive information is detected
   - _Requirements: 13.1, 13.2_
 
-### 5.5 GitHub Actionsの設定
+### 5.5 GitHub Actions Configuration
 
-- [x] 5.5 GitHub Actionsの設定
-  - `.github/workflows/deploy-backend.yml`を作成
-  - バックエンドのビルド&デプロイを自動化
-  - **受け入れ条件:**
-    - [ ] GitHub Actionsが設定されている
-    - [ ] mainブランチへのプッシュで自動デプロイされる
-    - [ ] テストが自動実行される
+- [x] 5.5 GitHub Actions Configuration
+  - Create `.github/workflows/deploy-backend.yml`
+  - Automate backend build & deploy
+  - **Acceptance Criteria:**
+    - [ ] GitHub Actions is configured
+    - [ ] Auto-deploys on push to main branch
+    - [ ] Tests run automatically
   - _Requirements: 12.8_
 
-### 5.6 チェックポイント：統合テスト
+### 5.6 Checkpoint: Integration Testing
 
-- [x] 5.6 チェックポイント：統合テスト
-  - すべてのテストを実行
-  - カバレッジを確認
-  - **受け入れ条件:**
-    - [ ] `make test`ですべてのテストが通る
-    - [ ] E2Eテストがすべて通る
-    - [ ] テストカバレッジが60%以上
-    - [ ] セキュリティチェックが通る
+- [x] 5.6 Checkpoint: Integration Testing
+  - Run all tests
+  - Check coverage
+  - **Acceptance Criteria:**
+    - [ ] All tests pass with `make test`
+    - [ ] All E2E tests pass
+    - [ ] Test coverage is 60% or higher
+    - [ ] Security checks pass
 
 ---
 
-## 6. 最終デプロイと動作確認
+## 6. Final Deployment and Verification
 
-### 6.1 本番環境での動作確認
+### 6.1 Production Environment Verification
 
-- [x] 6.1 本番環境での動作確認
-  - すべての機能を本番環境でテスト
-  - パフォーマンスを測定
-  - **受け入れ条件:**
-    - [ ] `https://my-rss-press.com`が正常に動作する
-    - [ ] 新聞生成が5秒以内に完了する
-    - [ ] すべての機能が動作する
-    - [ ] SSL証明書が有効
-    - [ ] DNS設定が正しい
+- [x] 6.1 Production Environment Verification
+  - Test all features in production environment
+  - Measure performance
+  - **Acceptance Criteria:**
+    - [ ] `https://my-rss-press.com` works normally
+    - [ ] Newspaper generation completes within 5 seconds
+    - [ ] All features work
+    - [ ] SSL certificate is valid
+    - [ ] DNS configuration is correct
   - _Requirements: 10.1, 10.2, 10.3_
 
-### 6.2 ドキュメントの更新
+### 6.2 Documentation Update
 
-- [x] 6.2 ドキュメントの更新
-  - README.mdを更新
-  - tech.mdを更新（必要に応じて）
-  - structure.mdを更新（必要に応じて）
-  - **受け入れ条件:**
-    - [ ] README.mdが最新の情報を反映している
-    - [ ] セットアップ手順が明確
-    - [ ] デプロイ手順が明確
-  - _Requirements: 全般_
+- [x] 6.2 Documentation Update
+  - Update README.md
+  - Update tech.md (as needed)
+  - Update structure.md (as needed)
+  - **Acceptance Criteria:**
+    - [ ] README.md reflects latest information
+    - [ ] Setup procedure is clear
+    - [ ] Deployment procedure is clear
+  - _Requirements: General_
 
-### 6.3 最終チェックリスト
+### 6.3 Final Checklist
 
-- [x] 6.3 最終チェックリスト
-  - すべての要件が満たされていることを確認
-  - **受け入れ条件:**
-    - [ ] すべてのタスクが完了している
-    - [ ] すべてのテストが通る
-    - [ ] 本番環境が正常に動作する
-    - [ ] ドキュメントが最新
-    - [ ] セキュリティチェックが通る
-    - [ ] パフォーマンス要件を満たす
+- [x] 6.3 Final Checklist
+  - Verify all requirements are met
+  - **Acceptance Criteria:**
+    - [ ] All tasks are completed
+    - [ ] All tests pass
+    - [ ] Production environment works normally
+    - [ ] Documentation is up to date
+    - [ ] Security checks pass
+    - [ ] Performance requirements are met
 
 ---
 
-## 完了
+## Completion
 
-すべてのタスクが完了したら、Phase 1（MVP）は完成です！🎉
+When all tasks are completed, Phase 1 (MVP) is complete! 🎉
 
-次のステップ：
-- Phase 2の要件定義と設計
-- ユーザーフィードバックの収集
-- パフォーマンスの最適化
-- 追加機能の検討
+Next Steps:
+- Phase 2 requirements definition and design
+- User feedback collection
+- Performance optimization
+- Additional feature consideration
 

@@ -28,6 +28,7 @@ export interface NewspaperData {
   updatedAt: string;
   viewCount: number;
   isPublic: boolean;
+  locale: Locale; // Language setting for the newspaper (en or ja)
 }
 
 export interface NewspaperSettings {

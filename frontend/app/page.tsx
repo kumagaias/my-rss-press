@@ -89,7 +89,7 @@ export default function Home() {
         .filter(s => s.isDefault)
         .map(s => s.url);
       
-      const articles = await generateNewspaper(selectedFeeds, theme, defaultFeedUrls);
+      const articles = await generateNewspaper(selectedFeeds, theme, defaultFeedUrls, locale);
       
       // Store data in sessionStorage for the newspaper page
       sessionStorage.setItem('newspaperArticles', JSON.stringify(articles));

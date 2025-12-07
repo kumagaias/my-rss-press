@@ -19,6 +19,7 @@ const GenerateNewspaperSchema = z.object({
   feedUrls: z.array(z.string().url()).min(3, 'At least 3 feed URLs are required').max(10, 'Too many feed URLs'),
   theme: z.string().min(1, 'Theme is required'),
   defaultFeedUrls: z.array(z.string().url()).optional(), // URLs of default/fallback feeds
+  locale: z.enum(['en', 'ja']).optional().default('en'), // Language setting for the newspaper
 });
 
 const ArticleSchema = z.object({
@@ -36,6 +37,7 @@ const SaveNewspaperSchema = z.object({
   feedUrls: z.array(z.string().url()).min(1).max(10, 'Too many feed URLs'),
   articles: z.array(ArticleSchema).optional(),
   isPublic: z.boolean().optional().default(true),
+  locale: z.enum(['en', 'ja']).optional().default('en'), // Language setting for the newspaper
 });
 
 /**
@@ -144,7 +146,7 @@ newspapersRouter.get('/newspapers/:id', async (c) => {
 });
 
 /**
- * GET /api/newspapers?sort=popular&limit=10
+ * GET /api/newspapers?sort=popular&limit=10&locale=en
  * Get public newspapers
  */
 newspapersRouter.get('/newspapers', async (c) => {
@@ -152,6 +154,8 @@ newspapersRouter.get('/newspapers', async (c) => {
     const sortParam = c.req.query('sort');
     const sortBy: 'popular' | 'recent' = (sortParam === 'popular' || sortParam === 'recent') ? sortParam : 'popular';
     const limit = Math.max(1, Math.min(100, parseInt(c.req.query('limit') || '10', 10)));
+    const localeParam = c.req.query('locale');
+    const locale: 'en' | 'ja' | undefined = (localeParam === 'en' || localeParam === 'ja') ? localeParam : undefined;
 
     // Validate sort parameter
     if (sortBy !== 'popular' && sortBy !== 'recent') {
@@ -164,7 +168,12 @@ newspapersRouter.get('/newspapers', async (c) => {
     }
 
     // Get public newspapers
-    const newspapers = await getPublicNewspapers(sortBy, limit);
+    let newspapers = await getPublicNewspapers(sortBy, limit);
+
+    // Filter by locale if specified
+    if (locale) {
+      newspapers = newspapers.filter(n => n.locale === locale);
+    }
 
     return c.json({
       newspapers,

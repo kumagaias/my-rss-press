@@ -17,13 +17,6 @@ export function LoadingAnimation({ locale = 'en' }: LoadingAnimationProps) {
 
   return (
     <div className="flex flex-col items-center justify-center py-8 space-y-4">
-      {/* Animated dots representing AI processing */}
-      <div className="flex space-x-2">
-        <div className="w-3 h-3 bg-black rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-        <div className="w-3 h-3 bg-black rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-        <div className="w-3 h-3 bg-black rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-      </div>
-      
       {/* Text */}
       <p className="text-sm font-serif text-gray-700 animate-pulse">
         {text}

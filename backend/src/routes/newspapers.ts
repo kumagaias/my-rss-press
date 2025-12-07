@@ -168,13 +168,7 @@ newspapersRouter.get('/newspapers', async (c) => {
     }
 
     // Get public newspapers
-    let newspapers = await getPublicNewspapers(sortBy, limit);
-
-    // Filter by locale if specified
-    if (locale) {
-      newspapers = newspapers.filter(n => n.locale === locale);
-    }
-
+    let newspapers = await getPublicNewspapers(sortBy, limit, locale);
     return c.json({
       newspapers,
     });

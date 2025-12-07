@@ -26,6 +26,8 @@ export interface Article {
   importance: number;
 }
 
+export type Locale = 'en' | 'ja';
+
 export interface NewspaperData {
   newspaperId: string;
   name: string;
@@ -36,6 +38,7 @@ export interface NewspaperData {
   updatedAt: string;
   viewCount: number;
   isPublic: boolean;
+  locale: Locale; // Language setting for the newspaper (en or ja)
 }
 
 /**
@@ -114,6 +117,7 @@ export async function getNewspaper(newspaperId: string): Promise<NewspaperData |
     updatedAt: result.Item.updatedAt,
     viewCount: result.Item.viewCount,
     isPublic: result.Item.isPublic,
+    locale: result.Item.locale || 'en', // Default to 'en' for backward compatibility
   };
 }
 
@@ -163,6 +167,7 @@ export async function getPublicNewspapers(
     updatedAt: item.updatedAt,
     viewCount: item.viewCount,
     isPublic: item.isPublic,
+    locale: item.locale || 'en', // Default to 'en' for backward compatibility
   }));
 }
 

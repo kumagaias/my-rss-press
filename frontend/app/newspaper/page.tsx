@@ -119,7 +119,7 @@ function NewspaperPageInner() {
     setIsSaving(true);
 
     try {
-      const result = await saveNewspaper(settings, feedUrls, articles);
+      const result = await saveNewspaper(settings, feedUrls, articles, locale);
       
       setNewspaperName(settings.newspaperName);
       setUserName(settings.userName);
@@ -145,7 +145,7 @@ function NewspaperPageInner() {
     setIsRegeneratingArticles(true);
 
     try {
-      const regeneratedArticles = await generateNewspaper(feedUrls, newspaperName || 'News');
+      const regeneratedArticles = await generateNewspaper(feedUrls, newspaperName || 'News', [], locale);
       setArticles(regeneratedArticles);
       
       // Mark as not saved so user can save the regenerated version

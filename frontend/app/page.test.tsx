@@ -111,7 +111,8 @@ describe('Home Page', () => {
       expect(api.generateNewspaper).toHaveBeenCalledWith(
         ['https://example.com/tech-feed'],
         'Technology',
-        [] // defaultFeedUrls (empty array since no default feeds in this test)
+        [], // defaultFeedUrls (empty array since no default feeds in this test)
+        'en' // locale
       );
     }, { timeout: 3000 });
 

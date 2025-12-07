@@ -30,7 +30,8 @@ export async function suggestFeeds(theme: string, locale?: 'en' | 'ja'): Promise
 export async function generateNewspaper(
   feedUrls: string[],
   theme: string,
-  defaultFeedUrls: string[] = []
+  defaultFeedUrls: string[] = [],
+  locale: 'en' | 'ja' = 'en'
 ): Promise<Article[]> {
   // Validate input
   if (!feedUrls || feedUrls.length === 0) {
@@ -49,6 +50,7 @@ export async function generateNewspaper(
       feedUrls,
       theme,
       defaultFeedUrls, // Pass default feed URLs for lower priority
+      locale, // Language setting for the newspaper
       daysBack: 3,
     }),
   });
@@ -67,7 +69,8 @@ export async function generateNewspaper(
 export async function saveNewspaper(
   settings: NewspaperSettings,
   feedUrls: string[],
-  articles?: Article[]
+  articles?: Article[],
+  locale: 'en' | 'ja' = 'en'
 ): Promise<{ newspaperId: string; createdAt: string }> {
   const response = await fetch(`${API_BASE_URL}/api/newspapers`, {
     method: 'POST',
@@ -80,6 +83,7 @@ export async function saveNewspaper(
       feedUrls,
       articles,
       isPublic: settings.isPublic,
+      locale, // Language setting for the newspaper
     }),
   });
 
@@ -108,10 +112,12 @@ export async function getNewspaper(newspaperId: string): Promise<NewspaperData> 
  */
 export async function getPublicNewspapers(
   sortBy: 'popular' | 'recent' = 'popular',
-  limit: number = 10
+  limit: number = 10,
+  locale?: 'en' | 'ja'
 ): Promise<NewspaperData[]> {
+  const localeParam = locale ? `&locale=${locale}` : '';
   const response = await fetch(
-    `${API_BASE_URL}/api/newspapers?sort=${sortBy}&limit=${limit}`
+    `${API_BASE_URL}/api/newspapers?sort=${sortBy}&limit=${limit}${localeParam}`
   );
 
   if (!response.ok) {

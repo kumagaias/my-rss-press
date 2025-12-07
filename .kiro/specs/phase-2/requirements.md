@@ -1,364 +1,364 @@
-# Requirements Document (Future Extensions)
+# 要件定義書（将来の拡張機能）
 
-## Introduction
+## はじめに
 
-This document defines requirements for future extensions of MyRSSPress. These features are not included in the current implementation, but the architecture should be prepared to facilitate future implementation.
+このドキュメントは、MyRSSPressの将来の拡張機能に関する要件を定義します。これらの機能は現在の実装には含まれませんが、設計時に考慮し、将来的な実装を容易にするためのアーキテクチャを準備します。
 
-## Glossary
+## 用語集
 
-- **Privacy Settings**: Settings to control public/private status of newspapers
-- **Private Newspaper**: Newspaper viewable only by creator
-- **Public Newspaper**: Newspaper viewable by all users
+- **プライバシー設定**: 新聞の公開/非公開を制御する設定
+- **非公開新聞**: 作成者のみが閲覧できる新聞
+- **公開新聞**: すべてのユーザーが閲覧できる新聞
 
-## Requirements
+## 要件
 
-### Requirement 1: Newspaper Privacy Settings
+### 要件1: 新聞のプライバシー設定
 
-**User Story:** As a user, I want to choose whether to make my newspaper public or private, so that I can manage personal newspapers separately from those I want to share.
+**ユーザーストーリー:** ユーザーとして、新聞を公開するか非公開にするかを選択したい。そうすることで、個人的な新聞とシェアしたい新聞を分けて管理できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When displaying the newspaper settings modal, the MyRSSPress system MUST include public/private selection options
-2. When a user selects public, the MyRSSPress system MUST save the newspaper in a state viewable by other users
-3. When a user selects private, the MyRSSPress system MUST save the newspaper in a state viewable only by the creator
-4. When displaying the popular newspapers section, the MyRSSPress system MUST display only public newspapers
-5. When a user views their newspaper list, the MyRSSPress system MUST display both public and private newspapers
-6. When displaying each newspaper card, the MyRSSPress system MUST visually indicate the public/private status
+1. 新聞設定モーダルを表示するとき、MyRSSPressシステムは公開/非公開選択オプションを含めなければならない
+2. ユーザーが公開を選択したとき、MyRSSPressシステムは新聞を他のユーザーが閲覧可能な状態で保存しなければならない
+3. ユーザーが非公開を選択したとき、MyRSSPressシステムは新聞を作成者のみが閲覧可能な状態で保存しなければならない
+4. 人気の新聞セクションを表示するとき、MyRSSPressシステムは公開設定の新聞のみを表示しなければならない
+5. ユーザーが自分の新聞一覧を閲覧するとき、MyRSSPressシステムは公開/非公開の両方の新聞を表示しなければならない
+6. 各新聞カードを表示するとき、MyRSSPressシステムは公開/非公開のステータスを視覚的に示さなければならない
 
-### Requirement 2: My Newspapers List
+### 要件2: マイ新聞一覧
 
-**User Story:** As a user, I want to view a list of newspapers I created, so that I can easily find newspapers I created in the past.
+**ユーザーストーリー:** ユーザーとして、自分が作成した新聞の一覧を閲覧したい。そうすることで、過去に作成した新聞を簡単に見つけられる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When a user accesses the My Newspapers page, the MyRSSPress system MUST display a list of newspapers where the creator is themselves
-2. When displaying the My Newspapers list, the MyRSSPress system MUST sort newspapers in descending order by creation date
-3. When displaying each newspaper card, the MyRSSPress system MUST include thumbnail image, title, creation date, and public/private status
-4. When a user clicks a newspaper card, the MyRSSPress system MUST navigate to that newspaper's detail page
+1. ユーザーがマイ新聞ページにアクセスしたとき、MyRSSPressシステムは作成者が自分である新聞の一覧を表示しなければならない
+2. マイ新聞一覧を表示するとき、MyRSSPressシステムは作成日時の降順に新聞を並べなければならない
+3. 各新聞カードを表示するとき、MyRSSPressシステムはサムネイル画像、タイトル、作成日、公開/非公開ステータスを含めなければならない
+4. ユーザーが新聞カードをクリックしたとき、MyRSSPressシステムはその新聞の詳細ページに遷移しなければならない
 
-### Requirement 3: Newspaper Editing and Deletion
+### 要件3: 新聞の編集と削除
 
-**User Story:** As a user, I want to change settings or delete newspapers I created later, so that I can manage newspapers flexibly.
+**ユーザーストーリー:** ユーザーとして、作成した新聞の設定を後から変更したり削除したりしたい。そうすることで、新聞を柔軟に管理できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When a user is viewing their own newspaper, the MyRSSPress system MUST display edit and delete buttons
-2. When a user clicks the edit button, the MyRSSPress system MUST display the settings modal
-3. When displaying the settings modal, the MyRSSPress system MUST display current setting values in input fields
-4. When a user changes settings and saves, the MyRSSPress system MUST update the newspaper information in the database
-5. When a user clicks the delete button, the MyRSSPress system MUST display a confirmation dialog
-6. When a user confirms deletion, the MyRSSPress system MUST delete the newspaper from the database
+1. ユーザーが自分の新聞を閲覧しているとき、MyRSSPressシステムは編集ボタンと削除ボタンを表示しなければならない
+2. ユーザーが編集ボタンをクリックしたとき、MyRSSPressシステムは設定モーダルを表示しなければならない
+3. 設定モーダルを表示するとき、MyRSSPressシステムは現在の設定値を入力フィールドに表示しなければならない
+4. ユーザーが設定を変更して保存したとき、MyRSSPressシステムはデータベースの新聞情報を更新しなければならない
+5. ユーザーが削除ボタンをクリックしたとき、MyRSSPressシステムは確認ダイアログを表示しなければならない
+6. ユーザーが削除を確認したとき、MyRSSPressシステムはデータベースから新聞を削除しなければならない
 
-### Requirement 4: User Authentication (Email/Password)
+### 要件4: ユーザー認証（メールアドレス/パスワード）
 
-**User Story:** As a user, I want to create an account and log in with email and password, so that I can manage my newspapers and distinguish myself from other users.
+**ユーザーストーリー:** ユーザーとして、メールアドレスとパスワードでアカウントを作成してログインしたい。そうすることで、自分の新聞を管理し、他のユーザーと区別できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When a user accesses the application, the MyRSSPress system MUST display login/signup options
-2. When a user selects signup, the MyRSSPress system MUST request email address and password input
-3. When entering a password, the MyRSSPress system MUST validate that it meets the following requirements:
-   - Minimum 8 characters
-   - Contains uppercase, lowercase, and numbers
-4. When a user completes signup, the MyRSSPress system MUST send a confirmation email
-5. When a user confirms their email address, the MyRSSPress system MUST activate the account
-6. When a user logs in, the MyRSSPress system MUST establish a session with AWS Cognito
-7. When a user is logged in, the MyRSSPress system MUST automatically associate creator information when saving newspapers
-8. When a user logs out, the MyRSSPress system MUST terminate the session
-9. When a user forgets their password, the MyRSSPress system MUST provide password reset functionality
+1. ユーザーがアプリケーションにアクセスしたとき、MyRSSPressシステムはログイン/サインアップオプションを表示しなければならない
+2. ユーザーがサインアップを選択したとき、MyRSSPressシステムはメールアドレスとパスワードの入力を求めなければならない
+3. パスワードを入力するとき、MyRSSPressシステムは以下の要件を満たすことを検証しなければならない：
+   - 最小8文字
+   - 大文字、小文字、数字を含む
+4. ユーザーがサインアップを完了したとき、MyRSSPressシステムは確認メールを送信しなければならない
+5. ユーザーがメールアドレスを確認したとき、MyRSSPressシステムはアカウントを有効化しなければならない
+6. ユーザーがログインしたとき、MyRSSPressシステムはAWS Cognitoでセッションを確立しなければならない
+7. ユーザーがログインしているとき、MyRSSPressシステムは新聞保存時に作成者情報を自動的に関連付けなければならない
+8. ユーザーがログアウトしたとき、MyRSSPressシステムはセッションを終了しなければならない
+9. ユーザーがパスワードを忘れたとき、MyRSSPressシステムはパスワードリセット機能を提供しなければならない
 
-### Requirement 5: User Authentication (Google OAuth)
+### 要件5: ユーザー認証（Google OAuth）
 
-**User Story:** As a user, I want to log in with my Google account, so that I can easily access without creating a new password.
+**ユーザーストーリー:** ユーザーとして、Googleアカウントでログインしたい。そうすることで、新しいパスワードを作成せずに簡単にアクセスできる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When displaying the login screen, the MyRSSPress system MUST display a "Sign in with Google" button
-2. When a user clicks the "Sign in with Google" button, the MyRSSPress system MUST initiate the Google OAuth authentication flow
-3. When a user authenticates with their Google account, the MyRSSPress system MUST establish a session with AWS Cognito
-4. On first login, the MyRSSPress system MUST retrieve Google profile information (name, email address) and create a user account
-5. When a user is logged in, the MyRSSPress system MUST automatically associate creator information when saving newspapers
-6. When a user logs out, the MyRSSPress system MUST terminate the session
+1. ログイン画面を表示するとき、MyRSSPressシステムは「Googleでログイン」ボタンを表示しなければならない
+2. ユーザーが「Googleでログイン」ボタンをクリックしたとき、MyRSSPressシステムはGoogle OAuth認証フローを開始しなければならない
+3. ユーザーがGoogleアカウントで認証したとき、MyRSSPressシステムはAWS Cognitoでセッションを確立しなければならない
+4. 初回ログイン時、MyRSSPressシステムはGoogleプロフィール情報（名前、メールアドレス）を取得してユーザーアカウントを作成しなければならない
+5. ユーザーがログインしているとき、MyRSSPressシステムは新聞保存時に作成者情報を自動的に関連付けなければならない
+6. ユーザーがログアウトしたとき、MyRSSPressシステムはセッションを終了しなければならない
 
-### Requirement 6: Newspaper Theme (Skin) Selection
+### 要件6: 新聞のテーマ（スキン）選択
 
-**User Story:** As a user, I want to select the appearance (theme/skin) of my newspaper, so that I can enjoy newspapers in my preferred design.
+**ユーザーストーリー:** ユーザーとして、新聞の見た目（テーマ/スキン）を選択したい。そうすることで、好みのデザインで新聞を楽しめる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When displaying the newspaper settings modal, the MyRSSPress system MUST include theme selection options
-2. When displaying theme selection options, the MyRSSPress system MUST provide the following themes:
-   - Classic (default): Traditional newspaper style
-   - Modern: Contemporary and clean design
-   - Dark: Dark mode style
-   - Vintage: Retro newspaper style
-3. When displaying each theme option, the MyRSSPress system MUST include a preview image
-4. When a user selects a theme, the MyRSSPress system MUST immediately update the newspaper style
-5. When saving a newspaper, the MyRSSPress system MUST include the selected theme in newspaper metadata
-6. When displaying a saved newspaper, the MyRSSPress system MUST apply the saved theme
+1. 新聞設定モーダルを表示するとき、MyRSSPressシステムはテーマ選択オプションを含めなければならない
+2. テーマ選択オプションを表示するとき、MyRSSPressシステムは以下のテーマを提供しなければならない：
+   - クラシック（デフォルト）：伝統的な新聞スタイル
+   - モダン：現代的でクリーンなデザイン
+   - ダーク：ダークモードスタイル
+   - ビンテージ：レトロな新聞スタイル
+3. 各テーマオプションを表示するとき、MyRSSPressシステムはプレビュー画像を含めなければならない
+4. ユーザーがテーマを選択したとき、MyRSSPressシステムは新聞のスタイルを即座に更新しなければならない
+5. 新聞を保存するとき、MyRSSPressシステムは選択されたテーマを新聞メタデータに含めなければならない
+6. 保存された新聞を表示するとき、MyRSSPressシステムは保存されたテーマを適用しなければならない
 
-### Requirement 7: Article Count Adjustment
+### 要件7: 記事数の調整
 
-**User Story:** As a user, I want to adjust the number of articles displayed in the newspaper, so that I can change the newspaper volume according to my reading time.
+**ユーザーストーリー:** ユーザーとして、新聞に表示する記事数を調整したい。そうすることで、読む時間に合わせて新聞のボリュームを変更できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When displaying the pre-generation settings screen, the MyRSSPress system MUST include article count selection options
-2. When displaying article count selection options, the MyRSSPress system MUST provide a slider or dropdown in the range of 5 to 20
-3. When setting default values, the MyRSSPress system MUST set 10 articles as the initial value
-4. When a user changes the article count, the MyRSSPress system MUST fetch the selected number of articles
-5. When the article count is less than the selected number, the MyRSSPress system MUST display all fetched articles
-6. When saving a newspaper, the MyRSSPress system MUST include the selected article count in newspaper metadata
+1. 新聞生成前の設定画面を表示するとき、MyRSSPressシステムは記事数選択オプションを含めなければならない
+2. 記事数選択オプションを表示するとき、MyRSSPressシステムは5から20の範囲でスライダーまたはドロップダウンを提供しなければならない
+3. デフォルト値を設定するとき、MyRSSPressシステムは10記事を初期値として設定しなければならない
+4. ユーザーが記事数を変更したとき、MyRSSPressシステムは選択された数の記事を取得しなければならない
+5. 記事数が選択された数より少ないとき、MyRSSPressシステムは取得できたすべての記事を表示しなければならない
+6. 新聞を保存するとき、MyRSSPressシステムは選択された記事数を新聞メタデータに含めなければならない
 
-### Requirement 8: Page Count Adjustment
+### 要件8: ページ数の調整
 
-**User Story:** As a user, I want to adjust the number of pages in the newspaper, so that I can display more articles across multiple pages.
+**ユーザーストーリー:** ユーザーとして、新聞のページ数を調整したい。そうすることで、より多くの記事を複数ページに分けて表示できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When displaying the pre-generation settings screen, the MyRSSPress system MUST include page count selection options
-2. When displaying page count selection options, the MyRSSPress system MUST provide choices in the range of 1 to 4
-3. When setting default values, the MyRSSPress system MUST set 1 page as the initial value
-4. When a user selects page count, the MyRSSPress system MUST distribute articles evenly across each page
-5. When displaying a multi-page newspaper, the MyRSSPress system MUST provide page navigation (previous/next buttons)
-6. When a user switches pages, the MyRSSPress system MUST display articles for the selected page
-7. When saving a newspaper, the MyRSSPress system MUST include the selected page count in newspaper metadata
-8. When displaying each page, the MyRSSPress system MUST display the current page number and total page count
+1. 新聞生成前の設定画面を表示するとき、MyRSSPressシステムはページ数選択オプションを含めなければならない
+2. ページ数選択オプションを表示するとき、MyRSSPressシステムは1から4の範囲で選択肢を提供しなければならない
+3. デフォルト値を設定するとき、MyRSSPressシステムは1ページを初期値として設定しなければならない
+4. ユーザーがページ数を選択したとき、MyRSSPressシステムは記事を均等に各ページに配分しなければならない
+5. 複数ページの新聞を表示するとき、MyRSSPressシステムはページナビゲーション（前へ/次へボタン）を提供しなければならない
+6. ユーザーがページを切り替えたとき、MyRSSPressシステムは選択されたページの記事を表示しなければならない
+7. 新聞を保存するとき、MyRSSPressシステムは選択されたページ数を新聞メタデータに含めなければならない
+8. 各ページを表示するとき、MyRSSPressシステムは現在のページ番号と総ページ数を表示しなければならない
 
-### Requirement 9: Environment Separation (Development/Staging)
+### 要件9: 環境分離（Development/Staging）
 
-**User Story:** As a developer, I want to test new features without affecting the production environment, so that I can develop and deploy safely.
+**ユーザーストーリー:** 開発者として、本番環境に影響を与えずに新機能をテストしたい。そうすることで、安全に開発とデプロイができる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When building infrastructure, the MyRSSPress system MUST provide a development environment
-2. When building infrastructure, the MyRSSPress system MUST provide a staging environment
-3. When building each environment, the MyRSSPress system MUST create independent AWS resources
-4. When switching environments, the MyRSSPress system MUST use environment-specific configurations
-5. When deploying code, the MyRSSPress system MUST follow this flow:
-   - develop branch → development environment
-   - staging branch → staging environment
-   - main branch → production environment
+1. インフラストラクチャを構築するとき、MyRSSPressシステムはdevelopment環境を提供しなければならない
+2. インフラストラクチャを構築するとき、MyRSSPressシステムはstaging環境を提供しなければならない
+3. 各環境を構築するとき、MyRSSPressシステムは独立したAWSリソースを作成しなければならない
+4. 環境を切り替えるとき、MyRSSPressシステムは環境固有の設定を使用しなければならない
+5. コードをデプロイするとき、MyRSSPressシステムは以下のフローに従わなければならない：
+   - developブランチ → development環境
+   - stagingブランチ → staging環境
+   - mainブランチ → production環境
 
-## Design Considerations
+## 設計上の考慮事項
 
-To prepare for future implementation of these features, the current design should consider the following points:
+これらの機能を将来実装する際に備えて、現在の設計では以下の点を考慮する必要があります：
 
-1. **Data Model**: Separate newspaper templates and newspaper issues
+1. **データモデル**: 新聞テンプレートと新聞発行版を分離
 
-   **NewspaperTemplate**:
-   - `templateId`: Template ID (UUID)
-   - `userId`: Creator's user ID (Cognito Sub)
-   - `name`: Newspaper name
-   - `feedUrls`: RSS feed URL list
-   - `theme`: Selected theme/skin
-   - `articleCount`: Article count
-   - `pageCount`: Page count
-   - `isPublic`: Public/private flag
-   - `autoPublish`: Auto-publish enable/disable flag
-   - `enableSummary`: Summary feature enable/disable flag
-   - `createdAt`: Template creation datetime
-   - `updatedAt`: Template update datetime
+   **NewspaperTemplate（新聞テンプレート）**:
+   - `templateId`: テンプレートID（UUID）
+   - `userId`: 作成者のユーザーID（Cognito Sub）
+   - `name`: 新聞名
+   - `feedUrls`: RSSフィードURLリスト
+   - `theme`: 選択されたテーマ/スキン
+   - `articleCount`: 記事数
+   - `pageCount`: ページ数
+   - `isPublic`: 公開/非公開フラグ
+   - `autoPublish`: 自動発行の有効/無効フラグ
+   - `enableSummary`: 要約機能の有効/無効フラグ
+   - `createdAt`: テンプレート作成日時
+   - `updatedAt`: テンプレート更新日時
    
-   **NewspaperIssue**:
-   - `issueId`: Issue ID (UUID)
-   - `templateId`: Original template ID
-   - `publishDate`: Publication date (YYYY-MM-DD format)
-   - `articles`: Article data (JSON array)
-   - `createdAt`: Publication datetime
-   - `viewCount`: View count
+   **NewspaperIssue（新聞発行版）**:
+   - `issueId`: 発行版ID（UUID）
+   - `templateId`: 元のテンプレートID
+   - `publishDate`: 発行日（YYYY-MM-DD形式）
+   - `articles`: 記事データ（JSON配列）
+   - `createdAt`: 発行日時
+   - `viewCount`: 閲覧数
    
-   **DynamoDB Table Design**:
+   **DynamoDBテーブル設計**:
    
-   **NewspaperTemplates Table**:
+   **NewspaperTemplatesテーブル**:
    - PK: `TEMPLATE#{templateId}`
    - SK: `METADATA`
-   - Attributes: NewspaperTemplate fields above
-   - GSI: `UserTemplates` (for retrieving user's template list)
+   - 属性: 上記のNewspaperTemplateフィールド
+   - GSI: `UserTemplates`（ユーザーのテンプレート一覧取得用）
      - PK: `USER#{userId}`
      - SK: `CREATED#{createdAt}#{templateId}`
    
-   **NewspaperIssues Table**:
+   **NewspaperIssuesテーブル**:
    - PK: `TEMPLATE#{templateId}`
    - SK: `ISSUE#{publishDate}`
-   - Attributes: NewspaperIssue fields above
-   - GSI: `PublicIssues` (for retrieving public newspaper issue list)
+   - 属性: 上記のNewspaperIssueフィールド
+   - GSI: `PublicIssues`（公開新聞の発行版一覧取得用）
      - PK: `PUBLIC`
      - SK: `PUBLISHED#{publishDate}#{issueId}`
    
-   Add the following field to article entity:
-   - `summary`: AI-generated summary text
+   記事エンティティに以下のフィールドを追加：
+   - `summary`: AI生成された要約テキスト
    
-   **ReadArticle**:
-   - `userId`: User ID (Cognito Sub)
-   - `articleUrl`: Article URL
-   - `readAt`: Read datetime (ISO 8601)
+   **ReadArticle（既読記事）**:
+   - `userId`: ユーザーID（Cognito Sub）
+   - `articleUrl`: 記事URL
+   - `readAt`: 既読日時（ISO 8601）
    
-   **DynamoDB Table Design (Read Articles)**:
+   **DynamoDBテーブル設計（既読記事）**:
    
-   **ReadArticles Table**:
+   **ReadArticlesテーブル**:
    - PK: `USER#{userId}`
    - SK: `ARTICLE#{articleUrl}`
-   - Attributes: `userId`, `articleUrl`, `readAt`
-   - TTL: Auto-delete after 90 days (remove old read articles)
+   - 属性: `userId`, `articleUrl`, `readAt`
+   - TTL: 90日後に自動削除（古い既読記事を削除）
    
-   **Access Patterns**:
-   - Get template: `GetItem(PK=TEMPLATE#{templateId}, SK=METADATA)`
-   - User's template list: `Query(GSI=UserTemplates, PK=USER#{userId})`
-   - Get specific date issue: `GetItem(PK=TEMPLATE#{templateId}, SK=ISSUE#{publishDate})`
-   - Get all template issues: `Query(PK=TEMPLATE#{templateId}, SK begins_with ISSUE#)`
-   - Get latest issue: `Query(PK=TEMPLATE#{templateId}, SK begins_with ISSUE#, ScanIndexForward=false, Limit=1)`
-   - Public newspaper issue list: `Query(GSI=PublicIssues, PK=PUBLIC)`
+   **アクセスパターン**:
+   - テンプレート取得: `GetItem(PK=TEMPLATE#{templateId}, SK=METADATA)`
+   - ユーザーのテンプレート一覧: `Query(GSI=UserTemplates, PK=USER#{userId})`
+   - 特定日の発行版取得: `GetItem(PK=TEMPLATE#{templateId}, SK=ISSUE#{publishDate})`
+   - テンプレートの全発行版取得: `Query(PK=TEMPLATE#{templateId}, SK begins_with ISSUE#)`
+   - 最新の発行版取得: `Query(PK=TEMPLATE#{templateId}, SK begins_with ISSUE#, ScanIndexForward=false, Limit=1)`
+   - 公開新聞の発行版一覧: `Query(GSI=PublicIssues, PK=PUBLIC)`
 
-2. **Authentication**: User authentication using AWS Cognito
-   - User pool configuration
-   - Google OAuth integration
-   - JWT token validation
+2. **認証**: AWS Cognitoを使用したユーザー認証
+   - ユーザープール設定
+   - Google OAuth統合
+   - JWTトークン検証
 
-3. **Access Control**: Logic to check newspaper viewing permissions
-   - Public newspapers: Viewable by all users
-   - Private newspapers: Viewable only by creator
+3. **アクセス制御**: 新聞の閲覧権限をチェックするロジック
+   - 公開新聞：すべてのユーザーが閲覧可能
+   - 非公開新聞：作成者のみ閲覧可能
 
-4. **UI/UX**: Extensible component design
-   - Public/private settings UI
-   - Theme selection UI
-   - Article count/page count adjustment UI
-   - Page navigation
-   - Auto-publish settings UI
-   - Summary display UI
-   - Unique URL display and copy functionality
-   - Issue history display UI (calendar view or list)
-   - Publication date selection UI
-   - Template/issue distinction display
+4. **UI/UX**: 拡張可能なコンポーネント設計
+   - 公開/非公開設定UI
+   - テーマ選択UI
+   - 記事数・ページ数調整UI
+   - ページナビゲーション
+   - 自動発行設定UI
+   - 要約表示UI
+   - 固有URL表示とコピー機能
+   - 発行版履歴表示UI（カレンダービューまたはリスト）
+   - 発行日選択UI
+   - テンプレート/発行版の区別表示
 
-5. **API Design**: Extensible endpoints
-   - Endpoints requiring authentication (Authorization header)
+5. **API設計**: 拡張可能なエンドポイント
+   - 認証が必要なエンドポイント（Authorization ヘッダー）
    
-   **Template Management**:
-   - `POST /templates` - Create newspaper template
-   - `GET /templates/{templateId}` - Get template
-   - `PUT /templates/{templateId}` - Update template
-   - `DELETE /templates/{templateId}` - Delete template
-   - `GET /users/{userId}/templates` - User's template list
+   **テンプレート管理**:
+   - `POST /templates` - 新聞テンプレート作成
+   - `GET /templates/{templateId}` - テンプレート取得
+   - `PUT /templates/{templateId}` - テンプレート更新
+   - `DELETE /templates/{templateId}` - テンプレート削除
+   - `GET /users/{userId}/templates` - ユーザーのテンプレート一覧
    
-   **Issue Management**:
-   - `GET /templates/{templateId}/latest` - Get latest issue (generate if not exists)
-   - `GET /templates/{templateId}/issues/{date}` - Get specific date issue
-   - `GET /templates/{templateId}/issues` - All template issues list
-   - `POST /templates/{templateId}/issues` - Manually generate issue
+   **発行版管理**:
+   - `GET /templates/{templateId}/latest` - 最新の発行版取得（存在しない場合は生成）
+   - `GET /templates/{templateId}/issues/{date}` - 特定日の発行版取得
+   - `GET /templates/{templateId}/issues` - テンプレートの全発行版一覧
+   - `POST /templates/{templateId}/issues` - 手動で発行版を生成
    
-   **Read Article Management**:
-   - `POST /users/{userId}/read-articles` - Record read article
-   - `GET /users/{userId}/read-articles` - Get user's read articles list
-   - `DELETE /users/{userId}/read-articles/{articleUrl}` - Delete read article (mark as unread)
+   **既読記事管理**:
+   - `POST /users/{userId}/read-articles` - 既読記事を記録
+   - `GET /users/{userId}/read-articles` - ユーザーの既読記事一覧取得
+   - `DELETE /users/{userId}/read-articles/{articleUrl}` - 既読記事を削除（未読に戻す）
    
-   **Other**:
-   - Article summary generation (Bedrock integration)
-   - Bookmark management
+   **その他**:
+   - 記事要約生成（Bedrock統合）
+   - ブックマークの管理
 
-6. **Infrastructure**: 
-   - Terraform modules structured for easy environment addition
-   - Cognito user pool and app client
-   - Google OAuth configuration
+6. **インフラストラクチャ**: 
+   - Terraformモジュールは環境を追加しやすい構造
+   - Cognitoユーザープールとアプリクライアント
+   - Google OAuth設定
 
-7. **Environment Variables**: Different settings per environment
+7. **環境変数**: 環境ごとに異なる設定
    - Cognito User Pool ID
    - Cognito App Client ID
    - Google OAuth Client ID/Secret
-   - Bedrock Model ID (for summaries)
-   - Summary generation timeout settings
+   - Bedrock Model ID（要約用）
+   - 要約生成のタイムアウト設定
 
-8. **Performance**: Summary generation optimization
-   - Parallel processing for multiple article summaries
-   - Consider summary caching (avoid re-summarizing same articles)
-   - Timeout settings (within 3 seconds per article)
+8. **パフォーマンス**: 要約生成の最適化
+   - 複数記事の要約を並行処理
+   - 要約キャッシュの検討（同じ記事の再要約を避ける）
+   - タイムアウト設定（記事あたり3秒以内）
 
 
-### Requirement 10: Newspaper Auto-Publishing (Periodic Updates)
+### 要件10: 新聞の自動発行（定期更新）
 
-**User Story:** As a user, I want my favorite newspapers to automatically update daily, so that I can continuously read the latest articles with the same feed configuration.
+**ユーザーストーリー:** ユーザーとして、お気に入りの新聞を毎日自動的に更新したい。そうすることで、同じフィード構成で最新の記事を継続的に読める。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When a user is logged in, the MyRSSPress system MUST display an "Enable auto-publish" option when saving newspapers
-2. When a user enables auto-publish, the MyRSSPress system MUST save as a newspaper template
-3. When saving a newspaper template, the MyRSSPress system MUST generate a unique template ID
-4. When generating unique URLs, the MyRSSPress system MUST use the following format:
-   - Latest version: `/newspapers/{templateId}/latest`
-   - Specific date version: `/newspapers/{templateId}/issues/{YYYY-MM-DD}`
-5. When a user accesses the latest version URL, the MyRSSPress system MUST execute the following process:
-   - Check if an issue exists for today's date
-   - If exists: Display the saved issue
-   - If not exists: Generate and save a new issue using template settings
-6. When generating a new issue, the MyRSSPress system MUST apply template settings (feed URLs, article count, page count, theme, summary enable/disable)
-7. When saving an issue, the MyRSSPress system MUST include the following information:
-   - Publication date (YYYY-MM-DD)
-   - Article data (title, description, link, image, summary)
-   - Template ID
-8. When displaying a newspaper with auto-publish enabled, the MyRSSPress system MUST display the following buttons:
-   - "View Latest" button
-   - "View Past Issues" button
-9. When a user clicks "View Past Issues", the MyRSSPress system MUST display a list of publication dates
-10. When a user selects a specific publication date, the MyRSSPress system MUST display that day's issue
-11. When displaying the My Newspapers list, the MyRSSPress system MUST display an "Auto-update" badge on templates with auto-publish enabled
-12. When a user edits template settings, the MyRSSPress system MUST allow toggling auto-publish on/off
-13. When template settings are updated, the MyRSSPress system MUST apply new settings from the next issue onwards
-14. When auto-publish is disabled, the MyRSSPress system MUST retain existing issues and stop generating new issues
+1. ユーザーがログインしているとき、MyRSSPressシステムは新聞保存時に「自動発行を有効にする」オプションを表示しなければならない
+2. ユーザーが自動発行を有効にしたとき、MyRSSPressシステムは新聞テンプレートとして保存しなければならない
+3. 新聞テンプレートを保存するとき、MyRSSPressシステムは固有のテンプレートIDを生成しなければならない
+4. 固有のURLを生成するとき、MyRSSPressシステムは以下の形式を使用しなければならない：
+   - 最新版: `/newspapers/{templateId}/latest`
+   - 特定日版: `/newspapers/{templateId}/issues/{YYYY-MM-DD}`
+5. ユーザーが最新版URLにアクセスしたとき、MyRSSPressシステムは以下の処理を実行しなければならない：
+   - 今日の日付で発行版が存在するか確認
+   - 存在する場合：保存された発行版を表示
+   - 存在しない場合：テンプレート設定を使用して新しい発行版を生成し、保存
+6. 新しい発行版を生成するとき、MyRSSPressシステムはテンプレートの設定（フィードURL、記事数、ページ数、テーマ、要約有効/無効）を適用しなければならない
+7. 発行版を保存するとき、MyRSSPressシステムは以下の情報を含めなければならない：
+   - 発行日（YYYY-MM-DD）
+   - 記事データ（タイトル、説明、リンク、画像、要約）
+   - テンプレートID
+8. 自動発行が有効な新聞を表示するとき、MyRSSPressシステムは以下のボタンを表示しなければならない：
+   - 「最新版を見る」ボタン
+   - 「過去の発行版を見る」ボタン
+9. ユーザーが「過去の発行版を見る」をクリックしたとき、MyRSSPressシステムは発行日のリストを表示しなければならない
+10. ユーザーが特定の発行日を選択したとき、MyRSSPressシステムはその日の発行版を表示しなければならない
+11. マイ新聞一覧を表示するとき、MyRSSPressシステムは自動発行が有効なテンプレートに「自動更新」バッジを表示しなければならない
+12. ユーザーがテンプレート設定を編集するとき、MyRSSPressシステムは自動発行のオン/オフを切り替えられなければならない
+13. テンプレート設定が更新されたとき、MyRSSPressシステムは次回の発行版から新しい設定を適用しなければならない
+14. 自動発行が無効化されたとき、MyRSSPressシステムは既存の発行版を保持し、新しい発行版の生成を停止しなければならない
 
-### Requirement 11: Article Summary Feature
+### 要件11: 記事要約機能
 
-**User Story:** As a user, I want to read article summaries, so that I can quickly grasp content before reading the full text.
+**ユーザーストーリー:** ユーザーとして、記事の要約を読みたい。そうすることで、全文を読む前に内容を素早く把握できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When generating newspapers, the MyRSSPress system MUST generate AI summaries for each article
-2. When generating AI summaries, the MyRSSPress system MUST use AWS Bedrock (Claude 3 Haiku)
-3. When generating summaries, the MyRSSPress system MUST use article title and description as input
-4. For generated summaries, the MyRSSPress system MUST limit to 2-3 sentences (approximately 50-100 characters)
-5. When displaying articles, the MyRSSPress system MUST display the summary section below the article
-6. When displaying the summary section, the MyRSSPress system MUST visually distinguish it with a "Summary" label
-7. When a summary cannot be generated, the MyRSSPress system MUST display the original article description
-8. When summary feature can be enabled/disabled in newspaper settings, the MyRSSPress system MUST show or hide summaries according to settings
-9. When summary generation times out, the MyRSSPress system MUST display articles without summaries
-10. When generating summaries for multiple articles, the MyRSSPress system MUST minimize generation time with parallel processing
+1. 新聞生成時、MyRSSPressシステムは各記事に対してAI要約を生成しなければならない
+2. AI要約を生成するとき、MyRSSPressシステムはAWS Bedrock（Claude 3 Haiku）を使用しなければならない
+3. 要約を生成するとき、MyRSSPressシステムは記事のタイトルと説明を入力として使用しなければならない
+4. 生成された要約は、MyRSSPressシステムは2〜3文（50〜100文字程度）に制限しなければならない
+5. 記事を表示するとき、MyRSSPressシステムは要約欄を記事の下部に表示しなければならない
+6. 要約欄を表示するとき、MyRSSPressシステムは「要約」ラベルを付けて視覚的に区別しなければならない
+7. 要約が生成できなかったとき、MyRSSPressシステムは元の記事説明を表示しなければならない
+8. 新聞設定で要約機能を有効/無効にできるとき、MyRSSPressシステムは設定に従って要約を表示または非表示にしなければならない
+9. 要約生成がタイムアウトしたとき、MyRSSPressシステムは要約なしで記事を表示しなければならない
+10. 複数記事の要約を生成するとき、MyRSSPressシステムは並行処理で生成時間を最小化しなければならない
 
-### Requirement 12: Article Read Status Feature
+### 要件12: 記事の既読機能
 
-**User Story:** As a user, I want to record clicked articles as read, so that I can track which articles I've read and sync read status across multiple devices.
+**ユーザーストーリー:** ユーザーとして、クリックした記事を既読として記録したい。そうすることで、どの記事を読んだか把握でき、複数デバイスで既読状態を同期できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When a user clicks an article link, the MyRSSPress system MUST mark that article as read
-2. When a user is logged in, the MyRSSPress system MUST save read articles to DynamoDB
-3. When a user is not logged in, the MyRSSPress system MUST save read articles to browser local storage
-4. When a user logs in, the MyRSSPress system MUST migrate read articles from local storage to DynamoDB
-5. When displaying read articles, the MyRSSPress system MUST visually distinguish them (e.g., lighten title color, display read badge)
-6. When loading a newspaper page, the MyRSSPress system MUST retrieve the user's read articles list
-7. When retrieving read articles for logged-in users, the MyRSSPress system MUST retrieve from DynamoDB
-8. When retrieving read articles for non-logged-in users, the MyRSSPress system MUST retrieve from local storage
-9. When a user logs in on another device, the MyRSSPress system MUST sync read status
-10. When saving read article data, the MyRSSPress system MUST include article URL, read datetime, and user ID
+1. ユーザーが記事リンクをクリックしたとき、MyRSSPressシステムはその記事を既読としてマークしなければならない
+2. ユーザーがログインしているとき、MyRSSPressシステムは既読記事をDynamoDBに保存しなければならない
+3. ユーザーがログインしていないとき、MyRSSPressシステムは既読記事をブラウザのローカルストレージに保存しなければならない
+4. ユーザーがログインしたとき、MyRSSPressシステムはローカルストレージの既読記事をDynamoDBに移行しなければならない
+5. 既読の記事を表示するとき、MyRSSPressシステムは視覚的に区別しなければならない（例：タイトルの色を薄くする、既読バッジを表示）
+6. 新聞ページを読み込むとき、MyRSSPressシステムはユーザーの既読記事リストを取得しなければならない
+7. ログインユーザーの既読記事を取得するとき、MyRSSPressシステムはDynamoDBから取得しなければならない
+8. 未ログインユーザーの既読記事を取得するとき、MyRSSPressシステムはローカルストレージから取得しなければならない
+9. ユーザーが別のデバイスでログインしたとき、MyRSSPressシステムは既読状態を同期しなければならない
+10. 既読記事データを保存するとき、MyRSSPressシステムは記事URL、既読日時、ユーザーIDを含めなければならない
 
-### Requirement 13: Bookmark Feature
+### 要件13: ブックマーク機能
 
-**User Story:** As a user, I want to bookmark articles while reading, so that I can save interesting content for later reference.
+**ユーザーストーリー:** ユーザーとして、読んでいる間に記事をブックマークしたい。そうすることで、興味深いコンテンツを後で参照するために保存できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-1. When viewing articles, the MyRSSPress system MUST display a bookmark icon on each article
-2. When a user clicks the bookmark icon, the MyRSSPress system MUST add the article URL to the bookmark list
-3. When an article is bookmarked, the MyRSSPress system MUST change the icon to a filled state
-4. When a user clicks a bookmarked icon, the MyRSSPress system MUST remove the bookmark
-5. When bookmark status changes, the MyRSSPress system MUST immediately update the UI
-6. When a user accesses the bookmarks list page, the MyRSSPress system MUST retrieve and display all saved article URLs
+1. 記事を閲覧しているとき、MyRSSPressシステムは各記事にブックマークアイコンを表示しなければならない
+2. ユーザーがブックマークアイコンをクリックしたとき、MyRSSPressシステムは記事URLをブックマークリストに追加しなければならない
+3. 記事がブックマークされたとき、MyRSSPressシステムはアイコンを塗りつぶし状態に変更しなければならない
+4. ユーザーがブックマーク済みアイコンをクリックしたとき、MyRSSPressシステムはブックマークを解除しなければならない
+5. ブックマーク状態が変更されたとき、MyRSSPressシステムは即座にUIを更新しなければならない
+6. ユーザーがブックマーク一覧ページにアクセスしたとき、MyRSSPressシステムは保存されたすべての記事URLを取得して表示しなければならない
 
-### Requirement 14: Error Code Standardization
+### 要件14: エラーコードの標準化
 
-**User Story:** As a developer, I want to manage API errors with standardized error codes, so that I can display appropriate multilingual error messages on the frontend and make debugging easier.
+**ユーザーストーリー:** 開発者として、APIエラーを標準化されたエラーコードで管理したい。そうすることで、フロントエンドで適切な多言語エラーメッセージを表示でき、デバッグも容易になる。
 
-#### Background
+#### 背景
 
-Currently, the backend API returns error messages directly in Japanese:
+現在、バックエンドAPIは日本語のエラーメッセージを直接返しています：
 
 ```json
 {
@@ -367,16 +367,16 @@ Currently, the backend API returns error messages directly in Japanese:
 }
 ```
 
-This has the following problems:
-1. Difficult to support multiple languages (error messages are hardcoded)
-2. Frontend cannot determine error type
-3. Error causes are unclear during debugging
+これには以下の問題があります：
+1. 多言語対応が困難（エラーメッセージがハードコード）
+2. フロントエンドでエラーの種類を判別できない
+3. デバッグ時にエラーの原因が分かりにくい
 
-#### Acceptance Criteria
+#### 受入基準
 
-**Backend:**
+**バックエンド:**
 
-1. When returning API errors, the MyRSSPress system MUST use the following format:
+1. APIエラーを返すとき、MyRSSPressシステムは以下の形式を使用しなければならない：
 ```json
 {
   "error": "Developer-friendly error message in English",
@@ -387,14 +387,14 @@ This has the following problems:
 }
 ```
 
-2. When defining error codes, the MyRSSPress system MUST follow these naming conventions:
-   - Uppercase snake case (e.g., `GENERATE_NEWSPAPER_NO_ARTICLES`)
-   - Use feature name as prefix (e.g., `GENERATE_NEWSPAPER_*`, `SUGGEST_FEEDS_*`)
-   - Descriptive and clear names
+2. エラーコードを定義するとき、MyRSSPressシステムは以下の命名規則に従わなければならない：
+   - 大文字のスネークケース（例：`GENERATE_NEWSPAPER_NO_ARTICLES`）
+   - 機能名をプレフィックスとして使用（例：`GENERATE_NEWSPAPER_*`、`SUGGEST_FEEDS_*`）
+   - 説明的で明確な名前
 
-3. When managing error codes, the MyRSSPress system MUST consolidate them in the `backend/src/constants/errorCodes.ts` file
+3. エラーコードを管理するとき、MyRSSPressシステムは`backend/src/constants/errorCodes.ts`ファイルに集約しなければならない
 
-4. When creating the error codes file, the MyRSSPress system MUST use the following structure:
+4. エラーコードファイルを作成するとき、MyRSSPressシステムは以下の構造を使用しなければならない：
 ```typescript
 export const ErrorCodes = {
   // Newspaper generation errors
@@ -427,9 +427,9 @@ export const ErrorCodes = {
 export type ErrorCode = typeof ErrorCodes[keyof typeof ErrorCodes];
 ```
 
-5. When returning error responses, the MyRSSPress system MUST follow these examples:
+5. エラーレスポンスを返すとき、MyRSSPressシステムは以下の例に従わなければならない：
 ```typescript
-// Example 1: No articles could be fetched
+// 例1: 記事が取得できない
 return c.json(
   {
     error: 'No articles could be fetched from the provided feeds',
@@ -442,7 +442,7 @@ return c.json(
   400
 );
 
-// Example 2: Insufficient articles
+// 例2: 記事数が不足
 return c.json(
   {
     error: 'Insufficient articles to generate newspaper (minimum: 3)',
@@ -456,11 +456,11 @@ return c.json(
 );
 ```
 
-**Frontend:**
+**フロントエンド:**
 
-6. When defining error messages, the MyRSSPress system MUST add them to `frontend/lib/i18n.ts`
+6. エラーメッセージを定義するとき、MyRSSPressシステムは`frontend/lib/i18n.ts`に追加しなければならない
 
-7. When adding error messages, the MyRSSPress system MUST use the following structure:
+7. エラーメッセージを追加するとき、MyRSSPressシステムは以下の構造を使用しなければならない：
 ```typescript
 export const translations = {
   en: {
@@ -510,7 +510,7 @@ export const translations = {
 };
 ```
 
-8. When handling API errors, the MyRSSPress system MUST use the following helper function:
+8. APIエラーを処理するとき、MyRSSPressシステムは以下のヘルパー関数を使用しなければならない：
 ```typescript
 // frontend/lib/errorHandler.ts
 import { translations, Locale } from './i18n';
@@ -534,7 +534,7 @@ export function getErrorMessage(error: APIError, locale: Locale): string {
 }
 ```
 
-9. When calling APIs, the MyRSSPress system MUST use the following pattern:
+9. APIを呼び出すとき、MyRSSPressシステムは以下のパターンを使用しなければならない：
 ```typescript
 // frontend/lib/api.ts
 import { getErrorMessage } from './errorHandler';
@@ -561,43 +561,43 @@ export async function generateNewspaper(
 }
 ```
 
-**Documentation:**
+**ドキュメント:**
 
-10. When adding error codes, the MyRSSPress system MUST document the error code list in `docs/API.md`
+10. エラーコードを追加するとき、MyRSSPressシステムは`docs/API.md`にエラーコード一覧を記載しなければならない
 
-11. When creating error code documentation, the MyRSSPress system MUST include the following information:
-    - Error code
-    - HTTP status code
-    - Description
-    - Occurrence conditions
-    - Resolution method
+11. エラーコードドキュメントを作成するとき、MyRSSPressシステムは以下の情報を含めなければならない：
+    - エラーコード
+    - HTTPステータスコード
+    - 説明
+    - 発生条件
+    - 対処方法
 
-**Migration Strategy:**
+**移行戦略:**
 
-12. When migrating existing error responses, the MyRSSPress system MUST execute in the following order:
-    - Step 1: Create `errorCodes.ts` and define error codes
-    - Step 2: Update backend error responses
-    - Step 3: Add error messages to frontend i18n
-    - Step 4: Update frontend error handling
-    - Step 5: Remove existing hardcoded error messages
+12. 既存のエラーレスポンスを移行するとき、MyRSSPressシステムは以下の順序で実行しなければならない：
+    - ステップ1: `errorCodes.ts`を作成してエラーコードを定義
+    - ステップ2: バックエンドのエラーレスポンスを更新
+    - ステップ3: フロントエンドのi18nにエラーメッセージを追加
+    - ステップ4: フロントエンドのエラーハンドリングを更新
+    - ステップ5: 既存のハードコードされたエラーメッセージを削除
 
-13. When completing migration, the MyRSSPress system MUST update the following files:
+13. 移行を完了するとき、MyRSSPressシステムは以下のファイルを更新しなければならない：
     - `backend/src/routes/newspapers.ts`
     - `backend/src/routes/feeds.ts`
     - `frontend/lib/api.ts`
     - `frontend/app/page.tsx`
     - `frontend/app/newspaper/page.tsx`
 
-### Requirement 15: Migration to Property-Based Testing
+### 要件15: プロパティベーステストへの移行
 
-**User Story:** As a developer, I want to rewrite example-based tests to property-based tests, so that I can test a wider range of input patterns and automatically discover edge cases.
+**ユーザーストーリー:** 開発者として、例ベースのテストをプロパティベーステストに書き換えたい。そうすることで、より広範囲の入力パターンをテストし、エッジケースを自動的に発見できる。
 
-#### Acceptance Criteria
+#### 受入基準
 
-**Frontend:**
+**フロントエンド:**
 
-1. When rewriting tests for `layoutCalculator.ts`, the MyRSSPress system MUST verify the following properties:
-   - **Completeness**: All articles are included in layout (lead + topStories + remaining = original article count)
+1. `layoutCalculator.ts`のテストを書き換えるとき、MyRSSPressシステムは以下のプロパティを検証しなければならない：
+   - **完全性**: すべての記事がレイアウトに含まれる（lead + topStories + remaining = 元の記事数）
    - **順序性**: 記事は重要度の降順に並んでいる
    - **境界条件**: 0記事、1記事、100記事などの極端なケースで正しく動作する
    - **不変性**: 元の記事配列が変更されない
@@ -648,10 +648,10 @@ export async function generateNewspaper(
     - ステップ2: プロパティベーステストが安定したら例ベースのテストを削除
     - ステップ3: すべてのテストファイルで移行を完了
 
-14. When completing migration, the MyRSSPress system MUST rewrite the following files to property-based tests:
+14. 移行を完了するとき、MyRSSPressシステムは以下のファイルをプロパティベーステストに書き換えなければならない：
     - `frontend/lib/layoutCalculator.test.ts`
     - `frontend/components/features/newspaper/NewspaperLayout.test.tsx`
     - `frontend/components/features/feed/FeedSelector.test.tsx`
     - `backend/src/services/importanceCalculator.test.ts`
     - `backend/src/services/rssParser.test.ts`
-    - `backend/src/routes/*.test.ts` (all API endpoints)
+    - `backend/src/routes/*.test.ts`（すべてのAPIエンドポイント）

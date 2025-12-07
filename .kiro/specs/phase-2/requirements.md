@@ -274,91 +274,91 @@ To prepare for future implementation of these features, the current design shoul
    - Timeout settings (within 3 seconds per article)
 
 
-### 要件10: 新聞の自動発行（定期更新）
+### Requirement 10: Newspaper Auto-Publishing (Periodic Updates)
 
-**ユーザーストーリー:** ユーザーとして、お気に入りの新聞を毎日自動的に更新したい。そうすることで、同じフィード構成で最新の記事を継続的に読める。
+**User Story:** As a user, I want my favorite newspapers to automatically update daily, so that I can continuously read the latest articles with the same feed configuration.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. ユーザーがログインしているとき、MyRSSPressシステムは新聞保存時に「自動発行を有効にする」オプションを表示しなければならない
-2. ユーザーが自動発行を有効にしたとき、MyRSSPressシステムは新聞テンプレートとして保存しなければならない
-3. 新聞テンプレートを保存するとき、MyRSSPressシステムは固有のテンプレートIDを生成しなければならない
-4. 固有のURLを生成するとき、MyRSSPressシステムは以下の形式を使用しなければならない：
-   - 最新版: `/newspapers/{templateId}/latest`
-   - 特定日版: `/newspapers/{templateId}/issues/{YYYY-MM-DD}`
-5. ユーザーが最新版URLにアクセスしたとき、MyRSSPressシステムは以下の処理を実行しなければならない：
-   - 今日の日付で発行版が存在するか確認
-   - 存在する場合：保存された発行版を表示
-   - 存在しない場合：テンプレート設定を使用して新しい発行版を生成し、保存
-6. 新しい発行版を生成するとき、MyRSSPressシステムはテンプレートの設定（フィードURL、記事数、ページ数、テーマ、要約有効/無効）を適用しなければならない
-7. 発行版を保存するとき、MyRSSPressシステムは以下の情報を含めなければならない：
-   - 発行日（YYYY-MM-DD）
-   - 記事データ（タイトル、説明、リンク、画像、要約）
-   - テンプレートID
-8. 自動発行が有効な新聞を表示するとき、MyRSSPressシステムは以下のボタンを表示しなければならない：
-   - 「最新版を見る」ボタン
-   - 「過去の発行版を見る」ボタン
-9. ユーザーが「過去の発行版を見る」をクリックしたとき、MyRSSPressシステムは発行日のリストを表示しなければならない
-10. ユーザーが特定の発行日を選択したとき、MyRSSPressシステムはその日の発行版を表示しなければならない
-11. マイ新聞一覧を表示するとき、MyRSSPressシステムは自動発行が有効なテンプレートに「自動更新」バッジを表示しなければならない
-12. ユーザーがテンプレート設定を編集するとき、MyRSSPressシステムは自動発行のオン/オフを切り替えられなければならない
-13. テンプレート設定が更新されたとき、MyRSSPressシステムは次回の発行版から新しい設定を適用しなければならない
-14. 自動発行が無効化されたとき、MyRSSPressシステムは既存の発行版を保持し、新しい発行版の生成を停止しなければならない
+1. When a user is logged in, the MyRSSPress system MUST display an "Enable auto-publish" option when saving newspapers
+2. When a user enables auto-publish, the MyRSSPress system MUST save as a newspaper template
+3. When saving a newspaper template, the MyRSSPress system MUST generate a unique template ID
+4. When generating unique URLs, the MyRSSPress system MUST use the following format:
+   - Latest version: `/newspapers/{templateId}/latest`
+   - Specific date version: `/newspapers/{templateId}/issues/{YYYY-MM-DD}`
+5. When a user accesses the latest version URL, the MyRSSPress system MUST execute the following process:
+   - Check if an issue exists for today's date
+   - If exists: Display the saved issue
+   - If not exists: Generate and save a new issue using template settings
+6. When generating a new issue, the MyRSSPress system MUST apply template settings (feed URLs, article count, page count, theme, summary enable/disable)
+7. When saving an issue, the MyRSSPress system MUST include the following information:
+   - Publication date (YYYY-MM-DD)
+   - Article data (title, description, link, image, summary)
+   - Template ID
+8. When displaying a newspaper with auto-publish enabled, the MyRSSPress system MUST display the following buttons:
+   - "View Latest" button
+   - "View Past Issues" button
+9. When a user clicks "View Past Issues", the MyRSSPress system MUST display a list of publication dates
+10. When a user selects a specific publication date, the MyRSSPress system MUST display that day's issue
+11. When displaying the My Newspapers list, the MyRSSPress system MUST display an "Auto-update" badge on templates with auto-publish enabled
+12. When a user edits template settings, the MyRSSPress system MUST allow toggling auto-publish on/off
+13. When template settings are updated, the MyRSSPress system MUST apply new settings from the next issue onwards
+14. When auto-publish is disabled, the MyRSSPress system MUST retain existing issues and stop generating new issues
 
-### 要件11: 記事要約機能
+### Requirement 11: Article Summary Feature
 
-**ユーザーストーリー:** ユーザーとして、記事の要約を読みたい。そうすることで、全文を読む前に内容を素早く把握できる。
+**User Story:** As a user, I want to read article summaries, so that I can quickly grasp content before reading the full text.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. 新聞生成時、MyRSSPressシステムは各記事に対してAI要約を生成しなければならない
-2. AI要約を生成するとき、MyRSSPressシステムはAWS Bedrock（Claude 3 Haiku）を使用しなければならない
-3. 要約を生成するとき、MyRSSPressシステムは記事のタイトルと説明を入力として使用しなければならない
-4. 生成された要約は、MyRSSPressシステムは2〜3文（50〜100文字程度）に制限しなければならない
-5. 記事を表示するとき、MyRSSPressシステムは要約欄を記事の下部に表示しなければならない
-6. 要約欄を表示するとき、MyRSSPressシステムは「要約」ラベルを付けて視覚的に区別しなければならない
-7. 要約が生成できなかったとき、MyRSSPressシステムは元の記事説明を表示しなければならない
-8. 新聞設定で要約機能を有効/無効にできるとき、MyRSSPressシステムは設定に従って要約を表示または非表示にしなければならない
-9. 要約生成がタイムアウトしたとき、MyRSSPressシステムは要約なしで記事を表示しなければならない
-10. 複数記事の要約を生成するとき、MyRSSPressシステムは並行処理で生成時間を最小化しなければならない
+1. When generating newspapers, the MyRSSPress system MUST generate AI summaries for each article
+2. When generating AI summaries, the MyRSSPress system MUST use AWS Bedrock (Claude 3 Haiku)
+3. When generating summaries, the MyRSSPress system MUST use article title and description as input
+4. For generated summaries, the MyRSSPress system MUST limit to 2-3 sentences (approximately 50-100 characters)
+5. When displaying articles, the MyRSSPress system MUST display the summary section below the article
+6. When displaying the summary section, the MyRSSPress system MUST visually distinguish it with a "Summary" label
+7. When a summary cannot be generated, the MyRSSPress system MUST display the original article description
+8. When summary feature can be enabled/disabled in newspaper settings, the MyRSSPress system MUST show or hide summaries according to settings
+9. When summary generation times out, the MyRSSPress system MUST display articles without summaries
+10. When generating summaries for multiple articles, the MyRSSPress system MUST minimize generation time with parallel processing
 
-### 要件12: 記事の既読機能
+### Requirement 12: Article Read Status Feature
 
-**ユーザーストーリー:** ユーザーとして、クリックした記事を既読として記録したい。そうすることで、どの記事を読んだか把握でき、複数デバイスで既読状態を同期できる。
+**User Story:** As a user, I want to record clicked articles as read, so that I can track which articles I've read and sync read status across multiple devices.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. ユーザーが記事リンクをクリックしたとき、MyRSSPressシステムはその記事を既読としてマークしなければならない
-2. ユーザーがログインしているとき、MyRSSPressシステムは既読記事をDynamoDBに保存しなければならない
-3. ユーザーがログインしていないとき、MyRSSPressシステムは既読記事をブラウザのローカルストレージに保存しなければならない
-4. ユーザーがログインしたとき、MyRSSPressシステムはローカルストレージの既読記事をDynamoDBに移行しなければならない
-5. 既読の記事を表示するとき、MyRSSPressシステムは視覚的に区別しなければならない（例：タイトルの色を薄くする、既読バッジを表示）
-6. 新聞ページを読み込むとき、MyRSSPressシステムはユーザーの既読記事リストを取得しなければならない
-7. ログインユーザーの既読記事を取得するとき、MyRSSPressシステムはDynamoDBから取得しなければならない
-8. 未ログインユーザーの既読記事を取得するとき、MyRSSPressシステムはローカルストレージから取得しなければならない
-9. ユーザーが別のデバイスでログインしたとき、MyRSSPressシステムは既読状態を同期しなければならない
-10. 既読記事データを保存するとき、MyRSSPressシステムは記事URL、既読日時、ユーザーIDを含めなければならない
+1. When a user clicks an article link, the MyRSSPress system MUST mark that article as read
+2. When a user is logged in, the MyRSSPress system MUST save read articles to DynamoDB
+3. When a user is not logged in, the MyRSSPress system MUST save read articles to browser local storage
+4. When a user logs in, the MyRSSPress system MUST migrate read articles from local storage to DynamoDB
+5. When displaying read articles, the MyRSSPress system MUST visually distinguish them (e.g., lighten title color, display read badge)
+6. When loading a newspaper page, the MyRSSPress system MUST retrieve the user's read articles list
+7. When retrieving read articles for logged-in users, the MyRSSPress system MUST retrieve from DynamoDB
+8. When retrieving read articles for non-logged-in users, the MyRSSPress system MUST retrieve from local storage
+9. When a user logs in on another device, the MyRSSPress system MUST sync read status
+10. When saving read article data, the MyRSSPress system MUST include article URL, read datetime, and user ID
 
-### 要件13: ブックマーク機能
+### Requirement 13: Bookmark Feature
 
-**ユーザーストーリー:** ユーザーとして、読んでいる間に記事をブックマークしたい。そうすることで、興味深いコンテンツを後で参照するために保存できる。
+**User Story:** As a user, I want to bookmark articles while reading, so that I can save interesting content for later reference.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. 記事を閲覧しているとき、MyRSSPressシステムは各記事にブックマークアイコンを表示しなければならない
-2. ユーザーがブックマークアイコンをクリックしたとき、MyRSSPressシステムは記事URLをブックマークリストに追加しなければならない
-3. 記事がブックマークされたとき、MyRSSPressシステムはアイコンを塗りつぶし状態に変更しなければならない
-4. ユーザーがブックマーク済みアイコンをクリックしたとき、MyRSSPressシステムはブックマークを解除しなければならない
-5. ブックマーク状態が変更されたとき、MyRSSPressシステムは即座にUIを更新しなければならない
-6. ユーザーがブックマーク一覧ページにアクセスしたとき、MyRSSPressシステムは保存されたすべての記事URLを取得して表示しなければならない
+1. When viewing articles, the MyRSSPress system MUST display a bookmark icon on each article
+2. When a user clicks the bookmark icon, the MyRSSPress system MUST add the article URL to the bookmark list
+3. When an article is bookmarked, the MyRSSPress system MUST change the icon to a filled state
+4. When a user clicks a bookmarked icon, the MyRSSPress system MUST remove the bookmark
+5. When bookmark status changes, the MyRSSPress system MUST immediately update the UI
+6. When a user accesses the bookmarks list page, the MyRSSPress system MUST retrieve and display all saved article URLs
 
-### 要件14: エラーコードの標準化
+### Requirement 14: Error Code Standardization
 
-**ユーザーストーリー:** 開発者として、APIエラーを標準化されたエラーコードで管理したい。そうすることで、フロントエンドで適切な多言語エラーメッセージを表示でき、デバッグも容易になる。
+**User Story:** As a developer, I want to manage API errors with standardized error codes, so that I can display appropriate multilingual error messages on the frontend and make debugging easier.
 
-#### 背景
+#### Background
 
-現在、バックエンドAPIは日本語のエラーメッセージを直接返しています：
+Currently, the backend API returns error messages directly in Japanese:
 
 ```json
 {
@@ -367,16 +367,16 @@ To prepare for future implementation of these features, the current design shoul
 }
 ```
 
-これには以下の問題があります：
-1. 多言語対応が困難（エラーメッセージがハードコード）
-2. フロントエンドでエラーの種類を判別できない
-3. デバッグ時にエラーの原因が分かりにくい
+This has the following problems:
+1. Difficult to support multiple languages (error messages are hardcoded)
+2. Frontend cannot determine error type
+3. Error causes are unclear during debugging
 
-#### 受入基準
+#### Acceptance Criteria
 
-**バックエンド:**
+**Backend:**
 
-1. APIエラーを返すとき、MyRSSPressシステムは以下の形式を使用しなければならない：
+1. When returning API errors, the MyRSSPress system MUST use the following format:
 ```json
 {
   "error": "Developer-friendly error message in English",
@@ -387,14 +387,14 @@ To prepare for future implementation of these features, the current design shoul
 }
 ```
 
-2. エラーコードを定義するとき、MyRSSPressシステムは以下の命名規則に従わなければならない：
-   - 大文字のスネークケース（例：`GENERATE_NEWSPAPER_NO_ARTICLES`）
-   - 機能名をプレフィックスとして使用（例：`GENERATE_NEWSPAPER_*`、`SUGGEST_FEEDS_*`）
-   - 説明的で明確な名前
+2. When defining error codes, the MyRSSPress system MUST follow these naming conventions:
+   - Uppercase snake case (e.g., `GENERATE_NEWSPAPER_NO_ARTICLES`)
+   - Use feature name as prefix (e.g., `GENERATE_NEWSPAPER_*`, `SUGGEST_FEEDS_*`)
+   - Descriptive and clear names
 
-3. エラーコードを管理するとき、MyRSSPressシステムは`backend/src/constants/errorCodes.ts`ファイルに集約しなければならない
+3. When managing error codes, the MyRSSPress system MUST consolidate them in the `backend/src/constants/errorCodes.ts` file
 
-4. エラーコードファイルを作成するとき、MyRSSPressシステムは以下の構造を使用しなければならない：
+4. When creating the error codes file, the MyRSSPress system MUST use the following structure:
 ```typescript
 export const ErrorCodes = {
   // Newspaper generation errors
@@ -427,9 +427,9 @@ export const ErrorCodes = {
 export type ErrorCode = typeof ErrorCodes[keyof typeof ErrorCodes];
 ```
 
-5. エラーレスポンスを返すとき、MyRSSPressシステムは以下の例に従わなければならない：
+5. When returning error responses, the MyRSSPress system MUST follow these examples:
 ```typescript
-// 例1: 記事が取得できない
+// Example 1: No articles could be fetched
 return c.json(
   {
     error: 'No articles could be fetched from the provided feeds',
@@ -442,7 +442,7 @@ return c.json(
   400
 );
 
-// 例2: 記事数が不足
+// Example 2: Insufficient articles
 return c.json(
   {
     error: 'Insufficient articles to generate newspaper (minimum: 3)',
@@ -456,11 +456,11 @@ return c.json(
 );
 ```
 
-**フロントエンド:**
+**Frontend:**
 
-6. エラーメッセージを定義するとき、MyRSSPressシステムは`frontend/lib/i18n.ts`に追加しなければならない
+6. When defining error messages, the MyRSSPress system MUST add them to `frontend/lib/i18n.ts`
 
-7. エラーメッセージを追加するとき、MyRSSPressシステムは以下の構造を使用しなければならない：
+7. When adding error messages, the MyRSSPress system MUST use the following structure:
 ```typescript
 export const translations = {
   en: {
@@ -510,7 +510,7 @@ export const translations = {
 };
 ```
 
-8. APIエラーを処理するとき、MyRSSPressシステムは以下のヘルパー関数を使用しなければならない：
+8. When handling API errors, the MyRSSPress system MUST use the following helper function:
 ```typescript
 // frontend/lib/errorHandler.ts
 import { translations, Locale } from './i18n';
@@ -534,7 +534,7 @@ export function getErrorMessage(error: APIError, locale: Locale): string {
 }
 ```
 
-9. APIを呼び出すとき、MyRSSPressシステムは以下のパターンを使用しなければならない：
+9. When calling APIs, the MyRSSPress system MUST use the following pattern:
 ```typescript
 // frontend/lib/api.ts
 import { getErrorMessage } from './errorHandler';
@@ -561,27 +561,27 @@ export async function generateNewspaper(
 }
 ```
 
-**ドキュメント:**
+**Documentation:**
 
-10. エラーコードを追加するとき、MyRSSPressシステムは`docs/API.md`にエラーコード一覧を記載しなければならない
+10. When adding error codes, the MyRSSPress system MUST document the error code list in `docs/API.md`
 
-11. エラーコードドキュメントを作成するとき、MyRSSPressシステムは以下の情報を含めなければならない：
-    - エラーコード
-    - HTTPステータスコード
-    - 説明
-    - 発生条件
-    - 対処方法
+11. When creating error code documentation, the MyRSSPress system MUST include the following information:
+    - Error code
+    - HTTP status code
+    - Description
+    - Occurrence conditions
+    - Resolution method
 
-**移行戦略:**
+**Migration Strategy:**
 
-12. 既存のエラーレスポンスを移行するとき、MyRSSPressシステムは以下の順序で実行しなければならない：
-    - ステップ1: `errorCodes.ts`を作成してエラーコードを定義
-    - ステップ2: バックエンドのエラーレスポンスを更新
-    - ステップ3: フロントエンドのi18nにエラーメッセージを追加
-    - ステップ4: フロントエンドのエラーハンドリングを更新
-    - ステップ5: 既存のハードコードされたエラーメッセージを削除
+12. When migrating existing error responses, the MyRSSPress system MUST execute in the following order:
+    - Step 1: Create `errorCodes.ts` and define error codes
+    - Step 2: Update backend error responses
+    - Step 3: Add error messages to frontend i18n
+    - Step 4: Update frontend error handling
+    - Step 5: Remove existing hardcoded error messages
 
-13. 移行を完了するとき、MyRSSPressシステムは以下のファイルを更新しなければならない：
+13. When completing migration, the MyRSSPress system MUST update the following files:
     - `backend/src/routes/newspapers.ts`
     - `backend/src/routes/feeds.ts`
     - `frontend/lib/api.ts`
@@ -648,10 +648,10 @@ export async function generateNewspaper(
     - ステップ2: プロパティベーステストが安定したら例ベースのテストを削除
     - ステップ3: すべてのテストファイルで移行を完了
 
-14. 移行を完了するとき、MyRSSPressシステムは以下のファイルをプロパティベーステストに書き換えなければならない：
+14. When completing migration, the MyRSSPress system MUST rewrite the following files to property-based tests:
     - `frontend/lib/layoutCalculator.test.ts`
     - `frontend/components/features/newspaper/NewspaperLayout.test.tsx`
     - `frontend/components/features/feed/FeedSelector.test.tsx`
     - `backend/src/services/importanceCalculator.test.ts`
     - `backend/src/services/rssParser.test.ts`
-    - `backend/src/routes/*.test.ts`（すべてのAPIエンドポイント）
+    - `backend/src/routes/*.test.ts` (all API endpoints)

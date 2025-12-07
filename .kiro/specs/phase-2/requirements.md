@@ -10,75 +10,75 @@ This document defines requirements for future extensions of MyRSSPress. These fe
 - **Private Newspaper**: Newspaper viewable only by creator
 - **Public Newspaper**: Newspaper viewable by all users
 
-## 要件
+## Requirements
 
-### 要件1: 新聞のプライバシー設定
+### Requirement 1: Newspaper Privacy Settings
 
-**ユーザーストーリー:** ユーザーとして、新聞を公開するか非公開にするかを選択したい。そうすることで、個人的な新聞とシェアしたい新聞を分けて管理できる。
+**User Story:** As a user, I want to choose whether to make my newspaper public or private, so that I can manage personal newspapers separately from those I want to share.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. 新聞設定モーダルを表示するとき、MyRSSPressシステムは公開/非公開選択オプションを含めなければならない
-2. ユーザーが公開を選択したとき、MyRSSPressシステムは新聞を他のユーザーが閲覧可能な状態で保存しなければならない
-3. ユーザーが非公開を選択したとき、MyRSSPressシステムは新聞を作成者のみが閲覧可能な状態で保存しなければならない
-4. 人気の新聞セクションを表示するとき、MyRSSPressシステムは公開設定の新聞のみを表示しなければならない
-5. ユーザーが自分の新聞一覧を閲覧するとき、MyRSSPressシステムは公開/非公開の両方の新聞を表示しなければならない
-6. 各新聞カードを表示するとき、MyRSSPressシステムは公開/非公開のステータスを視覚的に示さなければならない
+1. When displaying the newspaper settings modal, the MyRSSPress system MUST include public/private selection options
+2. When a user selects public, the MyRSSPress system MUST save the newspaper in a state viewable by other users
+3. When a user selects private, the MyRSSPress system MUST save the newspaper in a state viewable only by the creator
+4. When displaying the popular newspapers section, the MyRSSPress system MUST display only public newspapers
+5. When a user views their newspaper list, the MyRSSPress system MUST display both public and private newspapers
+6. When displaying each newspaper card, the MyRSSPress system MUST visually indicate the public/private status
 
-### 要件2: マイ新聞一覧
+### Requirement 2: My Newspapers List
 
-**ユーザーストーリー:** ユーザーとして、自分が作成した新聞の一覧を閲覧したい。そうすることで、過去に作成した新聞を簡単に見つけられる。
+**User Story:** As a user, I want to view a list of newspapers I created, so that I can easily find newspapers I created in the past.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. ユーザーがマイ新聞ページにアクセスしたとき、MyRSSPressシステムは作成者が自分である新聞の一覧を表示しなければならない
-2. マイ新聞一覧を表示するとき、MyRSSPressシステムは作成日時の降順に新聞を並べなければならない
-3. 各新聞カードを表示するとき、MyRSSPressシステムはサムネイル画像、タイトル、作成日、公開/非公開ステータスを含めなければならない
-4. ユーザーが新聞カードをクリックしたとき、MyRSSPressシステムはその新聞の詳細ページに遷移しなければならない
+1. When a user accesses the My Newspapers page, the MyRSSPress system MUST display a list of newspapers where the creator is themselves
+2. When displaying the My Newspapers list, the MyRSSPress system MUST sort newspapers in descending order by creation date
+3. When displaying each newspaper card, the MyRSSPress system MUST include thumbnail image, title, creation date, and public/private status
+4. When a user clicks a newspaper card, the MyRSSPress system MUST navigate to that newspaper's detail page
 
-### 要件3: 新聞の編集と削除
+### Requirement 3: Newspaper Editing and Deletion
 
-**ユーザーストーリー:** ユーザーとして、作成した新聞の設定を後から変更したり削除したりしたい。そうすることで、新聞を柔軟に管理できる。
+**User Story:** As a user, I want to change settings or delete newspapers I created later, so that I can manage newspapers flexibly.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. ユーザーが自分の新聞を閲覧しているとき、MyRSSPressシステムは編集ボタンと削除ボタンを表示しなければならない
-2. ユーザーが編集ボタンをクリックしたとき、MyRSSPressシステムは設定モーダルを表示しなければならない
-3. 設定モーダルを表示するとき、MyRSSPressシステムは現在の設定値を入力フィールドに表示しなければならない
-4. ユーザーが設定を変更して保存したとき、MyRSSPressシステムはデータベースの新聞情報を更新しなければならない
-5. ユーザーが削除ボタンをクリックしたとき、MyRSSPressシステムは確認ダイアログを表示しなければならない
-6. ユーザーが削除を確認したとき、MyRSSPressシステムはデータベースから新聞を削除しなければならない
+1. When a user is viewing their own newspaper, the MyRSSPress system MUST display edit and delete buttons
+2. When a user clicks the edit button, the MyRSSPress system MUST display the settings modal
+3. When displaying the settings modal, the MyRSSPress system MUST display current setting values in input fields
+4. When a user changes settings and saves, the MyRSSPress system MUST update the newspaper information in the database
+5. When a user clicks the delete button, the MyRSSPress system MUST display a confirmation dialog
+6. When a user confirms deletion, the MyRSSPress system MUST delete the newspaper from the database
 
-### 要件4: ユーザー認証（メールアドレス/パスワード）
+### Requirement 4: User Authentication (Email/Password)
 
-**ユーザーストーリー:** ユーザーとして、メールアドレスとパスワードでアカウントを作成してログインしたい。そうすることで、自分の新聞を管理し、他のユーザーと区別できる。
+**User Story:** As a user, I want to create an account and log in with email and password, so that I can manage my newspapers and distinguish myself from other users.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. ユーザーがアプリケーションにアクセスしたとき、MyRSSPressシステムはログイン/サインアップオプションを表示しなければならない
-2. ユーザーがサインアップを選択したとき、MyRSSPressシステムはメールアドレスとパスワードの入力を求めなければならない
-3. パスワードを入力するとき、MyRSSPressシステムは以下の要件を満たすことを検証しなければならない：
-   - 最小8文字
-   - 大文字、小文字、数字を含む
-4. ユーザーがサインアップを完了したとき、MyRSSPressシステムは確認メールを送信しなければならない
-5. ユーザーがメールアドレスを確認したとき、MyRSSPressシステムはアカウントを有効化しなければならない
-6. ユーザーがログインしたとき、MyRSSPressシステムはAWS Cognitoでセッションを確立しなければならない
-7. ユーザーがログインしているとき、MyRSSPressシステムは新聞保存時に作成者情報を自動的に関連付けなければならない
-8. ユーザーがログアウトしたとき、MyRSSPressシステムはセッションを終了しなければならない
-9. ユーザーがパスワードを忘れたとき、MyRSSPressシステムはパスワードリセット機能を提供しなければならない
+1. When a user accesses the application, the MyRSSPress system MUST display login/signup options
+2. When a user selects signup, the MyRSSPress system MUST request email address and password input
+3. When entering a password, the MyRSSPress system MUST validate that it meets the following requirements:
+   - Minimum 8 characters
+   - Contains uppercase, lowercase, and numbers
+4. When a user completes signup, the MyRSSPress system MUST send a confirmation email
+5. When a user confirms their email address, the MyRSSPress system MUST activate the account
+6. When a user logs in, the MyRSSPress system MUST establish a session with AWS Cognito
+7. When a user is logged in, the MyRSSPress system MUST automatically associate creator information when saving newspapers
+8. When a user logs out, the MyRSSPress system MUST terminate the session
+9. When a user forgets their password, the MyRSSPress system MUST provide password reset functionality
 
-### 要件5: ユーザー認証（Google OAuth）
+### Requirement 5: User Authentication (Google OAuth)
 
-**ユーザーストーリー:** ユーザーとして、Googleアカウントでログインしたい。そうすることで、新しいパスワードを作成せずに簡単にアクセスできる。
+**User Story:** As a user, I want to log in with my Google account, so that I can easily access without creating a new password.
 
-#### 受入基準
+#### Acceptance Criteria
 
-1. ログイン画面を表示するとき、MyRSSPressシステムは「Googleでログイン」ボタンを表示しなければならない
-2. ユーザーが「Googleでログイン」ボタンをクリックしたとき、MyRSSPressシステムはGoogle OAuth認証フローを開始しなければならない
-3. ユーザーがGoogleアカウントで認証したとき、MyRSSPressシステムはAWS Cognitoでセッションを確立しなければならない
-4. 初回ログイン時、MyRSSPressシステムはGoogleプロフィール情報（名前、メールアドレス）を取得してユーザーアカウントを作成しなければならない
-5. ユーザーがログインしているとき、MyRSSPressシステムは新聞保存時に作成者情報を自動的に関連付けなければならない
-6. ユーザーがログアウトしたとき、MyRSSPressシステムはセッションを終了しなければならない
+1. When displaying the login screen, the MyRSSPress system MUST display a "Sign in with Google" button
+2. When a user clicks the "Sign in with Google" button, the MyRSSPress system MUST initiate the Google OAuth authentication flow
+3. When a user authenticates with their Google account, the MyRSSPress system MUST establish a session with AWS Cognito
+4. On first login, the MyRSSPress system MUST retrieve Google profile information (name, email address) and create a user account
+5. When a user is logged in, the MyRSSPress system MUST automatically associate creator information when saving newspapers
+6. When a user logs out, the MyRSSPress system MUST terminate the session
 
 ### 要件6: 新聞のテーマ（スキン）選択
 

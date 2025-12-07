@@ -22,7 +22,8 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
       
-      - name: Install dependencies
+      - name: Install frontend dependencies
+        working-directory: frontend
         run: npm ci
       
       - name: Run ESLint
@@ -48,12 +49,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
       
-      - name: Install dependencies
-        run: npm ci
-        
       - name: Install backend dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci
       
       - name: Run ESLint
         working-directory: backend
@@ -99,8 +97,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
       
-      - name: Install dependencies
-        run: npm ci
+      - name: Check frontend vulnerabilities
+        working-directory: frontend
+        run: npm ci && npm audit --audit-level=moderate || exit 1
       
-      - name: Check vulnerabilities
-        run: npm audit --audit-level=moderate || exit 1
+      - name: Check backend vulnerabilities
+        working-directory: backend
+        run: npm ci && npm audit --audit-level=moderate || exit 1

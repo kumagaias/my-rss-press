@@ -588,16 +588,16 @@ export async function generateNewspaper(
     - `frontend/app/page.tsx`
     - `frontend/app/newspaper/page.tsx`
 
-### 要件15: プロパティベーステストへの移行
+### Requirement 15: Migration to Property-Based Testing
 
-**ユーザーストーリー:** 開発者として、例ベースのテストをプロパティベーステストに書き換えたい。そうすることで、より広範囲の入力パターンをテストし、エッジケースを自動的に発見できる。
+**User Story:** As a developer, I want to rewrite example-based tests to property-based tests, so that I can test a wider range of input patterns and automatically discover edge cases.
 
-#### 受入基準
+#### Acceptance Criteria
 
-**フロントエンド:**
+**Frontend:**
 
-1. `layoutCalculator.ts`のテストを書き換えるとき、MyRSSPressシステムは以下のプロパティを検証しなければならない：
-   - **完全性**: すべての記事がレイアウトに含まれる（lead + topStories + remaining = 元の記事数）
+1. When rewriting tests for `layoutCalculator.ts`, the MyRSSPress system MUST verify the following properties:
+   - **Completeness**: All articles are included in layout (lead + topStories + remaining = original article count)
    - **順序性**: 記事は重要度の降順に並んでいる
    - **境界条件**: 0記事、1記事、100記事などの極端なケースで正しく動作する
    - **不変性**: 元の記事配列が変更されない

@@ -33,7 +33,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -54,7 +54,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -75,7 +75,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -96,7 +96,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -120,7 +120,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -145,7 +145,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -170,7 +170,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -191,7 +191,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -209,7 +209,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -230,7 +230,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -249,7 +249,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={true}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -295,7 +295,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -319,7 +319,7 @@ describe('FeedSelector', () => {
         onSelectionChange={onSelectionChange}
         onGenerate={onGenerate}
         isGenerating={false}
-        locale="en"
+        locale="en-US"
       />
     );
 

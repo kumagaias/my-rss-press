@@ -6,7 +6,7 @@ describe('ThemeInput', () => {
   it('should render input field and button', () => {
     const onSubmit = vi.fn();
 
-    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en-US" />);
 
     expect(screen.getByPlaceholderText(/Technology, Sports, Business/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Get Feed Suggestions/ })).toBeInTheDocument();
@@ -24,7 +24,7 @@ describe('ThemeInput', () => {
   it('should update input value when typing', () => {
     const onSubmit = vi.fn();
 
-    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en-US" />);
 
     const input = screen.getByPlaceholderText(/Technology, Sports, Business/) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Technology' } });
@@ -35,7 +35,7 @@ describe('ThemeInput', () => {
   it('should show error when submitting empty input', () => {
     const onSubmit = vi.fn();
 
-    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en-US" />);
 
     const button = screen.getByRole('button', { name: /Get Feed Suggestions/ });
     fireEvent.click(button);
@@ -47,7 +47,7 @@ describe('ThemeInput', () => {
   it('should show error when submitting whitespace-only input', () => {
     const onSubmit = vi.fn();
 
-    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en-US" />);
 
     const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     fireEvent.change(input, { target: { value: '   ' } });
@@ -62,7 +62,7 @@ describe('ThemeInput', () => {
   it('should call onSubmit with trimmed value when valid input is submitted', () => {
     const onSubmit = vi.fn();
 
-    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en-US" />);
 
     const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     fireEvent.change(input, { target: { value: '  Technology  ' } });
@@ -76,7 +76,7 @@ describe('ThemeInput', () => {
   it('should submit on Enter key press', () => {
     const onSubmit = vi.fn();
 
-    const { container } = render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+    const { container } = render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en-US" />);
 
     const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     fireEvent.change(input, { target: { value: 'Sports' } });
@@ -93,7 +93,7 @@ describe('ThemeInput', () => {
   it('should disable input and button when loading', () => {
     const onSubmit = vi.fn();
 
-    render(<ThemeInput onSubmit={onSubmit} isLoading={true} locale="en" />);
+    render(<ThemeInput onSubmit={onSubmit} isLoading={true} locale="en-US" />);
 
     const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
     const button = screen.getByRole('button');
@@ -105,7 +105,7 @@ describe('ThemeInput', () => {
   it('should clear error when user starts typing', () => {
     const onSubmit = vi.fn();
 
-    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en-US" />);
 
     // Submit empty to trigger error
     const button = screen.getByRole('button', { name: /Get Feed Suggestions/ });
@@ -123,7 +123,7 @@ describe('ThemeInput', () => {
   it('should allow button click even when input is empty (to show validation)', () => {
     const onSubmit = vi.fn();
 
-    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en-US" />);
 
     const button = screen.getByRole('button', { name: /Get Feed Suggestions/ });
     // Button should not be disabled - we want to show validation errors

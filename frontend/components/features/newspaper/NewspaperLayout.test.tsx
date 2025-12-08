@@ -50,7 +50,7 @@ describe('NewspaperLayout', () => {
         articles={mockArticles}
         newspaperName="Test Newspaper"
         createdAt={new Date('2025-12-01')}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -65,7 +65,7 @@ describe('NewspaperLayout', () => {
         newspaperName="Test Newspaper"
         userName="John Doe"
         createdAt={new Date('2025-12-01')}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -78,7 +78,7 @@ describe('NewspaperLayout', () => {
         articles={mockArticles}
         newspaperName="Test Newspaper"
         createdAt={new Date('2025-12-01')}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -95,7 +95,7 @@ describe('NewspaperLayout', () => {
         articles={mockArticles}
         newspaperName="Test Newspaper"
         createdAt={new Date('2025-12-01')}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -110,7 +110,7 @@ describe('NewspaperLayout', () => {
         articles={mockArticles}
         newspaperName="Test Newspaper"
         createdAt={new Date('2025-12-01')}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -125,7 +125,7 @@ describe('NewspaperLayout', () => {
         articles={mockArticles}
         newspaperName="Test Newspaper"
         createdAt={new Date('2025-12-01')}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -157,7 +157,7 @@ describe('NewspaperLayout', () => {
         articles={singleArticle}
         newspaperName="Test Newspaper"
         createdAt={new Date('2025-12-01')}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -170,7 +170,7 @@ describe('NewspaperLayout', () => {
         articles={mockArticles}
         newspaperName="Test Newspaper"
         createdAt={new Date('2025-12-01')}
-        locale="en"
+        locale="en-US"
       />
     );
 

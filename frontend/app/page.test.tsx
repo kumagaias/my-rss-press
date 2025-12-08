@@ -64,7 +64,7 @@ describe('Home Page', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(api.suggestFeeds).toHaveBeenCalledWith('Technology', 'en');
+      expect(api.suggestFeeds).toHaveBeenCalledWith('Technology', 'en-US');
     }, { timeout: 3000 });
 
     await waitFor(() => {
@@ -112,7 +112,7 @@ describe('Home Page', () => {
         ['https://example.com/tech-feed'],
         'Technology',
         [], // defaultFeedUrls (empty array since no default feeds in this test)
-        'en' // locale
+        'en-US' // locale
       );
     }, { timeout: 3000 });
 

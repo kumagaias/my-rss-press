@@ -38,7 +38,7 @@ describe('i18n', () => {
         configurable: true,
       });
 
-      expect(detectLocale()).toBe('en');
+      expect(detectLocale()).toBe('en-US');
     });
 
     it('should return "en" for non-Japanese languages', () => {
@@ -47,13 +47,13 @@ describe('i18n', () => {
         configurable: true,
       });
 
-      expect(detectLocale()).toBe('en');
+      expect(detectLocale()).toBe('en-US');
     });
   });
 
   describe('useTranslations', () => {
     it('should return English translations for "en" locale', () => {
-      const t = useTranslations('en');
+      const t = useTranslations('en-US');
       
       expect(t.appName).toBe('MyRSSPress');
       expect(t.appTagline).toBe('Your Personalized Morning Digest, Curated by AI');
@@ -69,7 +69,7 @@ describe('i18n', () => {
     });
 
     it('should have all required translation keys for both locales', () => {
-      const enKeys = Object.keys(useTranslations('en'));
+      const enKeys = Object.keys(useTranslations('en-US'));
       const jaKeys = Object.keys(useTranslations('ja'));
       
       expect(enKeys).toEqual(jaKeys);
@@ -79,7 +79,7 @@ describe('i18n', () => {
   describe('formatDate', () => {
     it('should format date in English locale', () => {
       const date = new Date('2025-11-29T10:00:00Z');
-      const formatted = formatDate(date, 'en');
+      const formatted = formatDate(date, 'en-US');
       
       // The exact format may vary by environment, but it should contain the date components
       expect(formatted).toContain('2025');
@@ -97,7 +97,7 @@ describe('i18n', () => {
 
     it('should handle string dates', () => {
       const dateString = '2025-11-29T10:00:00Z';
-      const formatted = formatDate(dateString, 'en');
+      const formatted = formatDate(dateString, 'en-US');
       
       expect(formatted).toContain('2025');
       expect(formatted).toContain('29');
@@ -106,8 +106,8 @@ describe('i18n', () => {
 
   describe('formatNumber', () => {
     it('should format numbers in English locale', () => {
-      expect(formatNumber(1000, 'en')).toBe('1,000');
-      expect(formatNumber(1000000, 'en')).toBe('1,000,000');
+      expect(formatNumber(1000, 'en-US')).toBe('1,000');
+      expect(formatNumber(1000000, 'en-US')).toBe('1,000,000');
     });
 
     it('should format numbers in Japanese locale', () => {
@@ -116,7 +116,7 @@ describe('i18n', () => {
     });
 
     it('should handle small numbers', () => {
-      expect(formatNumber(42, 'en')).toBe('42');
+      expect(formatNumber(42, 'en-US')).toBe('42');
       expect(formatNumber(42, 'ja')).toBe('42');
     });
   });

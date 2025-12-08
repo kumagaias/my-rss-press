@@ -33,6 +33,15 @@ vi.mock('@/lib/api', () => ({
   getNewspaper: vi.fn(),
 }));
 
+// Mock i18n to return en-US locale
+vi.mock('@/lib/i18n', async () => {
+  const actual = await vi.importActual('@/lib/i18n');
+  return {
+    ...actual,
+    detectLocale: () => 'en-US' as const,
+  };
+});
+
 // Mock sessionStorage
 const mockSessionStorage = {
   getItem: vi.fn(),
@@ -41,6 +50,17 @@ const mockSessionStorage = {
 };
 Object.defineProperty(window, 'sessionStorage', {
   value: mockSessionStorage,
+});
+
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
 });
 
 const mockArticles = [
@@ -64,6 +84,13 @@ describe('NewspaperPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockNewspaperId = null; // Reset to no newspaper ID by default
+    
+    // Mock localStorage to return en-US locale
+    mockLocalStorage.getItem.mockImplementation((key) => {
+      if (key === 'locale') return 'en-US';
+      return null;
+    });
+    
     mockSessionStorage.getItem.mockImplementation((key) => {
       if (key === 'newspaperArticles') return JSON.stringify(mockArticles);
       if (key === 'newspaperTheme') return 'Technology';

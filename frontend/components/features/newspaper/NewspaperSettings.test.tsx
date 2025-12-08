@@ -16,7 +16,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -29,7 +29,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={false}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -42,7 +42,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -57,7 +57,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
         defaultName="Tech Daily"
       />
     );
@@ -72,7 +72,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -86,7 +86,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -101,7 +101,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -116,7 +116,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -131,7 +131,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -157,7 +157,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -173,7 +173,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 
@@ -193,7 +193,7 @@ describe('NewspaperSettingsModal', () => {
         isOpen={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        locale="en"
+        locale="en-US"
       />
     );
 

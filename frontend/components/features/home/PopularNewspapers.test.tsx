@@ -40,7 +40,7 @@ describe('PopularNewspapers', () => {
       json: async () => ({ newspapers: [] }),
     });
 
-    render(<PopularNewspapers locale="en" />);
+    render(<PopularNewspapers locale="en-US" />);
     expect(screen.getByText('Popular Newspapers')).toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe('PopularNewspapers', () => {
       json: async () => ({ newspapers: mockNewspapers }),
     });
 
-    render(<PopularNewspapers locale="en" />);
+    render(<PopularNewspapers locale="en-US" />);
 
     await waitFor(() => {
       expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('PopularNewspapers', () => {
       json: async () => ({ newspapers: mockNewspapers }),
     });
 
-    render(<PopularNewspapers locale="en" />);
+    render(<PopularNewspapers locale="en-US" />);
 
     // Wait for initial load
     await waitFor(() => {
@@ -90,14 +90,14 @@ describe('PopularNewspapers', () => {
       () => new Promise(() => {}) // Never resolves
     );
 
-    render(<PopularNewspapers locale="en" />);
+    render(<PopularNewspapers locale="en-US" />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('displays error state', async () => {
     (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
-    render(<PopularNewspapers locale="en" />);
+    render(<PopularNewspapers locale="en-US" />);
 
     await waitFor(() => {
       expect(screen.getByText(/An error occurred/)).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('PopularNewspapers', () => {
       json: async () => ({ newspapers: [] }),
     });
 
-    render(<PopularNewspapers locale="en" />);
+    render(<PopularNewspapers locale="en-US" />);
 
     await waitFor(() => {
       expect(screen.getByText('No newspapers found')).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe('PopularNewspapers', () => {
     });
 
     const handleClick = vi.fn();
-    render(<PopularNewspapers locale="en" onNewspaperClick={handleClick} />);
+    render(<PopularNewspapers locale="en-US" onNewspaperClick={handleClick} />);
 
     await waitFor(() => {
       expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
@@ -143,7 +143,7 @@ describe('PopularNewspapers', () => {
       json: async () => ({ newspapers: mockNewspapers }),
     });
 
-    render(<PopularNewspapers locale="en" />);
+    render(<PopularNewspapers locale="en-US" />);
 
     await waitFor(() => {
       expect(screen.getByText(/Created by: John Doe/)).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe('PopularNewspapers', () => {
       json: async () => ({ newspapers: mockNewspapers }),
     });
 
-    render(<PopularNewspapers locale="en" />);
+    render(<PopularNewspapers locale="en-US" />);
 
     await waitFor(() => {
       // example.com appears multiple times (2 feeds in first newspaper)

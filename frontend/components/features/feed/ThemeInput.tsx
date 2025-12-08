@@ -4,11 +4,12 @@ import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useTranslations } from '@/lib/i18n';
+import type { Locale } from '@/types';
 
 interface ThemeInputProps {
   onSubmit: (theme: string) => void;
   isLoading: boolean;
-  locale: 'en' | 'ja';
+  locale: Locale;
   initialTheme?: string;
 }
 

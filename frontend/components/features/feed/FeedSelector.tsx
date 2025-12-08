@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { FeedSuggestion } from '@/types';
+import { FeedSuggestion, Locale } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
@@ -13,7 +13,7 @@ interface FeedSelectorProps {
   onSelectionChange: (feeds: string[]) => void;
   onGenerate: () => void;
   isGenerating: boolean;
-  locale: 'en' | 'ja';
+  locale: Locale;
 }
 
 /**

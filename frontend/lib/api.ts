@@ -4,10 +4,12 @@ import type { Article, FeedSuggestion, NewspaperData, NewspaperSettings } from '
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
+import type { Locale } from '@/types';
+
 /**
  * Suggest RSS feeds based on a theme
  */
-export async function suggestFeeds(theme: string, locale?: 'en' | 'ja'): Promise<FeedSuggestion[]> {
+export async function suggestFeeds(theme: string, locale?: Locale): Promise<FeedSuggestion[]> {
   const response = await fetch(`${API_BASE_URL}/api/suggest-feeds`, {
     method: 'POST',
     headers: {
@@ -31,7 +33,7 @@ export async function generateNewspaper(
   feedUrls: string[],
   theme: string,
   defaultFeedUrls: string[] = [],
-  locale: 'en' | 'ja' = 'en'
+  locale: Locale = 'ja'
 ): Promise<Article[]> {
   // Validate input
   if (!feedUrls || feedUrls.length === 0) {
@@ -70,7 +72,7 @@ export async function saveNewspaper(
   settings: NewspaperSettings,
   feedUrls: string[],
   articles?: Article[],
-  locale: 'en' | 'ja' = 'en'
+  locale: Locale = 'ja'
 ): Promise<{ newspaperId: string; createdAt: string }> {
   const response = await fetch(`${API_BASE_URL}/api/newspapers`, {
     method: 'POST',

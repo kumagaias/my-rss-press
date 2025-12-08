@@ -14,7 +14,7 @@ import type { Locale, FeedSuggestion } from '@/types';
 
 export default function Home() {
   const router = useRouter();
-  const [locale, setLocale] = useState<Locale>('en');
+  const [locale, setLocale] = useState<Locale>('ja');
   const t = useTranslations(locale);
 
   const [theme, setTheme] = useState('');
@@ -147,14 +147,24 @@ export default function Home() {
                 日本語
               </button>
               <button
-                onClick={() => setLocale('en')}
+                onClick={() => setLocale('en-US')}
                 className={`px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black transition-colors ${
-                  locale === 'en'
+                  locale === 'en-US'
                     ? 'bg-black text-white'
                     : 'bg-white text-black hover:bg-gray-100'
                 }`}
               >
-                EN
+                EN-US
+              </button>
+              <button
+                onClick={() => setLocale('en-GB')}
+                className={`px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black transition-colors ${
+                  locale === 'en-GB'
+                    ? 'bg-black text-white'
+                    : 'bg-white text-black hover:bg-gray-100'
+                }`}
+              >
+                EN-GB
               </button>
             </div>
           </div>

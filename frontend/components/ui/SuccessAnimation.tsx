@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import type { Locale } from '@/types';
 
 interface SuccessAnimationProps {
   onScrollToGenerate?: () => void;
-  locale?: 'en' | 'ja';
+  locale?: Locale;
 }
 
 /**
@@ -13,7 +14,7 @@ interface SuccessAnimationProps {
  * Displays a success checkmark animation with a down arrow
  * Clicking the arrow scrolls to the generate newspaper button
  */
-export function SuccessAnimation({ onScrollToGenerate, locale = 'en' }: SuccessAnimationProps) {
+export function SuccessAnimation({ onScrollToGenerate, locale = 'ja' }: SuccessAnimationProps) {
   const checkmarkRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {

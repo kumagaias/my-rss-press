@@ -1,6 +1,6 @@
 'use client';
 
-import { Article } from '@/types';
+import { Article, Locale } from '@/types';
 import { calculateLayout } from '@/lib/layoutCalculator';
 import { useTranslations, formatDate } from '@/lib/i18n';
 
@@ -9,7 +9,7 @@ interface NewspaperLayoutProps {
   newspaperName: string;
   userName?: string;
   createdAt: Date;
-  locale: 'en' | 'ja';
+  locale: Locale;
 }
 
 /**

@@ -1,14 +1,116 @@
 // Internationalization (i18n) support for MyRSSPress
-// Supports Japanese (ja) and English (en)
+// Phase 2: Extended to support 3 locales
+// - ja: Japanese (Asia/Tokyo, UTC+9)
+// - en-US: English (US) (America/New_York, UTC-5/-4)
+// - en-GB: English (UK) (Europe/London, UTC+0/+1)
 
-export type Locale = 'en' | 'ja';
+export type Locale = 'ja' | 'en-US' | 'en-GB';
 
 // Translation keys and their values for each supported language
 export const translations = {
-  en: {
+  'en-US': {
     // App metadata
     appName: 'MyRSSPress',
     appTagline: 'Your Personalized Morning Digest, Curated by AI',
+    
+    // Navigation
+    home: 'Home',
+    backToHome: 'Back to Home',
+    
+    // Theme input
+    themeInputLabel: 'What are you interested in?',
+    themeInputPlaceholder: 'e.g., Technology, Sports, Business',
+    suggestFeeds: 'Suggest Feeds',
+    
+    // Feed selection
+    feedSelectorTitle: 'Select RSS Feeds',
+    suggestedFeeds: 'Suggested Feeds',
+    addCustomFeed: 'Add Custom Feed',
+    addFeedManually: 'Add Feed Manually',
+    feedUrlPlaceholder: 'Enter feed URL',
+    addFeed: 'Add',
+    addButton: 'Add',
+    removeFeed: 'Remove',
+    removeButton: 'Remove',
+    generateNewspaper: 'Generate Newspaper',
+    generateButton: 'Generate Newspaper',
+    selectedCount: (count: number) => `${count} feed${count !== 1 ? 's' : ''} selected`,
+    getFeedSuggestions: 'Get Feed Suggestions',
+    
+    // Newspaper
+    newspaperTitle: 'Your Newspaper',
+    createdBy: 'Created by',
+    createdAt: 'Created at',
+    viewCount: 'Views',
+    saveNewspaper: 'Save Newspaper',
+    readMore: 'Read more',
+    
+    // Settings
+    newspaperSettings: 'Newspaper Settings',
+    newspaperName: 'Newspaper Name',
+    userName: 'Your Name',
+    userNamePlaceholder: 'Your name (optional)',
+    makePublic: 'Make this newspaper public',
+    save: 'Save',
+    cancel: 'Cancel',
+    defaultNewspaperName: (date: string) => `${date} Newspaper`,
+    defaultNameNote: 'Default name will be used if left empty',
+    anonymousNote: 'Will be displayed as "Anonymous" if left empty',
+    publicNote: 'When public, other users can view your newspaper',
+    
+    // Popular newspapers
+    popularNewspapers: 'Popular Newspapers',
+    recentNewspapers: 'Recent Newspapers',
+    sortBy: 'Sort by',
+    popular: 'Popular',
+    recent: 'Recent',
+    
+    // Loading and errors
+    loading: 'Loading...',
+    generating: 'Generating your newspaper...',
+    error: 'Error',
+    errorOccurred: 'An error occurred',
+    tryAgain: 'Try Again',
+    newspaperNotFound: 'Newspaper not found',
+    loadingArticles: 'Loading articles...',
+    noNewspapersFound: 'No newspapers found',
+    newspaperLoadError: 'Failed to load newspaper',
+    
+    // Validation messages
+    themeRequired: 'Please enter a theme',
+    themeEmpty: 'Please enter a theme',
+    feedRequired: 'Please select at least one feed',
+    errorSelectFeed: 'Please select at least one feed',
+    invalidUrl: 'Please enter a valid URL',
+    errorInvalidUrl: 'Please enter a valid URL',
+    duplicateFeed: 'This feed is already added',
+    errorDuplicate: 'This feed is already added',
+    
+    // Status
+    saved: 'Saved',
+    
+    // Footer
+    footerTagline: 'Powered by AI',
+    
+    // Topic keywords
+    topicKeywords: [
+      'Technology', 'Sports', 'Business', 'Politics', 'Entertainment',
+      'Science', 'Health', 'Travel', 'Food', 'Fashion',
+      'Music', 'Movies', 'Books', 'Gaming', 'Art',
+      'Photography', 'Design', 'Education', 'Finance', 'Real Estate',
+      'Automotive', 'Environment', 'Space', 'AI', 'Cryptocurrency',
+      'Startups', 'Marketing', 'Programming', 'Fitness', 'Yoga',
+      'Cooking', 'Wine', 'Coffee', 'Tea', 'Pets',
+      'Gardening', 'DIY', 'Home Decor', 'Parenting', 'Relationships',
+      'Psychology', 'Philosophy', 'History', 'Geography', 'Culture',
+      'Language', 'Religion', 'Spirituality', 'Meditation', 'Wellness',
+    ],
+  },
+  'en-GB': {
+    // Same as en-US for now (can be customized later for British English)
+    // App metadata
+    appName: 'MyRSSPress',
+    appTagline: 'Your Personalised Morning Digest, Curated by AI',
     
     // Navigation
     home: 'Home',
@@ -205,17 +307,25 @@ export const translations = {
 
 /**
  * Detect the user's preferred locale based on browser settings
- * @returns 'ja' if browser language starts with 'ja', otherwise 'en'
+ * Phase 2: Extended to support 3 locales
+ * @returns 'ja' for Japanese, 'en-GB' for British English, 'en-US' for others
  */
 export function detectLocale(): Locale {
-  // Server-side rendering: default to English
+  // Server-side rendering: default to Japanese
   if (typeof window === 'undefined') {
-    return 'en';
+    return 'ja';
   }
   
   // Client-side: detect from browser
   const browserLang = navigator.language.toLowerCase();
-  return browserLang.startsWith('ja') ? 'ja' : 'en';
+  
+  if (browserLang.startsWith('ja')) {
+    return 'ja';
+  } else if (browserLang === 'en-gb' || browserLang.startsWith('en-gb')) {
+    return 'en-GB';
+  } else {
+    return 'en-US';
+  }
 }
 
 /**
@@ -229,13 +339,16 @@ export function useTranslations(locale: Locale) {
 
 /**
  * Format a date according to the specified locale
+ * Phase 2: Extended to support 3 locales with proper formatting
  * @param date - The date to format
  * @param locale - The locale to use for formatting
  * @returns Formatted date string
  */
 export function formatDate(date: Date | string, locale: Locale): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const dateLocale = locale === 'ja' ? 'ja-JP' : 'en-US';
+  
+  // Map locale to browser locale string
+  const dateLocale = locale === 'ja' ? 'ja-JP' : locale === 'en-GB' ? 'en-GB' : 'en-US';
   
   return dateObj.toLocaleDateString(dateLocale, {
     weekday: 'long',
@@ -247,11 +360,47 @@ export function formatDate(date: Date | string, locale: Locale): string {
 
 /**
  * Format a number according to the specified locale
+ * Phase 2: Extended to support 3 locales
  * @param num - The number to format
  * @param locale - The locale to use for formatting
  * @returns Formatted number string
  */
 export function formatNumber(num: number, locale: Locale): string {
-  const numLocale = locale === 'ja' ? 'ja-JP' : 'en-US';
+  const numLocale = locale === 'ja' ? 'ja-JP' : locale === 'en-GB' ? 'en-GB' : 'en-US';
   return num.toLocaleString(numLocale);
+}
+
+/**
+ * Timezone mapping for each locale
+ * Phase 2: Maps locales to their respective timezones
+ */
+export const timezones: Record<Locale, string> = {
+  'ja': 'Asia/Tokyo',
+  'en-US': 'America/New_York',
+  'en-GB': 'Europe/London',
+};
+
+/**
+ * Format a newspaper date according to the specified locale and timezone
+ * Phase 2: New function for locale-specific date formatting with timezone support
+ * @param isoDate - ISO 8601 date string (UTC)
+ * @param locale - The locale to use for formatting
+ * @returns Formatted date string in the locale's timezone
+ * 
+ * Examples:
+ * - ja: "2025年12月8日 月曜日"
+ * - en-US: "Monday, December 8, 2025"
+ * - en-GB: "Monday, 8 December 2025"
+ */
+export function formatNewspaperDate(isoDate: string, locale: Locale): string {
+  const date = new Date(isoDate);
+  const timezone = timezones[locale];
+  
+  return date.toLocaleDateString(locale, {
+    timeZone: timezone,
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }

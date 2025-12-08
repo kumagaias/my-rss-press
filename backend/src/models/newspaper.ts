@@ -1,8 +1,7 @@
-// Common type definitions for the frontend application
+// Data models for newspaper-related entities
 
 /**
  * Supported locales for newspapers
- * Phase 2: Extended to support 3 locales
  * - ja: Japanese (Asia/Tokyo, UTC+9)
  * - en-US: English (US) (America/New_York, UTC-5/-4)
  * - en-GB: English (UK) (Europe/London, UTC+0/+1)
@@ -25,19 +24,13 @@ export interface Article {
   title: string;
   description: string;
   link: string;
-  pubDate: string;
+  pubDate: string; // ISO 8601 format
   imageUrl?: string;
   importance: number;
+  feedSource?: string; // Optional for backward compatibility
   
   // Phase 2: Unsplash attribution
   imageAttribution?: ImageAttribution;
-}
-
-export interface FeedSuggestion {
-  url: string;
-  title: string;
-  reasoning: string;
-  isDefault?: boolean; // Flag to indicate if this is a default/fallback feed
 }
 
 /**
@@ -45,7 +38,7 @@ export interface FeedSuggestion {
  * Phase 2 extensions:
  * - seriesId: UUID for newspaper series
  * - publishDate: Publication date (YYYY-MM-DD)
- * - locale: Extended to support 3 locales (ja, en-US, en-GB)
+ * - locale: Language and timezone setting
  * - summary: AI-generated 3-line summary
  * 
  * Note: Phase 2 fields are optional for backward compatibility during migration
@@ -67,10 +60,4 @@ export interface NewspaperData {
   seriesId?: string; // UUID for newspaper series
   publishDate?: string; // YYYY-MM-DD format
   summary?: string; // AI-generated 3-line summary
-}
-
-export interface NewspaperSettings {
-  newspaperName: string;
-  userName: string;
-  isPublic: boolean;
 }

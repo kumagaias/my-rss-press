@@ -14,7 +14,7 @@ function NewspaperPageInner() {
   const searchParams = useSearchParams();
   const newspaperId = searchParams.get('id');
   
-  const [locale, setLocale] = useState<Locale>('en');
+  const [locale, setLocale] = useState<Locale>('ja');
   const t = useTranslations(locale);
 
   const [articles, setArticles] = useState<Article[]>([]);
@@ -218,12 +218,20 @@ function NewspaperPageInner() {
                   日本語
                 </button>
                 <button
-                  onClick={() => setLocale('en')}
+                  onClick={() => setLocale('en-US')}
                   className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
-                    locale === 'en' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'
+                    locale === 'en-US' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
-                  EN
+                  EN-US
+                </button>
+                <button
+                  onClick={() => setLocale('en-GB')}
+                  className={`px-3 py-1 text-sm font-serif font-bold border-2 border-black transition-colors ${
+                    locale === 'en-GB' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  EN-GB
                 </button>
               </div>
             </div>
@@ -301,14 +309,24 @@ function NewspaperPageInner() {
                   日本語
                 </button>
                 <button
-                  onClick={() => setLocale('en')}
+                  onClick={() => setLocale('en-US')}
                   className={`px-3 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black transition-colors ${
-                    locale === 'en'
+                    locale === 'en-US'
                       ? 'bg-black text-white'
                       : 'bg-white text-black hover:bg-gray-100'
                   }`}
                 >
-                  EN
+                  EN-US
+                </button>
+                <button
+                  onClick={() => setLocale('en-GB')}
+                  className={`px-3 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black transition-colors ${
+                    locale === 'en-GB'
+                      ? 'bg-black text-white'
+                      : 'bg-white text-black hover:bg-gray-100'
+                  }`}
+                >
+                  EN-GB
                 </button>
               </div>
               {/* Show view count for saved newspapers */}

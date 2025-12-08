@@ -1,7 +1,9 @@
 'use client';
 
+import type { Locale } from '@/types';
+
 interface LoadingAnimationProps {
-  locale?: 'en' | 'ja';
+  locale?: Locale;
 }
 
 /**
@@ -10,7 +12,7 @@ interface LoadingAnimationProps {
  * Displays an animated loading indicator showing AI fetching feeds
  * Uses newspaper-themed animation with dots and waves
  */
-export function LoadingAnimation({ locale = 'en' }: LoadingAnimationProps) {
+export function LoadingAnimation({ locale = 'ja' }: LoadingAnimationProps) {
   const text = locale === 'ja' 
     ? 'AIが最適なフィードを探しています...'
     : 'AI is finding the best feeds for you...';

@@ -19,7 +19,7 @@ const GenerateNewspaperSchema = z.object({
   feedUrls: z.array(z.string().url()).min(3, 'At least 3 feed URLs are required').max(10, 'Too many feed URLs'),
   theme: z.string().min(1, 'Theme is required'),
   defaultFeedUrls: z.array(z.string().url()).optional(), // URLs of default/fallback feeds
-  locale: z.enum(['en', 'ja']).optional().default('en'), // Language setting for the newspaper
+  locale: z.enum(['ja', 'en-US', 'en-GB']).optional().default('ja'), // Phase 2: Extended locale support
 });
 
 const ArticleSchema = z.object({
@@ -37,7 +37,7 @@ const SaveNewspaperSchema = z.object({
   feedUrls: z.array(z.string().url()).min(1).max(10, 'Too many feed URLs'),
   articles: z.array(ArticleSchema).optional(),
   isPublic: z.boolean().optional().default(true),
-  locale: z.enum(['en', 'ja']).optional().default('en'), // Language setting for the newspaper
+  locale: z.enum(['ja', 'en-US', 'en-GB']).optional().default('ja'), // Phase 2: Extended locale support
 });
 
 /**

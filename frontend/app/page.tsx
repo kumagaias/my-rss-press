@@ -28,7 +28,14 @@ export default function Home() {
   // Detect locale on mount
   useEffect(() => {
     // Check localStorage first, then detect from browser
-    const savedLocale = localStorage.getItem('locale') as Locale | null;
+    let savedLocale = localStorage.getItem('locale') as Locale | null;
+    
+    // Migration: Convert old 'en' locale to 'en-US'
+    if (savedLocale === 'en' as any) {
+      savedLocale = 'en-US';
+      localStorage.setItem('locale', 'en-US');
+    }
+    
     setLocale(savedLocale || detectLocale());
   }, []);
 

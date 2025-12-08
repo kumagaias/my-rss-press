@@ -98,7 +98,8 @@ export async function getNewspaper(newspaperId: string): Promise<NewspaperData |
     updatedAt: result.Item.updatedAt,
     viewCount: result.Item.viewCount,
     isPublic: result.Item.isPublic,
-    locale: result.Item.locale || 'ja', // Default to 'ja' for backward compatibility
+    // Migration: Convert old 'en' locale to 'en-US', default to 'ja' for backward compatibility
+    locale: result.Item.locale === 'en' ? 'en-US' : (result.Item.locale || 'ja'),
     // Phase 2 fields (optional)
     seriesId: result.Item.seriesId,
     publishDate: result.Item.publishDate,
@@ -152,7 +153,8 @@ export async function getPublicNewspapers(
     updatedAt: item.updatedAt,
     viewCount: item.viewCount,
     isPublic: item.isPublic,
-    locale: item.locale || 'ja', // Default to 'ja' for backward compatibility
+    // Migration: Convert old 'en' locale to 'en-US', default to 'ja' for backward compatibility
+    locale: item.locale === 'en' ? 'en-US' : (item.locale || 'ja'),
     // Phase 2 fields (optional)
     seriesId: item.seriesId,
     publishDate: item.publishDate,

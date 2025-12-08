@@ -38,8 +38,19 @@ function NewspaperPageInner() {
   // Load data from sessionStorage or API
   useEffect(() => {
     // Try to get saved locale from localStorage first, then sessionStorage, then detect
-    const localStorageLocale = localStorage.getItem('locale') as Locale | null;
-    const sessionLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
+    let localStorageLocale = localStorage.getItem('locale') as Locale | null;
+    let sessionLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
+    
+    // Migration: Convert old 'en' locale to 'en-US'
+    if (localStorageLocale === 'en' as any) {
+      localStorageLocale = 'en-US';
+      localStorage.setItem('locale', 'en-US');
+    }
+    if (sessionLocale === 'en' as any) {
+      sessionLocale = 'en-US';
+      sessionStorage.setItem('newspaperLocale', 'en-US');
+    }
+    
     const detectedLocale = localStorageLocale || sessionLocale || detectLocale();
     setLocale(detectedLocale);
 

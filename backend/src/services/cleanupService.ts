@@ -92,7 +92,7 @@ async function queryOldNewspapersByGSI(
   cutoffDate: string,
   items: Array<{ PK: string; SK: string }>
 ): Promise<void> {
-  let lastEvaluatedKey: Record<string, any> | undefined;
+  let lastEvaluatedKey: Record<string, unknown> | undefined;
 
   do {
     const result = await docClient.send(

@@ -10,6 +10,7 @@ import {
   fetchArticlesForNewspaper,
 } from '../services/rssFetcherService.js';
 import { calculateImportance } from '../services/importanceCalculator.js';
+import { detectLanguages } from '../services/languageDetectionService.js';
 import { rateLimit } from '../middleware/rateLimit.js';
 
 export const newspapersRouter = new Hono();
@@ -38,6 +39,9 @@ const SaveNewspaperSchema = z.object({
   articles: z.array(ArticleSchema).optional(),
   isPublic: z.boolean().optional().default(true),
   locale: z.enum(['en', 'ja']).optional().default('en'), // Language setting for the newspaper
+  languages: z.array(z.string()).optional(), // Detected language tags (e.g., ["JP", "EN"])
+  summary: z.string().optional(), // AI-generated summary
+  newspaperDate: z.string().optional(), // Date of the newspaper (YYYY-MM-DD)
 });
 
 /**
@@ -56,7 +60,7 @@ newspapersRouter.post(
       console.log(`Generating newspaper for theme: ${validated.theme}`);
 
       // Fetch articles from RSS feeds
-      const articles = await fetchArticlesForNewspaper(
+      const { articles, feedLanguages } = await fetchArticlesForNewspaper(
         validated.feedUrls,
         validated.theme
       );
@@ -84,8 +88,19 @@ newspapersRouter.post(
         defaultFeedUrls
       );
 
+      // Detect languages from articles
+      let languages: string[] = [];
+      try {
+        languages = await detectLanguages(articlesWithImportance, feedLanguages);
+        console.log(`Detected languages: ${languages.join(', ')}`);
+      } catch (error) {
+        console.error('Error detecting languages:', error);
+        // Continue without languages (empty array)
+      }
+
       return c.json({
         articles: articlesWithImportance,
+        languages, // Include detected languages in response
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

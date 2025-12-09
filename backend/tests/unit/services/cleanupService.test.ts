@@ -7,6 +7,10 @@ describe('cleanupService', () => {
     vi.setSystemTime(new Date('2025-12-09T12:00:00+09:00'));
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('should calculate correct cutoff date', () => {
     // Test that cutoff date is 7 days ago
     // Current time: 2025-12-09T12:00:00+09:00 (JST)

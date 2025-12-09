@@ -9,6 +9,10 @@ describe('historicalNewspaperService', () => {
       vi.setSystemTime(new Date('2025-12-09T12:00:00+09:00'));
     });
 
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('should accept today\'s date', () => {
       const result = validateDate('2025-12-09');
       expect(result.valid).toBe(true);

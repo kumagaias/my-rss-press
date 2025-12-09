@@ -131,6 +131,7 @@ newspapersRouter.post(
 /**
  * GET /api/newspapers/:id/dates
  * Get available dates for a newspaper
+ * Note: This route must be defined BEFORE :id/:date to avoid route conflicts
  */
 newspapersRouter.get('/newspapers/:id/dates', async (c) => {
   try {
@@ -154,8 +155,9 @@ newspapersRouter.get('/newspapers/:id/dates', async (c) => {
 /**
  * GET /api/newspapers/:id/:date
  * Get or create a newspaper for a specific date
+ * Note: Date format must be YYYY-MM-DD
  */
-newspapersRouter.get('/newspapers/:id/:date', async (c) => {
+newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async (c) => {
   try {
     const newspaperId = c.req.param('id');
     const date = c.req.param('date');

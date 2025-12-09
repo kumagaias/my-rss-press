@@ -12,7 +12,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { config } from '../config.js';
 import { NewspaperData } from '../models/newspaper.js';
-import { fetchArticles } from './rssFetcherService.js';
+import { fetchArticles, type Article as RSSArticle } from './rssFetcherService.js';
 import { calculateImportance } from './importanceCalculator.js';
 import { detectLanguages } from './languageDetectionService.js';
 
@@ -59,8 +59,6 @@ export function validateDate(date: string): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
-import type { Article as RSSArticle } from './rssFetcherService.js';
-
 /**
  * Fetch articles for a specific date
  * @param feedUrls - Array of RSS feed URLs
@@ -81,16 +79,16 @@ export async function fetchArticlesForDate(
   const todayJST = new Date(nowJST);
   todayJST.setHours(0, 0, 0, 0);
 
-  // Determine end time
+  // Determine end time (avoid mutating targetDate)
   const endTime = targetDate.getTime() === todayJST.getTime()
     ? nowJST // Today: up to current time
-    : new Date(targetDate.setHours(23, 59, 59, 999)); // Other days: end of day
+    : new Date(new Date(targetDate).setHours(23, 59, 59, 999)); // Other days: end of day
 
   console.log(`Fetching articles for date: ${date} (JST)`);
   console.log(`Time range: ${startOfDay.toISOString()} to ${endTime.toISOString()}`);
 
-  // Fetch all articles from feeds
-  const result = await fetchArticles(feedUrls, 7); // Fetch last 7 days
+  // Fetch articles from feeds (initially 7 days, extend to 14 if needed)
+  let result = await fetchArticles(feedUrls, 7); // Fetch last 7 days
   let allArticles = result.articles;
   const feedLanguages = result.feedLanguages;
 
@@ -102,14 +100,20 @@ export async function fetchArticlesForDate(
 
   console.log(`Found ${articles.length} articles for ${date}`);
 
-  // If insufficient articles, extend to 7 days before target date
+  // If insufficient articles, extend search to 14 days and re-filter
   const minArticles = 8;
   if (articles.length < minArticles) {
-    console.log(`Insufficient articles (${articles.length}), extending search to 7 days before ${date}`);
+    console.log(`Insufficient articles (${articles.length}), extending search to 14 days`);
     
+    // Fetch articles from last 14 days
+    result = await fetchArticles(feedUrls, 14);
+    allArticles = result.articles;
+    
+    // Calculate extended date range (7 days before target date)
     const sevenDaysBefore = new Date(startOfDay);
     sevenDaysBefore.setDate(sevenDaysBefore.getDate() - 7);
 
+    // Re-filter with extended range
     articles = allArticles.filter(article => {
       const pubDate = new Date(article.pubDate);
       return pubDate >= sevenDaysBefore && pubDate <= endTime;
@@ -251,6 +255,9 @@ async function getNewspaperByDate(
 /**
  * Save a newspaper by date
  * @param newspaper - Newspaper data
+ * 
+ * Note: Sets GSI attributes for cleanup service to find historical newspapers.
+ * Uses a special GSI1PK pattern 'HISTORICAL' to distinguish from public newspapers.
  */
 async function saveNewspaperByDate(newspaper: NewspaperData): Promise<void> {
   await docClient.send(
@@ -259,6 +266,10 @@ async function saveNewspaperByDate(newspaper: NewspaperData): Promise<void> {
       Item: {
         PK: `NEWSPAPER#${newspaper.newspaperId}`,
         SK: `DATE#${newspaper.newspaperDate}`,
+        // Set GSI attributes for cleanup service
+        // Use 'HISTORICAL' prefix to distinguish from public newspapers
+        GSI1PK: 'HISTORICAL',
+        GSI1SK: `DATE#${newspaper.newspaperDate}#${newspaper.newspaperId}`,
         ...newspaper,
       },
     })

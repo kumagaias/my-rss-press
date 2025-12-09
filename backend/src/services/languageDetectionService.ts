@@ -33,6 +33,9 @@ export function detectLanguage(text: string): 'JP' | 'EN' {
  * @param articles - Array of articles to analyze
  * @param feedLanguages - Map of feed URL to language code from RSS <language> field
  * @returns Array of unique language codes (e.g., ["JP", "EN"])
+ * 
+ * Note: Currently only handles Japanese ('ja') and English ('en') explicitly.
+ * Other languages default to 'EN' as the system primarily targets EN/JP users.
  */
 export async function detectLanguages(
   articles: Article[],
@@ -45,6 +48,8 @@ export async function detectLanguages(
     const feedLanguage = feedLanguages.get(article.feedSource);
     if (feedLanguage) {
       // Convert language code to our format (JP or EN)
+      // Note: Other languages (es, fr, zh, ko, etc.) default to 'EN'
+      // This is acceptable as the system primarily targets EN/JP users
       const lang = feedLanguage.toLowerCase().startsWith('ja') ? 'JP' : 'EN';
       languages.add(lang);
       continue;

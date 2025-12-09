@@ -65,24 +65,43 @@ export async function cleanupOldNewspapers(): Promise<{ deletedCount: number }> 
  * Query newspapers older than cutoff date
  * @param cutoffDate - Cutoff date in YYYY-MM-DD format
  * @returns Array of items to delete
+ * 
+ * Note: Queries both public newspapers and historical newspapers using GSI.
+ * Historical newspapers are identified by GSI1PK = 'HISTORICAL'.
  */
 async function queryOldNewspapers(cutoffDate: string): Promise<Array<{ PK: string; SK: string }>> {
   const items: Array<{ PK: string; SK: string }> = [];
 
-  // We need to scan the table to find all DATE# items
-  // This is not ideal, but necessary since we don't have a GSI for dates
-  // In production, consider adding a GSI for efficient date-based queries
+  // Query 1: Find old public newspapers
+  await queryOldNewspapersByGSI('PUBLIC', cutoffDate, items);
 
+  // Query 2: Find old historical newspapers
+  await queryOldNewspapersByGSI('HISTORICAL', cutoffDate, items);
+
+  return items;
+}
+
+/**
+ * Query old newspapers by GSI1PK
+ * @param gsi1pk - GSI1PK value ('PUBLIC' or 'HISTORICAL')
+ * @param cutoffDate - Cutoff date in YYYY-MM-DD format
+ * @param items - Array to append found items to
+ */
+async function queryOldNewspapersByGSI(
+  gsi1pk: string,
+  cutoffDate: string,
+  items: Array<{ PK: string; SK: string }>
+): Promise<void> {
   let lastEvaluatedKey: Record<string, any> | undefined;
 
   do {
     const result = await docClient.send(
       new QueryCommand({
         TableName: config.dynamodbTable,
-        IndexName: 'PublicNewspapers', // Use existing GSI to scan efficiently
+        IndexName: 'PublicNewspapers', // Use existing GSI
         KeyConditionExpression: 'GSI1PK = :pk',
         ExpressionAttributeValues: {
-          ':pk': 'PUBLIC',
+          ':pk': gsi1pk,
         },
         ExclusiveStartKey: lastEvaluatedKey,
       })
@@ -105,8 +124,6 @@ async function queryOldNewspapers(cutoffDate: string): Promise<Array<{ PK: strin
 
     lastEvaluatedKey = result.LastEvaluatedKey;
   } while (lastEvaluatedKey);
-
-  return items;
 }
 
 /**

@@ -3,7 +3,7 @@
 resource "aws_cloudwatch_event_rule" "cleanup_schedule" {
   name                = "${var.project_name}-cleanup-schedule-${var.environment}"
   description         = "Trigger cleanup Lambda daily at 3 AM JST (6 PM UTC previous day)"
-  schedule_expression = "cron(0 18 * * ? *)" # 3 AM JST = 6 PM UTC (previous day)
+  schedule_expression = "cron(0 18 * * ? *)" # Runs at 18:00 UTC daily (3:00 AM JST next day)
 }
 
 resource "aws_cloudwatch_event_target" "cleanup_lambda" {

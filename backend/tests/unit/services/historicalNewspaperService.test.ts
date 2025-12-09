@@ -4,9 +4,9 @@ import { validateDate } from '../../../src/services/historicalNewspaperService.j
 describe('historicalNewspaperService', () => {
   describe('validateDate', () => {
     beforeEach(() => {
-      // Mock current date to 2025-12-09 JST
+      // Mock current date to 2025-12-09 12:00 JST (which is 2025-12-09 03:00 UTC)
       vi.useFakeTimers();
-      vi.setSystemTime(new Date('2025-12-09T12:00:00+09:00'));
+      vi.setSystemTime(new Date('2025-12-09T03:00:00Z')); // UTC time that corresponds to 12:00 JST
     });
 
     afterEach(() => {

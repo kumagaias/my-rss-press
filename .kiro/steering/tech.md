@@ -154,6 +154,31 @@ NEXT_PUBLIC_APP_ENV=production
 - Write type-safe code with TypeScript
 - Functions follow single responsibility principle
 
+### Timezone Handling
+
+**All dates and times MUST use JST (Asia/Tokyo, UTC+9)**
+
+- **Date validation**: Compare dates in JST
+- **Date filtering**: Filter articles by JST date ranges
+- **Date display**: Display dates in JST to users
+- **Database storage**: Store dates in ISO 8601 format with timezone
+- **Cleanup schedule**: Run at 3 AM JST (cron: `0 18 * * ? *` in UTC)
+
+**Implementation:**
+```typescript
+// Get current date in JST
+const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+
+// Parse date string as JST
+const dateJST = new Date(dateString + 'T00:00:00+09:00');
+
+// Compare dates in JST
+const todayJST = new Date(nowJST);
+todayJST.setHours(0, 0, 0, 0);
+```
+
+**Reason**: Although MyRSSPress is primarily for US/UK users, the development team is in Japan (JST). Using JST for all date operations ensures consistency in development, debugging, and operations. Users see dates in their local timezone in the UI.
+
 ### Layered Architecture
 
 ```
@@ -583,7 +608,8 @@ app.onError((err, c) => {
 
 - Define and use custom error classes
 - Return errors with appropriate HTTP status codes
-- Support multi-language error messages
+- **Error messages MUST be in English** (for consistency and debugging)
+- UI can translate error messages for display to users
 - Hide detailed error information in production
 
 ### API Design

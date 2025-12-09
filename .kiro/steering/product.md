@@ -14,6 +14,10 @@ This document describes the product specifications for MyRSSPress.
 
 MyRSSPress is a web application that transforms RSS feeds into visually appealing newspaper-style layouts. Users enter topics of interest, receive AI-powered RSS feed suggestions, select feeds, and generate personalized digital newspapers with realistic paper textures and intelligent article layouts.
 
+**Target Users:** Primarily US/UK (English-speaking) users, with Japanese language support for Japanese users.
+
+**Primary Region:** US/UK (English-speaking countries)
+
 ## Core Features
 
 ### 1. Multi-language Support

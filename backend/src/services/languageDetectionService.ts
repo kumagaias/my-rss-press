@@ -6,7 +6,7 @@
  * 2. Character-based detection (fallback)
  */
 
-import type { Article } from './rssFetcherService';
+import type { Article } from './rssFetcherService.js';
 
 /**
  * Detect language from text content using character-based analysis

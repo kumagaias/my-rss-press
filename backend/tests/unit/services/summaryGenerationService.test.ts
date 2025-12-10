@@ -47,6 +47,7 @@ describe('summaryGenerationService', () => {
         link: 'https://example.com/1',
         pubDate: new Date(),
         importance: 10,
+        feedSource: 'https://example.com/feed',
       },
       {
         title: 'Article 2',
@@ -54,6 +55,7 @@ describe('summaryGenerationService', () => {
         link: 'https://example.com/2',
         pubDate: new Date(),
         importance: 8,
+        feedSource: 'https://example.com/feed',
       },
     ];
 
@@ -92,6 +94,7 @@ describe('summaryGenerationService', () => {
         link: `https://example.com/${i + 1}`,
         pubDate: new Date(),
         importance: 10 - i,
+        feedSource: 'https://example.com/feed',
       }));
 
       const result = await generateSummary(manyArticles, 'Technology', ['EN']);
@@ -123,6 +126,7 @@ describe('summaryGenerationService', () => {
           link: 'https://example.com/1',
           pubDate: new Date(),
           importance: 0,
+          feedSource: 'https://example.com/feed',
         },
       ];
 
@@ -143,6 +147,7 @@ describe('summaryGenerationService', () => {
             link: 'https://example.com/1',
             pubDate: new Date(),
             importance: 10,
+            feedSource: 'https://example.com/feed',
           },
         ],
         'Technology',

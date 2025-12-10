@@ -42,8 +42,9 @@ export default function DateNavigation({
   const handlePrevious = () => {
     if (!canGoPrevious) return;
 
-    const previousDate = new Date(current);
-    previousDate.setDate(previousDate.getDate() - 1);
+    // Create date in UTC to avoid timezone issues
+    const [year, month, day] = currentDate.split('-').map(Number);
+    const previousDate = new Date(Date.UTC(year, month - 1, day - 1));
     const dateString = previousDate.toISOString().split('T')[0];
     onDateChange(dateString);
   };
@@ -51,8 +52,9 @@ export default function DateNavigation({
   const handleNext = () => {
     if (!canGoNext) return;
 
-    const nextDate = new Date(current);
-    nextDate.setDate(nextDate.getDate() + 1);
+    // Create date in UTC to avoid timezone issues
+    const [year, month, day] = currentDate.split('-').map(Number);
+    const nextDate = new Date(Date.UTC(year, month - 1, day + 1));
     const dateString = nextDate.toISOString().split('T')[0];
     onDateChange(dateString);
   };

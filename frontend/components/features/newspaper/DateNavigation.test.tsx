@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DateNavigation } from './DateNavigation';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import DateNavigation from './DateNavigation';
 
 describe('DateNavigation', () => {
   const mockOnDateChange = vi.fn();
@@ -17,7 +17,7 @@ describe('DateNavigation', () => {
   });
 
   const defaultProps = {
-    currentDate: new Date('2025-12-10T00:00:00+09:00'),
+    currentDate: '2025-12-10',
     onDateChange: mockOnDateChange,
     locale: 'en' as const,
   };
@@ -44,12 +44,11 @@ describe('DateNavigation', () => {
 
       const previousButton = screen.getByRole('button', { name: /previous/i });
       expect(previousButton).not.toBeDisabled();
-      expect(previousButton).toHaveClass('bg-blue-600');
+      expect(previousButton).toHaveClass('bg-gray-800');
     });
 
     it('should be disabled when current date is 7 days ago', () => {
-      const sevenDaysAgo = new Date('2025-12-03T00:00:00+09:00');
-      render(<DateNavigation {...defaultProps} currentDate={sevenDaysAgo} />);
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
       const previousButton = screen.getByRole('button', { name: /previous/i });
       expect(previousButton).toBeDisabled();
@@ -57,19 +56,18 @@ describe('DateNavigation', () => {
     });
 
     it('should call onDateChange with previous day when clicked', () => {
-      render(<DateNavigation {...defaultProps} />);
+      // Current date is 2025-12-09, so previous should be 2025-12-08
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-09" />);
 
       const previousButton = screen.getByRole('button', { name: /previous/i });
       fireEvent.click(previousButton);
 
       expect(mockOnDateChange).toHaveBeenCalledTimes(1);
-      const calledDate = mockOnDateChange.mock.calls[0][0];
-      expect(calledDate.getDate()).toBe(9); // December 9
+      expect(mockOnDateChange).toHaveBeenCalledWith('2025-12-08');
     });
 
     it('should not call onDateChange when disabled', () => {
-      const sevenDaysAgo = new Date('2025-12-03T00:00:00+09:00');
-      render(<DateNavigation {...defaultProps} currentDate={sevenDaysAgo} />);
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
       const previousButton = screen.getByRole('button', { name: /previous/i });
       fireEvent.click(previousButton);
@@ -80,12 +78,11 @@ describe('DateNavigation', () => {
 
   describe('Next Day Button', () => {
     it('should be enabled when current date is before today', () => {
-      const yesterday = new Date('2025-12-09T00:00:00+09:00');
-      render(<DateNavigation {...defaultProps} currentDate={yesterday} />);
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-09" />);
 
       const nextButton = screen.getByRole('button', { name: /next/i });
       expect(nextButton).not.toBeDisabled();
-      expect(nextButton).toHaveClass('bg-blue-600');
+      expect(nextButton).toHaveClass('bg-gray-800');
     });
 
     it('should be disabled when current date is today', () => {
@@ -97,15 +94,14 @@ describe('DateNavigation', () => {
     });
 
     it('should call onDateChange with next day when clicked', () => {
-      const yesterday = new Date('2025-12-09T00:00:00+09:00');
-      render(<DateNavigation {...defaultProps} currentDate={yesterday} />);
+      // Current date is 2025-12-08, so next should be 2025-12-09
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-08" />);
 
       const nextButton = screen.getByRole('button', { name: /next/i });
       fireEvent.click(nextButton);
 
       expect(mockOnDateChange).toHaveBeenCalledTimes(1);
-      const calledDate = mockOnDateChange.mock.calls[0][0];
-      expect(calledDate.getDate()).toBe(10); // December 10
+      expect(mockOnDateChange).toHaveBeenCalledWith('2025-12-09');
     });
 
     it('should not call onDateChange when disabled', () => {
@@ -127,16 +123,14 @@ describe('DateNavigation', () => {
     });
 
     it('should prevent navigation to dates older than 7 days', () => {
-      const sevenDaysAgo = new Date('2025-12-03T00:00:00+09:00');
-      render(<DateNavigation {...defaultProps} currentDate={sevenDaysAgo} />);
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
       const previousButton = screen.getByRole('button', { name: /previous/i });
       expect(previousButton).toBeDisabled();
     });
 
     it('should allow navigation within 7-day window', () => {
-      const fiveDaysAgo = new Date('2025-12-05T00:00:00+09:00');
-      render(<DateNavigation {...defaultProps} currentDate={fiveDaysAgo} />);
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-05" />);
 
       const previousButton = screen.getByRole('button', { name: /previous/i });
       const nextButton = screen.getByRole('button', { name: /next/i });
@@ -150,15 +144,15 @@ describe('DateNavigation', () => {
     it('should display Japanese labels when locale is ja', () => {
       render(<DateNavigation {...defaultProps} locale="ja" />);
 
-      expect(screen.getByText('前日')).toBeInTheDocument();
-      expect(screen.getByText('翌日')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /前日/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /翌日/i })).toBeInTheDocument();
     });
 
     it('should display English labels when locale is en', () => {
       render(<DateNavigation {...defaultProps} locale="en" />);
 
-      expect(screen.getByText('Previous')).toBeInTheDocument();
-      expect(screen.getByText('Next')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
     });
   });
 });

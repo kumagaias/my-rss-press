@@ -87,6 +87,10 @@ export const translations = {
     // Status
     saved: 'Saved',
     
+    // Date navigation
+    previousDay: 'Previous',
+    nextDay: 'Next',
+    
     // Footer
     footerTagline: 'Powered by AI',
     
@@ -185,6 +189,10 @@ export const translations = {
     
     // ステータス
     saved: '保存済み',
+    
+    // 日付ナビゲーション
+    previousDay: '前日',
+    nextDay: '翌日',
     
     // フッター
     footerTagline: 'AIで動作',

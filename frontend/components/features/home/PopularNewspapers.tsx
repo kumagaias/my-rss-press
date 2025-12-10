@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import LanguageFilter from './LanguageFilter';
+import SearchInput from './SearchInput';
 import type { NewspaperData, Locale } from '@/types';
 import { useTranslations, formatDate, formatNumber } from '@/lib/i18n';
 import { getHostnameFromUrl } from '@/lib/utils';
@@ -16,6 +18,12 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
   const [sortBy, setSortBy] = useState<'popular' | 'recent'>('popular');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Filter states
+  const [selectedLanguage, setSelectedLanguage] = useState<'JP' | 'EN' | 'ALL'>(
+    locale === 'ja' ? 'JP' : 'EN'
+  );
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchNewspapers = useCallback(async () => {
     setIsLoading(true);
@@ -52,27 +60,78 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
     }
   };
 
+  // Filter newspapers by language and search query
+  const filteredNewspapers = useMemo(() => {
+    let filtered = newspapers;
+
+    // Language filter
+    if (selectedLanguage !== 'ALL') {
+      filtered = filtered.filter((newspaper) => {
+        // If languages field is missing or empty, show in all filters (backward compatibility)
+        if (!newspaper.languages || newspaper.languages.length === 0) {
+          return true;
+        }
+        // Check if selected language is in the newspaper's languages
+        return newspaper.languages.includes(selectedLanguage);
+      });
+    }
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((newspaper) => {
+        // Search in newspaper name
+        const nameMatch = newspaper.name.toLowerCase().includes(query);
+        
+        // Search in feed URLs
+        const feedMatch = newspaper.feedUrls?.some((url) =>
+          url.toLowerCase().includes(query)
+        );
+        
+        return nameMatch || feedMatch;
+      });
+    }
+
+    return filtered;
+  }, [newspapers, selectedLanguage, searchQuery]);
+
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-6 border-b-2 border-black pb-4">
-        <h2 className="text-3xl font-serif font-black">
-          {sortBy === 'popular' ? t.popularNewspapers : t.recentNewspapers}
-        </h2>
-        <div className="flex gap-2">
-          <Button
-            variant={sortBy === 'popular' ? 'primary' : 'outline'}
-            size="sm"
-            onClick={() => handleSortChange('popular')}
-          >
-            {t.popular}
-          </Button>
-          <Button
-            variant={sortBy === 'recent' ? 'primary' : 'outline'}
-            size="sm"
-            onClick={() => handleSortChange('recent')}
-          >
-            {t.recent}
-          </Button>
+      <div className="flex flex-col gap-4 mb-6 border-b-2 border-black pb-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-serif font-black">
+            {sortBy === 'popular' ? t.popularNewspapers : t.recentNewspapers}
+          </h2>
+          <div className="flex gap-2">
+            <Button
+              variant={sortBy === 'popular' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => handleSortChange('popular')}
+            >
+              {t.popular}
+            </Button>
+            <Button
+              variant={sortBy === 'recent' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => handleSortChange('recent')}
+            >
+              {t.recent}
+            </Button>
+          </div>
+        </div>
+        
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <LanguageFilter
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={setSelectedLanguage}
+            locale={locale}
+          />
+          <SearchInput
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            locale={locale}
+          />
         </div>
       </div>
 
@@ -102,9 +161,19 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
         </div>
       )}
 
-      {!isLoading && !error && newspapers.length > 0 && (
+      {!isLoading && !error && newspapers.length > 0 && filteredNewspapers.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-600">
+            {locale === 'ja'
+              ? '検索条件に一致する新聞が見つかりませんでした'
+              : 'No newspapers found matching your search criteria'}
+          </p>
+        </div>
+      )}
+
+      {!isLoading && !error && filteredNewspapers.length > 0 && (
         <div className="space-y-4">
-          {newspapers.map((newspaper) => (
+          {filteredNewspapers.map((newspaper) => (
             <div
               key={newspaper.newspaperId}
               onClick={() => handleNewspaperClick(newspaper.newspaperId)}

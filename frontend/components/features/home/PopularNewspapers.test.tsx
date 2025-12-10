@@ -177,4 +177,271 @@ describe('PopularNewspapers', () => {
       expect(screen.getByText('人気の新聞')).toBeInTheDocument();
     });
   });
+
+  describe('Language Filter', () => {
+    const newspapersWithLanguages: NewspaperData[] = [
+      {
+        ...mockNewspapers[0],
+        languages: ['EN'],
+      },
+      {
+        ...mockNewspapers[1],
+        languages: ['JP'],
+      },
+      {
+        newspaperId: '3',
+        name: 'Bilingual News',
+        userName: 'Bob Wilson',
+        feedUrls: ['https://example.com/bilingual'],
+        createdAt: '2025-12-03T10:00:00Z',
+        updatedAt: '2025-12-03T10:00:00Z',
+        viewCount: 100,
+        isPublic: true,
+        languages: ['EN', 'JP'],
+      },
+      {
+        newspaperId: '4',
+        name: 'Legacy News',
+        userName: 'Alice Brown',
+        feedUrls: ['https://example.com/legacy'],
+        createdAt: '2025-12-04T10:00:00Z',
+        updatedAt: '2025-12-04T10:00:00Z',
+        viewCount: 50,
+        isPublic: true,
+        // No languages field (backward compatibility)
+      },
+    ];
+
+    it('filters newspapers by selected language', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ newspapers: newspapersWithLanguages }),
+      });
+
+      render(<PopularNewspapers locale="en" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+      });
+
+      // Click JP filter
+      const jpButton = screen.getByText('Japanese');
+      fireEvent.click(jpButton);
+
+      // Should show only JP newspapers and legacy newspapers (backward compatibility)
+      await waitFor(() => {
+        expect(screen.queryByText('Tech News Daily')).not.toBeInTheDocument();
+        expect(screen.getByText('Sports Weekly')).toBeInTheDocument();
+        expect(screen.getByText('Bilingual News')).toBeInTheDocument();
+        expect(screen.getByText('Legacy News')).toBeInTheDocument();
+      });
+    });
+
+    it('shows all newspapers when ALL is selected', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ newspapers: newspapersWithLanguages }),
+      });
+
+      render(<PopularNewspapers locale="en" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+      });
+
+      // Click ALL filter
+      const allButton = screen.getByText('All');
+      fireEvent.click(allButton);
+
+      // Should show all newspapers
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+        expect(screen.getByText('Sports Weekly')).toBeInTheDocument();
+        expect(screen.getByText('Bilingual News')).toBeInTheDocument();
+        expect(screen.getByText('Legacy News')).toBeInTheDocument();
+      });
+    });
+
+    it('shows newspapers without languages field in all filters', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ newspapers: newspapersWithLanguages }),
+      });
+
+      render(<PopularNewspapers locale="en" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Legacy News')).toBeInTheDocument();
+      });
+
+      // Legacy News should be visible in EN filter
+      expect(screen.getByText('Legacy News')).toBeInTheDocument();
+
+      // Click JP filter
+      const jpButton = screen.getByText('Japanese');
+      fireEvent.click(jpButton);
+
+      // Legacy News should still be visible in JP filter
+      await waitFor(() => {
+        expect(screen.getByText('Legacy News')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Search Filter', () => {
+    it('filters newspapers by search query in name', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ newspapers: mockNewspapers }),
+      });
+
+      render(<PopularNewspapers locale="en" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+      });
+
+      // Search for "tech"
+      const searchInput = screen.getByPlaceholderText(/search by newspaper name/i);
+      fireEvent.change(searchInput, { target: { value: 'tech' } });
+
+      // Should show only Tech News Daily
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+        expect(screen.queryByText('Sports Weekly')).not.toBeInTheDocument();
+      });
+    });
+
+    it('filters newspapers by search query in feed URL', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ newspapers: mockNewspapers }),
+      });
+
+      render(<PopularNewspapers locale="en" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+      });
+
+      // Search for "espn"
+      const searchInput = screen.getByPlaceholderText(/search by newspaper name/i);
+      fireEvent.change(searchInput, { target: { value: 'espn' } });
+
+      // Should show only Sports Weekly
+      await waitFor(() => {
+        expect(screen.queryByText('Tech News Daily')).not.toBeInTheDocument();
+        expect(screen.getByText('Sports Weekly')).toBeInTheDocument();
+      });
+    });
+
+    it('shows no results message when search has no matches', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ newspapers: mockNewspapers }),
+      });
+
+      render(<PopularNewspapers locale="en" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+      });
+
+      // Search for something that doesn't exist
+      const searchInput = screen.getByPlaceholderText(/search by newspaper name/i);
+      fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
+
+      // Should show no results message
+      await waitFor(() => {
+        expect(
+          screen.getByText(/no newspapers found matching your search criteria/i)
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('clears search when clear button is clicked', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ newspapers: mockNewspapers }),
+      });
+
+      render(<PopularNewspapers locale="en" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+      });
+
+      // Search for "tech"
+      const searchInput = screen.getByPlaceholderText(/search by newspaper name/i);
+      fireEvent.change(searchInput, { target: { value: 'tech' } });
+
+      await waitFor(() => {
+        expect(screen.queryByText('Sports Weekly')).not.toBeInTheDocument();
+      });
+
+      // Click clear button
+      const clearButton = screen.getByLabelText(/clear search/i);
+      fireEvent.click(clearButton);
+
+      // Should show all newspapers again
+      await waitFor(() => {
+        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+        expect(screen.getByText('Sports Weekly')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Combined Filters', () => {
+    const newspapersWithLanguages: NewspaperData[] = [
+      {
+        ...mockNewspapers[0],
+        name: 'English Tech News',
+        languages: ['EN'],
+      },
+      {
+        ...mockNewspapers[1],
+        name: 'Japanese Sports News',
+        languages: ['JP'],
+      },
+      {
+        newspaperId: '3',
+        name: 'English Sports News',
+        userName: 'Bob Wilson',
+        feedUrls: ['https://example.com/sports'],
+        createdAt: '2025-12-03T10:00:00Z',
+        updatedAt: '2025-12-03T10:00:00Z',
+        viewCount: 100,
+        isPublic: true,
+        languages: ['EN'],
+      },
+    ];
+
+    it('applies both language and search filters', async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ newspapers: newspapersWithLanguages }),
+      });
+
+      render(<PopularNewspapers locale="en" />);
+
+      await waitFor(() => {
+        expect(screen.getByText('English Tech News')).toBeInTheDocument();
+      });
+
+      // Filter by EN language
+      const enButton = screen.getByText('English');
+      fireEvent.click(enButton);
+
+      // Search for "sports"
+      const searchInput = screen.getByPlaceholderText(/search by newspaper name/i);
+      fireEvent.change(searchInput, { target: { value: 'sports' } });
+
+      // Should show only English Sports News
+      await waitFor(() => {
+        expect(screen.queryByText('English Tech News')).not.toBeInTheDocument();
+        expect(screen.queryByText('Japanese Sports News')).not.toBeInTheDocument();
+        expect(screen.getByText('English Sports News')).toBeInTheDocument();
+      });
+    });
+  });
 });

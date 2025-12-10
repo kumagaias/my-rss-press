@@ -29,6 +29,7 @@ function NewspaperPageInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRegeneratingArticles, setIsRegeneratingArticles] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
 
   // Save locale to localStorage when it changes
   useEffect(() => {
@@ -71,6 +72,7 @@ function NewspaperPageInner() {
           setUserName(newspaper.userName || '');
           setCreatedAt(new Date(newspaper.createdAt));
           setViewCount(newspaper.viewCount || 0);
+          setSummary(newspaper.summary ?? null);
         } catch (err) {
           setError(err instanceof Error ? err.message : t.newspaperNotFound);
         } finally {
@@ -109,6 +111,7 @@ function NewspaperPageInner() {
       }
       if (summaryData) {
         sessionStorage.setItem('newspaperSummary', summaryData);
+        setSummary(summaryData);
       }
 
       // If no articles and no newspaperId, redirect to home
@@ -160,13 +163,16 @@ function NewspaperPageInner() {
     setIsRegeneratingArticles(true);
 
     try {
-      const { articles: regeneratedArticles, languages, summary } = await generateNewspaper(feedUrls, newspaperName || 'News', [], locale);
+      const { articles: regeneratedArticles, languages, summary: generatedSummary } = await generateNewspaper(feedUrls, newspaperName || 'News', [], locale);
       setArticles(regeneratedArticles);
       
       // Store detected languages and summary for later use when saving
       sessionStorage.setItem('detectedLanguages', JSON.stringify(languages));
-      if (summary !== null && summary !== undefined) {
-        sessionStorage.setItem('newspaperSummary', summary);
+      if (generatedSummary !== null && generatedSummary !== undefined) {
+        sessionStorage.setItem('newspaperSummary', generatedSummary);
+        setSummary(generatedSummary);
+      } else {
+        setSummary(null);
       }
       
       // Mark as not saved so user can save the regenerated version
@@ -374,6 +380,7 @@ function NewspaperPageInner() {
           userName={userName}
           createdAt={createdAt}
           locale={locale}
+          summary={summary}
         />
       </div>
 

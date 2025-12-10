@@ -7,9 +7,9 @@ describe('DateNavigation', () => {
 
   beforeEach(() => {
     mockOnDateChange.mockClear();
-    // Mock current date to 2025-12-10 JST
+    // Mock current date to 2025-12-10 00:00:00 UTC (09:00:00 JST)
     vi.useFakeTimers();
-    vi.setSystemTime(new Date('2025-12-10T12:00:00+09:00'));
+    vi.setSystemTime(new Date('2025-12-10T00:00:00Z'));
   });
 
   afterEach(() => {
@@ -17,7 +17,7 @@ describe('DateNavigation', () => {
   });
 
   const defaultProps = {
-    currentDate: '2025-12-10',
+    currentDate: '2025-12-09', // Yesterday (not today)
     onDateChange: mockOnDateChange,
     locale: 'en' as const,
   };
@@ -86,7 +86,7 @@ describe('DateNavigation', () => {
     });
 
     it('should be disabled when current date is today', () => {
-      render(<DateNavigation {...defaultProps} />);
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-10" />);
 
       const nextButton = screen.getByRole('button', { name: /next/i });
       expect(nextButton).toBeDisabled();
@@ -105,7 +105,7 @@ describe('DateNavigation', () => {
     });
 
     it('should not call onDateChange when disabled', () => {
-      render(<DateNavigation {...defaultProps} />);
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-10" />);
 
       const nextButton = screen.getByRole('button', { name: /next/i });
       fireEvent.click(nextButton);
@@ -116,7 +116,7 @@ describe('DateNavigation', () => {
 
   describe('Date Boundaries', () => {
     it('should prevent navigation to future dates', () => {
-      render(<DateNavigation {...defaultProps} />);
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-10" />);
 
       const nextButton = screen.getByRole('button', { name: /next/i });
       expect(nextButton).toBeDisabled();

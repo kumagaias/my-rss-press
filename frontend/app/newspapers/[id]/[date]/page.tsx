@@ -160,8 +160,12 @@ export default function NewspaperDatePage({ params }: PageProps) {
       {/* Newspaper Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <NewspaperLayout
-          newspaper={newspaper}
+          articles={newspaper.articles}
+          newspaperName={newspaper.name}
+          userName={newspaper.userName}
+          createdAt={new Date(newspaper.newspaperDate)}
           locale={locale}
+          summary={newspaper.summary}
         />
       </div>
 

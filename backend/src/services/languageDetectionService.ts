@@ -67,5 +67,5 @@ export async function detectLanguages(
     languages.add(language);
   }
 
-  return Array.from(languages);
+  return Array.from(languages).sort(); // Sort for consistency
 }

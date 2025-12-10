@@ -11,6 +11,7 @@ import {
 } from '../services/rssFetcherService.js';
 import { calculateImportance } from '../services/importanceCalculator.js';
 import { detectLanguages } from '../services/languageDetectionService.js';
+import { generateSummaryWithRetry } from '../services/summaryGenerationService.js';
 import {
   getOrCreateNewspaper,
   getAvailableDates,
@@ -105,7 +106,6 @@ newspapersRouter.post(
       // Generate summary (optional, don't fail if it doesn't work)
       let summary: string | null = null;
       try {
-        const { generateSummaryWithRetry } = await import('../services/summaryGenerationService.js');
         summary = await generateSummaryWithRetry(
           articlesWithImportance,
           validated.theme,

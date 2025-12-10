@@ -132,7 +132,7 @@ function NewspaperPageInner() {
       // Get detected languages and summary from sessionStorage
       const languagesData = sessionStorage.getItem('detectedLanguages');
       const languages = languagesData ? JSON.parse(languagesData) : undefined;
-      const summary = sessionStorage.getItem('newspaperSummary') || undefined;
+      const summary = sessionStorage.getItem('newspaperSummary') ?? null;
       
       const result = await saveNewspaper(settings, feedUrls, articles, locale, languages, summary);
       
@@ -165,7 +165,7 @@ function NewspaperPageInner() {
       
       // Store detected languages and summary for later use when saving
       sessionStorage.setItem('detectedLanguages', JSON.stringify(languages));
-      if (summary) {
+      if (summary !== null && summary !== undefined) {
         sessionStorage.setItem('newspaperSummary', summary);
       }
       

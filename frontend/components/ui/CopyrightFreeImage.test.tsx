@@ -50,8 +50,8 @@ describe('CopyrightFreeImage', () => {
     expect(img.getAttribute('src')).toContain('artificial%20intelligence');
   });
 
-  it('falls back to placeholder on error', () => {
-    render(<CopyrightFreeImage theme="technology" alt="Tech article" />);
+  it('falls back to placeholder div on error', () => {
+    const { container } = render(<CopyrightFreeImage theme="technology" alt="Tech article" />);
 
     const img = screen.getByTestId('copyright-free-image');
 
@@ -61,8 +61,10 @@ describe('CopyrightFreeImage', () => {
     // Trigger error
     fireEvent.error(img);
 
-    // Should now show placeholder
-    expect(img.getAttribute('src')).toBe('/images/placeholder-newspaper.jpg');
+    // Should now show placeholder div instead of image
+    const placeholder = container.querySelector('div.bg-gray-200');
+    expect(placeholder).toBeInTheDocument();
+    expect(placeholder).toHaveTextContent('Tech article');
   });
 
   it('applies custom className', () => {

@@ -190,7 +190,7 @@ export default function Home() {
               />
 
               {/* Loading Animation */}
-              {isLoadingSuggestions && <LoadingAnimation locale={locale} />}
+              {isLoadingSuggestions && <LoadingAnimation message={t.loadingSuggestions} />}
 
               {/* Success Animation */}
               {showSuccessAnimation && !isLoadingSuggestions && suggestions.length > 0 && (
@@ -222,7 +222,7 @@ export default function Home() {
             {/* Loading State */}
             {isGenerating && (
               <div className="bg-white border-4 border-black p-4 sm:p-6">
-                <p className="text-black text-center font-serif font-bold text-base sm:text-lg">{t.generating}</p>
+                <LoadingAnimation message={t.generating} />
               </div>
             )}
           </div>

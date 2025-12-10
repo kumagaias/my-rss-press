@@ -88,7 +88,11 @@ describe('Home Page', () => {
     ];
 
     (api.suggestFeeds as any).mockResolvedValueOnce(mockSuggestions);
-    (api.generateNewspaper as any).mockResolvedValueOnce(mockArticles);
+    (api.generateNewspaper as any).mockResolvedValueOnce({
+      articles: mockArticles,
+      languages: ['EN'],
+      summary: 'Test summary',
+    });
 
     render(<Home />);
 
@@ -120,6 +124,14 @@ describe('Home Page', () => {
       expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
         'newspaperArticles',
         JSON.stringify(mockArticles)
+      );
+      expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
+        'newspaperLanguages',
+        JSON.stringify(['EN'])
+      );
+      expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
+        'newspaperSummary',
+        'Test summary'
       );
       expect(mockPush).toHaveBeenCalledWith('/newspaper');
     }, { timeout: 3000 });

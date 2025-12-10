@@ -32,7 +32,7 @@ export async function generateNewspaper(
   theme: string,
   defaultFeedUrls: string[] = [],
   locale: 'en' | 'ja' = 'en'
-): Promise<Article[]> {
+): Promise<{ articles: Article[]; languages: string[]; summary: string | null }> {
   // Validate input
   if (!feedUrls || feedUrls.length === 0) {
     throw new Error('At least one feed URL is required');
@@ -60,7 +60,11 @@ export async function generateNewspaper(
   }
 
   const data = await response.json();
-  return data.articles || [];
+  return {
+    articles: data.articles || [],
+    languages: data.languages || [],
+    summary: data.summary || null,
+  };
 }
 
 /**
@@ -70,7 +74,9 @@ export async function saveNewspaper(
   settings: NewspaperSettings,
   feedUrls: string[],
   articles?: Article[],
-  locale: 'en' | 'ja' = 'en'
+  locale: 'en' | 'ja' = 'en',
+  languages?: string[],
+  summary?: string | null
 ): Promise<{ newspaperId: string; createdAt: string }> {
   const response = await fetch(`${API_BASE_URL}/api/newspapers`, {
     method: 'POST',
@@ -84,6 +90,8 @@ export async function saveNewspaper(
       articles,
       isPublic: settings.isPublic,
       locale, // Language setting for the newspaper
+      languages, // Detected language tags (e.g., ["JP", "EN"])
+      summary, // AI-generated summary (may be null)
     }),
   });
 

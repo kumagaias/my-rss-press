@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { DEFAULT_LANGUAGE } from '../constants.js';
 import {
   saveNewspaper,
   getNewspaper,
@@ -11,6 +12,7 @@ import {
 } from '../services/rssFetcherService.js';
 import { calculateImportance } from '../services/importanceCalculator.js';
 import { detectLanguages } from '../services/languageDetectionService.js';
+import { generateSummaryWithRetry } from '../services/summaryGenerationService.js';
 import {
   getOrCreateNewspaper,
   getAvailableDates,
@@ -24,7 +26,7 @@ const GenerateNewspaperSchema = z.object({
   feedUrls: z.array(z.string().url()).min(3, 'At least 3 feed URLs are required').max(10, 'Too many feed URLs'),
   theme: z.string().min(1, 'Theme is required'),
   defaultFeedUrls: z.array(z.string().url()).optional(), // URLs of default/fallback feeds
-  locale: z.enum(['en', 'ja']).optional().default('en'), // Language setting for the newspaper
+  locale: z.enum(['en', 'ja']).optional().default(DEFAULT_LANGUAGE.LOCALE), // Language setting for the newspaper
 });
 
 const ArticleSchema = z.object({
@@ -42,7 +44,7 @@ const SaveNewspaperSchema = z.object({
   feedUrls: z.array(z.string().url()).min(1).max(10, 'Too many feed URLs'),
   articles: z.array(ArticleSchema).optional(),
   isPublic: z.boolean().optional().default(true),
-  locale: z.enum(['en', 'ja']).optional().default('en'), // Language setting for the newspaper
+  locale: z.enum(['en', 'ja']).optional().default(DEFAULT_LANGUAGE.LOCALE), // Language setting for the newspaper
   languages: z.array(z.string()).optional(), // Detected language tags (e.g., ["JP", "EN"])
   summary: z.string().optional(), // AI-generated summary
   newspaperDate: z.string().optional(), // Date of the newspaper (YYYY-MM-DD)
@@ -102,9 +104,29 @@ newspapersRouter.post(
         // Continue without languages (empty array)
       }
 
+      // Generate summary (optional, don't fail if it doesn't work)
+      let summary: string | null = null;
+      try {
+        summary = await generateSummaryWithRetry(
+          articlesWithImportance,
+          validated.theme,
+          languages,
+          3 // Max 3 retries
+        );
+        if (summary) {
+          console.log(`Generated summary: ${summary.substring(0, 50)}...`);
+        } else {
+          console.log('Summary generation returned null');
+        }
+      } catch (error) {
+        console.error('Error generating summary:', error);
+        // Continue without summary (null)
+      }
+
       return c.json({
         articles: articlesWithImportance,
         languages, // Include detected languages in response
+        summary, // Include generated summary in response (may be null)
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

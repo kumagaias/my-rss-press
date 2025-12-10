@@ -9,6 +9,7 @@ export interface Article {
   pubDate: string;
   imageUrl?: string;
   importance: number;
+  feedSource?: string; // RSS feed URL that this article came from (for language detection)
 }
 
 export type Locale = 'en' | 'ja';

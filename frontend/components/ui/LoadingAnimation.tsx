@@ -1,40 +1,30 @@
 'use client';
 
 interface LoadingAnimationProps {
-  locale?: 'en' | 'ja';
+  message?: string;
 }
 
 /**
  * LoadingAnimation Component
  * 
- * Displays an animated loading indicator showing AI fetching feeds
- * Uses newspaper-themed animation with dots and waves
+ * Displays a loading animation with an optional message.
+ * Uses the same style as the feed suggestion loading animation.
  */
-export function LoadingAnimation({ locale = 'en' }: LoadingAnimationProps) {
-  const text = locale === 'ja' 
-    ? 'AIが最適なフィードを探しています...'
-    : 'AI is finding the best feeds for you...';
-
+export function LoadingAnimation({ message }: LoadingAnimationProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-8 space-y-4">
-      {/* Text */}
-      <p className="text-sm font-serif text-gray-700 animate-pulse">
-        {text}
-      </p>
-      
-      {/* Wave animation */}
-      <div className="flex space-x-1">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="w-1 bg-black rounded-full animate-wave"
-            style={{
-              height: '20px',
-              animationDelay: `${i * 100}ms`,
-            }}
-          ></div>
-        ))}
+    <div className="flex flex-col items-center justify-center py-12">
+      {/* Spinner */}
+      <div className="relative w-16 h-16 mb-4">
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 rounded-full"></div>
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
       </div>
+
+      {/* Message */}
+      {message && (
+        <p className="text-lg text-gray-700 font-medium animate-pulse">
+          {message}
+        </p>
+      )}
     </div>
   );
 }

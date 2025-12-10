@@ -8,6 +8,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { config } from '../config.js';
 import { nanoid } from 'nanoid';
+import { DEFAULT_LANGUAGE } from '../constants.js';
 import { NewspaperData, Article, Locale } from '../models/newspaper.js';
 
 // DynamoDB client configuration
@@ -101,7 +102,7 @@ export async function getNewspaper(newspaperId: string): Promise<NewspaperData |
     updatedAt: result.Item.updatedAt,
     viewCount: result.Item.viewCount,
     isPublic: result.Item.isPublic,
-    locale: result.Item.locale || 'en', // Default to 'en' for backward compatibility
+    locale: result.Item.locale || DEFAULT_LANGUAGE.LOCALE,
     languages: result.Item.languages || [], // Default to empty array for backward compatibility
     summary: result.Item.summary,
     newspaperDate: result.Item.newspaperDate,
@@ -154,7 +155,7 @@ export async function getPublicNewspapers(
     updatedAt: item.updatedAt,
     viewCount: item.viewCount,
     isPublic: item.isPublic,
-    locale: item.locale || 'en', // Default to 'en' for backward compatibility
+    locale: item.locale || DEFAULT_LANGUAGE.LOCALE,
     languages: item.languages || [], // Default to empty array for backward compatibility
     summary: item.summary,
     newspaperDate: item.newspaperDate,

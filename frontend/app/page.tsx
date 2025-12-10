@@ -89,13 +89,17 @@ export default function Home() {
         .filter(s => s.isDefault)
         .map(s => s.url);
       
-      const articles = await generateNewspaper(selectedFeeds, theme, defaultFeedUrls, locale);
+      const { articles, languages, summary } = await generateNewspaper(selectedFeeds, theme, defaultFeedUrls, locale);
       
       // Store data in sessionStorage for the newspaper page
       sessionStorage.setItem('newspaperArticles', JSON.stringify(articles));
       sessionStorage.setItem('newspaperTheme', theme);
       sessionStorage.setItem('newspaperFeeds', JSON.stringify(selectedFeeds));
       sessionStorage.setItem('newspaperLocale', locale); // Save selected locale
+      sessionStorage.setItem('newspaperLanguages', JSON.stringify(languages)); // Save detected languages
+      if (summary) {
+        sessionStorage.setItem('newspaperSummary', summary); // Save generated summary
+      }
       
       // Navigate to newspaper page
       router.push('/newspaper');
@@ -186,7 +190,7 @@ export default function Home() {
               />
 
               {/* Loading Animation */}
-              {isLoadingSuggestions && <LoadingAnimation locale={locale} />}
+              {isLoadingSuggestions && <LoadingAnimation message={t.loadingSuggestions} />}
 
               {/* Success Animation */}
               {showSuccessAnimation && !isLoadingSuggestions && suggestions.length > 0 && (
@@ -218,7 +222,7 @@ export default function Home() {
             {/* Loading State */}
             {isGenerating && (
               <div className="bg-white border-4 border-black p-4 sm:p-6">
-                <p className="text-black text-center font-serif font-bold text-base sm:text-lg">{t.generating}</p>
+                <LoadingAnimation message={t.generating} />
               </div>
             )}
           </div>

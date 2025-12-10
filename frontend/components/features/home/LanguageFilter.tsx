@@ -17,7 +17,6 @@ export default function LanguageFilter({
   onLanguageChange,
   locale,
 }: LanguageFilterProps) {
-  const t = useTranslations(locale);
 
   const languages = [
     { value: 'ALL' as const, label: locale === 'ja' ? 'すべて' : 'All' },

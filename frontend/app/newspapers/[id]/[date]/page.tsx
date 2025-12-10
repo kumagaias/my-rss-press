@@ -101,7 +101,12 @@ export default function NewspaperDatePage({ params }: PageProps) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <div className="flex gap-2 justify-center mb-4">
+            <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '300ms' }}></div>
+            <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '450ms' }}></div>
+          </div>
           <p className="text-gray-600">{t.loading}</p>
         </div>
       </div>

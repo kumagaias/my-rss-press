@@ -7,6 +7,7 @@
 
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config.js';
+import { DEFAULT_LANGUAGE } from '../constants.js';
 import type { Article } from './rssFetcherService.js';
 
 // Bedrock client
@@ -27,7 +28,7 @@ const bedrockClient = new BedrockRuntimeClient({
  */
 export function determineSummaryLanguage(languages: string[]): 'ja' | 'en' {
   if (languages.length === 0) {
-    return 'en'; // Default to English
+    return DEFAULT_LANGUAGE.LOCALE;
   }
 
   const hasJP = languages.includes('JP');

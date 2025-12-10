@@ -6,6 +6,7 @@
  * 2. Character-based detection (fallback)
  */
 
+import { DEFAULT_LANGUAGE } from '../constants.js';
 import type { Article } from './rssFetcherService.js';
 
 /**
@@ -16,7 +17,7 @@ import type { Article } from './rssFetcherService.js';
  */
 export function detectLanguage(text: string): 'JP' | 'EN' {
   if (!text || text.length === 0) {
-    return 'EN'; // Default to English for empty text
+    return DEFAULT_LANGUAGE.DETECTION;
   }
 
   // Count Japanese characters (Hiragana, Katakana, Kanji)

@@ -10,10 +10,11 @@ vi.mock('next/navigation', () => ({
 
 // Mock components
 vi.mock('@/components/features/newspaper/NewspaperLayout', () => ({
-  default: ({ newspaper }: any) => (
+  default: ({ articles, newspaperName, userName, createdAt, locale, summary }: any) => (
     <div data-testid="newspaper-layout">
-      <div>{newspaper.name}</div>
-      <div>{newspaper.newspaperDate}</div>
+      <div>{newspaperName}</div>
+      <div>{createdAt.toISOString().split('T')[0]}</div>
+      <div>{articles.length} articles</div>
     </div>
   ),
 }));

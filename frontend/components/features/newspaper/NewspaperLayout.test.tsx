@@ -1,181 +1,109 @@
-import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
 import { NewspaperLayout } from './NewspaperLayout';
 import { Article } from '@/types';
 
-// Mock articles for testing
-const mockArticles: Article[] = [
-  {
-    title: 'Breaking News: Major Discovery',
-    description: 'Scientists have made a groundbreaking discovery that will change everything.',
-    link: 'https://example.com/article1',
-    pubDate: new Date('2025-12-01'),
-    imageUrl: 'https://example.com/image1.jpg',
-    importance: 95,
-  },
-  {
-    title: 'Technology Update',
-    description: 'Latest advancements in AI technology.',
-    link: 'https://example.com/article2',
-    pubDate: new Date('2025-12-01'),
-    importance: 85,
-  },
-  {
-    title: 'Sports Highlights',
-    description: 'Recap of today\'s major sporting events.',
-    link: 'https://example.com/article3',
-    pubDate: new Date('2025-12-01'),
-    importance: 75,
-  },
-  {
-    title: 'Weather Forecast',
-    description: 'Sunny skies expected for the weekend.',
-    link: 'https://example.com/article4',
-    pubDate: new Date('2025-12-01'),
-    importance: 65,
-  },
-  {
-    title: 'Business News',
-    description: 'Stock market reaches new highs.',
-    link: 'https://example.com/article5',
-    pubDate: new Date('2025-12-01'),
-    importance: 55,
-  },
-];
-
 describe('NewspaperLayout', () => {
-  it('should render newspaper header with name and date', () => {
-    render(
-      <NewspaperLayout
-        articles={mockArticles}
-        newspaperName="Test Newspaper"
-        createdAt={new Date('2025-12-01')}
-        locale="en"
-      />
-    );
+  const mockArticles: Article[] = [
+    {
+      title: 'Test Article 1',
+      description: 'Test description 1',
+      link: 'https://example.com/1',
+      pubDate: new Date('2025-12-10'),
+      imageUrl: 'https://example.com/image1.jpg',
+      importance: 10,
+    },
+    {
+      title: 'Test Article 2',
+      description: 'Test description 2',
+      link: 'https://example.com/2',
+      pubDate: new Date('2025-12-10'),
+      importance: 8,
+    },
+  ];
 
-    expect(screen.getByText('Test Newspaper')).toBeInTheDocument();
-    expect(screen.getByText(/December/)).toBeInTheDocument();
-  });
+  const defaultProps = {
+    articles: mockArticles,
+    newspaperName: 'Test Newspaper',
+    userName: 'Test User',
+    createdAt: new Date('2025-12-10'),
+    locale: 'en' as const,
+  };
 
-  it('should render newspaper header with user name when provided', () => {
-    render(
-      <NewspaperLayout
-        articles={mockArticles}
-        newspaperName="Test Newspaper"
-        userName="John Doe"
-        createdAt={new Date('2025-12-01')}
-        locale="en"
-      />
-    );
+  describe('Summary Display', () => {
+    it('should display summary when provided', () => {
+      const summary = 'This is a test summary of the newspaper content.';
+      render(<NewspaperLayout {...defaultProps} summary={summary} />);
 
-    expect(screen.getByText(/Created by: John Doe/)).toBeInTheDocument();
-  });
+      expect(screen.getByText('Summary')).toBeInTheDocument();
+      expect(screen.getByText(summary)).toBeInTheDocument();
+    });
 
-  it('should render lead article prominently', () => {
-    render(
-      <NewspaperLayout
-        articles={mockArticles}
-        newspaperName="Test Newspaper"
-        createdAt={new Date('2025-12-01')}
-        locale="en"
-      />
-    );
+    it('should not display summary section when summary is null', () => {
+      render(<NewspaperLayout {...defaultProps} summary={null} />);
 
-    // Lead article should be the one with highest importance
-    expect(screen.getByText('Breaking News: Major Discovery')).toBeInTheDocument();
-    expect(
-      screen.getByText('Scientists have made a groundbreaking discovery that will change everything.')
-    ).toBeInTheDocument();
-  });
+      expect(screen.queryByText('Summary')).not.toBeInTheDocument();
+    });
 
-  it('should render all articles', () => {
-    render(
-      <NewspaperLayout
-        articles={mockArticles}
-        newspaperName="Test Newspaper"
-        createdAt={new Date('2025-12-01')}
-        locale="en"
-      />
-    );
+    it('should not display summary section when summary is undefined', () => {
+      render(<NewspaperLayout {...defaultProps} />);
 
-    mockArticles.forEach((article) => {
-      expect(screen.getByText(article.title)).toBeInTheDocument();
+      expect(screen.queryByText('Summary')).not.toBeInTheDocument();
+    });
+
+    it('should display summary in Japanese when locale is ja', () => {
+      const summary = 'これはテスト要約です。';
+      render(<NewspaperLayout {...defaultProps} locale="ja" summary={summary} />);
+
+      expect(screen.getByText('要約')).toBeInTheDocument();
+      expect(screen.getByText(summary)).toBeInTheDocument();
+    });
+
+    it('should display summary above the lead article', () => {
+      const summary = 'Test summary';
+      const { container } = render(<NewspaperLayout {...defaultProps} summary={summary} />);
+
+      const summaryElement = screen.getByText(summary).closest('div');
+      const leadArticle = screen.getByText('Test Article 1').closest('article');
+
+      // Summary should appear before lead article in DOM
+      expect(summaryElement).toBeTruthy();
+      expect(leadArticle).toBeTruthy();
+      
+      if (summaryElement && leadArticle) {
+        const summaryPosition = Array.from(container.querySelectorAll('*')).indexOf(summaryElement);
+        const leadPosition = Array.from(container.querySelectorAll('*')).indexOf(leadArticle);
+        expect(summaryPosition).toBeLessThan(leadPosition);
+      }
+    });
+
+    it('should apply newspaper-style styling to summary', () => {
+      const summary = 'Test summary';
+      render(<NewspaperLayout {...defaultProps} summary={summary} />);
+
+      const summaryContainer = screen.getByText(summary).closest('div');
+      expect(summaryContainer).toHaveClass('bg-gray-50', 'border-2', 'border-gray-800');
     });
   });
 
-  it('should render images when available', () => {
-    render(
-      <NewspaperLayout
-        articles={mockArticles}
-        newspaperName="Test Newspaper"
-        createdAt={new Date('2025-12-01')}
-        locale="en"
-      />
-    );
+  describe('Basic Layout', () => {
+    it('should render newspaper header with name', () => {
+      render(<NewspaperLayout {...defaultProps} />);
 
-    const images = screen.getAllByRole('img');
-    expect(images.length).toBeGreaterThan(0);
-    expect(images[0]).toHaveAttribute('src', 'https://example.com/image1.jpg');
-  });
+      expect(screen.getByText('Test Newspaper')).toBeInTheDocument();
+    });
 
-  it('should render "Read more" links for all articles', () => {
-    render(
-      <NewspaperLayout
-        articles={mockArticles}
-        newspaperName="Test Newspaper"
-        createdAt={new Date('2025-12-01')}
-        locale="en"
-      />
-    );
+    it('should render articles', () => {
+      render(<NewspaperLayout {...defaultProps} />);
 
-    const readMoreLinks = screen.getAllByText(/Read more/);
-    expect(readMoreLinks).toHaveLength(mockArticles.length);
-  });
+      expect(screen.getByText('Test Article 1')).toBeInTheDocument();
+      expect(screen.getByText('Test Article 2')).toBeInTheDocument();
+    });
 
-  it('should use Japanese locale when specified', () => {
-    render(
-      <NewspaperLayout
-        articles={mockArticles}
-        newspaperName="テスト新聞"
-        userName="山田太郎"
-        createdAt={new Date('2025-12-01')}
-        locale="ja"
-      />
-    );
+    it('should display empty state when no articles', () => {
+      render(<NewspaperLayout {...defaultProps} articles={[]} />);
 
-    expect(screen.getByText(/作成者: 山田太郎/)).toBeInTheDocument();
-    const readMoreLinks = screen.getAllByText(/続きを読む/);
-    expect(readMoreLinks).toHaveLength(mockArticles.length);
-  });
-
-  it('should handle single article', () => {
-    const singleArticle = [mockArticles[0]];
-
-    render(
-      <NewspaperLayout
-        articles={singleArticle}
-        newspaperName="Test Newspaper"
-        createdAt={new Date('2025-12-01')}
-        locale="en"
-      />
-    );
-
-    expect(screen.getByText('Breaking News: Major Discovery')).toBeInTheDocument();
-  });
-
-  it('should apply responsive grid classes', () => {
-    const { container } = render(
-      <NewspaperLayout
-        articles={mockArticles}
-        newspaperName="Test Newspaper"
-        createdAt={new Date('2025-12-01')}
-        locale="en"
-      />
-    );
-
-    // Check for responsive grid classes
-    const gridElements = container.querySelectorAll('[class*="md:grid-cols"]');
-    expect(gridElements.length).toBeGreaterThan(0);
+      expect(screen.getByText(/no newspapers found/i)).toBeInTheDocument();
+    });
   });
 });

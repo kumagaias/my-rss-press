@@ -11,6 +11,7 @@ interface NewspaperLayoutProps {
   userName?: string;
   createdAt: Date;
   locale: 'en' | 'ja';
+  summary?: string | null;
 }
 
 /**
@@ -30,6 +31,7 @@ export function NewspaperLayout({
   userName,
   createdAt,
   locale,
+  summary,
 }: NewspaperLayoutProps) {
   const t = useTranslations(locale);
   const formattedDate = formatDate(createdAt, locale);
@@ -82,6 +84,20 @@ export function NewspaperLayout({
           )}
         </div>
       </header>
+
+      {/* Summary Section */}
+      {summary && (
+        <div className="mb-8 pb-6 border-b-2 border-gray-400">
+          <div className="bg-gray-50 border-2 border-gray-800 p-6 rounded shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-gray-600 mb-3">
+              {locale === 'ja' ? '要約' : 'Summary'}
+            </h2>
+            <p className="text-base leading-relaxed text-gray-900 whitespace-pre-line">
+              {summary}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Lead Article (Most Important) - Always has an image */}
       <a

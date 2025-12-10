@@ -10,6 +10,11 @@ import {
   fetchArticlesForNewspaper,
 } from '../services/rssFetcherService.js';
 import { calculateImportance } from '../services/importanceCalculator.js';
+import { detectLanguages } from '../services/languageDetectionService.js';
+import {
+  getOrCreateNewspaper,
+  getAvailableDates,
+} from '../services/historicalNewspaperService.js';
 import { rateLimit } from '../middleware/rateLimit.js';
 
 export const newspapersRouter = new Hono();
@@ -38,6 +43,9 @@ const SaveNewspaperSchema = z.object({
   articles: z.array(ArticleSchema).optional(),
   isPublic: z.boolean().optional().default(true),
   locale: z.enum(['en', 'ja']).optional().default('en'), // Language setting for the newspaper
+  languages: z.array(z.string()).optional(), // Detected language tags (e.g., ["JP", "EN"])
+  summary: z.string().optional(), // AI-generated summary
+  newspaperDate: z.string().optional(), // Date of the newspaper (YYYY-MM-DD)
 });
 
 /**
@@ -56,7 +64,7 @@ newspapersRouter.post(
       console.log(`Generating newspaper for theme: ${validated.theme}`);
 
       // Fetch articles from RSS feeds
-      const articles = await fetchArticlesForNewspaper(
+      const { articles, feedLanguages } = await fetchArticlesForNewspaper(
         validated.feedUrls,
         validated.theme
       );
@@ -84,8 +92,19 @@ newspapersRouter.post(
         defaultFeedUrls
       );
 
+      // Detect languages from articles
+      let languages: string[] = [];
+      try {
+        languages = await detectLanguages(articlesWithImportance, feedLanguages);
+        console.log(`Detected languages: ${languages.join(', ')}`);
+      } catch (error) {
+        console.error('Error detecting languages:', error);
+        // Continue without languages (empty array)
+      }
+
       return c.json({
         articles: articlesWithImportance,
+        languages, // Include detected languages in response
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -110,9 +129,105 @@ newspapersRouter.post(
 );
 
 /**
+ * GET /api/newspapers/:id/dates
+ * Get available dates for a newspaper
+ * Note: This route must be defined BEFORE :id/:date to avoid route conflicts
+ */
+newspapersRouter.get('/newspapers/:id/dates', async (c) => {
+  try {
+    const newspaperId = c.req.param('id');
+
+    // Get available dates
+    const dates = await getAvailableDates(newspaperId);
+
+    return c.json({ dates });
+  } catch (error) {
+    console.error('Error in get available dates:', error);
+    return c.json(
+      {
+        error: 'Failed to get available dates',
+      },
+      500
+    );
+  }
+});
+
+/**
+ * GET /api/newspapers/:id/:date
+ * Get or create a newspaper for a specific date
+ * Note: Date format must be YYYY-MM-DD
+ */
+newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async (c) => {
+  try {
+    const newspaperId = c.req.param('id');
+    const date = c.req.param('date');
+
+    // Get newspaper metadata to get feedUrls and theme
+    const metadata = await getNewspaper(newspaperId);
+    if (!metadata) {
+      return c.json(
+        {
+          error: 'Newspaper not found',
+        },
+        404
+      );
+    }
+
+    // Get or create historical newspaper
+    try {
+      const newspaper = await getOrCreateNewspaper(
+        newspaperId,
+        date,
+        metadata.feedUrls,
+        'general' // Use a default theme for now
+      );
+
+      return c.json(newspaper);
+    } catch (error) {
+      if (error instanceof Error) {
+        // Handle validation errors
+        if (error.message.includes('Future newspapers') ||
+            error.message.includes('older than 7 days') ||
+            error.message.includes('Invalid date format')) {
+          return c.json(
+            {
+              error: error.message,
+              code: error.message.includes('Future') ? 'FUTURE_DATE' :
+                    error.message.includes('older') ? 'DATE_TOO_OLD' :
+                    'INVALID_DATE',
+            },
+            400
+          );
+        }
+        
+        if (error.message.includes('Insufficient articles')) {
+          return c.json(
+            {
+              error: 'Insufficient articles for this date',
+              code: 'INSUFFICIENT_ARTICLES',
+            },
+            400
+          );
+        }
+      }
+      
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error in get historical newspaper:', error);
+    return c.json(
+      {
+        error: 'Failed to get newspaper',
+      },
+      500
+    );
+  }
+});
+
+/**
  * GET /api/newspapers/:id
  * Get a newspaper by ID
- * Note: This route must be defined BEFORE /newspapers to avoid route conflicts
+ * Note: This route must be defined AFTER date-specific routes to avoid route conflicts
  */
 newspapersRouter.get('/newspapers/:id', async (c) => {
   try {

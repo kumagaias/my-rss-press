@@ -8,6 +8,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { config } from '../config.js';
 import { nanoid } from 'nanoid';
+import { NewspaperData, Article, Locale } from '../models/newspaper.js';
 
 // DynamoDB client configuration
 const dynamoClient = new DynamoDBClient({
@@ -17,29 +18,8 @@ const dynamoClient = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-export interface Article {
-  title: string;
-  description: string;
-  link: string;
-  pubDate: string;
-  imageUrl?: string;
-  importance: number;
-}
-
-export type Locale = 'en' | 'ja';
-
-export interface NewspaperData {
-  newspaperId: string;
-  name: string;
-  userName: string;
-  feedUrls: string[];
-  articles?: Article[];
-  createdAt: string;
-  updatedAt: string;
-  viewCount: number;
-  isPublic: boolean;
-  locale: Locale; // Language setting for the newspaper (en or ja)
-}
+// Re-export types for backward compatibility
+export type { NewspaperData, Article, Locale };
 
 /**
  * Save a newspaper to DynamoDB
@@ -62,6 +42,10 @@ export async function saveNewspaper(
     updatedAt: now,
     viewCount: 0,
     isPublic: newspaper.isPublic,
+    locale: newspaper.locale,
+    languages: newspaper.languages,
+    summary: newspaper.summary,
+    newspaperDate: newspaper.newspaperDate,
   };
 
   // Save to DynamoDB
@@ -118,6 +102,9 @@ export async function getNewspaper(newspaperId: string): Promise<NewspaperData |
     viewCount: result.Item.viewCount,
     isPublic: result.Item.isPublic,
     locale: result.Item.locale || 'en', // Default to 'en' for backward compatibility
+    languages: result.Item.languages || [], // Default to empty array for backward compatibility
+    summary: result.Item.summary,
+    newspaperDate: result.Item.newspaperDate,
   };
 }
 
@@ -168,6 +155,9 @@ export async function getPublicNewspapers(
     viewCount: item.viewCount,
     isPublic: item.isPublic,
     locale: item.locale || 'en', // Default to 'en' for backward compatibility
+    languages: item.languages || [], // Default to empty array for backward compatibility
+    summary: item.summary,
+    newspaperDate: item.newspaperDate,
   }));
 }
 

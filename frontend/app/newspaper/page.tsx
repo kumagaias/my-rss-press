@@ -83,6 +83,8 @@ function NewspaperPageInner() {
       const articlesData = sessionStorage.getItem('newspaperArticles');
       const themeData = sessionStorage.getItem('newspaperTheme');
       const feedsData = sessionStorage.getItem('newspaperFeeds');
+      const languagesData = sessionStorage.getItem('newspaperLanguages');
+      const summaryData = sessionStorage.getItem('newspaperSummary');
 
       if (articlesData) {
         const parsedArticles = JSON.parse(articlesData);
@@ -99,6 +101,14 @@ function NewspaperPageInner() {
 
       if (feedsData) {
         setFeedUrls(JSON.parse(feedsData));
+      }
+
+      // Store languages and summary for later use when saving
+      if (languagesData) {
+        sessionStorage.setItem('detectedLanguages', languagesData);
+      }
+      if (summaryData) {
+        sessionStorage.setItem('newspaperSummary', summaryData);
       }
 
       // If no articles and no newspaperId, redirect to home
@@ -119,7 +129,12 @@ function NewspaperPageInner() {
     setIsSaving(true);
 
     try {
-      const result = await saveNewspaper(settings, feedUrls, articles, locale);
+      // Get detected languages and summary from sessionStorage
+      const languagesData = sessionStorage.getItem('detectedLanguages');
+      const languages = languagesData ? JSON.parse(languagesData) : undefined;
+      const summary = sessionStorage.getItem('newspaperSummary') || undefined;
+      
+      const result = await saveNewspaper(settings, feedUrls, articles, locale, languages, summary);
       
       setNewspaperName(settings.newspaperName);
       setUserName(settings.userName);
@@ -145,8 +160,14 @@ function NewspaperPageInner() {
     setIsRegeneratingArticles(true);
 
     try {
-      const regeneratedArticles = await generateNewspaper(feedUrls, newspaperName || 'News', [], locale);
+      const { articles: regeneratedArticles, languages, summary } = await generateNewspaper(feedUrls, newspaperName || 'News', [], locale);
       setArticles(regeneratedArticles);
+      
+      // Store detected languages and summary for later use when saving
+      sessionStorage.setItem('detectedLanguages', JSON.stringify(languages));
+      if (summary) {
+        sessionStorage.setItem('newspaperSummary', summary);
+      }
       
       // Mark as not saved so user can save the regenerated version
       setIsSaved(false);

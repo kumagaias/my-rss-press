@@ -89,13 +89,17 @@ export default function Home() {
         .filter(s => s.isDefault)
         .map(s => s.url);
       
-      const articles = await generateNewspaper(selectedFeeds, theme, defaultFeedUrls, locale);
+      const { articles, languages, summary } = await generateNewspaper(selectedFeeds, theme, defaultFeedUrls, locale);
       
       // Store data in sessionStorage for the newspaper page
       sessionStorage.setItem('newspaperArticles', JSON.stringify(articles));
       sessionStorage.setItem('newspaperTheme', theme);
       sessionStorage.setItem('newspaperFeeds', JSON.stringify(selectedFeeds));
       sessionStorage.setItem('newspaperLocale', locale); // Save selected locale
+      sessionStorage.setItem('newspaperLanguages', JSON.stringify(languages)); // Save detected languages
+      if (summary) {
+        sessionStorage.setItem('newspaperSummary', summary); // Save generated summary
+      }
       
       // Navigate to newspaper page
       router.push('/newspaper');

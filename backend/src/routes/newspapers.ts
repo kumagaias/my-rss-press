@@ -102,9 +102,30 @@ newspapersRouter.post(
         // Continue without languages (empty array)
       }
 
+      // Generate summary (optional, don't fail if it doesn't work)
+      let summary: string | null = null;
+      try {
+        const { generateSummaryWithRetry } = await import('../services/summaryGenerationService.js');
+        summary = await generateSummaryWithRetry(
+          articlesWithImportance,
+          validated.theme,
+          languages,
+          3 // Max 3 retries
+        );
+        if (summary) {
+          console.log(`Generated summary: ${summary.substring(0, 50)}...`);
+        } else {
+          console.log('Summary generation returned null');
+        }
+      } catch (error) {
+        console.error('Error generating summary:', error);
+        // Continue without summary (null)
+      }
+
       return c.json({
         articles: articlesWithImportance,
         languages, // Include detected languages in response
+        summary, // Include generated summary in response (may be null)
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

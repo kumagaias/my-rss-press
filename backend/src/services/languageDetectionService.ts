@@ -1,14 +1,18 @@
 /**
  * Language Detection Service
- * Detects language (JP or EN) from RSS feeds and article content
+ * 
+ * Detects the language of articles based on:
+ * 1. RSS feed language field (priority)
+ * 2. Character-based detection (fallback)
  */
 
-import type { Article } from './rssFetcherService.js';
+import type { Article } from './rssFetcherService';
 
 /**
- * Detect language from text content using character-based detection
+ * Detect language from text content using character-based analysis
+ * 
  * @param text - Text to analyze
- * @returns 'JP' for Japanese, 'EN' for English
+ * @returns 'JP' if Japanese characters > 10%, otherwise 'EN'
  */
 export function detectLanguage(text: string): 'JP' | 'EN' {
   if (!text || text.length === 0) {
@@ -29,13 +33,15 @@ export function detectLanguage(text: string): 'JP' | 'EN' {
 }
 
 /**
- * Detect languages from articles using RSS feed language field and content analysis
- * @param articles - Array of articles to analyze
- * @param feedLanguages - Map of feed URL to language code from RSS <language> field
- * @returns Array of unique language codes (e.g., ["JP", "EN"])
+ * Detect languages from a collection of articles
  * 
- * Note: Currently only handles Japanese ('ja') and English ('en') explicitly.
- * Other languages default to 'EN' as the system primarily targets EN/JP users.
+ * Priority:
+ * 1. RSS feed language field (if available)
+ * 2. Character-based detection from article content
+ * 
+ * @param articles - Array of articles to analyze
+ * @param feedLanguages - Map of feed URL to language code
+ * @returns Array of unique language codes detected
  */
 export async function detectLanguages(
   articles: Article[],
@@ -44,23 +50,22 @@ export async function detectLanguages(
   const languages = new Set<string>();
 
   for (const article of articles) {
-    // Priority 1: Check RSS feed's <language> field
+    // Priority 1: Check RSS feed language field
     const feedLanguage = feedLanguages.get(article.feedSource);
     if (feedLanguage) {
-      // Convert language code to our format (JP or EN)
-      // Note: Other languages (es, fr, zh, ko, etc.) default to 'EN'
-      // This is acceptable as the system primarily targets EN/JP users
+      // Normalize language code: 'ja', 'ja-JP' -> 'JP'
       const lang = feedLanguage.toLowerCase().startsWith('ja') ? 'JP' : 'EN';
       languages.add(lang);
       continue;
     }
 
-    // Priority 2: Detect from article content (title + first 50 chars of description)
+    // Priority 2: Detect from article content
+    // Use title + first 50 characters of description
     const description = article.description || '';
     const text = `${article.title} ${description.substring(0, 50)}`;
     const language = detectLanguage(text);
     languages.add(language);
   }
 
-  return Array.from(languages).sort(); // Sort for consistency
+  return Array.from(languages);
 }

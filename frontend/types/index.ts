@@ -29,6 +29,11 @@ export interface NewspaperData {
   viewCount: number;
   isPublic: boolean;
   locale: Locale; // Language setting for the newspaper (en or ja)
+  
+  // Phase-2 new fields (all optional for backward compatibility)
+  languages?: string[]; // Language tags detected from articles (e.g., ["JP", "EN"])
+  summary?: string; // AI-generated summary (100-200 characters)
+  newspaperDate?: string; // Date of the newspaper (YYYY-MM-DD format)
 }
 
 export interface NewspaperSettings {

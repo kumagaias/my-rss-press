@@ -74,7 +74,7 @@ describe('languageDetectionService', () => {
       ]);
 
       const languages = await detectLanguages(articles, feedLanguages);
-      expect(languages).toEqual(['EN', 'JP']);
+      expect(languages.sort()).toEqual(['EN', 'JP']);
     });
 
     it('should detect languages from article content when RSS language is not available', async () => {
@@ -98,7 +98,7 @@ describe('languageDetectionService', () => {
       const feedLanguages = new Map();
 
       const languages = await detectLanguages(articles, feedLanguages);
-      expect(languages).toEqual(['EN', 'JP']);
+      expect(languages.sort()).toEqual(['EN', 'JP']);
     });
 
     it('should return unique languages', async () => {

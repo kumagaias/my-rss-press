@@ -19,17 +19,24 @@ export default function DateNavigation({
 }: DateNavigationProps) {
   const t = useTranslations(locale);
 
-  // Parse current date in JST
-  const current = new Date(currentDate + 'T00:00:00+09:00');
+  // Parse current date as UTC midnight for consistent comparison
+  const [year, month, day] = currentDate.split('-').map(Number);
+  const current = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
 
-  // Get today in JST
-  const nowJST = new Date(
-    new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })
-  );
-  const todayJST = new Date(nowJST);
-  todayJST.setHours(0, 0, 0, 0);
+  // Get today in JST and convert to UTC midnight
+  const now = new Date();
+  const jstOffset = 9 * 60 * 60 * 1000; // JST is UTC+9 in milliseconds
+  const jstTime = new Date(now.getTime() + jstOffset);
+  
+  // Extract date components from JST time
+  const todayYear = jstTime.getUTCFullYear();
+  const todayMonth = jstTime.getUTCMonth();
+  const todayDay = jstTime.getUTCDate();
+  
+  // Create today's date at UTC midnight for comparison
+  const todayJST = new Date(Date.UTC(todayYear, todayMonth, todayDay, 0, 0, 0, 0));
 
-  // Calculate 7 days ago in JST
+  // Calculate 7 days ago
   const sevenDaysAgo = new Date(todayJST);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 

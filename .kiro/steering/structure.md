@@ -43,12 +43,24 @@ frontend/
 │   └── favicon.ico       # Favicon
 ├── components/            # Reusable components
 │   ├── ui/               # Basic UI components
+│   │   ├── LoadingAnimation.tsx  # Phase 2: Loading animation
+│   │   └── ...
 │   ├── features/         # Feature-specific components
+│   │   ├── home/
+│   │   │   ├── LanguageFilter.tsx  # Phase 2: Language filter
+│   │   │   ├── SearchInput.tsx     # Phase 2: Search input
+│   │   │   └── ...
+│   │   └── newspaper/
+│   │       ├── DateNavigation.tsx  # Phase 2: Date navigation
+│   │       └── ...
 │   └── layouts/          # Layout components
 ├── lib/                   # Utilities and helpers
 │   ├── api/              # API calls
 │   ├── i18n.ts           # Internationalization
-│   └── utils.ts          # Generic utilities
+│   ├── utils.ts          # Generic utilities
+│   ├── newspaperLayout.property.test.ts    # Phase 2: Property tests
+│   ├── searchFilter.property.test.ts       # Phase 2: Property tests
+│   └── languageFilter.property.test.ts     # Phase 2: Property tests
 ├── types/                 # TypeScript type definitions
 │   └── index.ts          # Common type definitions
 ├── hooks/                 # Custom hooks
@@ -59,7 +71,20 @@ frontend/
 │   └── e2e/              # E2E tests (Playwright)
 │       ├── fixtures/     # Test fixtures
 │       ├── pages/        # Page Object Model
+│       │   ├── HomePage.ts
+│       │   ├── NewspaperPage.ts
+│       │   ├── FeedSelectorPage.ts
+│       │   └── HistoricalNewspaperPage.ts  # Phase 2
 │       ├── specs/        # Test specs (by feature)
+│       │   ├── home/     # Home page tests
+│       │   └── newspaper/  # Phase 2: Newspaper feature tests
+│       │       ├── language-filter.spec.ts
+│       │       ├── search.spec.ts
+│       │       ├── date-navigation.spec.ts
+│       │       ├── historical-newspaper.spec.ts
+│       │       ├── loading-animation.spec.ts
+│       │       ├── summary-display.spec.ts
+│       │       └── image-fallback.spec.ts
 │       ├── utils/        # Helper functions
 │       └── setup/        # Setup files
 ├── playwright.config.ts  # Playwright configuration
@@ -115,7 +140,11 @@ backend/
 │   ├── services/          # Business logic
 │   │   ├── newspaperService.ts
 │   │   ├── feedService.ts
-│   │   └── rssParserService.ts
+│   │   ├── rssParserService.ts
+│   │   ├── languageDetectionService.ts      # Phase 2: Language detection
+│   │   ├── summaryGenerationService.ts      # Phase 2: AI summary generation
+│   │   ├── historicalNewspaperService.ts    # Phase 2: Historical newspapers
+│   │   └── cleanupService.ts                # Phase 2: Automatic cleanup
 │   ├── repositories/      # Data access layer
 │   │   ├── newspaperRepository.ts
 │   │   └── feedRepository.ts

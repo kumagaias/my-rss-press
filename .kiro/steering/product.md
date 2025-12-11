@@ -159,6 +159,120 @@ MyRSSPress is a web application that transforms RSS feeds into visually appealin
 - Maintain text readability
 - Appropriate layout adjustments
 
+### 9. Language Detection and Filtering (Phase 2)
+
+**Feature:** Automatically detect article languages and filter by language
+
+**Specifications:**
+- **Detection**: Analyze Japanese characters (hiragana, katakana, kanji) in title/description
+- **Threshold**: >10% Japanese characters → JP, otherwise → EN
+- **RSS Priority**: Use RSS `<language>` field if available
+- **Filter UI**: Dropdown with options: All / JP / EN
+- **Persistence**: Filter selection persists across navigation
+
+**Implementation:**
+- `languageDetectionService.ts` for detection logic
+- Client-side filtering for instant response
+- Languages stored in newspaper metadata
+
+### 10. Free-word Search (Phase 2)
+
+**Feature:** Search articles by keywords in real-time
+
+**Specifications:**
+- **Search scope**: Article title and description
+- **Case-insensitive**: Matches regardless of case
+- **Real-time**: Instant filtering as user types
+- **Persistence**: Search query persists across navigation
+- **Clear**: Empty search shows all articles
+
+**Implementation:**
+- Client-side search for instant response
+- Debounced input for performance
+- Highlight matching terms (optional)
+
+### 11. Historical Newspapers (Phase 2)
+
+**Feature:** Access past newspapers with date-based URLs
+
+**Specifications:**
+- **URL format**: `/newspapers/[id]/[YYYY-MM-DD]`
+- **Valid range**: Today to 7 days ago
+- **Validation**: Reject future dates and dates >7 days old
+- **Generation**: First access generates newspaper for that date
+- **Caching**: Second access retrieves cached newspaper
+- **Articles**: Prioritize articles from target date (00:00 to current time)
+
+**Performance:**
+- Generation: ~5-8 seconds
+- Cached retrieval: <1 second
+
+### 12. AI Summary Generation (Phase 2)
+
+**Feature:** Generate 3-line summary of newspaper content
+
+**Specifications:**
+- **AI**: AWS Bedrock (Claude 3 Haiku)
+- **Length**: 100-250 characters (3 lines)
+- **Language**: Matches newspaper's primary language (JP-only → Japanese, otherwise → English)
+- **Timeout**: 10 seconds
+- **Retry**: Up to 3 attempts with exponential backoff
+- **Caching**: Summary saved with newspaper, not regenerated
+
+**Implementation:**
+- `summaryGenerationService.ts` for generation logic
+- Summarizes top 10 articles by importance
+- Fallback to null if generation fails
+
+### 13. Date Navigation (Phase 2)
+
+**Feature:** Navigate between dates with previous/next day buttons
+
+**Specifications:**
+- **Previous day**: Navigate to yesterday's newspaper
+- **Next day**: Navigate to tomorrow's newspaper (disabled for today)
+- **Validation**: Buttons disabled at boundaries (today, 7 days ago)
+- **URL update**: URL changes to reflect new date
+- **State preservation**: Language filter and search persist
+
+**Implementation:**
+- Client-side navigation with Next.js router
+- Button state managed based on current date
+- Smooth transitions between dates
+
+### 14. Loading Animation (Phase 2)
+
+**Feature:** Visual feedback during newspaper generation
+
+**Specifications:**
+- **Display**: Shown during API calls and newspaper generation
+- **Animation**: Smooth, non-blocking animation
+- **Accessibility**: Includes aria-label for screen readers
+- **Duration**: Matches actual generation time (~5-8 seconds)
+- **Cached**: Not shown (or very brief) for cached newspapers
+
+**Implementation:**
+- React state-based loading indicator
+- Displayed during async operations
+- Automatically hidden when content loads
+
+### 15. Automatic Cleanup (Phase 2)
+
+**Feature:** Automatically delete old newspapers to manage storage
+
+**Specifications:**
+- **Schedule**: Daily at 3 AM JST (cron: `0 18 * * ? *` in UTC)
+- **Trigger**: AWS EventBridge rule
+- **Target**: Newspapers older than 7 days
+- **Batch size**: 25 newspapers per execution
+- **Continuation**: Continues until all old newspapers deleted
+
+**Implementation:**
+- `cleanupService.ts` for cleanup logic
+- Lambda function triggered by EventBridge
+- DynamoDB scan with date filtering
+- Batch delete for efficiency
+
 ## Technical Specifications
 
 ### Frontend
@@ -284,3 +398,15 @@ This document is updated according to product specification changes.
   - Responsive layout (mobile: 1 column, desktop: 3 columns)
   - Support for 320px-768px screen sizes
   - Related Issue: [#19](https://github.com/kumagaias/my-rss-press/issues/19)
+
+- **2025-12-11**: Phase 2 implementation completed
+  - **Language Detection & Filtering**: Automatic detection of article languages (JP/EN), language filter UI
+  - **Free-word Search**: Search articles by title/description with real-time filtering
+  - **Historical Newspapers**: Access past newspapers (up to 7 days), date-based URL structure
+  - **AI Summary Generation**: Bedrock-powered 3-line summaries (100-250 chars) in appropriate language
+  - **Date Navigation**: Previous/next day buttons with validation (future dates rejected, 7-day limit)
+  - **Loading Animation**: Visual feedback during newspaper generation
+  - **Automatic Cleanup**: EventBridge-triggered cleanup of old newspapers (>7 days)
+  - **Property-Based Testing**: 18 correctness properties verified with fast-check (375 total tests)
+  - **E2E Testing**: 28 Playwright tests covering all Phase 2 features
+  - Related: Phase 2 implementation

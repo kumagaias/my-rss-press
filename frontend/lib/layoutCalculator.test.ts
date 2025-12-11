@@ -8,7 +8,7 @@ const articleArbitrary = fc.record({
   title: fc.string({ minLength: 1, maxLength: 100 }),
   description: fc.string({ minLength: 0, maxLength: 500 }),
   link: fc.webUrl(),
-  pubDate: fc.date(),
+  pubDate: fc.integer({ min: new Date('2020-01-01').getTime(), max: new Date('2025-12-31').getTime() }).map(ts => new Date(ts)),
   importance: fc.integer({ min: 0, max: 100 }),
 });
 

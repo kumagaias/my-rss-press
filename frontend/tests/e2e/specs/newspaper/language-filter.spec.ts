@@ -28,21 +28,21 @@ test.describe('Language Filter', () => {
 
     // Filter by Japanese
     await historicalPage.selectLanguage('JP');
-    await page.waitForTimeout(500); // Wait for filter to apply
+    await page.waitForLoadState('networkidle');
 
     const jpCount = await historicalPage.getVisibleArticleCount();
     expect(jpCount).toBeLessThanOrEqual(initialCount);
 
     // Filter by English
     await historicalPage.selectLanguage('EN');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     const enCount = await historicalPage.getVisibleArticleCount();
     expect(enCount).toBeLessThanOrEqual(initialCount);
 
     // Show all
     await historicalPage.selectLanguage('ALL');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     const allCount = await historicalPage.getVisibleArticleCount();
     expect(allCount).toBe(initialCount);
@@ -63,9 +63,7 @@ test.describe('Language Filter', () => {
 
     // Select Japanese filter
     await historicalPage.selectLanguage('JP');
-    await page.waitForTimeout(500);
-
-    const jpCountBefore = await historicalPage.getVisibleArticleCount();
+    await page.waitForLoadState('networkidle');
 
     // Navigate to previous day
     await historicalPage.clickPrevDay();

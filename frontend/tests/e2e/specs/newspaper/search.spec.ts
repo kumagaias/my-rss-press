@@ -27,7 +27,7 @@ test.describe('Free-word Search', () => {
 
     // Search for a specific term
     await historicalPage.search('technology');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     const searchCount = await historicalPage.getVisibleArticleCount();
     expect(searchCount).toBeLessThanOrEqual(initialCount);
@@ -48,14 +48,13 @@ test.describe('Free-word Search', () => {
 
     // Search for a term that won't match
     await historicalPage.search('xyzabc123nonexistent');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
+
+    const noResultsMessage = page.getByText(/no articles found|記事が見つかりません/i);
+    await expect(noResultsMessage).toBeVisible();
 
     const searchCount = await historicalPage.getVisibleArticleCount();
     expect(searchCount).toBe(0);
-
-    // Should show "no results" message
-    const noResultsMessage = page.getByText(/no articles found|記事が見つかりません/i);
-    await expect(noResultsMessage).toBeVisible();
   });
 
   /**
@@ -75,14 +74,14 @@ test.describe('Free-word Search', () => {
 
     // Search for a term
     await historicalPage.search('technology');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     const searchCount = await historicalPage.getVisibleArticleCount();
     expect(searchCount).toBeLessThanOrEqual(initialCount);
 
     // Clear search
     await historicalPage.search('');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     const clearedCount = await historicalPage.getVisibleArticleCount();
     expect(clearedCount).toBe(initialCount);

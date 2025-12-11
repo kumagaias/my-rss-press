@@ -122,6 +122,6 @@ test.describe('Summary Display', () => {
     const ariaLabel = await summaryElement.getAttribute('aria-label');
     
     // Should have either role or aria-label for accessibility
-    expect(role || ariaLabel || true).toBeTruthy(); // Summary is visible text, so it's accessible by default
+    expect(role || ariaLabel).toBeTruthy(); // Should have either role or aria-label for accessibility
   });
 });

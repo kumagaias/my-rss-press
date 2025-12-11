@@ -132,8 +132,19 @@ describe('Historical Newspaper Service - Property-Based Tests', () => {
       return date;
     });
 
-    // Generator for article publication dates
-    const articleDate = fc.date();
+    // Generator for article publication dates within the valid range (last 7 days)
+    const minDate = (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 7);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    })();
+    const maxDate = (() => {
+      const d = new Date();
+      d.setHours(23, 59, 59, 999);
+      return d;
+    })();
+    const articleDate = fc.date({ min: minDate, max: maxDate });
 
     fc.assert(
       fc.property(validDate, articleDate, (targetDate, pubDate) => {

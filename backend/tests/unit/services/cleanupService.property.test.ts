@@ -17,14 +17,13 @@ describe('Cleanup Service - Property-Based Tests', () => {
    * **Validates: Requirements 10.1**
    */
   it('Property 14: Cleanup date threshold', () => {
-    // Generator for newspaper dates
-    const newspaperDate = fc.date();
-    
-    // Generator for current date
-    const currentDate = fc.date();
+    // Generate a newspaper date and a non-negative offset in days for current date
+    const dateAndOffset = fc.tuple(fc.date(), fc.nat(60)); // up to 60 days offset for reasonable coverage
 
     fc.assert(
-      fc.property(newspaperDate, currentDate, (newsDate, now) => {
+      fc.property(dateAndOffset, ([newsDate, offsetDays]) => {
+        // Calculate current date by adding offsetDays to newspaper date
+        const now = new Date(newsDate.getTime() + offsetDays * 24 * 60 * 60 * 1000);
         // Calculate days difference
         const daysDiff = Math.floor((now.getTime() - newsDate.getTime()) / (1000 * 60 * 60 * 24));
         

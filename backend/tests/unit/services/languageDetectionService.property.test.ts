@@ -119,8 +119,6 @@ describe('Language Detection Service - Property-Based Tests', () => {
           expect(result[0]).toBe('EN');
           expect(result[1]).toBe('JP');
         }
-        
-        return true;
       }),
       { numRuns: 100 }
     );
@@ -174,8 +172,6 @@ describe('Language Detection Service - Property-Based Tests', () => {
         
         const expectedLang = lang.startsWith('ja') ? 'JP' : 'EN';
         expect(result).toEqual([expectedLang]);
-        
-        return true;
       }),
       { numRuns: 100 }
     );

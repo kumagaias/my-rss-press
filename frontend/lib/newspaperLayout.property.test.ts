@@ -113,7 +113,7 @@ describe('Newspaper Layout - Property-Based Tests', () => {
       description: fc.string({ minLength: 20, maxLength: 200 }),
       link: fc.webUrl(),
       imageUrl: fc.webUrl(),
-      pubDate: fc.integer({ min: new Date('2020-01-01').getTime(), max: new Date('2025-12-31').getTime() }).map(ts => new Date(ts)).map(d => d.toISOString()),
+      pubDate: fc.integer({ min: new Date('2020-01-01').getTime(), max: new Date('2025-12-31').getTime() }).map(ts => new Date(ts).toISOString()),
       importance: fc.integer({ min: 1, max: 100 })
     });
 
@@ -243,10 +243,8 @@ describe('Newspaper Layout - Property-Based Tests', () => {
             error: ['idle'] // Can retry
           };
           
-          // Check if transition is valid (or allow any for testing flexibility)
-          expect(states).toBeDefined();
-          expect(current).toBeDefined();
-          expect(next).toBeDefined();
+          // Check if transition is valid
+          expect(validTransitions[current]).toContain(next);
         }
       }),
       { numRuns: 100 }

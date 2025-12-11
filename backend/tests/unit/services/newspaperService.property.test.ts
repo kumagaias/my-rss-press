@@ -57,7 +57,10 @@ describe('Newspaper Service - Property-Based Tests (Data Persistence)', () => {
   it('Property 15: Language persistence', () => {
     const newspaper = fc.record({
       newspaperId: fc.uuid(),
-      newspaperDate: fc.option(fc.date().map(d => d.toISOString().split('T')[0])),
+      newspaperDate: fc.option(
+        fc.integer({ min: new Date('2020-01-01').getTime(), max: new Date('2025-12-31').getTime() })
+          .map(ts => new Date(ts).toISOString().split('T')[0])
+      ),
       name: fc.string({ minLength: 5, maxLength: 50 }),
       userName: fc.string({ minLength: 3, maxLength: 30 }),
       feedUrls: fc.array(fc.webUrl(), { minLength: 1, maxLength: 5 }),
@@ -257,8 +260,6 @@ describe('Newspaper Service - Property-Based Tests (Data Persistence)', () => {
         // New fields should be undefined or default
         expect(retrieved!.languages).toBeUndefined();
         expect(retrieved!.summary).toBeUndefined();
-        
-        return true;
       }),
       { numRuns: 100 }
     );

@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
-import { generateSummary, determineSummaryLanguage } from '../../../src/services/summaryGenerationService';
+import { determineSummaryLanguage } from '../../../src/services/summaryGenerationService';
 import type { Article } from '../../../src/models/newspaper';
 
 // Mock Bedrock client
@@ -74,8 +74,6 @@ describe('Summary Generation Service - Property-Based Tests', () => {
           // English, both, or empty -> default to English
           expect(result).toBe('en');
         }
-        
-        return true;
       }),
       { numRuns: 100 }
     );
@@ -152,8 +150,6 @@ describe('Summary Generation Service - Property-Based Tests', () => {
         
         // The function should not crash
         expect(() => determineSummaryLanguage(langs)).not.toThrow();
-        
-        return true;
       }),
       { numRuns: 100 }
     );

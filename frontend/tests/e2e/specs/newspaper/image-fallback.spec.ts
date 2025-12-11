@@ -159,6 +159,6 @@ test.describe('Copyright-Free Image Fallback', () => {
 
     // At least some images should be theme-relevant (if using fallback)
     // This is a soft check as not all articles may need fallback
-    expect(true).toBe(true); // Test passes if no errors occur
+    expect(hasThemeRelevantImage).toBe(true); // At least one Unsplash image with theme relevance should be present
   });
 });

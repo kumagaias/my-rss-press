@@ -652,6 +652,201 @@ type NewspaperInput = z.infer<typeof NewspaperSchema>;
 - Use validation libraries like Zod
 - Return validation errors with clear messages
 
+## Phase 2: Advanced Features Implementation
+
+### Language Detection Service
+
+**Purpose**: Automatically detect article languages for filtering
+
+**Implementation:**
+```typescript
+// backend/src/services/languageDetectionService.ts
+export function detectLanguage(text: string): 'JP' | 'EN' {
+  const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g;
+  const japaneseChars = (text.match(japaneseRegex) || []).length;
+  const totalChars = text.length;
+  
+  // >10% Japanese characters → JP
+  return (japaneseChars / totalChars) > 0.1 ? 'JP' : 'EN';
+}
+
+export async function detectLanguages(
+  articles: Article[],
+  feedLanguages: Map<string, string>
+): Promise<string[]> {
+  const languages = new Set<string>();
+  
+  for (const article of articles) {
+    // Priority 1: RSS language field
+    const rssLang = feedLanguages.get(article.feedSource);
+    if (rssLang) {
+      languages.add(rssLang.startsWith('ja') ? 'JP' : 'EN');
+      continue;
+    }
+    
+    // Priority 2: Content detection
+    const text = `${article.title} ${article.description || ''}`;
+    languages.add(detectLanguage(text));
+  }
+  
+  return Array.from(languages).sort(); // EN, JP
+}
+```
+
+**Key Points:**
+- Unicode ranges: Hiragana (3040-309F), Katakana (30A0-30FF), Kanji (4E00-9FAF)
+- 10% threshold to avoid false positives
+- RSS `<language>` field takes priority
+- Returns sorted array for consistency
+
+### Summary Generation Service
+
+**Purpose**: Generate AI-powered newspaper summaries
+
+**Implementation:**
+```typescript
+// backend/src/services/summaryGenerationService.ts
+export async function generateSummary(
+  articles: Article[],
+  theme: string,
+  languages: string[]
+): Promise<string | null> {
+  const summaryLang = determineSummaryLanguage(languages);
+  const topArticles = articles
+    .sort((a, b) => (b.importance || 0) - (a.importance || 0))
+    .slice(0, 10);
+  
+  const prompt = summaryLang === 'ja'
+    ? `以下の記事を3行（100-200文字）で要約してください...`
+    : `Summarize the following articles in 3 lines (100-200 chars)...`;
+  
+  try {
+    const command = new InvokeModelCommand({
+      modelId: 'anthropic.claude-3-5-haiku-20241022-v1:0',
+      body: JSON.stringify({
+        anthropic_version: 'bedrock-2023-05-31',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    
+    const response = await bedrockClient.send(command);
+    return parseSummary(response);
+  } catch (error) {
+    console.error('Summary generation failed:', error);
+    return null;
+  }
+}
+
+export function determineSummaryLanguage(languages: string[]): 'ja' | 'en' {
+  // JP only → Japanese, otherwise → English
+  return languages.length === 1 && languages[0] === 'JP' ? 'ja' : 'en';
+}
+```
+
+**Key Points:**
+- Uses top 10 articles by importance
+- 10-second timeout with 3 retries (exponential backoff)
+- Language determined by newspaper's language mix
+- Returns null on failure (graceful degradation)
+- Summary length: 100-250 characters
+
+### Historical Newspaper Service
+
+**Purpose**: Generate and cache newspapers for specific dates
+
+**Implementation:**
+```typescript
+// backend/src/services/historicalNewspaperService.ts
+export function validateDate(dateStr: string): { valid: boolean; error?: string } {
+  const date = new Date(dateStr + 'T00:00:00+09:00'); // JST
+  const now = new Date();
+  const today = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+  today.setHours(0, 0, 0, 0);
+  
+  // Future dates rejected
+  if (date > today) {
+    return { valid: false, error: 'Future newspapers are not available' };
+  }
+  
+  // Dates >7 days old rejected
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  if (date < sevenDaysAgo) {
+    return { valid: false, error: 'Newspapers older than 7 days are not available' };
+  }
+  
+  return { valid: true };
+}
+
+export async function generateHistoricalNewspaper(
+  newspaperId: string,
+  date: string,
+  feedUrls: string[]
+): Promise<Newspaper> {
+  // Check if already cached
+  const cached = await getNewspaperByDate(newspaperId, date);
+  if (cached) return cached;
+  
+  // Generate new newspaper for that date
+  const articles = await fetchArticlesForDate(feedUrls, date);
+  const newspaper = await createNewspaper({
+    newspaperId,
+    newspaperDate: date,
+    articles,
+    // ... other fields
+  });
+  
+  return newspaper;
+}
+```
+
+**Key Points:**
+- All dates in JST (Asia/Tokyo, UTC+9)
+- Valid range: today to 7 days ago
+- First access generates, second access retrieves cache
+- Articles filtered by target date (00:00 to current time)
+- URL format: `/newspapers/[id]/[YYYY-MM-DD]`
+
+### Cleanup Service
+
+**Purpose**: Automatically delete old newspapers
+
+**Implementation:**
+```typescript
+// backend/src/services/cleanupService.ts
+export async function cleanupOldNewspapers(): Promise<void> {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const cutoffDate = sevenDaysAgo.toISOString();
+  
+  let lastEvaluatedKey: Record<string, any> | undefined;
+  
+  do {
+    const result = await dynamoClient.send(new ScanCommand({
+      TableName: TABLE_NAME,
+      FilterExpression: 'newspaperDate < :cutoff',
+      ExpressionAttributeValues: { ':cutoff': cutoffDate },
+      Limit: 25,
+      ExclusiveStartKey: lastEvaluatedKey,
+    }));
+    
+    if (result.Items && result.Items.length > 0) {
+      await batchDelete(result.Items);
+    }
+    
+    lastEvaluatedKey = result.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
+}
+```
+
+**Key Points:**
+- Triggered daily at 3 AM JST by EventBridge
+- Batch size: 25 newspapers per scan
+- Continues until all old newspapers deleted
+- Deletes newspapers older than 7 days
+- Idempotent (safe to run multiple times)
+
 ## Data Architecture
 
 ### DynamoDB Design

@@ -30,29 +30,36 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
  * @returns Validation result with error message if invalid
  */
 export function validateDate(date: string): { valid: boolean; error?: string } {
-  // Parse date as JST (Asia/Tokyo)
-  const targetDate = new Date(date + 'T00:00:00+09:00');
+  // Validate date format
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return { valid: false, error: 'Invalid date format. Use YYYY-MM-DD' };
+  }
+
+  // Parse date components
+  const [year, month, day] = date.split('-').map(Number);
+  
+  // Create date in JST (UTC+9)
+  const targetDateUTC = new Date(Date.UTC(year, month - 1, day, -9, 0, 0, 0)); // -9 hours to get JST midnight in UTC
   
   // Check if date is valid
-  if (isNaN(targetDate.getTime())) {
+  if (isNaN(targetDateUTC.getTime())) {
     return { valid: false, error: 'Invalid date format. Use YYYY-MM-DD' };
   }
 
   // Get current date in JST
-  const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-  const todayJST = new Date(nowJST);
-  todayJST.setHours(0, 0, 0, 0);
+  const nowUTC = new Date();
+  const nowJST = new Date(nowUTC.getTime() + (9 * 60 * 60 * 1000)); // Add 9 hours for JST
+  const todayJST = new Date(Date.UTC(nowJST.getUTCFullYear(), nowJST.getUTCMonth(), nowJST.getUTCDate(), -9, 0, 0, 0)); // Today in JST as UTC
 
   // Check if future date
-  if (targetDate > todayJST) {
+  if (targetDateUTC > todayJST) {
     return { valid: false, error: 'Future newspapers are not available' };
   }
 
   // Check if older than 7 days
-  const sevenDaysAgo = new Date(todayJST);
-  sevenDaysAgo.setDate(todayJST.getDate() - 7);
+  const sevenDaysAgo = new Date(todayJST.getTime() - (7 * 24 * 60 * 60 * 1000)); // 7 days ago
 
-  if (targetDate < sevenDaysAgo) {
+  if (targetDateUTC < sevenDaysAgo) {
     return { valid: false, error: 'Newspapers older than 7 days are not available' };
   }
 

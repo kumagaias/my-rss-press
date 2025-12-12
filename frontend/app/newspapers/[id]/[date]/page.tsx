@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import NewspaperLayout from '@/components/features/newspaper/NewspaperLayout';
+import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout';
 import DateNavigation from '@/components/features/newspaper/DateNavigation';
 import { detectLocale, useTranslations, type Locale } from '@/lib/i18n';
 
@@ -28,10 +28,10 @@ interface Newspaper {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
     date: string;
-  };
+  }>;
 }
 
 export default function NewspaperDatePage({ params }: PageProps) {
@@ -42,10 +42,22 @@ export default function NewspaperDatePage({ params }: PageProps) {
   const [newspaper, setNewspaper] = useState<Newspaper | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedParams, setResolvedParams] = useState<{ id: string; date: string } | null>(null);
 
-  const { id, date } = params;
+  // Resolve params first
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolved = await params;
+      setResolvedParams(resolved);
+    };
+    resolveParams();
+  }, [params]);
 
   useEffect(() => {
+    if (!resolvedParams) return;
+
+    const { id, date } = resolvedParams;
+
     const fetchNewspaper = async () => {
       try {
         setLoading(true);
@@ -90,11 +102,12 @@ export default function NewspaperDatePage({ params }: PageProps) {
     };
 
     fetchNewspaper();
-  }, [id, date]);
+  }, [resolvedParams]);
 
   const handleDateChange = (newDate: string) => {
+    if (!resolvedParams) return;
     // Navigate to the new date
-    router.push(`/newspapers/${id}/${newDate}`);
+    router.push(`/newspapers/${resolvedParams.id}/${newDate}`);
   };
 
   if (loading) {
@@ -152,15 +165,17 @@ export default function NewspaperDatePage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Date Navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4">
-          <DateNavigation
-            currentDate={date}
-            onDateChange={handleDateChange}
-            locale={locale}
-          />
+      {resolvedParams && (
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4">
+            <DateNavigation
+              currentDate={resolvedParams.date}
+              onDateChange={handleDateChange}
+              locale={locale}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Newspaper Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">

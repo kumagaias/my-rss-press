@@ -57,6 +57,12 @@ export async function generateSummary(
   languages: string[]
 ): Promise<string | null> {
   try {
+    // Return null for empty articles array
+    if (!articles || articles.length === 0) {
+      console.log('No articles to summarize');
+      return null;
+    }
+
     // Determine summary language
     const summaryLanguage = determineSummaryLanguage(languages);
 

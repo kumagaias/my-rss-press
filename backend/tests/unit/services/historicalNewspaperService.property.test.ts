@@ -22,15 +22,16 @@ describe('Historical Newspaper Service - Property-Based Tests', () => {
     // Generator for future dates (1-365 days from now) in JST
     const futureDate = fc.integer({ min: 1, max: 365 }).map(daysAhead => {
       // Get current date in JST
-      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-      const dateJST = new Date(nowJST);
-      dateJST.setDate(dateJST.getDate() + daysAhead);
-      dateJST.setHours(0, 0, 0, 0);
+      const nowUTC = new Date();
+      const nowJST = new Date(nowUTC.getTime() + (9 * 60 * 60 * 1000)); // Add 9 hours for JST
+      const todayJST = new Date(Date.UTC(nowJST.getUTCFullYear(), nowJST.getUTCMonth(), nowJST.getUTCDate(), -9, 0, 0, 0));
+      const futureDateJST = new Date(todayJST.getTime() + (daysAhead * 24 * 60 * 60 * 1000));
       
-      // Format as YYYY-MM-DD
-      const year = dateJST.getFullYear();
-      const month = String(dateJST.getMonth() + 1).padStart(2, '0');
-      const day = String(dateJST.getDate()).padStart(2, '0');
+      // Convert back to JST date components
+      const futureJST = new Date(futureDateJST.getTime() + (9 * 60 * 60 * 1000));
+      const year = futureJST.getUTCFullYear();
+      const month = String(futureJST.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(futureJST.getUTCDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     });
 
@@ -57,15 +58,16 @@ describe('Historical Newspaper Service - Property-Based Tests', () => {
     // Generator for dates older than 7 days (8-365 days ago) in JST
     const oldDate = fc.integer({ min: 8, max: 365 }).map(daysAgo => {
       // Get current date in JST
-      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-      const dateJST = new Date(nowJST);
-      dateJST.setDate(dateJST.getDate() - daysAgo);
-      dateJST.setHours(0, 0, 0, 0);
+      const nowUTC = new Date();
+      const nowJST = new Date(nowUTC.getTime() + (9 * 60 * 60 * 1000)); // Add 9 hours for JST
+      const todayJST = new Date(Date.UTC(nowJST.getUTCFullYear(), nowJST.getUTCMonth(), nowJST.getUTCDate(), -9, 0, 0, 0));
+      const oldDateJST = new Date(todayJST.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
       
-      // Format as YYYY-MM-DD
-      const year = dateJST.getFullYear();
-      const month = String(dateJST.getMonth() + 1).padStart(2, '0');
-      const day = String(dateJST.getDate()).padStart(2, '0');
+      // Convert back to JST date components
+      const oldJST = new Date(oldDateJST.getTime() + (9 * 60 * 60 * 1000));
+      const year = oldJST.getUTCFullYear();
+      const month = String(oldJST.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(oldJST.getUTCDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     });
 
@@ -90,15 +92,16 @@ describe('Historical Newspaper Service - Property-Based Tests', () => {
     // Generator for valid dates (0-7 days ago) in JST
     const validDate = fc.integer({ min: 0, max: 7 }).map(daysAgo => {
       // Get current date in JST
-      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-      const dateJST = new Date(nowJST);
-      dateJST.setDate(dateJST.getDate() - daysAgo);
-      dateJST.setHours(0, 0, 0, 0);
+      const nowUTC = new Date();
+      const nowJST = new Date(nowUTC.getTime() + (9 * 60 * 60 * 1000)); // Add 9 hours for JST
+      const todayJST = new Date(Date.UTC(nowJST.getUTCFullYear(), nowJST.getUTCMonth(), nowJST.getUTCDate(), -9, 0, 0, 0));
+      const validDateJST = new Date(todayJST.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
       
-      // Format as YYYY-MM-DD
-      const year = dateJST.getFullYear();
-      const month = String(dateJST.getMonth() + 1).padStart(2, '0');
-      const day = String(dateJST.getDate()).padStart(2, '0');
+      // Convert back to JST date components
+      const validJST = new Date(validDateJST.getTime() + (9 * 60 * 60 * 1000));
+      const year = validJST.getUTCFullYear();
+      const month = String(validJST.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(validJST.getUTCDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     });
 

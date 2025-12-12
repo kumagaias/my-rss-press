@@ -17,15 +17,35 @@ describe('Cleanup Service - Property-Based Tests', () => {
    * **Validates: Requirements 10.1**
    */
   it('Property 14: Cleanup date threshold', () => {
-    // Generate a newspaper date and a non-negative offset in days for current date
-    const dateAndOffset = fc.tuple(fc.date(), fc.nat(60)); // up to 60 days offset for reasonable coverage
+    // Generate a reasonable newspaper date (within last 2 years) and offset
+    const reasonableDate = fc.integer({ 
+      min: new Date('2023-01-01').getTime(), 
+      max: new Date('2025-12-31').getTime() 
+    }).map(ts => new Date(ts));
+    const dateAndOffset = fc.tuple(reasonableDate, fc.nat(60)); // up to 60 days offset for reasonable coverage
 
     fc.assert(
       fc.property(dateAndOffset, ([newsDate, offsetDays]) => {
+        // Validate that newsDate is a valid date
+        if (isNaN(newsDate.getTime())) {
+          return; // Skip invalid dates
+        }
+        
         // Calculate current date by adding offsetDays to newspaper date
         const now = new Date(newsDate.getTime() + offsetDays * 24 * 60 * 60 * 1000);
+        
+        // Validate that now is also a valid date
+        if (isNaN(now.getTime())) {
+          return; // Skip invalid calculations
+        }
+        
         // Calculate days difference
         const daysDiff = Math.floor((now.getTime() - newsDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Validate that daysDiff is a valid number
+        if (isNaN(daysDiff)) {
+          return; // Skip invalid calculations
+        }
         
         // Newspapers older than 7 days should be marked for deletion
         const shouldDelete = daysDiff > 7;

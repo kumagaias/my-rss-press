@@ -17,12 +17,13 @@ describe('Cleanup Service - Property-Based Tests', () => {
    * **Validates: Requirements 10.1**
    */
   it('Property 14: Cleanup date threshold', () => {
-    // Generate a reasonable newspaper date (within last 2 years) and offset
-    const reasonableDate = fc.integer({ 
-      min: new Date('2023-01-01').getTime(), 
-      max: new Date('2025-12-31').getTime() 
-    }).map(ts => new Date(ts));
-    const dateAndOffset = fc.tuple(reasonableDate, fc.nat(60)); // up to 60 days offset for reasonable coverage
+    // Generate a newspaper date within reasonable range and offset
+    const minDate = new Date('2020-01-01').getTime();
+    const maxDate = new Date('2025-12-31').getTime();
+    const dateAndOffset = fc.tuple(
+      fc.integer({ min: minDate, max: maxDate }).map(ts => new Date(ts)),
+      fc.nat(60) // up to 60 days offset for reasonable coverage
+    );
 
     fc.assert(
       fc.property(dateAndOffset, ([newsDate, offsetDays]) => {

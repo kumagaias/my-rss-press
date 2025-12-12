@@ -19,11 +19,19 @@ describe('Historical Newspaper Service - Property-Based Tests', () => {
    * **Validates: Requirements 4.6**
    */
   it('Property 7: Date validation - Future rejection', () => {
-    // Generator for future dates (1-365 days from now)
+    // Generator for future dates (1-365 days from now) in JST
     const futureDate = fc.integer({ min: 1, max: 365 }).map(daysAhead => {
-      const date = new Date();
-      date.setDate(date.getDate() + daysAhead);
-      return date.toISOString().split('T')[0]; // YYYY-MM-DD
+      // Get current date in JST
+      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const dateJST = new Date(nowJST);
+      dateJST.setDate(dateJST.getDate() + daysAhead);
+      dateJST.setHours(0, 0, 0, 0);
+      
+      // Format as YYYY-MM-DD
+      const year = dateJST.getFullYear();
+      const month = String(dateJST.getMonth() + 1).padStart(2, '0');
+      const day = String(dateJST.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     });
 
     fc.assert(
@@ -46,11 +54,19 @@ describe('Historical Newspaper Service - Property-Based Tests', () => {
    * **Validates: Requirements 4.7**
    */
   it('Property 8: Date validation - 7-day window', () => {
-    // Generator for dates older than 7 days (8-365 days ago)
+    // Generator for dates older than 7 days (8-365 days ago) in JST
     const oldDate = fc.integer({ min: 8, max: 365 }).map(daysAgo => {
-      const date = new Date();
-      date.setDate(date.getDate() - daysAgo);
-      return date.toISOString().split('T')[0]; // YYYY-MM-DD
+      // Get current date in JST
+      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const dateJST = new Date(nowJST);
+      dateJST.setDate(dateJST.getDate() - daysAgo);
+      dateJST.setHours(0, 0, 0, 0);
+      
+      // Format as YYYY-MM-DD
+      const year = dateJST.getFullYear();
+      const month = String(dateJST.getMonth() + 1).padStart(2, '0');
+      const day = String(dateJST.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     });
 
     fc.assert(
@@ -71,11 +87,19 @@ describe('Historical Newspaper Service - Property-Based Tests', () => {
    * the validation should pass
    */
   it('Property 7-8 (Valid Range): Valid dates within 7-day window', () => {
-    // Generator for valid dates (0-7 days ago)
+    // Generator for valid dates (0-7 days ago) in JST
     const validDate = fc.integer({ min: 0, max: 7 }).map(daysAgo => {
-      const date = new Date();
-      date.setDate(date.getDate() - daysAgo);
-      return date.toISOString().split('T')[0]; // YYYY-MM-DD
+      // Get current date in JST
+      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const dateJST = new Date(nowJST);
+      dateJST.setDate(dateJST.getDate() - daysAgo);
+      dateJST.setHours(0, 0, 0, 0);
+      
+      // Format as YYYY-MM-DD
+      const year = dateJST.getFullYear();
+      const month = String(dateJST.getMonth() + 1).padStart(2, '0');
+      const day = String(dateJST.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     });
 
     fc.assert(

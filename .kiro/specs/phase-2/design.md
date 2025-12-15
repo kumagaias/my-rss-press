@@ -73,6 +73,313 @@ Phase-2 では既存のアーキテクチャに以下のコンポーネントを
 
 ## 主要サービスの設計
 
+### 0. フィード品質改善サービス
+
+**目的**: AI提案フィードの品質を向上させ、無効/終了したフィードURLを減らす
+
+**問題**: 現在、Bedrock AIが提案するフィードURLの中に、無効（404）や終了したサービスのURLが含まれることがある。これによりユーザーが記事を取得できないエラーが発生する。
+
+**解決策**:
+
+#### 1. カテゴリ別信頼できるフィードリストの維持
+
+**実装方法**: デフォルトフィードを拡張し、カテゴリ別に整理
+
+```typescript
+// backend/src/constants/reliableFeeds.ts
+export const RELIABLE_FEEDS_BY_CATEGORY = {
+  technology: [
+    { url: 'https://techcrunch.com/feed/', title: 'TechCrunch', language: 'EN' },
+    { url: 'https://www.theverge.com/rss/index.xml', title: 'The Verge', language: 'EN' },
+    { url: 'https://www.wired.com/feed/rss', title: 'WIRED', language: 'EN' },
+  ],
+  business: [
+    { url: 'https://www.bloomberg.com/feed/podcast/etf-report.xml', title: 'Bloomberg', language: 'EN' },
+    { url: 'https://www.ft.com/?format=rss', title: 'Financial Times', language: 'EN' },
+  ],
+  politics: [
+    { url: 'https://www.bbc.com/news/politics/rss.xml', title: 'BBC Politics', language: 'EN' },
+    { url: 'https://www.politico.com/rss/politics08.xml', title: 'Politico', language: 'EN' },
+  ],
+  // 日本語カテゴリ
+  'technology-jp': [
+    { url: 'https://www.itmedia.co.jp/rss/2.0/news_bursts.xml', title: 'ITmedia', language: 'JP' },
+    { url: 'https://japan.cnet.com/rss/index.rdf', title: 'CNET Japan', language: 'JP' },
+  ],
+  'business-jp': [
+    { url: 'https://www.nikkei.com/rss/', title: '日本経済新聞', language: 'JP' },
+  ],
+  // ... 他のカテゴリ
+};
+
+// カテゴリマッピング（テーマからカテゴリを推測）
+export function getCategoryFromTheme(theme: string, locale: 'en' | 'ja'): string | null {
+  const themeL lower = theme.toLowerCase();
+  const suffix = locale === 'ja' ? '-jp' : '';
+  
+  if (themeL.includes('tech') || themeL.includes('テクノロジー')) {
+    return `technology${suffix}`;
+  }
+  if (themeL.includes('business') || themeL.includes('ビジネス')) {
+    return `business${suffix}`;
+  }
+  if (themeL.includes('politics') || themeL.includes('政治')) {
+    return `politics${suffix}`;
+  }
+  // ... 他のカテゴリ
+  
+  return null; // カテゴリが見つからない場合
+}
+```
+
+#### 2. フィードヘルスチェックの追加
+
+**実装方法**: 定期的にフィードの健全性をチェック
+
+```typescript
+// backend/src/services/feedHealthCheckService.ts
+interface FeedHealthStatus {
+  url: string;
+  isHealthy: boolean;
+  lastChecked: Date;
+  lastArticleDate?: Date;
+  errorMessage?: string;
+}
+
+async function checkFeedHealth(url: string): Promise<FeedHealthStatus> {
+  try {
+    const feed = await parser.parseURL(url);
+    
+    // 記事が存在するかチェック
+    if (!feed.items || feed.items.length === 0) {
+      return {
+        url,
+        isHealthy: false,
+        lastChecked: new Date(),
+        errorMessage: 'No articles found',
+      };
+    }
+    
+    // 最新記事の日付をチェック（30日以内なら健全）
+    const latestArticle = feed.items[0];
+    const latestDate = latestArticle.pubDate ? new Date(latestArticle.pubDate) : null;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const isHealthy = latestDate ? latestDate > thirtyDaysAgo : false;
+    
+    return {
+      url,
+      isHealthy,
+      lastChecked: new Date(),
+      lastArticleDate: latestDate || undefined,
+      errorMessage: isHealthy ? undefined : 'No recent articles (> 30 days)',
+    };
+  } catch (error) {
+    return {
+      url,
+      isHealthy: false,
+      lastChecked: new Date(),
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// 信頼できるフィードリストの健全性を定期的にチェック
+async function checkAllReliableFeeds(): Promise<Map<string, FeedHealthStatus>> {
+  const results = new Map<string, FeedHealthStatus>();
+  
+  for (const [category, feeds] of Object.entries(RELIABLE_FEEDS_BY_CATEGORY)) {
+    for (const feed of feeds) {
+      const status = await checkFeedHealth(feed.url);
+      results.set(feed.url, status);
+    }
+  }
+  
+  return results;
+}
+```
+
+#### 3. Bedrockプロンプトの改善
+
+**実装方法**: プロンプトに信頼できるフィードリストを含め、キーワードとの関連性を重視
+
+```typescript
+async function suggestFeedsWithReliableList(
+  theme: string,
+  locale: 'en' | 'ja'
+): Promise<FeedSuggestion[]> {
+  // カテゴリを推測
+  const category = getCategoryFromTheme(theme, locale);
+  
+  // 信頼できるフィードリストを取得
+  const reliableFeeds = category 
+    ? RELIABLE_FEEDS_BY_CATEGORY[category] || []
+    : [];
+  
+  // プロンプトに信頼できるフィードを含める
+  const reliableFeedsList = reliableFeeds
+    .map(f => `- ${f.title}: ${f.url}`)
+    .join('\n');
+  
+  const prompt = locale === 'ja'
+    ? `ユーザーは「${theme}」に興味があります。
+以下の信頼できるRSSフィードリストを優先的に使用し、10個のRSSフィードを提案してください。
+
+信頼できるフィード:
+${reliableFeedsList}
+
+重要な制約:
+1. 上記の信頼できるフィードリストから、テーマに関連するものを優先的に選択してください
+2. リストにない場合のみ、他の実在する主要メディアの公式RSSフィードを提案してください
+3. テーマとの関連性を最優先してください（一般的な主要ニュースソースになりすぎないように）
+4. 実在しないフィードや終了したサービスのURLは絶対に提案しないでください
+5. 正しいフィードURL形式（/rss, /feed, /rss.xml など）を使用してください
+
+JSON形式で10個のフィードを返してください:
+[
+  {
+    "url": "https://example.com/feed",
+    "title": "Feed Title",
+    "reasoning": "テーマとの関連性の説明"
+  }
+]`
+    : `User is interested in "${theme}".
+Please suggest 10 RSS feeds, prioritizing the following reliable feed list.
+
+Reliable feeds:
+${reliableFeedsList}
+
+Important constraints:
+1. Prioritize feeds from the reliable list above that are relevant to the theme
+2. Only suggest other real, official RSS feeds from major media if not in the list
+3. Prioritize relevance to the theme (avoid becoming too generic major news sources)
+4. Never suggest non-existent feeds or terminated service URLs
+5. Use correct feed URL formats (/rss, /feed, /rss.xml, etc.)
+
+Return 10 feeds in JSON format:
+[
+  {
+    "url": "https://example.com/feed",
+    "title": "Feed Title",
+    "reasoning": "Explanation of relevance to theme"
+  }
+]`;
+  
+  // Bedrock API呼び出し
+  const suggestions = await callBedrockAPI(prompt);
+  
+  // URL検証（既存のロジック）
+  const validatedSuggestions = await validateFeedUrls(suggestions);
+  
+  // 不足している場合、信頼できるフィードから補完
+  if (validatedSuggestions.length < 5 && reliableFeeds.length > 0) {
+    const supplementFeeds = reliableFeeds
+      .slice(0, 5 - validatedSuggestions.length)
+      .map(f => ({
+        url: f.url,
+        title: f.title,
+        reasoning: `Reliable ${category} feed`,
+      }));
+    
+    validatedSuggestions.push(...supplementFeeds);
+  }
+  
+  return validatedSuggestions;
+}
+```
+
+#### 4. 動作確認済みフィードのキャッシュ
+
+**実装方法**: DynamoDBに検証済みフィードをキャッシュ
+
+```typescript
+// DynamoDB スキーマ
+interface ValidatedFeed {
+  PK: string; // VALIDATED_FEED#{url_hash}
+  SK: string; // METADATA
+  url: string;
+  title: string;
+  category?: string;
+  language: 'JP' | 'EN';
+  lastValidated: string; // ISO 8601
+  validationCount: number; // 検証成功回数
+  failureCount: number; // 検証失敗回数
+  isHealthy: boolean;
+  lastArticleDate?: string;
+}
+
+// キャッシュから取得
+async function getValidatedFeed(url: string): Promise<ValidatedFeed | null> {
+  const urlHash = hashUrl(url);
+  const result = await dynamodb.get({
+    PK: `VALIDATED_FEED#${urlHash}`,
+    SK: 'METADATA',
+  });
+  
+  return result.Item as ValidatedFeed | null;
+}
+
+// キャッシュに保存
+async function saveValidatedFeed(feed: ValidatedFeed): Promise<void> {
+  await dynamodb.put({ Item: feed });
+}
+
+// フィード提案時にキャッシュを活用
+async function suggestFeedsWithCache(
+  theme: string,
+  locale: 'en' | 'ja'
+): Promise<FeedSuggestion[]> {
+  // Bedrockから提案を取得
+  const suggestions = await suggestFeedsWithReliableList(theme, locale);
+  
+  // キャッシュをチェック
+  const cachedResults = await Promise.all(
+    suggestions.map(async (s) => {
+      const cached = await getValidatedFeed(s.url);
+      return { suggestion: s, cached };
+    })
+  );
+  
+  // キャッシュされた健全なフィードを優先
+  const healthyFeeds = cachedResults
+    .filter(r => r.cached?.isHealthy)
+    .map(r => r.suggestion);
+  
+  // 新しいフィードを検証
+  const newFeeds = cachedResults
+    .filter(r => !r.cached)
+    .map(r => r.suggestion);
+  
+  const validatedNewFeeds = await validateFeedUrls(newFeeds);
+  
+  // キャッシュに保存
+  for (const feed of validatedNewFeeds) {
+    await saveValidatedFeed({
+      PK: `VALIDATED_FEED#${hashUrl(feed.url)}`,
+      SK: 'METADATA',
+      url: feed.url,
+      title: feed.title,
+      language: locale === 'ja' ? 'JP' : 'EN',
+      lastValidated: new Date().toISOString(),
+      validationCount: 1,
+      failureCount: 0,
+      isHealthy: true,
+    });
+  }
+  
+  return [...healthyFeeds, ...validatedNewFeeds];
+}
+```
+
+**メリット**:
+1. **品質向上**: 信頼できるフィードを優先的に提案
+2. **エラー削減**: 無効なURLの提案を減らす
+3. **パフォーマンス**: キャッシュにより検証時間を短縮
+4. **学習**: 検証結果を蓄積し、将来の提案に活用
+
+**実装優先度**: Phase-2の後（Phase-3として実装）
+
 ### 1. 言語検出サービス
 
 **実装方法:** RSS フィードの language フィールド + 文字ベースの検出

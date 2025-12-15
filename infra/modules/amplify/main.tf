@@ -9,9 +9,6 @@ resource "aws_amplify_app" "main" {
   name         = var.app_name
   repository   = var.github_repository
   access_token = data.aws_secretsmanager_secret_version.github_token.secret_string
-  
-  # Platform for Next.js SSR support
-  platform = "WEB_COMPUTE"
 
   # Build settings
   build_spec = file("${path.module}/amplify.yml")
@@ -20,11 +17,6 @@ resource "aws_amplify_app" "main" {
   environment_variables = {
     NEXT_PUBLIC_API_BASE_URL = var.api_base_url
     NODE_ENV                 = var.environment
-    _LIVE_UPDATES            = jsonencode([{
-      pkg     = "next-version"
-      type    = "internal"
-      version = "latest"
-    }])
   }
 
   # Enable auto branch creation for pull requests
@@ -32,8 +24,12 @@ resource "aws_amplify_app" "main" {
   enable_branch_auto_build    = true
   enable_branch_auto_deletion = false
 
-  # Custom rules for Next.js SSR (no custom rules needed for WEB_COMPUTE)
-  # Next.js handles routing internally
+  # Custom rules for SPA routing
+  custom_rule {
+    source = "/<*>"
+    status = "404-200"
+    target = "/index.html"
+  }
 
   tags = {
     Name        = "MyRSSPress Frontend"

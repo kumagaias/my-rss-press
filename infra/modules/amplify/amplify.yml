@@ -12,9 +12,9 @@ frontend:
       commands:
         - npm run build
   artifacts:
-    # For Next.js 15 with SSR/dynamic rendering
-    # Output is in frontend/.next from repository root
-    baseDirectory: frontend/.next
+    # For Next.js 15 with static export
+    # Output is in frontend/out from repository root
+    baseDirectory: frontend/out
     files:
       - '**/*'
   cache:

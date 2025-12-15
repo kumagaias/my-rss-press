@@ -1,10 +1,18 @@
+import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout';
+import DateNavigation from '@/components/features/newspaper/DateNavigation';
+import { detectLocale, useTranslations, type Locale } from '@/lib/i18n';
+
+// Generate static params for static export
+export function generateStaticParams() {
+  // Return empty array - pages will be generated on-demand
+  return [];
+}
+
+// Client component wrapper
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout';
-import DateNavigation from '@/components/features/newspaper/DateNavigation';
-import { detectLocale, useTranslations, type Locale } from '@/lib/i18n';
 
 interface Article {
   title: string;

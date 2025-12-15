@@ -1,0 +1,11 @@
+{
+  "name": "Setup CLI pager configuration",
+  "description": "AWS CLIとGitのpagerを無効化する設定を~/.zshrcに追加します",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "command",
+    "command": "echo '\n# Disable CLI pagers (for Kiro agent)\nexport AWS_PAGER=\"\"\nexport GIT_PAGER=\"\"' >> ~/.zshrc && echo '✅ Pager configuration added to ~/.zshrc' && echo 'Run: source ~/.zshrc to apply changes'"
+  }
+}

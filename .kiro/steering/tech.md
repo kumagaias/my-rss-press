@@ -959,6 +959,31 @@ When vulnerabilities cannot be fixed immediately due to dependency conflicts:
 
 ## Monitoring & Logging
 
+### CLI Pager Configuration for Development
+
+**Important**: Disable pagers for AWS CLI and Git to prevent command interruption.
+
+**Setup (add to `~/.zshrc` or `~/.bashrc`):**
+
+```bash
+# Disable AWS CLI pager (prevents interruption)
+export AWS_PAGER=""
+
+# Disable Git pager (prevents interruption)
+export GIT_PAGER=""
+```
+
+**Apply changes:**
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+**Why this is needed:**
+- Pagers (like `less`) interrupt command execution and wait for user input
+- This causes agent commands to hang and fail
+- Disabling pagers ensures commands complete immediately
+- Especially important for CI/CD and automated workflows
+
 ### Logging
 
 ```typescript
@@ -989,6 +1014,28 @@ const logger = {
 - Set alerts with CloudWatch Alarms
 - Tracing with X-Ray
 - Get detailed metrics with Lambda Insights
+
+### CloudWatch Logs Access
+
+**View logs without pager interruption:**
+
+```bash
+# Tail logs (real-time)
+aws logs tail /aws/lambda/myrsspress-api --follow --format short
+
+# Get recent logs
+aws logs tail /aws/lambda/myrsspress-api --since 1h
+
+# Filter logs by pattern
+aws logs tail /aws/lambda/myrsspress-api --filter-pattern "ERROR"
+```
+
+**Makefile commands (future implementation):**
+```bash
+make logs              # Display CloudWatch Logs
+make logs-frontend     # Frontend logs
+make logs-backend      # Backend logs
+```
 
 ## Performance Optimization
 

@@ -28,6 +28,53 @@ Place a `.tool-versions` file in the project root and define required tools and 
 - **Docker**: >= 20.0
 - **Gitleaks**: Latest version (for security checks)
 
+### CLI Pager Configuration
+
+**Important**: Disable pagers for AWS CLI and Git to prevent command interruption during agent execution.
+
+**Setup (add to `~/.zshrc` or `~/.bashrc`):**
+
+```bash
+# Disable AWS CLI pager (prevents interruption)
+export AWS_PAGER=""
+
+# Disable Git pager (prevents interruption)
+export GIT_PAGER=""
+```
+
+**Apply changes:**
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+**Verification:**
+```bash
+# Check environment variables
+echo $AWS_PAGER    # Should output nothing
+echo $GIT_PAGER    # Should output nothing
+
+# Test AWS CLI (should output directly without pager)
+aws help
+
+# Test Git (should output directly without pager)
+git log
+```
+
+**Why this is needed:**
+- Pagers (like `less`) interrupt command execution and wait for user input
+- This causes agent commands to hang and fail
+- Disabling pagers ensures commands complete immediately
+- Especially important for CI/CD and automated workflows
+
+**Alternative (per-command basis):**
+```bash
+# AWS CLI
+aws logs tail /aws/lambda/my-function --no-paginate
+
+# Git
+git --no-pager log
+```
+
 **Tool Installation:**
 
 Using asdf (recommended):
@@ -873,6 +920,16 @@ Create agent hooks to automate quality checks:
 3. **Security check** (`.kiro/hooks/pre-commit-security.json`)
    - Command: `make security-check`
    - Purpose: Check for sensitive information before commit
+   - Trigger: Manual execution
+
+4. **Setup CLI pager configuration** (`.kiro/hooks/setup-pager-config.json`)
+   - Command: Add pager disable settings to `~/.zshrc`
+   - Purpose: Prevent AWS CLI and Git command interruption
+   - Trigger: Manual execution (run once during initial setup)
+
+5. **Check CLI pager configuration** (`.kiro/hooks/check-pager-config.json`)
+   - Command: Verify pager settings
+   - Purpose: Confirm pagers are disabled correctly
    - Trigger: Manual execution
 
 ### How to Execute Hooks (for manual trigger)

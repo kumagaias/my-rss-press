@@ -1,0 +1,11 @@
+{
+  "name": "Check CLI pager configuration",
+  "description": "AWS CLIとGitのpager設定が正しく無効化されているか確認します",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "command",
+    "command": "echo '🔍 Checking pager configuration...' && echo 'AWS_PAGER: '$AWS_PAGER && echo 'GIT_PAGER: '$GIT_PAGER && if [ -z \"$AWS_PAGER\" ] && [ -z \"$GIT_PAGER\" ]; then echo '✅ Pagers are disabled correctly'; else echo '⚠️  Pagers are not disabled. Run \"Setup CLI pager configuration\" hook'; fi"
+  }
+}

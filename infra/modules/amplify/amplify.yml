@@ -3,6 +3,9 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Install root dependencies first (for monorepo workspace)
+        - npm ci
+        # Then install frontend dependencies
         - cd frontend
         - npm ci
     build:
@@ -16,4 +19,5 @@ frontend:
       - '**/*'
   cache:
     paths:
+      - node_modules/**/*
       - frontend/node_modules/**/*

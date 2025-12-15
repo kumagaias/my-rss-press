@@ -1,10 +1,15 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# セキュリティチェックを実行
-./scripts/security-check.sh
+echo "🔍 Running pre-push checks..."
 
-# npm脆弱性チェックを実行（手動実行推奨: make audit）
-# 注: 開発環境のみの脆弱性でプッシュがブロックされるのを避けるため、
-#     pre-pushフックでは実行しない。定期的に手動で実行すること。
-# ./scripts/npm-audit-check.sh
+# テストを実行（ユニットテスト + セキュリティチェック + 脆弱性チェック）
+echo "🧪 Running tests..."
+make test
+
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Please fix the issues before pushing."
+  exit 1
+fi
+
+echo "✅ All pre-push checks passed!"

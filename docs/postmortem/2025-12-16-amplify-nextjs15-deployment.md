@@ -68,6 +68,11 @@ Multiple Amplify deployment failures occurred when upgrading to Next.js 15 and i
    - Fixed issues one by one without understanding the full picture
    - Led to multiple deployment attempts and extended downtime
 
+3. **Skipped Local Build Testing**
+   - First few attempts pushed code without running `npm run build` locally
+   - Local build would have caught the same errors immediately
+   - Only started testing locally after multiple failures
+
 ## Impact Scope
 
 - **Duration:** ~2 hours (21:16 - 23:04 JST)
@@ -198,28 +203,32 @@ resource "aws_amplify_app" "main" {
    - Didn't research requirements before attempting
 
 3. ❌ **Not Testing Locally First**
-   - Could have caught issues before production deployment
-   - Local `next build` would have shown missing `generateStaticParams()`
+   - Pushed code without running `npm run build` locally
+   - Local build would have caught named export and generateStaticParams errors immediately
+   - Only started local testing after multiple production failures
 
 ### Key Takeaways
 
-1. **Understand Platform Requirements**
-   - Know the difference between Amplify platforms
-   - Match Next.js configuration to platform capabilities
+1. **Always Test Locally Before Deploying**
+   - **CRITICAL**: Run `npm run build` locally before every push
+   - Catches build errors immediately (named export, generateStaticParams, etc.)
+   - Verifies output directory structure
+   - Prevents production deployment failures
 
-2. **Prefer Simplicity**
+2. **Understand Platform Requirements**
+   - Know the difference between Amplify platforms (`WEB` vs `WEB_COMPUTE`)
+   - Match Next.js configuration to platform capabilities
+   - Research requirements before attempting major changes (SSR, adapters, etc.)
+
+3. **Prefer Simplicity**
    - Static export is sufficient for most SPAs
    - SSR adds complexity without clear benefits for our use case
-
-3. **Test Before Deploying**
-   - Run `next build` locally
-   - Verify output directory structure
-   - Check for build errors before pushing
+   - Query parameters simpler than dynamic routes for user-generated content
 
 4. **Document Architecture Decisions**
-   - Why we chose static export
-   - Trade-offs between SSR and static
-   - Requirements for each approach
+   - Why we chose static export over SSR
+   - Why we chose query parameters over dynamic routes
+   - Trade-offs and requirements for each approach
 
 ## References
 

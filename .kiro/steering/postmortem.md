@@ -111,7 +111,8 @@ Create a postmortem when the following events occur:
 ### 2025-12-16: Amplify Next.js 15 Deployment Issues
 - **Cause**: Multiple issues from Next.js 15 upgrade and dynamic routes implementation
 - **Errors**: Named export mismatch, missing generateStaticParams, platform type confusion
-- **Countermeasure**: Reverted to static export with generateStaticParams() for dynamic routes
-- **Lesson**: Prefer simpler solutions (static export) over complex ones (SSR) when they meet requirements. Test locally before production deployment.
+- **Root Issue**: Pushed code without running `npm run build` locally first
+- **Countermeasure**: Changed from dynamic routes to query parameters (/newspaper?id=xxx)
+- **Lesson**: ALWAYS run `npm run build` locally before pushing. Prefer simpler solutions (query parameters) over complex ones (dynamic routes + SSR).
 
 Details: Refer to `docs/postmortem/` directory

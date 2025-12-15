@@ -49,6 +49,7 @@ When only running `npm ci` in the frontend directory:
 - Insufficient understanding of npm workspaces dependency resolution
 - amplify.yml configuration didn't account for monorepo structure
 - No documentation about correct installation order in monorepo
+- Difference between local environment (with existing node_modules) and CI/CD environment (clean state) not considered
 
 ## Impact Scope
 

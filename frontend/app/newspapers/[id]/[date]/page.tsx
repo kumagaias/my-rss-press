@@ -28,10 +28,10 @@ interface Newspaper {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
     date: string;
-  };
+  }>;
 }
 
 export default function NewspaperDatePage({ params }: PageProps) {
@@ -42,10 +42,21 @@ export default function NewspaperDatePage({ params }: PageProps) {
   const [newspaper, setNewspaper] = useState<Newspaper | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [id, setId] = useState<string>('');
+  const [date, setDate] = useState<string>('');
 
-  const { id, date } = params;
+  // Unwrap params Promise
+  useEffect(() => {
+    params.then(({ id: paramId, date: paramDate }) => {
+      setId(paramId);
+      setDate(paramDate);
+    });
+  }, [params]);
 
   useEffect(() => {
+    // Wait for id and date to be set
+    if (!id || !date) return;
+
     const fetchNewspaper = async () => {
       try {
         setLoading(true);

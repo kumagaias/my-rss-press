@@ -214,12 +214,25 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
     return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを20個提案してください。
 
 重要な制約：
-1. 実際に存在し、現在もアクティブな日本語のRSSフィードのURLのみを提案してください
-2. 日本の大手メディア、公式サイト、有名ブログの確実にアクセス可能なフィードを優先してください
-3. 架空のURLや存在しないフィードは絶対に提案しないでください
-4. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml、/index.xml などで終わる正しい形式にしてください
-5. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
-6. 必ず完全なJSON形式で返してください（途中で切れないように）
+1. **テーマとの関連性が最重要**: 「${theme}」に特化したフィードのみを提案してください
+2. **一般的なニュースサイトは避ける**: NHK、朝日新聞、読売新聞などの一般ニュースサイトは、「${theme}」専門のセクションがない限り提案しないでください
+3. 実際に存在し、現在もアクティブな日本語のRSSフィードのURLのみを提案してください
+4. 「${theme}」に特化した専門メディア、ブログ、ウェブサイトを優先してください
+5. 架空のURLや存在しないフィードは絶対に提案しないでください
+6. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml、/index.xml などで終わる正しい形式にしてください
+7. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
+8. 必ず完全なJSON形式で返してください（途中で切れないように）
+
+「${theme}」の良い提案例：
+- 「${theme}」専門のウェブサイト
+- 「${theme}」業界の専門誌
+- 「${theme}」に特化したエキスパートブログ
+- 「${theme}」に関する学術・研究フィード
+
+悪い提案例（提案しないでください）：
+- 一般的なニュースサイト（NHK、朝日新聞、読売新聞のトップページ）
+- 無関係なテクノロジーやビジネスフィード
+- 一般的な世界ニュースフィード
 
 各フィードについて、以下の情報をJSON形式で返してください：
 - url: RSSフィードのURL（必ず実在する日本語のもの）
@@ -255,12 +268,24 @@ CRITICAL LANGUAGE REQUIREMENT:
 - If the feed is from a non-English source, translate the title to English
 
 Important constraints:
-1. Only suggest RSS feed URLs that actually exist and are currently active
-2. Prioritize English-language media, blogs, and news sites
-3. Never suggest fictional or non-existent feed URLs
-4. Prioritize reliable feeds from major media outlets and official websites
-5. Feed URLs must end with proper formats like /rss, /feed, /rss.xml, /feed.xml, /index.xml
-6. Sort by relevance to the theme (most relevant first)
+1. **THEME RELEVANCE IS CRITICAL**: Only suggest feeds that are SPECIFICALLY about "${theme}"
+2. **AVOID GENERIC NEWS**: Do NOT suggest general news sites (BBC, NYT, Reuters, Guardian) unless they have a specific "${theme}" section
+3. Only suggest RSS feed URLs that actually exist and are currently active
+4. Prioritize specialized media, blogs, and websites focused on "${theme}"
+5. Never suggest fictional or non-existent feed URLs
+6. Feed URLs must end with proper formats like /rss, /feed, /rss.xml, /feed.xml, /index.xml
+7. Sort by relevance to the theme (most relevant first)
+
+Examples of GOOD suggestions for "${theme}":
+- Specialized websites about "${theme}"
+- Industry-specific publications for "${theme}"
+- Expert blogs focused on "${theme}"
+- Academic or research feeds about "${theme}"
+
+Examples of BAD suggestions (DO NOT SUGGEST):
+- General news sites (BBC News, NYT Homepage, Reuters Top News)
+- Generic world news feeds
+- Unrelated technology or business feeds
 
 For each feed, provide the following information in JSON format:
 - url: RSS feed URL (must be real and in English)
@@ -353,9 +378,104 @@ function parseAIResponse(response: any): FeedSuggestion[] {
 }
 
 /**
+ * Get theme-specific feed suggestions
+ */
+function getThemeSpecificFeeds(theme: string): FeedSuggestion[] {
+  const themeLower = theme.toLowerCase();
+  
+  // Technology/Tech
+  if (themeLower.includes('tech') || themeLower.includes('テクノロジー')) {
+    return [
+      { url: 'https://feeds.arstechnica.com/arstechnica/index', title: 'Ars Technica', reasoning: 'Technology news and analysis' },
+      { url: 'https://www.wired.com/feed/rss', title: 'WIRED', reasoning: 'Technology, science, and culture' },
+      { url: 'https://techcrunch.com/feed/', title: 'TechCrunch', reasoning: 'Startup and technology news' },
+      { url: 'https://www.theverge.com/rss/index.xml', title: 'The Verge', reasoning: 'Technology and digital culture' },
+      { url: 'https://www.engadget.com/rss.xml', title: 'Engadget', reasoning: 'Consumer electronics and gadgets' },
+    ];
+  }
+  
+  // Health/Medical
+  if (themeLower.includes('health') || themeLower.includes('medical') || themeLower.includes('健康') || themeLower.includes('医療')) {
+    return [
+      { url: 'https://www.medicalnewstoday.com/rss', title: 'Medical News Today', reasoning: 'Health and medical news' },
+      { url: 'https://www.healthline.com/rss', title: 'Healthline', reasoning: 'Health information and wellness' },
+      { url: 'https://www.webmd.com/rss/rss.aspx?RSSSource=RSS_PUBLIC', title: 'WebMD', reasoning: 'Medical information and health news' },
+      { url: 'https://www.sciencedaily.com/rss/health_medicine.xml', title: 'ScienceDaily Health', reasoning: 'Health and medicine research news' },
+      { url: 'https://feeds.feedburner.com/HealthNews', title: 'Health News', reasoning: 'Latest health news and updates' },
+    ];
+  }
+  
+  // Business/Finance
+  if (themeLower.includes('business') || themeLower.includes('finance') || themeLower.includes('ビジネス') || themeLower.includes('経済')) {
+    return [
+      { url: 'https://www.bloomberg.com/feed/podcast/etf-report.xml', title: 'Bloomberg', reasoning: 'Business and financial news' },
+      { url: 'https://www.ft.com/?format=rss', title: 'Financial Times', reasoning: 'Global business news' },
+      { url: 'https://www.economist.com/rss', title: 'The Economist', reasoning: 'Business and economic analysis' },
+      { url: 'https://www.wsj.com/xml/rss/3_7085.xml', title: 'Wall Street Journal', reasoning: 'Business and market news' },
+      { url: 'https://feeds.reuters.com/reuters/businessNews', title: 'Reuters Business', reasoning: 'Business news updates' },
+    ];
+  }
+  
+  // Politics
+  if (themeLower.includes('politics') || themeLower.includes('政治')) {
+    return [
+      { url: 'https://www.bbc.com/news/politics/rss.xml', title: 'BBC Politics', reasoning: 'Political news and analysis' },
+      { url: 'https://www.politico.com/rss/politics08.xml', title: 'Politico', reasoning: 'Political news and policy' },
+      { url: 'https://thehill.com/rss/syndicator/19109', title: 'The Hill', reasoning: 'Political news and commentary' },
+      { url: 'https://feeds.reuters.com/Reuters/PoliticsNews', title: 'Reuters Politics', reasoning: 'Political news updates' },
+      { url: 'https://www.theguardian.com/politics/rss', title: 'Guardian Politics', reasoning: 'Political news and opinion' },
+    ];
+  }
+  
+  // Science
+  if (themeLower.includes('science') || themeLower.includes('科学')) {
+    return [
+      { url: 'https://www.sciencedaily.com/rss/all.xml', title: 'ScienceDaily', reasoning: 'Latest science news' },
+      { url: 'https://www.nature.com/nature.rss', title: 'Nature', reasoning: 'Scientific research and news' },
+      { url: 'https://www.sciencemag.org/rss/news_current.xml', title: 'Science Magazine', reasoning: 'Science news and research' },
+      { url: 'https://phys.org/rss-feed/', title: 'Phys.org', reasoning: 'Physics and science news' },
+      { url: 'https://www.newscientist.com/feed/home', title: 'New Scientist', reasoning: 'Science and technology news' },
+    ];
+  }
+  
+  // Sports
+  if (themeLower.includes('sport') || themeLower.includes('スポーツ')) {
+    return [
+      { url: 'https://www.espn.com/espn/rss/news', title: 'ESPN', reasoning: 'Sports news and updates' },
+      { url: 'https://www.bbc.com/sport/rss.xml', title: 'BBC Sport', reasoning: 'Sports news coverage' },
+      { url: 'https://www.theguardian.com/sport/rss', title: 'Guardian Sport', reasoning: 'Sports news and analysis' },
+      { url: 'https://feeds.reuters.com/reuters/sportsNews', title: 'Reuters Sports', reasoning: 'Sports news updates' },
+      { url: 'https://www.si.com/rss/si_topstories.rss', title: 'Sports Illustrated', reasoning: 'Sports news and features' },
+    ];
+  }
+  
+  // Entertainment/Culture
+  if (themeLower.includes('entertainment') || themeLower.includes('culture') || themeLower.includes('エンタメ') || themeLower.includes('文化')) {
+    return [
+      { url: 'https://variety.com/feed/', title: 'Variety', reasoning: 'Entertainment news' },
+      { url: 'https://www.hollywoodreporter.com/feed/', title: 'Hollywood Reporter', reasoning: 'Entertainment industry news' },
+      { url: 'https://www.rollingstone.com/feed/', title: 'Rolling Stone', reasoning: 'Music and culture news' },
+      { url: 'https://www.theguardian.com/culture/rss', title: 'Guardian Culture', reasoning: 'Arts and culture news' },
+      { url: 'https://www.bbc.com/culture/rss', title: 'BBC Culture', reasoning: 'Cultural news and features' },
+    ];
+  }
+  
+  // Default: Return empty array to avoid generic feeds
+  // This forces Bedrock to provide theme-specific suggestions
+  return [];
+}
+
+/**
  * Get mock feed suggestions for offline development
  */
 function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
+  // Try to get theme-specific feeds first
+  const themeFeeds = getThemeSpecificFeeds(theme);
+  if (themeFeeds.length > 0) {
+    return themeFeeds;
+  }
+  
+  // Only use generic feeds as last resort
   return [
     {
       url: 'https://feeds.bbci.co.uk/news/rss.xml',
@@ -373,7 +493,7 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
       reasoning: `Breaking news and updates about the theme: ${theme}`,
     },
     {
-      url: 'https://feeds.theguardian.com/theguardian/world/rss',
+      url: 'https://www.theguardian.com/world/rss',
       title: 'The Guardian World News',
       reasoning: `Global perspective on the theme: ${theme}`,
     },

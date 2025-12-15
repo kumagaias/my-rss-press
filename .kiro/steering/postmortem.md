@@ -102,4 +102,10 @@ Create a postmortem when the following events occur:
 - **Countermeasure**: Added tfplan to .gitignore, gitleaks now checks latest commit too
 - **Lesson**: Explicitly exclude binary files, run security checks after commits too
 
+### 2025-12-11: Amplify Build Failure in Monorepo
+- **Cause**: amplify.yml only ran `npm ci` in frontend directory, missing root workspace dependencies
+- **Error**: `Cannot find module 'styled-jsx'` - Next.js dependency not resolved
+- **Countermeasure**: Updated amplify.yml to run `npm ci` at root first, then in frontend
+- **Lesson**: In monorepo (npm workspaces), always install root dependencies before workspace dependencies
+
 Details: Refer to `docs/postmortem/` directory

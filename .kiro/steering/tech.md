@@ -15,6 +15,11 @@ MyRSSPress is a web application deployed on AWS using a serverless architecture.
 
 ## Technology Stack
 
+### Project Structure
+- **Monorepo**: npm workspaces
+- **Workspaces**: `frontend`, `backend`
+- **Root Dependencies**: Shared tooling (husky for git hooks)
+
 ### Frontend
 - **Framework**: Next.js 15.x (App Router)
 - **Runtime**: Node.js 24.x LTS (Active LTS) or 22.x LTS (Maintenance LTS)
@@ -40,6 +45,144 @@ MyRSSPress is a web application deployed on AWS using a serverless architecture.
 - **CDN**: CloudFront
 - **Primary Region**: ap-northeast-1 (Tokyo)
 - **ACM Region**: us-east-1 (CloudFront certificates only)
+
+## Monorepo Structure (npm workspaces)
+
+### Overview
+
+MyRSSPress uses npm workspaces to manage multiple packages in a single repository.
+
+### Directory Structure
+
+```
+my-rss-press/
+├── node_modules/          # Root node_modules (hoisted dependencies)
+│   ├── husky/            # Git hooks (root dependency)
+│   ├── react/            # Shared by frontend (hoisted from frontend)
+│   ├── next/             # Frontend dependency (hoisted)
+│   ├── styled-jsx/       # Next.js dependency (hoisted)
+│   └── ...               # Other hoisted dependencies
+├── frontend/
+│   ├── node_modules/     # Frontend-specific dependencies
+│   └── package.json
+├── backend/
+│   ├── node_modules/     # Backend-specific dependencies
+│   └── package.json
+└── package.json          # Root package.json with workspaces config
+```
+
+### Root node_modules の役割
+
+1. **ルート直接の依存関係**:
+   - `husky`: Git hooks管理（pre-commit, pre-pushなど）
+   - プロジェクト全体で使用する開発ツール
+
+2. **ホイスティングされた依存関係**:
+   - 複数のworkspaceで共通して使用される依存関係
+   - 例: `react`, `next`, `styled-jsx`, `typescript`など
+   - ディスク容量の節約とインストール時間の短縮
+
+3. **workspace間の依存関係解決**:
+   - 各workspaceの`package.json`を解析
+   - 共通の依存関係を自動的にルートに配置
+   - workspace固有の依存関係は各workspace内に配置
+
+### 依存関係のインストール順序
+
+**重要**: 必ずこの順序で実行すること
+
+```bash
+# 1. ルートで実行（workspace全体の依存関係を解決）
+npm ci
+
+# 2. 各workspaceで実行（個別の依存関係をインストール）
+cd frontend && npm ci
+cd ../backend && npm ci
+```
+
+**なぜこの順序が重要か**:
+- ルートの`npm ci`がworkspace構造を解析し、共通依存関係をホイスティング
+- 各workspaceの`npm ci`がworkspace固有の依存関係をインストール
+- この順序を守らないと、依存関係が正しく解決されない
+
+### CI/CDでの設定
+
+#### Amplify (Frontend)
+
+```yaml
+# infra/modules/amplify/amplify.yml
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci                    # 1. ルートで実行（重要！）
+        - cd frontend
+        - npm ci                    # 2. frontendで実行
+    build:
+      commands:
+        - npm run build
+  cache:
+    paths:
+      - node_modules/**/*           # ルートのnode_modules
+      - frontend/node_modules/**/*  # frontendのnode_modules
+```
+
+#### GitHub Actions (Backend)
+
+```yaml
+# .github/workflows/deploy-backend.yml
+- name: Install dependencies
+  run: |
+    npm ci                          # 1. ルートで実行
+    cd backend
+    npm ci                          # 2. backendで実行
+```
+
+### トラブルシューティング
+
+#### エラー: Cannot find module 'xxx'
+
+**原因**: ルートで`npm ci`を実行していない
+
+**解決策**:
+```bash
+npm ci
+cd frontend && npm ci
+cd ../backend && npm ci
+```
+
+#### エラー: Conflicting versions
+
+**原因**: 複数のworkspaceで異なるバージョンを指定
+
+**解決策**: ルートの`package.json`でバージョンを統一
+
+### ベストプラクティス
+
+1. **常にルートから実行**: `npm ci`は必ずルートで最初に実行
+2. **キャッシュは全て**: CI/CDでは全ての`node_modules`をキャッシュ
+3. **Makefileで統一**: インストール手順をMakefileに記載
+4. **ドキュメント化**: README.mdに手順を明記
+
+### 参考コマンド
+
+```bash
+# 依存関係ツリーを確認
+npm ls
+
+# workspace情報を確認
+npm ls --workspaces
+
+# ホイスティングされた依存関係を確認
+ls -la node_modules/
+
+# クリーンインストール
+rm -rf node_modules frontend/node_modules backend/node_modules
+npm ci
+cd frontend && npm ci
+cd ../backend && npm ci
+```
 
 ## Architecture Diagram
 

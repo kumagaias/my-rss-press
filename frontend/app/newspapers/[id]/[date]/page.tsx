@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import NewspaperLayout from '@/components/features/newspaper/NewspaperLayout';
+import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout';
 import DateNavigation from '@/components/features/newspaper/DateNavigation';
 import { detectLocale, useTranslations, type Locale } from '@/lib/i18n';
 

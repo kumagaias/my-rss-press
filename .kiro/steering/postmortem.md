@@ -108,4 +108,10 @@ Create a postmortem when the following events occur:
 - **Countermeasure**: Updated amplify.yml to run `npm ci` at root first, then in frontend
 - **Lesson**: In monorepo (npm workspaces), always install root dependencies before workspace dependencies
 
+### 2025-12-16: Amplify Next.js 15 Deployment Issues
+- **Cause**: Multiple issues from Next.js 15 upgrade and dynamic routes implementation
+- **Errors**: Named export mismatch, missing generateStaticParams, platform type confusion
+- **Countermeasure**: Reverted to static export with generateStaticParams() for dynamic routes
+- **Lesson**: Prefer simpler solutions (static export) over complex ones (SSR) when they meet requirements. Test locally before production deployment.
+
 Details: Refer to `docs/postmortem/` directory

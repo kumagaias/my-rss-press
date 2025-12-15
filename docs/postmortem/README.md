@@ -24,6 +24,8 @@ Each postmortem follows a standardized format:
 
 | Date | Title | Severity | Status |
 |------|-------|----------|--------|
+| 2025-12-16 | [Amplify Next.js 15 Deployment Issues](2025-12-16-amplify-nextjs15-deployment.md) | High | Resolved |
+| 2025-12-11 | [Amplify Build Failure in Monorepo Structure](2025-12-11-amplify-monorepo-build.md) | High | Resolved |
 | 2025-12-02 | [Terraform tfplan file committed with sensitive data](2025-12-02-tfplan-leak.md) | High | Resolved |
 
 ## Guidelines

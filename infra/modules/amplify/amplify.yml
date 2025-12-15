@@ -4,7 +4,11 @@ frontend:
     preBuild:
       commands:
         - cd frontend
-        - npm ci
+        - nvm use 24
+        - node --version
+        - npm --version
+        - rm -rf node_modules package-lock.json
+        - npm install
     build:
       commands:
         - npm run build
@@ -15,5 +19,4 @@ frontend:
     files:
       - '**/*'
   cache:
-    paths:
-      - frontend/node_modules/**/*
+    paths: []

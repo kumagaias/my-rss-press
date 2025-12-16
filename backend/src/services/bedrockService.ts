@@ -279,11 +279,11 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 - 「${theme}」専門のメディア、ブログ、サイトを優先
 - 一般ニュースサイトは避ける
 - URL形式: /rss, /feed, /rss.xml, /feed.xml, /index.xml
-- 完全なJSON形式で返す
 
-JSON形式：
+重要: JSONのみを返してください。説明文や前置きは不要です。
+
 {
-  "newspaperName": "${theme}に関する新聞名（例：${theme}タイムズ）",
+  "newspaperName": "${theme}に関する新聞名",
   "feeds": [
     {
       "url": "https://example.jp/feed",
@@ -301,11 +301,11 @@ Requirements:
 - Avoid general news sites
 - URL format: /rss, /feed, /rss.xml, /feed.xml, /index.xml
 - ALL text in English (titles, reasoning)
-- Complete JSON format
 
-JSON format:
+IMPORTANT: Return ONLY JSON. No explanations or preamble.
+
 {
-  "newspaperName": "Newspaper name about ${theme} (e.g., The ${theme} Times)",
+  "newspaperName": "Newspaper name about ${theme}",
   "feeds": [
     {
       "url": "https://example.com/feed",

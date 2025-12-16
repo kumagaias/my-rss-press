@@ -53,7 +53,10 @@ describe('Home Page', () => {
       { url: 'https://example.com/community-feed', title: 'Tech Community Feed', reasoning: 'Community discussions' },
     ];
 
-    (api.suggestFeeds as any).mockResolvedValueOnce(mockSuggestions);
+    (api.suggestFeeds as any).mockResolvedValueOnce({
+      suggestions: mockSuggestions,
+      newspaperName: 'Technology Daily',
+    });
 
     render(<Home />);
 
@@ -87,7 +90,10 @@ describe('Home Page', () => {
       },
     ];
 
-    (api.suggestFeeds as any).mockResolvedValueOnce(mockSuggestions);
+    (api.suggestFeeds as any).mockResolvedValueOnce({
+      suggestions: mockSuggestions,
+      newspaperName: 'Technology Daily',
+    });
     (api.generateNewspaper as any).mockResolvedValueOnce({
       articles: mockArticles,
       languages: ['EN'],

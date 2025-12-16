@@ -250,9 +250,9 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.error('[Bedrock] Error message:', error.message);
       console.error('[Bedrock] Error stack:', error.stack);
     }
-    // Fallback to 1 random default feed on error
-    console.log('[Fallback] Using 1 random default feed due to Bedrock error');
-    return getDefaultFeedSuggestions(theme, locale);
+    // Throw error to trigger retry logic in the endpoint
+    // The endpoint will handle fallback to all default feeds after retries
+    throw new Error('Bedrock API error');
   }
 }
 

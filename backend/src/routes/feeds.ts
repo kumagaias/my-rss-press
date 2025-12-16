@@ -43,16 +43,20 @@ feedsRouter.post(
         } catch (error) {
           lastError = error instanceof Error ? error : new Error('Unknown error');
           
-          // If this is not the last attempt and error is "No valid feeds found", retry
-          if (attempt < maxRetries && lastError.message.includes('No valid feeds found')) {
+          // Retry on "No valid feeds found" or "Bedrock API error"
+          const shouldRetry = lastError.message.includes('No valid feeds found') || 
+                             lastError.message.includes('Bedrock API error');
+          
+          // If this is not the last attempt and error is retryable, retry
+          if (attempt < maxRetries && shouldRetry) {
             console.log(`[Feed Suggestion] Attempt ${attempt} failed: ${lastError.message}, retrying...`);
             // Wait a bit before retrying (exponential backoff)
             await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
             continue;
           }
           
-          // If it's the last attempt or a different error, break and fall through to default feeds
-          if (attempt === maxRetries && lastError.message.includes('No valid feeds found')) {
+          // If it's the last attempt and error is retryable, break and fall through to default feeds
+          if (attempt === maxRetries && shouldRetry) {
             console.log(`[Feed Suggestion] All ${maxRetries} attempts failed, falling back to default feeds`);
             break;
           }

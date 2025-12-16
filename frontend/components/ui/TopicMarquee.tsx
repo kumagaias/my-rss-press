@@ -12,8 +12,17 @@ export function TopicMarquee({ keywords, onKeywordClick }: TopicMarqueeProps) {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [dragDistance, setDragDistance] = useState(0);
 
-  // Duplicate keywords for seamless loop
-  const duplicatedKeywords = [...keywords, ...keywords];
+  // Shuffle keywords and duplicate for seamless loop
+  const [shuffledKeywords] = useState(() => {
+    const shuffled = [...keywords];
+    // Fisher-Yates shuffle
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  });
+  const duplicatedKeywords = [...shuffledKeywords, ...shuffledKeywords];
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!containerRef.current) return;

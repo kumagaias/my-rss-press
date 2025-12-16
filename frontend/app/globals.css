@@ -33,7 +33,7 @@
   }
   
   .animate-marquee-slow {
-    animation: marquee-slow 60s linear infinite;
+    animation: marquee-slow 30s linear infinite;
   }
   
   .animate-marquee-slow:hover {

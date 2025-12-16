@@ -1,1224 +1,1087 @@
-# タスク一覧 Phase-2
+# Task List - Phase 2
 
-## 概要
+## Overview
 
-Phase-2 の実装タスクを定義します。既存機能を壊さずに段階的にリリースできるよう、タスクを順序立てて整理しています。
+This document defines implementation tasks for Phase 2. Tasks are organized sequentially to enable gradual releases without breaking existing functionality.
 
-## 実装の原則
+## Implementation Principles
 
-1. **段階的リリース**: 各タスクは独立してデプロイ可能
-2. **後方互換性**: 既存機能を壊さない
-3. **テスト駆動**: 各タスクにテストを含める
-4. **ドキュメント更新**: 実装に合わせてドキュメントを更新
+1. **Gradual Release**: Each task can be deployed independently
+2. **Backward Compatibility**: Don't break existing features
+3. **Test-Driven**: Include tests with each task
+4. **Documentation Updates**: Update documentation alongside implementation
 
-## タスクの優先順位
+## Task Priorities
 
-**優先度 1 (高)**: データベーススキーマ拡張、言語検出、過去の新聞
-**優先度 2 (中)**: 要約生成、画像強化、ローディングアニメーション
-**優先度 3 (低)**: 言語フィルター、検索機能
-
----
-
-## Phase 1: データベースとバックエンド基盤 (優先度 1)
-
-### タスク 1.1: DynamoDB スキーマ拡張
-
-**目的**: 新機能をサポートするためにデータベーススキーマを拡張
-
-**実装内容**:
-- Newspaper モデルに新しいフィールドを追加
-  - `languages?: string[]` - 言語タグ（オプショナル）
-  - `summary?: string` - AI 生成要約
-  - `newspaperDate?: string` - 新聞の日付 (YYYY-MM-DD)
-  - `articles?: Article[]` - 記事データ（過去の新聞用）
-- TypeScript 型定義を更新
-- 既存の新聞（`languages` なし）の後方互換性を確保
-
-**受け入れ基準**:
-- [x] `backend/src/models/newspaper.ts` に新しいフィールドが追加されている
-- [x] `languages` フィールドがオプショナル (`?`) になっている
-- [x] 型定義が正しく更新されている
-- [x] 既存のコードがコンパイルエラーなく動作する
-- [x] 既存の新聞を取得する際、`languages` がない場合は空配列 `[]` をデフォルトにする
-- [x] `make test` が成功する
-
-_要件: 1.6, 1.7, 8.1, 8.2, 8.3_
-
-
-### タスク 1.2: 言語検出サービスの実装
-
-**目的**: RSS フィードと記事内容から言語を自動検出
-
-**実装内容**:
-- `backend/src/services/languageDetectionService.ts` を作成
-- RSS フィードの `<language>` フィールドをチェック
-- フォールバック: 文字ベースの検出（日本語文字 > 10% = JP、それ以外 = EN）
-- タイトル + description の最初の 50 文字を使用
-- ユニットテストを追加
-
-**受け入れ基準**:
-- [x] `languageDetectionService.ts` が作成されている
-- [x] `detectLanguage(text: string): 'JP' | 'EN'` 関数が実装されている
-- [x] `detectLanguages(articles: Article[], feedLanguages: Map<string, string>): Promise<string[]>` 関数が実装されている
-- [x] RSS の `<language>` フィールドを優先的にチェックしている
-- [x] 日本語文字（ひらがな、カタカナ、漢字）を正しくカウントしている
-- [x] ユニットテストが 60% 以上のカバレッジを達成している (100% 達成)
-- [x] `make test` が成功する
-
-_要件: 1.1, 1.2, 1.3, 1.4_
-
-
-### タスク 1.3: 新聞保存時の言語検出統合
-
-**目的**: 新聞保存時に自動的に言語を検出して保存
-
-**実装内容**:
-- `newspaperService.ts` の `createNewspaper` 関数を更新
-- 記事から言語を検出
-- `languages` フィールドに保存
-- 既存の新聞作成フローを壊さない
-
-**受け入れ基準**:
-- [x] `createNewspaper` 関数が言語検出を呼び出している (generate-newspaper エンドポイントで実装)
-- [x] 検出された言語が DynamoDB に保存されている
-- [x] 言語検出が失敗しても新聞作成が続行される（空配列をデフォルト）
-- [x] 既存の新聞作成フローが正常に動作する
-- [x] 統合テストが追加されている (既存テストで確認済み)
-- [x] `make test` が成功する
-
-_要件: 1.5_
-
-
-### タスク 1.4: 過去の新聞サービスの実装
-
-**目的**: 日付ベースの新聞生成と取得機能を実装
-
-**実装内容**:
-- `backend/src/services/historicalNewspaperService.ts` を作成
-- 日付検証ロジック（未来の日付拒否、7日間ウィンドウ）
-- 日付ベースの記事取得（JST タイムゾーン使用）
-- 既存の新聞取得とキャッシング
-- ユニットテストを追加
-
-**受け入れ基準**:
-- [x] `historicalNewspaperService.ts` が作成されている
-- [x] `validateDate(date: string): { valid: boolean; error?: string }` 関数が実装されている
-- [x] `getOrCreateNewspaper(newspaperId, date, feedUrls, theme)` 関数が実装されている
-- [x] `fetchArticlesForDate(feedUrls, date)` 関数が実装されている
-- [x] すべての日付操作が JST (Asia/Tokyo) で処理されている
-- [x] 未来の日付を拒否する
-- [x] 7日より古い日付を拒否する
-- [x] 既存の新聞をキャッシュから取得する
-- [x] ユニットテストが追加されている
-- [x] `make test` が成功する
-
-_要件: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
-
-
-### タスク 1.5: 過去の新聞 API エンドポイントの追加
-
-**目的**: 日付ベースの新聞取得 API を追加
-
-**実装内容**:
-- `GET /api/newspapers/:newspaperId/:date` エンドポイントを追加
-- `GET /api/newspapers/:newspaperId/dates` エンドポイントを追加
-- エラーハンドリング（未来の日付、古すぎる日付、無効な日付形式）
-- 統合テストを追加
-
-**受け入れ基準**:
-- [x] `GET /api/newspapers/:newspaperId/:date` エンドポイントが実装されている
-- [x] `GET /api/newspapers/:newspaperId/dates` エンドポイントが実装されている
-- [x] 日付検証エラーが適切な HTTP ステータスコードで返される
-- [x] エラーメッセージが英語で記述されている
-- [x] 統合テストが追加されている (既存テストで確認済み)
-- [x] `make test` が成功する
-- [ ] ローカルで動作確認ができる
-- [ ] **本番環境で動作確認** (バグあり: DynamoDB undefined値エラー)
-
-**既知の問題**:
-- DynamoDB保存時に`undefined`値が含まれエラーが発生
-- エラー: `Pass options.removeUndefinedValues=true to remove undefined values`
-- 修正が必要
-
-_要件: 4.1, 4.6, 4.7, 12.3, 12.4, 12.5_
-
-
-### タスク 1.6: クリーンアップサービスの実装
-
-**目的**: 7日より古い過去の新聞を自動削除
-
-**実装内容**:
-- `backend/src/services/cleanupService.ts` を作成
-- 7日より古い新聞をクエリ
-- バッチ削除（25件ずつ）
-- Lambda 関数ハンドラーを作成
-- ユニットテストを追加
-
-**受け入れ基準**:
-- [x] `cleanupService.ts` が作成されている
-- [x] `cleanupOldNewspapers(): Promise<{ deletedCount: number }>` 関数が実装されている
-- [x] 7日より古い新聞を正しくクエリしている
-- [x] バッチ削除が実装されている（25件ずつ）
-- [x] 削除件数をログに記録している
-- [x] Lambda 関数ハンドラーが作成されている (cleanupService.ts に実装済み)
-- [x] ユニットテストが追加されている (cleanupService.test.ts で確認済み)
-- [x] `make test` が成功する
-
-_要件: 10.1, 10.3, 10.4_
-
-
-### タスク 1.7: EventBridge スケジュールの設定
-
-**目的**: クリーンアップ Lambda を毎日 3 AM JST に実行
-
-**実装内容**:
-- Terraform で EventBridge ルールを作成
-- cron 式: `cron(0 18 * * ? *)` (3 AM JST = 6 PM UTC 前日)
-- Lambda 関数との統合
-- CloudWatch Logs の設定
-
-**受け入れ基準**:
-- [x] `infra/modules/eventbridge/main.tf` が作成されている
-- [x] EventBridge ルールが正しい cron 式で設定されている
-- [x] Lambda 関数がトリガーされる設定になっている
-- [x] CloudWatch Logs が有効になっている (Lambda のデフォルト設定で有効)
-- [ ] `terraform plan` が成功する (デプロイ時に確認)
-- [ ] `terraform apply` が成功する (デプロイ時に確認)
-- [ ] 手動でトリガーして動作確認ができる (デプロイ後に確認)
-
-_要件: 10.2_
+**Priority 1 (High)**: Database schema extension, language detection, historical newspapers
+**Priority 2 (Medium)**: Summary generation, image enhancement, loading animations
+**Priority 3 (Low)**: Language filter, search functionality
 
 ---
 
-## Phase 2: AI 機能とユーザー体験の向上 (優先度 2)
+## Phase 1: Database and Backend Foundation (Priority 1)
 
-### タスク 2.1: 要約生成サービスの実装
+### Task 1.1: Extend DynamoDB Schema
 
-**目的**: Bedrock を使用して新聞の要約を生成
+**Purpose**: Extend database schema to support new features
 
-**実装内容**:
-- `backend/src/services/summaryGenerationService.ts` を作成
-- Bedrock (Claude 3 Haiku) を使用
-- 新聞の言語属性に基づいて要約の言語を決定
-- タイムアウト: 10 秒
-- リトライロジック（最大 3 回、指数バックオフ）
-- ユニットテストを追加（モック使用）
+**Implementation**:
+- Add new fields to Newspaper model
+  - `languages?: string[]` - Language tags (optional)
+  - `summary?: string` - AI-generated summary
+  - `newspaperDate?: string` - Newspaper date (YYYY-MM-DD)
+  - `articles?: Article[]` - Article data (for historical newspapers)
+- Update TypeScript type definitions
+- Ensure backward compatibility for existing newspapers (without `languages`)
 
-**受け入れ基準**:
-- [x] `summaryGenerationService.ts` が作成されている
-- [x] `generateSummary(articles, theme, languages): Promise<string>` 関数が実装されている
-- [x] `determineSummaryLanguage(languages): string` 関数が実装されている（将来の拡張を考慮）
-- [x] 要約が 3 行（100-200 文字）で生成される
-- [x] タイムアウトが 10 秒に設定されている
-- [x] リトライロジックが実装されている
-- [x] Bedrock API 失敗時に null を返す
-- [x] ユニットテストが追加されている（モック使用）
-- [x] `make test` が成功する (67% カバレッジ達成)
+**Acceptance Criteria**:
+- [x] New fields added to `backend/src/models/newspaper.ts`
+- [x] `languages` field is optional (`?`)
+- [x] Type definitions correctly updated
+- [x] Existing code compiles without errors
+- [x] When retrieving existing newspapers, default to empty array `[]` if `languages` is missing
+- [x] `make test` succeeds
 
-_要件: 7.1, 7.2, 12.2_
+_Requirements: 1.6, 1.7, 8.1, 8.2, 8.3_
 
+### Task 1.2: Implement Language Detection Service
 
-### タスク 2.2: 新聞保存時の要約生成統合
+**Purpose**: Automatically detect language from RSS feeds and article content
 
-**目的**: 新聞保存時に自動的に要約を生成して保存
+**Implementation**:
+- Create `backend/src/services/languageDetectionService.ts`
+- Check RSS feed `<language>` field
+- Fallback: Character-based detection (Japanese characters > 10% = JP, otherwise EN)
+- Use title + first 50 characters of description
+- Add unit tests
 
-**実装内容**:
-- `newspaperService.ts` の `createNewspaper` 関数を更新
-- 要約生成サービスを呼び出し
-- `summary` フィールドに保存
-- 要約生成失敗時も新聞作成を続行
-- 統合テストを追加
+**Acceptance Criteria**:
+- [x] `languageDetectionService.ts` created
+- [x] `detectLanguage(text: string): 'JP' | 'EN'` function implemented
+- [x] `detectLanguages(articles: Article[], feedLanguages: Map<string, string>): Promise<string[]>` function implemented
+- [x] RSS `<language>` field checked with priority
+- [x] Japanese characters (hiragana, katakana, kanji) correctly counted
+- [x] Unit tests achieve 60% or higher coverage (100% achieved)
+- [x] `make test` succeeds
 
-**受け入れ基準**:
-- [x] `createNewspaper` 関数が要約生成を呼び出している (generate-newspaper エンドポイントで実装)
-- [x] 生成された要約が DynamoDB に保存されている
-- [x] 要約生成が失敗しても新聞作成が続行される（summary = null）
-- [x] 既存の新聞作成フローが正常に動作する
-- [x] 統合テストが追加されている (既存テストで確認済み)
-- [x] `make test` が成功する
+_Requirements: 1.1, 1.2, 1.3, 1.4_
 
-_要件: 7.4, 12.2_
+### Task 1.3: Integrate Language Detection on Newspaper Save
 
-### タスク 2.3: 著作権フリー画像サービスの実装
+**Purpose**: Automatically detect and save language when creating newspapers
 
-**目的**: 記事に画像がない場合のプレースホルダー画像を提供
+**Implementation**:
+- Update `createNewspaper` function in `newspaperService.ts`
+- Detect languages from articles
+- Save to `languages` field
+- Don't break existing newspaper creation flow
 
-**実装内容**:
-- `frontend/components/ui/CopyrightFreeImage.tsx` を作成
-- Unsplash Source API を使用
-- フォールバック: ローカルプレースホルダー画像
-- エラーハンドリング
+**Acceptance Criteria**:
+- [x] `createNewspaper` function calls language detection (implemented in generate-newspaper endpoint)
+- [x] Detected languages saved to DynamoDB
+- [x] Newspaper creation continues even if language detection fails (defaults to empty array)
+- [x] Existing newspaper creation flow works normally
+- [x] Integration tests added (verified with existing tests)
+- [x] `make test` succeeds
 
-**受け入れ基準**:
-- [x] `CopyrightFreeImage.tsx` コンポーネントが作成されている
-- [x] Unsplash Source API を使用している
-- [x] テーマに基づいて画像を取得している
-- [x] 画像読み込み失敗時にローカルプレースホルダーにフォールバックする
-- [x] コンポーネントのユニットテストが追加されている
-- [x] `make test` が成功する
+_Requirements: 1.5_
 
-_要件: 6.3, 6.4_
+### Task 1.4: Implement Historical Newspaper Service
 
+**Purpose**: Implement date-based newspaper generation and retrieval
 
-### タスク 2.4: メインエリアの画像保証機能の実装
+**Implementation**:
+- Create `backend/src/services/historicalNewspaperService.ts`
+- Date validation logic (reject future dates, 7-day window)
+- Date-based article fetching (use JST timezone)
+- Existing newspaper retrieval and caching
+- Add unit tests
 
-**目的**: リード記事に常に画像を表示
+**Acceptance Criteria**:
+- [x] `historicalNewspaperService.ts` created
+- [x] `validateDate(date: string): { valid: boolean; error?: string }` function implemented
+- [x] `getOrCreateNewspaper(newspaperId, date, feedUrls, theme)` function implemented
+- [x] `fetchArticlesForDate(feedUrls, date)` function implemented
+- [x] All date operations processed in JST (Asia/Tokyo)
+- [x] Future dates rejected
+- [x] Dates older than 7 days rejected
+- [x] Existing newspapers retrieved from cache
+- [x] Unit tests added
+- [x] `make test` succeeds
 
-**実装内容**:
-- `NewspaperLayout.tsx` を更新
-- リード記事に元画像がない場合、著作権フリー画像を表示
-- レイアウトの調整
+_Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
 
-**受け入れ基準**:
-- [x] リード記事に常に画像が表示される
-- [x] 元画像がある場合はそれを使用する
-- [x] 元画像がない場合は `CopyrightFreeImage` コンポーネントを使用する
-- [x] 画像のサイズがレイアウトに適切である
-- [x] コンポーネントのユニットテストが追加されている (既存テストで確認済み)
-- [x] `make test` が成功する
-- [ ] ブラウザで動作確認ができる (デプロイ後に確認)
+### Task 1.5: Add Historical Newspaper API Endpoints
 
-_要件: 6.1, 6.2, 6.3, 6.5_
+**Purpose**: Add date-based newspaper retrieval API
 
-### タスク 2.5: ローディングアニメーションの実装
+**Implementation**:
+- Add `GET /api/newspapers/:newspaperId/:date` endpoint
+- Add `GET /api/newspapers/:newspaperId/dates` endpoint
+- Error handling (future date, too old date, invalid date format)
+- Add integration tests
 
-**目的**: 新聞生成中にローディングアニメーションを表示
+**Acceptance Criteria**:
+- [x] `GET /api/newspapers/:newspaperId/:date` endpoint implemented
+- [x] `GET /api/newspapers/:newspaperId/dates` endpoint implemented
+- [x] Date validation errors returned with appropriate HTTP status codes
+- [x] Error messages written in English
+- [x] Integration tests added (verified with existing tests)
+- [x] `make test` succeeds
+- [ ] Local verification works
+- [ ] **Production verification** (Bug: DynamoDB undefined value error)
 
-**実装内容**:
-- `frontend/components/ui/LoadingAnimation.tsx` を作成
-- フィード提案と同じスタイルのアニメーション
-- 新聞生成フローに統合
+**Known Issues**:
+- DynamoDB save fails with `undefined` values
+- Error: `Pass options.removeUndefinedValues=true to remove undefined values`
+- Fix needed
 
-**受け入れ基準**:
-- [x] `LoadingAnimation.tsx` コンポーネントが作成されている
-- [x] フィード提案と同じアニメーションスタイルを使用している
-- [x] 新聞生成開始時にアニメーションが表示される
-- [x] 新聞生成完了時にアニメーションが非表示になる
-- [x] 生成失敗時にアニメーションが非表示になる
-- [x] コンポーネントのユニットテストが追加されている
-- [x] `make test` が成功する
-- [ ] ブラウザで動作確認ができる (デプロイ後に確認)
-
-_要件: 5.1, 5.2, 5.3, 5.4_
-
-
----
-
-## Phase 3: フロントエンド機能の追加 (優先度 3)
-
-### タスク 3.1: 新聞ページへの要約表示
-
-**目的**: 新聞ページのメインエリア上部に要約を表示
-
-**実装内容**:
-- `NewspaperLayout.tsx` を更新
-- 要約をメインエリアの上に配置
-- スタイリング（新聞風デザイン）
-
-**受け入れ基準**:
-- [x] 要約がメインエリアの上に表示される
-- [x] 要約がない場合は何も表示しない
-- [x] 新聞風のスタイリングが適用されている
-- [x] コンポーネントのユニットテストが追加されている
-- [x] `make test` が成功する
-- [ ] ブラウザで動作確認ができる (デプロイ後に確認)
-
-_要件: 7.3, 7.6_
-
-### タスク 3.2: 日付ナビゲーションコンポーネントの実装
-
-**目的**: 過去の新聞を日付で閲覧できるナビゲーション
-
-**実装内容**:
-- `frontend/components/features/newspaper/DateNavigation.tsx` を作成
-- 前日/翌日ボタン
-- 日付表示
-- 日付検証（未来の日付、7日より古い日付）
-
-**受け入れ基準**:
-- [x] `DateNavigation.tsx` コンポーネントが作成されている
-- [x] 前日/翌日ボタンが実装されている
-- [x] 現在の日付が表示されている
-- [x] 未来の日付への移動を防ぐ
-- [x] 7日より古い日付への移動を防ぐ
-- [x] コンポーネントのユニットテストが追加されている (既存テストで確認済み)
-- [x] `make test` が成功する (テストのインポート方法を修正する必要あり)
-
-_要件: 4.1, 4.6, 4.7, 4.8_
+_Requirements: 4.1, 4.6, 4.7, 12.3, 12.4, 12.5_
 
 
-### タスク 3.3: 日付ベース URL ルーティングの実装
+### Task 1.6: Implement Cleanup Service
 
-**目的**: `/newspapers/[id]/[date]` 形式の URL をサポート
+**Purpose**: Automatically delete newspapers older than 7 days
 
-**実装内容**:
-- Next.js の動的ルーティングを使用
-- `app/newspapers/[id]/[date]/page.tsx` を作成
-- API 呼び出しとエラーハンドリング
+**Implementation**:
+- Create `backend/src/services/cleanupService.ts`
+- Query newspapers older than 7 days
+- Batch deletion (25 at a time)
+- Create Lambda function handler
+- Add unit tests
 
-**受け入れ基準**:
-- [x] `/newspapers/[id]/[date]` ルートが作成されている
-- [x] 日付パラメータを正しく解析している
-- [x] API エンドポイントを呼び出している
-- [x] エラーメッセージを適切に表示している（未来の日付、古すぎる日付）
-- [x] ローディング状態を表示している
-- [x] ユニットテストが追加されている
-- [x] `make test` が成功する
-- [ ] ブラウザで動作確認ができる (デプロイ後に確認)
+**Acceptance Criteria**:
+- [x] `cleanupService.ts` created
+- [x] `cleanupOldNewspapers(): Promise<{ deletedCount: number }>` function implemented
+- [x] Correctly queries newspapers older than 7 days
+- [x] Batch deletion implemented (25 at a time)
+- [x] Deletion count logged
+- [x] Lambda function handler created (implemented in cleanupService.ts)
+- [x] Unit tests added (verified with cleanupService.test.ts)
+- [x] `make test` succeeds
 
-_要件: 4.1, 12.3, 12.4, 12.5_
+_Requirements: 10.1, 10.3, 10.4_
 
-### タスク 3.4: 言語フィルターコンポーネントの実装
+### Task 1.7: Configure EventBridge Schedule
 
-**目的**: 人気の新聞と最近の新聞を言語でフィルタリング
+**Purpose**: Execute cleanup Lambda daily at 3 AM JST
 
-**実装内容**:
-- `frontend/components/features/home/LanguageFilter.tsx` を作成
-- JP/EN 選択ボタン
-- デフォルト選択（UI ロケールに基づく）
-- フロントエンドでのフィルタリングロジック
-- 既存の新聞（`languages` なし）の後方互換性を確保
+**Implementation**:
+- Create EventBridge rule with Terraform
+- Cron expression: `cron(0 18 * * ? *)` (3 AM JST = 6 PM UTC previous day)
+- Integrate with Lambda function
+- Configure CloudWatch Logs
 
-**受け入れ基準**:
-- [x] `LanguageFilter.tsx` コンポーネントが作成されている
-- [x] JP/EN/ALL 選択ボタンが実装されている
-- [x] UI ロケールに基づいてデフォルト選択が可能
-- [x] 選択された言語に基づいて新聞がフィルタリングされる（親コンポーネントで実装）
-- [x] `languages` フィールドがない新聞（既存の新聞）はすべての言語フィルターで表示される（親コンポーネントで実装）
-- [x] `languages` が空配列 `[]` の新聞もすべての言語フィルターで表示される（親コンポーネントで実装）
-- [x] コンポーネントのユニットテストが追加されている
-- [x] `make test` が成功する
+**Acceptance Criteria**:
+- [x] `infra/modules/eventbridge/main.tf` created
+- [x] EventBridge rule configured with correct cron expression
+- [x] Lambda function trigger configured
+- [x] CloudWatch Logs enabled (enabled by Lambda default settings)
+- [ ] `terraform plan` succeeds (verify during deployment)
+- [ ] `terraform apply` succeeds (verify during deployment)
+- [ ] Manual trigger verification works (verify after deployment)
 
-_要件: 1.6, 1.7, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
-
-
-### タスク 3.5: フリーワード検索コンポーネントの実装
-
-**目的**: 新聞タイトルとフィード URL でキーワード検索
-
-**実装内容**:
-- `frontend/components/features/home/SearchInput.tsx` を作成
-- リアルタイムフィルタリング
-- 検索結果なしメッセージ
-
-**受け入れ基準**:
-- [x] `SearchInput.tsx` コンポーネントが作成されている
-- [x] 検索入力フィールドが実装されている
-- [x] リアルタイムで新聞がフィルタリングされる（親コンポーネントで実装）
-- [x] 新聞タイトルとフィード URL の両方を検索している（親コンポーネントで実装）
-- [x] 検索結果がない場合、適切なメッセージを表示する（親コンポーネントで実装）
-- [x] コンポーネントのユニットテストが追加されている
-- [x] `make test` が成功する
-- [ ] ブラウザで動作確認ができる（Task 3.6で統合後に確認）
-
-_要件: 3.1, 3.2, 3.3, 3.4, 3.5_
-
-### タスク 3.6: ホーム画面への統合
-
-**目的**: 言語フィルターと検索機能をホーム画面に統合
-
-**実装内容**:
-- `PopularNewspapers.tsx` を更新
-- 言語フィルターと検索入力を追加
-- フィルタリングロジックの統合
-
-**受け入れ基準**:
-- [x] 言語フィルターがホーム画面に表示される
-- [x] 検索入力がホーム画面に表示される
-- [x] 言語フィルターと検索が連携して動作する
-- [x] 既存の機能（フィード提案、人気の新聞）が正常に動作する
-- [x] コンポーネントのユニットテストが追加されている
-- [x] `make test` が成功する
-- [ ] ブラウザで動作確認ができる (デプロイ後に確認)
-
-_要件: 2.1, 3.1_
-
+_Requirements: 10.2_
 
 ---
 
-## Phase 4: テストとドキュメント (優先度 1)
+## Phase 2: AI Features and User Experience Enhancement (Priority 2)
 
-### タスク 4.1: プロパティベーステストの実装
+### Task 2.1: Implement Summary Generation Service
 
-**目的**: 正確性プロパティを検証するテストを追加
+**Purpose**: Generate newspaper summaries using Bedrock
 
-**実装内容**:
-- `fast-check` を使用したプロパティベーステスト
-- 設計書の正確性プロパティ 1-18 をテスト
-- 各テストは最低 100 回の反復を実行
+**Implementation**:
+- Create `backend/src/services/summaryGenerationService.ts`
+- Use Bedrock (Claude 3 Haiku)
+- Determine summary language based on newspaper language attributes
+- Timeout: 10 seconds
+- Retry logic (max 3 times, exponential backoff)
+- Add unit tests (using mocks)
 
-**受け入れ基準**:
-- [ ] `fast-check` がインストールされている
-- [ ] 言語検出のプロパティテストが実装されている（プロパティ 1, 2, 3）
-- [ ] 言語フィルタリングのプロパティテストが実装されている（プロパティ 4, 5）
-- [ ] 検索フィルタリングのプロパティテストが実装されている（プロパティ 6）
-- [ ] 日付検証のプロパティテストが実装されている（プロパティ 7, 8）
-- [ ] 過去の新聞キャッシングのプロパティテストが実装されている（プロパティ 9）
-- [ ] 日付ベース記事フィルタリングのプロパティテストが実装されている（プロパティ 10）
-- [ ] 要約生成のプロパティテストが実装されている（プロパティ 11, 12）
-- [ ] 画像存在のプロパティテストが実装されている（プロパティ 13）
-- [ ] クリーンアップロジックのプロパティテストが実装されている（プロパティ 14）
-- [ ] データ永続性のプロパティテストが実装されている（プロパティ 15, 16, 17）
-- [ ] ローディングアニメーションのプロパティテストが実装されている（プロパティ 18）
-- [ ] 各テストが設計書のプロパティを明示的に参照している
-- [ ] `make test` が成功する
+**Acceptance Criteria**:
+- [x] `summaryGenerationService.ts` created
+- [x] `generateSummary(articles, theme, languages): Promise<string>` function implemented
+- [x] `determineSummaryLanguage(languages): string` function implemented (considering future expansion)
+- [x] Summary generated in 3 lines (100-200 characters)
+- [x] Timeout set to 10 seconds
+- [x] Retry logic implemented
+- [x] Returns null on Bedrock API failure
+- [x] Unit tests added (using mocks)
+- [x] `make test` succeeds (67% coverage achieved)
 
-_要件: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7_
+_Requirements: 7.1, 7.2, 12.2_
 
+### Task 2.2: Integrate Summary Generation on Newspaper Save
 
-### タスク 4.2: E2E テストの実装
+**Purpose**: Automatically generate and save summary when creating newspapers
 
-**目的**: 新機能の E2E テストを追加
+**Implementation**:
+- Update `createNewspaper` function in `newspaperService.ts`
+- Call summary generation service
+- Save to `summary` field
+- Continue newspaper creation even if summary generation fails
+- Add integration tests
 
-**実装内容**:
-- Playwright を使用した E2E テスト
-- 言語フィルター、検索、日付ナビゲーション、要約表示のテスト
-- Page Object Model パターンを使用
+**Acceptance Criteria**:
+- [x] `createNewspaper` function calls summary generation (implemented in generate-newspaper endpoint)
+- [x] Generated summary saved to DynamoDB
+- [x] Newspaper creation continues even if summary generation fails (summary = null)
+- [x] Existing newspaper creation flow works normally
+- [x] Integration tests added (verified with existing tests)
+- [x] `make test` succeeds
 
-**受け入れ基準**:
-- [ ] 言語フィルター選択と新聞フィルタリングの E2E テストが実装されている
-- [ ] フリーワード検索機能の E2E テストが実装されている
-- [ ] 日付ナビゲーション（前日/翌日）の E2E テストが実装されている
-- [ ] 初回アクセス時の過去の新聞生成の E2E テストが実装されている
-- [ ] 2回目アクセス時の過去の新聞取得の E2E テストが実装されている
-- [ ] 未来の日付の拒否の E2E テストが実装されている
-- [ ] 古い日付（> 7日）の拒否の E2E テストが実装されている
-- [ ] 生成中のローディングアニメーション表示の E2E テストが実装されている
-- [ ] 新聞内の要約表示の E2E テストが実装されている
-- [ ] 著作権フリー画像のフォールバックの E2E テストが実装されている
-- [ ] Page Object Model パターンを使用している
-- [ ] `npm run test:e2e` が成功する
+_Requirements: 7.4, 12.2_
 
-_要件: 11.2, 11.4_
+### Task 2.3: Implement Copyright-Free Image Service
 
-### タスク 4.3: ドキュメントの更新
+**Purpose**: Provide placeholder images when articles lack images
 
-**目的**: Phase-2 の実装に合わせてドキュメントを更新
+**Implementation**:
+- Create `frontend/components/ui/CopyrightFreeImage.tsx`
+- Use Unsplash Source API
+- Fallback: Local placeholder image
+- Error handling
 
-**実装内容**:
-- `product.md` の更新（新機能の追加）
-- `tech.md` の更新（技術的な実装詳細）
-- `structure.md` の更新（新しいファイル構造）
+**Acceptance Criteria**:
+- [x] `CopyrightFreeImage.tsx` component created
+- [x] Uses Unsplash Source API
+- [x] Fetches images based on theme
+- [x] Falls back to local placeholder on image load failure
+- [x] Component unit tests added
+- [x] `make test` succeeds
 
-**受け入れ基準**:
-- [ ] `product.md` に Phase-2 の機能が追加されている
-- [ ] `tech.md` に言語検出、要約生成、過去の新聞の実装詳細が追加されている
-- [ ] `structure.md` に新しいファイルとディレクトリが追加されている
-- [ ] 更新履歴セクションに Phase-2 の変更が記録されている
-- [ ] すべてのドキュメントが一貫性を保っている
+_Requirements: 6.3, 6.4_
 
-_要件: すべて_
+### Task 2.4: Implement Main Area Image Guarantee
+
+**Purpose**: Always display image in lead article
+
+**Implementation**:
+- Update `NewspaperLayout.tsx`
+- Display copyright-free image if lead article has no original image
+- Layout adjustments
+
+**Acceptance Criteria**:
+- [x] Lead article always displays an image
+- [x] Uses original image if available
+- [x] Uses `CopyrightFreeImage` component if no original image
+- [x] Image size appropriate for layout
+- [x] Component unit tests added (verified with existing tests)
+- [x] `make test` succeeds
+- [ ] Browser verification works (verify after deployment)
+
+_Requirements: 6.1, 6.2, 6.3, 6.5_
+
+### Task 2.5: Implement Loading Animation
+
+**Purpose**: Display loading animation during newspaper generation
+
+**Implementation**:
+- Create `frontend/components/ui/LoadingAnimation.tsx`
+- Same animation style as feed suggestion
+- Integrate into newspaper generation flow
+
+**Acceptance Criteria**:
+- [x] `LoadingAnimation.tsx` component created
+- [x] Uses same animation style as feed suggestion
+- [x] Animation displays when newspaper generation starts
+- [x] Animation hides when newspaper generation completes
+- [x] Animation hides when generation fails
+- [x] Component unit tests added
+- [x] `make test` succeeds
+- [ ] Browser verification works (verify after deployment)
+
+_Requirements: 5.1, 5.2, 5.3, 5.4_
+
+---
+
+## Phase 3: Frontend Feature Addition (Priority 3)
+
+### Task 3.1: Display Summary on Newspaper Page
+
+**Purpose**: Display summary at top of main area on newspaper page
+
+**Implementation**:
+- Update `NewspaperLayout.tsx`
+- Place summary above main area
+- Styling (newspaper-style design)
+
+**Acceptance Criteria**:
+- [x] Summary displayed at top of main area
+- [x] Nothing displayed if no summary
+- [x] Newspaper-style styling applied
+- [x] Component unit tests added
+- [x] `make test` succeeds
+- [ ] Browser verification works (verify after deployment)
+
+_Requirements: 7.3, 7.6_
+
+### Task 3.2: Implement Date Navigation Component
+
+**Purpose**: Navigation to browse past newspapers by date
+
+**Implementation**:
+- Create `frontend/components/features/newspaper/DateNavigation.tsx`
+- Previous/next day buttons
+- Date display
+- Date validation (future dates, dates older than 7 days)
+
+**Acceptance Criteria**:
+- [x] `DateNavigation.tsx` component created
+- [x] Previous/next day buttons implemented
+- [x] Current date displayed
+- [x] Prevents navigation to future dates
+- [x] Prevents navigation to dates older than 7 days
+- [x] Component unit tests added (verified with existing tests)
+- [x] `make test` succeeds (need to fix test import method)
+
+_Requirements: 4.1, 4.6, 4.7, 4.8_
+
+### Task 3.3: Implement Date-Based URL Routing
+
+**Purpose**: Support `/newspapers/[id]/[date]` format URLs
+
+**Implementation**:
+- Use Next.js dynamic routing
+- Create `app/newspapers/[id]/[date]/page.tsx`
+- API calls and error handling
+
+**Acceptance Criteria**:
+- [x] `/newspapers/[id]/[date]` route created
+- [x] Date parameter correctly parsed
+- [x] API endpoint called
+- [x] Error messages appropriately displayed (future date, too old date)
+- [x] Loading state displayed
+- [x] Unit tests added
+- [x] `make test` succeeds
+- [ ] Browser verification works (verify after deployment)
+
+_Requirements: 4.1, 12.3, 12.4, 12.5_
+
+### Task 3.4: Implement Language Filter Component
+
+**Purpose**: Filter popular and recent newspapers by language
+
+**Implementation**:
+- Create `frontend/components/features/home/LanguageFilter.tsx`
+- JP/EN selection buttons
+- Default selection (based on UI locale)
+- Frontend filtering logic
+- Ensure backward compatibility for existing newspapers (without `languages`)
+
+**Acceptance Criteria**:
+- [x] `LanguageFilter.tsx` component created
+- [x] JP/EN/ALL selection buttons implemented
+- [x] Default selection possible based on UI locale
+- [x] Newspapers filtered based on selected language (implemented in parent component)
+- [x] Newspapers without `languages` field (existing newspapers) displayed in all language filters (implemented in parent component)
+- [x] Newspapers with empty `languages` array `[]` also displayed in all language filters (implemented in parent component)
+- [x] Component unit tests added
+- [x] `make test` succeeds
+
+_Requirements: 1.6, 1.7, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
+
+### Task 3.5: Implement Free-word Search Component
+
+**Purpose**: Keyword search for newspaper titles and feed URLs
+
+**Implementation**:
+- Create `frontend/components/features/home/SearchInput.tsx`
+- Real-time filtering
+- No results message
+
+**Acceptance Criteria**:
+- [x] `SearchInput.tsx` component created
+- [x] Search input field implemented
+- [x] Newspapers filtered in real-time (implemented in parent component)
+- [x] Searches both newspaper titles and feed URLs (implemented in parent component)
+- [x] Displays appropriate message when no search results (implemented in parent component)
+- [x] Component unit tests added
+- [x] `make test` succeeds
+- [ ] Browser verification works (verify after integration in Task 3.6)
+
+_Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+### Task 3.6: Integrate into Home Screen
+
+**Purpose**: Integrate language filter and search functionality into home screen
+
+**Implementation**:
+- Update `PopularNewspapers.tsx`
+- Add language filter and search input
+- Integrate filtering logic
+
+**Acceptance Criteria**:
+- [x] Language filter displayed on home screen
+- [x] Search input displayed on home screen
+- [x] Language filter and search work together
+- [x] Existing features (feed suggestion, popular newspapers) work normally
+- [x] Component unit tests added
+- [x] `make test` succeeds
+- [ ] Browser verification works (verify after deployment)
+
+_Requirements: 2.1, 3.1_
+
+---
+
+## Phase 4: Testing and Documentation (Priority 1)
+
+### Task 4.1: Implement Property-Based Tests
+
+**Purpose**: Add tests to verify correctness properties
+
+**Implementation**:
+- Property-based tests using `fast-check`
+- Test design document correctness properties 1-18
+- Each test runs at least 100 iterations
+
+**Acceptance Criteria**:
+- [ ] `fast-check` installed
+- [ ] Property tests for language detection implemented (Properties 1, 2, 3)
+- [ ] Property tests for language filtering implemented (Properties 4, 5)
+- [ ] Property tests for search filtering implemented (Property 6)
+- [ ] Property tests for date validation implemented (Properties 7, 8)
+- [ ] Property tests for historical newspaper caching implemented (Property 9)
+- [ ] Property tests for date-based article filtering implemented (Property 10)
+- [ ] Property tests for summary generation implemented (Properties 11, 12)
+- [ ] Property tests for image presence implemented (Property 13)
+- [ ] Property tests for cleanup logic implemented (Property 14)
+- [ ] Property tests for data persistence implemented (Properties 15, 16, 17)
+- [ ] Property tests for loading animation implemented (Property 18)
+- [ ] Each test explicitly references design document properties
+- [ ] `make test` succeeds
+
+_Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7_
+
+### Task 4.2: Implement E2E Tests
+
+**Purpose**: Add E2E tests for new features
+
+**Implementation**:
+- E2E tests using Playwright
+- Test language filter, search, date navigation, summary display
+- Use Page Object Model pattern
+
+**Acceptance Criteria**:
+- [ ] E2E test for language filter selection and newspaper filtering implemented
+- [ ] E2E test for free-word search functionality implemented
+- [ ] E2E test for date navigation (previous/next day) implemented
+- [ ] E2E test for historical newspaper generation on first access implemented
+- [ ] E2E test for historical newspaper retrieval on second access implemented
+- [ ] E2E test for future date rejection implemented
+- [ ] E2E test for old date (> 7 days) rejection implemented
+- [ ] E2E test for loading animation display during generation implemented
+- [ ] E2E test for summary display in newspaper implemented
+- [ ] E2E test for copyright-free image fallback implemented
+- [ ] Uses Page Object Model pattern
+- [ ] `npm run test:e2e` succeeds
+
+_Requirements: 11.2, 11.4_
+
+### Task 4.3: Update Documentation
+
+**Purpose**: Update documentation for Phase 2 implementation
+
+**Implementation**:
+- Update `product.md` (add new features)
+- Update `tech.md` (technical implementation details)
+- Update `structure.md` (new file structure)
+
+**Acceptance Criteria**:
+- [ ] Phase 2 features added to `product.md`
+- [ ] Language detection, summary generation, historical newspaper implementation details added to `tech.md`
+- [ ] New files and directories added to `structure.md`
+- [ ] Phase 2 changes recorded in update history section
+- [ ] All documentation maintains consistency
+
+_Requirements: All_
 
 
 ---
 
-## Phase 5: デプロイと検証 (優先度 1)
+## Phase 5: Deployment and Verification (Priority 1)
 
-### タスク 5.1: インフラストラクチャのデプロイ
+### Task 5.1: Deploy Infrastructure
 
-**目的**: Phase-2 のインフラストラクチャ変更をデプロイ
+**Purpose**: Deploy Phase 2 infrastructure changes
 
-**実装内容**:
-- Terraform で EventBridge ルールをデプロイ
-- クリーンアップ Lambda 関数をデプロイ
-- DynamoDB スキーマの変更を確認
+**Implementation**:
+- Deploy EventBridge rule with Terraform
+- Deploy cleanup Lambda function
+- Verify DynamoDB schema changes
 
-**受け入れ基準**:
-- [ ] `terraform plan` が成功する
-- [ ] `terraform apply` が成功する
-- [ ] EventBridge ルールが作成されている
-- [ ] クリーンアップ Lambda 関数がデプロイされている
-- [ ] DynamoDB テーブルが正しく設定されている
-- [ ] CloudWatch Logs が有効になっている
-- [ ] 手動でクリーンアップ Lambda をトリガーして動作確認ができる
+**Acceptance Criteria**:
+- [ ] `terraform plan` succeeds
+- [ ] `terraform apply` succeeds
+- [ ] EventBridge rule created
+- [ ] Cleanup Lambda function deployed
+- [ ] DynamoDB table correctly configured
+- [ ] CloudWatch Logs enabled
+- [ ] Manual cleanup Lambda trigger verification works
 
-_要件: 10.2_
+_Requirements: 10.2_
 
-### タスク 5.2: バックエンドのデプロイ
+### Task 5.2: Deploy Backend
 
-**目的**: Phase-2 のバックエンド変更をデプロイ
+**Purpose**: Deploy Phase 2 backend changes
 
-**実装内容**:
-- GitHub Actions で自動デプロイ
-- Lambda 関数の更新
-- API Gateway の設定確認
+**Implementation**:
+- Automatic deployment via GitHub Actions
+- Update Lambda functions
+- Verify API Gateway configuration
 
-**受け入れ基準**:
-- [ ] `make test` が成功する
-- [ ] GitHub Actions のビルドが成功する
-- [ ] Lambda 関数が更新されている
-- [ ] API エンドポイントが正常に動作する
-- [ ] CloudWatch Logs でエラーがないことを確認する
-- [ ] 本番環境で動作確認ができる
+**Acceptance Criteria**:
+- [ ] `make test` succeeds
+- [ ] GitHub Actions build succeeds
+- [ ] Lambda functions updated
+- [ ] API endpoints work normally
+- [ ] No errors in CloudWatch Logs
+- [ ] Production verification works
 
-_要件: すべて_
+_Requirements: All_
 
+### Task 5.3: Deploy Frontend
 
-### タスク 5.3: フロントエンドのデプロイ
+**Purpose**: Deploy Phase 2 frontend changes
 
-**目的**: Phase-2 のフロントエンド変更をデプロイ
+**Implementation**:
+- Automatic deployment via Amplify
+- Verify environment variable configuration
+- Clear CloudFront cache
 
-**実装内容**:
-- Amplify で自動デプロイ
-- 環境変数の設定確認
-- CloudFront キャッシュのクリア
+**Acceptance Criteria**:
+- [ ] `make test` succeeds
+- [ ] Amplify build succeeds
+- [ ] Frontend updated
+- [ ] All new features work normally
+- [ ] CloudFront cache cleared
+- [ ] Production verification works
 
-**受け入れ基準**:
-- [ ] `make test` が成功する
-- [ ] Amplify のビルドが成功する
-- [ ] フロントエンドが更新されている
-- [ ] すべての新機能が正常に動作する
-- [ ] CloudFront キャッシュがクリアされている
-- [ ] 本番環境で動作確認ができる
+_Requirements: All_
 
-_要件: すべて_
+### Task 5.4: Production Verification
 
-### タスク 5.4: 本番環境での検証
+**Purpose**: Verify Phase 2 features work in production
 
-**目的**: Phase-2 の機能が本番環境で正常に動作することを確認
+**Implementation**:
+- Verify language detection operation
+- Verify language filter operation
+- Verify free-word search operation
+- Verify historical newspaper operation
+- Verify summary generation operation
+- Verify loading animation operation
+- Verify image display operation
 
-**実装内容**:
-- 言語検出の動作確認
-- 言語フィルターの動作確認
-- フリーワード検索の動作確認
-- 過去の新聞の動作確認
-- 要約生成の動作確認
-- ローディングアニメーションの動作確認
-- 画像表示の動作確認
+**Acceptance Criteria**:
+- [ ] Languages correctly detected when creating newspapers
+- [ ] Language filter works normally
+- [ ] Free-word search works normally
+- [ ] Historical newspapers correctly generated/retrieved
+- [ ] Future dates and old dates correctly rejected
+- [ ] Summaries correctly generated/displayed
+- [ ] Loading animations displayed
+- [ ] Lead articles always display images
+- [ ] No errors in CloudWatch Logs
+- [ ] Performance meets requirements
 
-**受け入れ基準**:
-- [ ] 新聞作成時に言語が正しく検出される
-- [ ] 言語フィルターが正常に動作する
-- [ ] フリーワード検索が正常に動作する
-- [ ] 過去の新聞が正しく生成・取得される
-- [ ] 未来の日付と古い日付が正しく拒否される
-- [ ] 要約が正しく生成・表示される
-- [ ] ローディングアニメーションが表示される
-- [ ] リード記事に常に画像が表示される
-- [ ] CloudWatch Logs でエラーがないことを確認する
-- [ ] パフォーマンスが要件を満たしている
-
-_要件: すべて_
-
+_Requirements: All_
 
 ---
 
-## タスクの依存関係
+## Phase 6: Feed Quality Improvement (Priority 2)
+
+### Task 6.1: Create Reliable Feeds List by Category
+
+**Purpose**: Maintain list of reliable RSS feeds by theme
+
+**Implementation**:
+- Create `backend/src/constants/reliableFeeds.ts`
+- Organize feeds by category (technology, business, politics, etc.)
+- Support both Japanese and English
+- Implement category mapping function
+
+**Acceptance Criteria**:
+- [ ] `reliableFeeds.ts` created
+- [ ] `RELIABLE_FEEDS_BY_CATEGORY` object defined
+- [ ] Each category contains at least 3 feeds
+- [ ] Japanese categories (with `-jp` suffix) included
+- [ ] `getCategoryFromTheme(theme, locale): string | null` function implemented
+- [ ] Correctly infers category from theme
+- [ ] Unit tests added
+- [ ] `make test` succeeds
+
+_Requirements: Feed Quality Improvement 1_
+
+### Task 6.2: Implement Feed Health Check Service
+
+**Purpose**: Periodically check feed health
+
+**Implementation**:
+- Create `backend/src/services/feedHealthCheckService.ts`
+- Check for article existence
+- Check latest article date (within 30 days)
+- Error handling
+- Add unit tests
+
+**Acceptance Criteria**:
+- [ ] `feedHealthCheckService.ts` created
+- [ ] `checkFeedHealth(url): Promise<FeedHealthStatus>` function implemented
+- [ ] `checkAllReliableFeeds(): Promise<Map<string, FeedHealthStatus>>` function implemented
+- [ ] Returns `isHealthy: false` if no articles exist
+- [ ] Returns `isHealthy: false` if latest article older than 30 days
+- [ ] Returns appropriate error message on error
+- [ ] Unit tests added
+- [ ] `make test` succeeds
+
+_Requirements: Feed Quality Improvement 2_
+
+### Task 6.3: Improve Bedrock Prompt
+
+**Purpose**: Prioritize reliable feeds list when suggesting feeds
+
+**Implementation**:
+- Update `feedSuggestionService.ts`
+- Include reliable feeds list in prompt
+- Add constraint to prioritize theme relevance
+- Adjust to avoid becoming too generic major news sources
+
+**Acceptance Criteria**:
+- [ ] `suggestFeedsWithReliableList(theme, locale)` function implemented
+- [ ] Prompt includes reliable feeds list
+- [ ] Prompt includes "prioritize theme relevance" constraint
+- [ ] Prompt includes "avoid becoming too generic major news sources" constraint
+- [ ] Works even when category not found
+- [ ] Supplements with reliable feeds if fewer than 5 validated feeds
+- [ ] Unit tests added (using mocks)
+- [ ] `make test` succeeds
+
+_Requirements: Feed Quality Improvement 3_
+
+### Task 6.4: Implement Validated Feed Cache
+
+**Purpose**: Cache validated feeds in DynamoDB
+
+**Implementation**:
+- Add `ValidatedFeed` to DynamoDB schema
+- Implement cache read/write functions
+- Utilize cache when suggesting feeds
+- Save validation results to cache
+
+**Acceptance Criteria**:
+- [ ] `ValidatedFeed` interface defined
+- [ ] `getValidatedFeed(url): Promise<ValidatedFeed | null>` function implemented
+- [ ] `saveValidatedFeed(feed): Promise<void>` function implemented
+- [ ] `suggestFeedsWithCache(theme, locale)` function implemented
+- [ ] Prioritizes cached healthy feeds
+- [ ] Validates new feeds and saves to cache
+- [ ] URL hashing implemented
+- [ ] Unit tests added
+- [ ] `make test` succeeds
+
+_Requirements: Feed Quality Improvement 4_
+
+### Task 6.5: Update Feed Suggestion API
+
+**Purpose**: Integrate new logic into feed suggestion API
+
+**Implementation**:
+- Update `POST /api/suggest-feeds` endpoint
+- Use new `suggestFeedsWithCache` function
+- Improve error handling
+- Add integration tests
+
+**Acceptance Criteria**:
+- [ ] `/api/suggest-feeds` endpoint updated
+- [ ] Calls `suggestFeedsWithCache` function
+- [ ] Error handling appropriately implemented
+- [ ] Existing fallback (default feeds) maintained
+- [ ] Integration tests added
+- [ ] `make test` succeeds
+- [ ] Local verification works
+
+_Requirements: Feed Quality Improvement 1, 2, 3, 4_
+
+### Task 6.6: Schedule Feed Health Check
+
+**Purpose**: Periodically check health of reliable feeds list
+
+**Implementation**:
+- Create Lambda function (weekly execution)
+- Configure EventBridge schedule
+- Log unhealthy feeds
+- Configure CloudWatch alarm
+
+**Acceptance Criteria**:
+- [ ] Feed health check Lambda function created
+- [ ] EventBridge rule created (weekly execution)
+- [ ] Unhealthy feeds logged to CloudWatch Logs
+- [ ] CloudWatch alarm configured (unhealthy feeds > 10%)
+- [ ] Managed with Terraform
+- [ ] `terraform plan` succeeds
+- [ ] `terraform apply` succeeds
+- [ ] Manual trigger verification works
+
+_Requirements: Feed Quality Improvement 2_
+
+### Task 6.7: Update Documentation
+
+**Purpose**: Add documentation for feed quality improvement features
+
+**Implementation**:
+- Add feed quality improvement implementation details to `tech.md`
+- Add feature description to `product.md`
+- Add new files to `structure.md`
+
+**Acceptance Criteria**:
+- [ ] Feed quality improvement implementation details added to `tech.md`
+- [ ] Feature description added to `product.md`
+- [ ] New files added to `structure.md`
+- [ ] Changes recorded in update history section
+- [ ] All documentation maintains consistency
+
+_Requirements: Feed Quality Improvement All_
+
+---
+
+## Task Dependencies
 
 ```
-Phase 1: データベースとバックエンド基盤
-├── 1.1 DynamoDB スキーマ拡張 (独立)
-├── 1.2 言語検出サービスの実装 (1.1 に依存)
-├── 1.3 新聞保存時の言語検出統合 (1.2 に依存)
-├── 1.4 過去の新聞サービスの実装 (1.1 に依存)
-├── 1.5 過去の新聞 API エンドポイントの追加 (1.4 に依存)
-├── 1.6 クリーンアップサービスの実装 (1.1, 1.4 に依存)
-└── 1.7 EventBridge スケジュールの設定 (1.6 に依存)
+Phase 1: Database and Backend Foundation
+├── 1.1 Extend DynamoDB Schema (independent)
+├── 1.2 Implement Language Detection Service (depends on 1.1)
+├── 1.3 Integrate Language Detection on Newspaper Save (depends on 1.2)
+├── 1.4 Implement Historical Newspaper Service (depends on 1.1)
+├── 1.5 Add Historical Newspaper API Endpoints (depends on 1.4)
+├── 1.6 Implement Cleanup Service (depends on 1.1, 1.4)
+└── 1.7 Configure EventBridge Schedule (depends on 1.6)
 
-Phase 2: AI 機能とユーザー体験の向上
-├── 2.1 要約生成サービスの実装 (1.1 に依存)
-├── 2.2 新聞保存時の要約生成統合 (2.1 に依存)
-├── 2.3 著作権フリー画像サービスの実装 (独立)
-├── 2.4 メインエリアの画像保証機能の実装 (2.3 に依存)
-└── 2.5 ローディングアニメーションの実装 (独立)
+Phase 2: AI Features and User Experience Enhancement
+├── 2.1 Implement Summary Generation Service (depends on 1.1)
+├── 2.2 Integrate Summary Generation on Newspaper Save (depends on 2.1)
+├── 2.3 Implement Copyright-Free Image Service (independent)
+├── 2.4 Implement Main Area Image Guarantee (depends on 2.3)
+└── 2.5 Implement Loading Animation (independent)
 
-Phase 3: フロントエンド機能の追加
-├── 3.1 新聞ページへの要約表示 (2.2 に依存)
-├── 3.2 日付ナビゲーションコンポーネントの実装 (1.5 に依存)
-├── 3.3 日付ベース URL ルーティングの実装 (1.5, 3.2 に依存)
-├── 3.4 言語フィルターコンポーネントの実装 (1.3 に依存)
-├── 3.5 フリーワード検索コンポーネントの実装 (独立)
-└── 3.6 ホーム画面への統合 (3.4, 3.5 に依存)
+Phase 3: Frontend Feature Addition
+├── 3.1 Display Summary on Newspaper Page (depends on 2.2)
+├── 3.2 Implement Date Navigation Component (depends on 1.5)
+├── 3.3 Implement Date-Based URL Routing (depends on 1.5, 3.2)
+├── 3.4 Implement Language Filter Component (depends on 1.3)
+├── 3.5 Implement Free-word Search Component (independent)
+└── 3.6 Integrate into Home Screen (depends on 3.4, 3.5)
 
-Phase 4: テストとドキュメント
-├── 4.1 プロパティベーステストの実装 (すべての実装タスクに依存)
-├── 4.2 E2E テストの実装 (すべての実装タスクに依存)
-└── 4.3 ドキュメントの更新 (すべての実装タスクに依存)
+Phase 4: Testing and Documentation
+├── 4.1 Implement Property-Based Tests (depends on all implementation tasks)
+├── 4.2 Implement E2E Tests (depends on all implementation tasks)
+└── 4.3 Update Documentation (depends on all implementation tasks)
 
-Phase 5: デプロイと検証
-├── 5.1 インフラストラクチャのデプロイ (1.7 に依存)
-├── 5.2 バックエンドのデプロイ (Phase 1, 2 に依存)
-├── 5.3 フロントエンドのデプロイ (Phase 2, 3 に依存)
-└── 5.4 本番環境での検証 (5.1, 5.2, 5.3 に依存)
+Phase 5: Deployment and Verification
+├── 5.1 Deploy Infrastructure (depends on 1.7)
+├── 5.2 Deploy Backend (depends on Phase 1, 2)
+├── 5.3 Deploy Frontend (depends on Phase 2, 3)
+└── 5.4 Production Verification (depends on 5.1, 5.2, 5.3)
+
+Phase 6: Feed Quality Improvement (new)
+├── 6.1 Create Reliable Feeds List by Category (independent)
+├── 6.2 Implement Feed Health Check Service (depends on 6.1)
+├── 6.3 Improve Bedrock Prompt (depends on 6.1)
+├── 6.4 Implement Validated Feed Cache (depends on 6.1, 6.2)
+├── 6.5 Update Feed Suggestion API (depends on 6.3, 6.4)
+├── 6.6 Schedule Feed Health Check (depends on 6.2)
+└── 6.7 Update Documentation (depends on 6.1-6.6)
 ```
 
-## 段階的リリース戦略
+## Gradual Release Strategy
 
-### リリース 1: バックエンド基盤 (Phase 1)
-**目的**: データベースとバックエンド API を準備
+### Release 1: Backend Foundation (Phase 1)
+**Purpose**: Prepare database and backend API
 
-**含まれるタスク**:
-- 1.1 - 1.7 (すべて)
+**Included Tasks**:
+- 1.1 - 1.7 (all)
 
-**デプロイ**:
-- インフラストラクチャ (Terraform)
-- バックエンド (GitHub Actions)
+**Deployment**:
+- Infrastructure (Terraform)
+- Backend (GitHub Actions)
 
-**検証**:
-- API エンドポイントの動作確認
-- クリーンアップ Lambda の動作確認
-- 既存機能が壊れていないことを確認
+**Verification**:
+- API endpoint operation verification
+- Cleanup Lambda operation verification
+- Verify existing features not broken
 
-**リスク**: 低（フロントエンドに変更なし）
+**Risk**: Low (no frontend changes)
 
+### Release 2: AI Features (Phase 2)
+**Purpose**: Add summary generation and image enhancement
 
-### リリース 2: AI 機能 (Phase 2)
-**目的**: 要約生成と画像強化を追加
+**Included Tasks**:
+- 2.1 - 2.5 (all)
 
-**含まれるタスク**:
-- 2.1 - 2.5 (すべて)
+**Deployment**:
+- Backend (GitHub Actions)
+- Frontend (Amplify)
 
-**デプロイ**:
-- バックエンド (GitHub Actions)
-- フロントエンド (Amplify)
+**Verification**:
+- Verify summaries correctly generated
+- Verify lead articles always display images
+- Verify loading animations displayed
+- Verify existing features not broken
 
-**検証**:
-- 要約が正しく生成されることを確認
-- リード記事に常に画像が表示されることを確認
-- ローディングアニメーションが表示されることを確認
-- 既存機能が壊れていないことを確認
+**Risk**: Medium (changes to newspaper creation flow)
 
-**リスク**: 中（新聞作成フローに変更あり）
+### Release 3: Frontend Features (Phase 3)
+**Purpose**: Add user-facing features
 
-### リリース 3: フロントエンド機能 (Phase 3)
-**目的**: ユーザー向け機能を追加
+**Included Tasks**:
+- 3.1 - 3.6 (all)
 
-**含まれるタスク**:
-- 3.1 - 3.6 (すべて)
+**Deployment**:
+- Frontend (Amplify)
 
-**デプロイ**:
-- フロントエンド (Amplify)
+**Verification**:
+- Verify language filter works normally
+- Verify free-word search works normally
+- Verify date navigation works normally
+- Verify existing features not broken
 
-**検証**:
-- 言語フィルターが正常に動作することを確認
-- フリーワード検索が正常に動作することを確認
-- 日付ナビゲーションが正常に動作することを確認
-- 既存機能が壊れていないことを確認
+**Risk**: Medium (changes to home screen)
 
-**リスク**: 中（ホーム画面に変更あり）
+### Release 4: Testing and Documentation (Phase 4)
+**Purpose**: Quality assurance and documentation maintenance
 
-### リリース 4: テストとドキュメント (Phase 4)
-**目的**: 品質保証とドキュメント整備
+**Included Tasks**:
+- 4.1 - 4.3 (all)
 
-**含まれるタスク**:
-- 4.1 - 4.3 (すべて)
+**Deployment**:
+- None (testing and documentation only)
 
-**デプロイ**:
-- なし（テストとドキュメントのみ）
+**Verification**:
+- Verify all tests succeed
+- Verify documentation is up to date
 
-**検証**:
-- すべてのテストが成功することを確認
-- ドキュメントが最新であることを確認
+**Risk**: Low (no code changes)
 
-**リスク**: 低（コード変更なし）
+### Release 5: Feed Quality Improvement (Phase 6) - New
+**Purpose**: Improve feed suggestion quality
 
+**Included Tasks**:
+- 6.1 - 6.7 (all)
 
-## 実装時の注意事項
+**Deployment**:
+- Infrastructure (Terraform)
+- Backend (GitHub Actions)
 
-### 後方互換性の維持
+**Verification**:
+- Verify feed suggestions prioritize reliable feeds
+- Verify invalid feed URL suggestions reduced
+- Verify feed health check works normally
+- Verify cache functions normally
+- Verify existing features not broken
 
-1. **DynamoDB スキーマ**:
-   - 新しいフィールドはすべてオプショナル (`?`)
-   - 既存のフィールドは変更しない
-   - 既存のクエリパターンは維持
+**Risk**: Low (feed suggestion logic improvement only)
 
-2. **API エンドポイント**:
-   - 既存のエンドポイントは変更しない
-   - 新しいエンドポイントを追加
-   - レスポンス形式は既存と一貫性を保つ
+## Implementation Notes
 
-3. **フロントエンド**:
-   - 既存のコンポーネントは可能な限り変更しない
-   - 新しいコンポーネントを追加
-   - 段階的に統合
+### Maintaining Backward Compatibility
 
-### エラーハンドリング
+1. **DynamoDB Schema**:
+   - All new fields are optional (`?`)
+   - Don't change existing fields
+   - Maintain existing query patterns
 
-1. **言語検出失敗**:
-   - 空配列 `[]` をデフォルトにする
-   - エラーをログに記録
-   - 新聞作成を続行
+2. **API Endpoints**:
+   - Don't change existing endpoints
+   - Add new endpoints
+   - Keep response format consistent with existing
+
+3. **Frontend**:
+   - Don't change existing components as much as possible
+   - Add new components
+   - Integrate gradually
+
+### Error Handling
+
+1. **Language detection failure**:
+   - Default to empty array `[]`
+   - Log error
+   - Continue newspaper creation
+
+2. **Summary generation failure**:
+   - Return `null`
+   - Log error
+   - Display newspaper without summary
+
+3. **Historical newspaper generation failure**:
+   - Return appropriate error message (English)
+   - Set HTTP status code correctly
+   - Provide retry option
+
+4. **Cleanup failure**:
+   - Log error
+   - Continue next scheduled execution
+   - Allow partial deletion
+
+### Performance Requirements
+
+1. **Language detection**: < 1ms/article
+2. **Summary generation**: < 10 seconds
+3. **Historical newspaper generation**: < 8 seconds (first time), < 200ms (from cache)
+4. **Filtering**: < 100ms (100 newspapers)
+5. **Cleanup**: < 2 seconds (100 newspapers)
 
-2. **要約生成失敗**:
-   - `null` を返す
-   - エラーをログに記録
-   - 要約なしで新聞を表示
+### Test Requirements
 
-3. **過去の新聞生成失敗**:
-   - 適切なエラーメッセージを返す（英語）
-   - HTTP ステータスコードを正しく設定
-   - 再試行オプションを提供
+1. **Unit Tests**:
+   - Coverage: 60% or higher
+   - All new services and components
+   - Edge cases and error cases
 
-4. **クリーンアップ失敗**:
-   - エラーをログに記録
-   - 次のスケジュール実行を続行
-   - 部分的な削除を許可
+2. **Property-Based Tests**:
+   - Design document correctness properties 1-18
+   - At least 100 iterations per test
+   - Explicit property references
 
-### パフォーマンス要件
+3. **Integration Tests**:
+   - API endpoints
+   - Service interactions
+   - Database operations
+
+4. **E2E Tests**:
+   - Main user flows
+   - Page Object Model pattern
+   - Verification on multiple browsers
 
-1. **言語検出**: < 1ms/記事
-2. **要約生成**: < 10 秒
-3. **過去の新聞生成**: < 8 秒（初回）、< 200ms（キャッシュから）
-4. **フィルタリング**: < 100ms（100 件の新聞）
-5. **クリーンアップ**: < 2 秒（100 件の新聞）
+### Security Requirements
 
+1. **Input Validation**:
+   - All API endpoints
+   - Date format validation
+   - URL validation
+
+2. **Error Messages**:
+   - All written in English
+   - Don't include sensitive information
+   - User-friendly
 
-### テスト要件
+3. **Authentication/Authorization**:
+   - Maintain existing security policies
+   - Apply to new endpoints
 
-1. **ユニットテスト**:
-   - カバレッジ: 60% 以上
-   - すべての新しいサービスとコンポーネント
-   - エッジケースとエラーケース
+### Documentation Requirements
 
-2. **プロパティベーステスト**:
-   - 設計書の正確性プロパティ 1-18
-   - 各テスト最低 100 回の反復
-   - 明示的なプロパティ参照
+1. **Code Comments**:
+   - All written in English
+   - Function and class descriptions
+   - Complex logic explanations
 
-3. **統合テスト**:
-   - API エンドポイント
-   - サービス間の連携
-   - データベース操作
+2. **API Documentation**:
+   - New endpoint descriptions
+   - Request/response examples
+   - Error codes
 
-4. **E2E テスト**:
-   - 主要なユーザーフロー
-   - Page Object Model パターン
-   - 複数ブラウザでの検証
+3. **User Documentation**:
+   - How to use new features
+   - Screenshots
+   - Troubleshooting
 
-### セキュリティ要件
+## Definition of Done
 
-1. **入力検証**:
-   - すべての API エンドポイント
-   - 日付形式の検証
-   - URL の検証
+Each task is considered complete when all of the following conditions are met:
 
-2. **エラーメッセージ**:
-   - すべて英語で記述
-   - 機密情報を含めない
-   - ユーザーフレンドリー
+1. **Implementation Complete**:
+   - [ ] All acceptance criteria met
+   - [ ] Code review complete
+   - [ ] Merged
 
-3. **認証・認可**:
-   - 既存のセキュリティポリシーを維持
-   - 新しいエンドポイントにも適用
+2. **Testing Complete**:
+   - [ ] Unit tests added
+   - [ ] All tests succeed
+   - [ ] Coverage requirements met
 
-### ドキュメント要件
+3. **Documentation Complete**:
+   - [ ] Code comments added
+   - [ ] Related documentation updated
+   - [ ] API documentation updated (if applicable)
 
-1. **コードコメント**:
-   - すべて英語で記述
-   - 関数とクラスの説明
-   - 複雑なロジックの説明
+4. **Deployment Complete**:
+   - [ ] Deployed to production
+   - [ ] Operation verification complete
+   - [ ] No errors confirmed
 
-2. **API ドキュメント**:
-   - 新しいエンドポイントの説明
-   - リクエスト/レスポンス例
-   - エラーコード
+## Progress Management
 
-3. **ユーザードキュメント**:
-   - 新機能の使い方
-   - スクリーンショット
-   - トラブルシューティング
+### Task States
 
+- **Not Started**: Task not yet started
+- **In Progress**: Task being implemented
+- **In Review**: Waiting for code review
+- **Testing**: Running tests
+- **Awaiting Deployment**: Waiting for deployment
+- **Complete**: All conditions met
 
-## 完了の定義
+### Progress Tracking
 
-各タスクは以下の条件をすべて満たした場合に完了とみなされます:
+Track progress of each task using:
 
-1. **実装完了**:
-   - [ ] すべての受け入れ基準を満たしている
-   - [ ] コードレビューが完了している
-   - [ ] マージされている
+1. **GitHub Issues**: Create Issue for each task
+2. **GitHub Projects**: Visualize progress with project board
+3. **Regular Reviews**: Check progress weekly
 
-2. **テスト完了**:
-   - [ ] ユニットテストが追加されている
-   - [ ] すべてのテストが成功している
-   - [ ] カバレッジ要件を満たしている
+## Risk Management
 
-3. **ドキュメント完了**:
-   - [ ] コードコメントが追加されている
-   - [ ] 関連ドキュメントが更新されている
-   - [ ] API ドキュメントが更新されている（該当する場合）
+### High Risk Items
 
-4. **デプロイ完了**:
-   - [ ] 本番環境にデプロイされている
-   - [ ] 動作確認が完了している
-   - [ ] エラーがないことを確認している
+1. **Summary generation timeout**:
+   - **Risk**: Bedrock API may not respond within 10 seconds
+   - **Mitigation**: Retry logic, fallback (no summary)
+   - **Monitoring**: Monitor timeouts with CloudWatch Logs
 
-## 進捗管理
+2. **Insufficient articles for historical newspapers**:
+   - **Risk**: Target date may have fewer than minimum articles
+   - **Mitigation**: Go back up to 7 days, display error message
+   - **Monitoring**: Log article counts
 
-### タスクの状態
+3. **Cleanup failure**:
+   - **Risk**: DynamoDB deletion may fail
+   - **Mitigation**: Batch processing, error logging, retry on next run
+   - **Monitoring**: Monitor deletion counts with CloudWatch Logs
 
-- **未着手**: タスクがまだ開始されていない
-- **進行中**: タスクが実装中
-- **レビュー中**: コードレビュー待ち
-- **テスト中**: テスト実行中
-- **デプロイ待ち**: デプロイ待ち
-- **完了**: すべての条件を満たしている
+### Medium Risk Items
 
-### 進捗の追跡
+1. **Language detection accuracy**:
+   - **Risk**: Language may be incorrectly detected
+   - **Mitigation**: Prioritize RSS `<language>` field, character-based detection
+   - **Monitoring**: User feedback
 
-各タスクの進捗は以下の方法で追跡します:
+2. **Copyright-free image loading failure**:
+   - **Risk**: Unsplash API may not respond
+   - **Mitigation**: Fall back to local placeholder
+   - **Monitoring**: Log image loading errors
 
-1. **GitHub Issues**: 各タスクに対応する Issue を作成
-2. **GitHub Projects**: プロジェクトボードで進捗を可視化
-3. **定期レビュー**: 週次で進捗を確認
+### Low Risk Items
 
-
-## リスク管理
-
-### 高リスク項目
-
-1. **要約生成のタイムアウト**:
-   - **リスク**: Bedrock API が 10 秒以内に応答しない
-   - **対策**: リトライロジック、フォールバック（要約なし）
-   - **監視**: CloudWatch Logs でタイムアウトを監視
-
-2. **過去の新聞の記事不足**:
-   - **リスク**: 指定日付の記事が最小数に満たない
-   - **対策**: 7日間まで遡る、エラーメッセージを表示
-   - **監視**: 記事数をログに記録
-
-3. **クリーンアップの失敗**:
-   - **リスク**: DynamoDB の削除が失敗する
-   - **対策**: バッチ処理、エラーログ、次回実行で再試行
-   - **監視**: CloudWatch Logs で削除件数を監視
-
-### 中リスク項目
-
-1. **言語検出の精度**:
-   - **リスク**: 言語が誤って検出される
-   - **対策**: RSS の `<language>` フィールドを優先、文字ベース検出
-   - **監視**: ユーザーフィードバック
-
-2. **著作権フリー画像の読み込み失敗**:
-   - **リスク**: Unsplash API が応答しない
-   - **対策**: ローカルプレースホルダーにフォールバック
-   - **監視**: 画像読み込みエラーをログに記録
-
-### 低リスク項目
-
-1. **フィルタリングのパフォーマンス**:
-   - **リスク**: 大量の新聞でフィルタリングが遅い
-   - **対策**: クライアント側で最適化、ページネーション
-   - **監視**: パフォーマンスメトリクス
+1. **Filtering performance**:
+   - **Risk**: Filtering may be slow with many newspapers
+   - **Mitigation**: Client-side optimization, pagination
+   - **Monitoring**: Performance metrics
 
 ---
 
-## Phase 6: フィード品質改善 (優先度 2)
-
-### タスク 6.1: カテゴリ別信頼できるフィードリストの作成
-
-**目的**: テーマ別に信頼できるRSSフィードのリストを維持
-
-**実装内容**:
-- `backend/src/constants/reliableFeeds.ts` を作成
-- カテゴリ別にフィードを整理（technology, business, politics など）
-- 日本語/英語の両方をサポート
-- カテゴリマッピング関数を実装
-
-**受け入れ基準**:
-- [ ] `reliableFeeds.ts` が作成されている
-- [ ] `RELIABLE_FEEDS_BY_CATEGORY` オブジェクトが定義されている
-- [ ] 各カテゴリに最低 3 つのフィードが含まれている
-- [ ] 日本語カテゴリ（`-jp` サフィックス）が含まれている
-- [ ] `getCategoryFromTheme(theme, locale): string | null` 関数が実装されている
-- [ ] テーマからカテゴリを正しく推測できる
-- [ ] ユニットテストが追加されている
-- [ ] `make test` が成功する
-
-_要件: フィード品質改善 1_
-
-
-### タスク 6.2: フィードヘルスチェックサービスの実装
-
-**目的**: フィードの健全性を定期的にチェック
-
-**実装内容**:
-- `backend/src/services/feedHealthCheckService.ts` を作成
-- フィードの記事存在チェック
-- 最新記事の日付チェック（30日以内）
-- エラーハンドリング
-- ユニットテストを追加
-
-**受け入れ基準**:
-- [ ] `feedHealthCheckService.ts` が作成されている
-- [ ] `checkFeedHealth(url): Promise<FeedHealthStatus>` 関数が実装されている
-- [ ] `checkAllReliableFeeds(): Promise<Map<string, FeedHealthStatus>>` 関数が実装されている
-- [ ] 記事が存在しない場合、`isHealthy: false` を返す
-- [ ] 最新記事が 30 日より古い場合、`isHealthy: false` を返す
-- [ ] エラーが発生した場合、適切なエラーメッセージを返す
-- [ ] ユニットテストが追加されている
-- [ ] `make test` が成功する
-
-_要件: フィード品質改善 2_
-
-
-### タスク 6.3: Bedrock プロンプトの改善
-
-**目的**: フィード提案時に信頼できるフィードリストを優先
-
-**実装内容**:
-- `feedSuggestionService.ts` を更新
-- プロンプトに信頼できるフィードリストを含める
-- テーマとの関連性を重視する制約を追加
-- 一般的な主要ニュースソースになりすぎないように調整
-
-**受け入れ基準**:
-- [ ] `suggestFeedsWithReliableList(theme, locale)` 関数が実装されている
-- [ ] プロンプトに信頼できるフィードリストが含まれている
-- [ ] プロンプトに「テーマとの関連性を最優先」という制約が含まれている
-- [ ] プロンプトに「一般的な主要ニュースソースになりすぎないように」という制約が含まれている
-- [ ] カテゴリが見つからない場合でも動作する
-- [ ] 検証済みフィードが 5 件未満の場合、信頼できるフィードから補完する
-- [ ] ユニットテストが追加されている（モック使用）
-- [ ] `make test` が成功する
-
-_要件: フィード品質改善 3_
-
-
-### タスク 6.4: 検証済みフィードキャッシュの実装
-
-**目的**: 検証済みフィードを DynamoDB にキャッシュ
-
-**実装内容**:
-- DynamoDB スキーマに `ValidatedFeed` を追加
-- キャッシュの読み書き関数を実装
-- フィード提案時にキャッシュを活用
-- 検証結果をキャッシュに保存
-
-**受け入れ基準**:
-- [ ] `ValidatedFeed` インターフェースが定義されている
-- [ ] `getValidatedFeed(url): Promise<ValidatedFeed | null>` 関数が実装されている
-- [ ] `saveValidatedFeed(feed): Promise<void>` 関数が実装されている
-- [ ] `suggestFeedsWithCache(theme, locale)` 関数が実装されている
-- [ ] キャッシュされた健全なフィードを優先的に使用する
-- [ ] 新しいフィードを検証してキャッシュに保存する
-- [ ] URL のハッシュ化が実装されている
-- [ ] ユニットテストが追加されている
-- [ ] `make test` が成功する
-
-_要件: フィード品質改善 4_
-
-
-### タスク 6.5: フィード提案 API の更新
-
-**目的**: フィード提案 API に新しいロジックを統合
-
-**実装内容**:
-- `POST /api/suggest-feeds` エンドポイントを更新
-- 新しい `suggestFeedsWithCache` 関数を使用
-- エラーハンドリングの改善
-- 統合テストを追加
-
-**受け入れ基準**:
-- [ ] `/api/suggest-feeds` エンドポイントが更新されている
-- [ ] `suggestFeedsWithCache` 関数を呼び出している
-- [ ] エラーハンドリングが適切に実装されている
-- [ ] 既存のフォールバック（デフォルトフィード）が維持されている
-- [ ] 統合テストが追加されている
-- [ ] `make test` が成功する
-- [ ] ローカルで動作確認ができる
-
-_要件: フィード品質改善 1, 2, 3, 4_
-
-
-### タスク 6.6: フィードヘルスチェックの定期実行
-
-**目的**: 信頼できるフィードリストの健全性を定期的にチェック
-
-**実装内容**:
-- Lambda 関数を作成（週次実行）
-- EventBridge スケジュールを設定
-- 健全でないフィードをログに記録
-- CloudWatch アラームを設定
-
-**受け入れ基準**:
-- [ ] フィードヘルスチェック Lambda 関数が作成されている
-- [ ] EventBridge ルールが作成されている（週次実行）
-- [ ] 健全でないフィードを CloudWatch Logs に記録している
-- [ ] CloudWatch アラームが設定されている（健全でないフィード > 10%）
-- [ ] Terraform で管理されている
-- [ ] `terraform plan` が成功する
-- [ ] `terraform apply` が成功する
-- [ ] 手動でトリガーして動作確認ができる
-
-_要件: フィード品質改善 2_
-
-
-### タスク 6.7: ドキュメントの更新
-
-**目的**: フィード品質改善機能のドキュメントを追加
-
-**実装内容**:
-- `tech.md` にフィード品質改善の実装詳細を追加
-- `product.md` に機能説明を追加
-- `structure.md` に新しいファイルを追加
-
-**受け入れ基準**:
-- [ ] `tech.md` にフィード品質改善の実装詳細が追加されている
-- [ ] `product.md` に機能説明が追加されている
-- [ ] `structure.md` に新しいファイルが追加されている
-- [ ] 更新履歴セクションに変更が記録されている
-- [ ] すべてのドキュメントが一貫性を保っている
-
-_要件: フィード品質改善 すべて_
-
-
----
-
-## タスクの依存関係（更新）
-
-```
-Phase 1: データベースとバックエンド基盤
-├── 1.1 DynamoDB スキーマ拡張 (独立)
-├── 1.2 言語検出サービスの実装 (1.1 に依存)
-├── 1.3 新聞保存時の言語検出統合 (1.2 に依存)
-├── 1.4 過去の新聞サービスの実装 (1.1 に依存)
-├── 1.5 過去の新聞 API エンドポイントの追加 (1.4 に依存)
-├── 1.6 クリーンアップサービスの実装 (1.1, 1.4 に依存)
-└── 1.7 EventBridge スケジュールの設定 (1.6 に依存)
-
-Phase 2: AI 機能とユーザー体験の向上
-├── 2.1 要約生成サービスの実装 (1.1 に依存)
-├── 2.2 新聞保存時の要約生成統合 (2.1 に依存)
-├── 2.3 著作権フリー画像サービスの実装 (独立)
-├── 2.4 メインエリアの画像保証機能の実装 (2.3 に依存)
-└── 2.5 ローディングアニメーションの実装 (独立)
-
-Phase 3: フロントエンド機能の追加
-├── 3.1 新聞ページへの要約表示 (2.2 に依存)
-├── 3.2 日付ナビゲーションコンポーネントの実装 (1.5 に依存)
-├── 3.3 日付ベース URL ルーティングの実装 (1.5, 3.2 に依存)
-├── 3.4 言語フィルターコンポーネントの実装 (1.3 に依存)
-├── 3.5 フリーワード検索コンポーネントの実装 (独立)
-└── 3.6 ホーム画面への統合 (3.4, 3.5 に依存)
-
-Phase 4: テストとドキュメント
-├── 4.1 プロパティベーステストの実装 (すべての実装タスクに依存)
-├── 4.2 E2E テストの実装 (すべての実装タスクに依存)
-└── 4.3 ドキュメントの更新 (すべての実装タスクに依存)
-
-Phase 5: デプロイと検証
-├── 5.1 インフラストラクチャのデプロイ (1.7 に依存)
-├── 5.2 バックエンドのデプロイ (Phase 1, 2 に依存)
-├── 5.3 フロントエンドのデプロイ (Phase 2, 3 に依存)
-└── 5.4 本番環境での検証 (5.1, 5.2, 5.3 に依存)
-
-Phase 6: フィード品質改善 (新規)
-├── 6.1 カテゴリ別信頼できるフィードリストの作成 (独立)
-├── 6.2 フィードヘルスチェックサービスの実装 (6.1 に依存)
-├── 6.3 Bedrock プロンプトの改善 (6.1 に依存)
-├── 6.4 検証済みフィードキャッシュの実装 (6.1, 6.2 に依存)
-├── 6.5 フィード提案 API の更新 (6.3, 6.4 に依存)
-├── 6.6 フィードヘルスチェックの定期実行 (6.2 に依存)
-└── 6.7 ドキュメントの更新 (6.1-6.6 に依存)
-```
-
-## 段階的リリース戦略（更新）
-
-### リリース 1: バックエンド基盤 (Phase 1)
-**目的**: データベースとバックエンド API を準備
-
-**含まれるタスク**:
-- 1.1 - 1.7 (すべて)
-
-**デプロイ**:
-- インフラストラクチャ (Terraform)
-- バックエンド (GitHub Actions)
-
-**検証**:
-- API エンドポイントの動作確認
-- クリーンアップ Lambda の動作確認
-- 既存機能が壊れていないことを確認
-
-**リスク**: 低（フロントエンドに変更なし）
-
-
-### リリース 2: AI 機能 (Phase 2)
-**目的**: 要約生成と画像強化を追加
-
-**含まれるタスク**:
-- 2.1 - 2.5 (すべて)
-
-**デプロイ**:
-- バックエンド (GitHub Actions)
-- フロントエンド (Amplify)
-
-**検証**:
-- 要約が正しく生成されることを確認
-- リード記事に常に画像が表示されることを確認
-- ローディングアニメーションが表示されることを確認
-- 既存機能が壊れていないことを確認
-
-**リスク**: 中（新聞作成フローに変更あり）
-
-### リリース 3: フロントエンド機能 (Phase 3)
-**目的**: ユーザー向け機能を追加
-
-**含まれるタスク**:
-- 3.1 - 3.6 (すべて)
-
-**デプロイ**:
-- フロントエンド (Amplify)
-
-**検証**:
-- 言語フィルターが正常に動作することを確認
-- フリーワード検索が正常に動作することを確認
-- 日付ナビゲーションが正常に動作することを確認
-- 既存機能が壊れていないことを確認
-
-**リスク**: 中（ホーム画面に変更あり）
-
-### リリース 4: テストとドキュメント (Phase 4)
-**目的**: 品質保証とドキュメント整備
-
-**含まれるタスク**:
-- 4.1 - 4.3 (すべて)
-
-**デプロイ**:
-- なし（テストとドキュメントのみ）
-
-**検証**:
-- すべてのテストが成功することを確認
-- ドキュメントが最新であることを確認
-
-**リスク**: 低（コード変更なし）
-
-### リリース 5: フィード品質改善 (Phase 6) - 新規
-**目的**: フィード提案の品質を向上
-
-**含まれるタスク**:
-- 6.1 - 6.7 (すべて)
-
-**デプロイ**:
-- インフラストラクチャ (Terraform)
-- バックエンド (GitHub Actions)
-
-**検証**:
-- フィード提案が信頼できるフィードを優先することを確認
-- 無効なフィードURLの提案が減少することを確認
-- フィードヘルスチェックが正常に動作することを確認
-- キャッシュが正常に機能することを確認
-- 既存機能が壊れていないことを確認
-
-**リスク**: 低（フィード提案ロジックの改善のみ）
-
-
-## まとめ
-
-Phase-2 の実装は 6 つのフェーズに分かれており、段階的にリリースできるよう設計されています。各タスクは明確な受け入れ基準を持ち、依存関係が整理されています。
-
-**推奨実装順序**:
-1. Phase 1 (バックエンド基盤) → リリース 1
-2. Phase 2 (AI 機能) → リリース 2
-3. Phase 3 (フロントエンド機能) → リリース 3
-4. Phase 4 (テストとドキュメント) → リリース 4
-5. Phase 6 (フィード品質改善) → リリース 5 ★新規追加
-
-この順序により、既存機能を壊さずに新機能を段階的に追加できます。
-
-**Phase 6 (フィード品質改善) の特徴**:
-- 既存機能への影響が最小限
-- フィード提案の品質を大幅に向上
-- ユーザーエラーの削減
-- 段階的な実装が可能
-
+## Summary
+
+Phase 2 implementation is divided into 6 phases, designed for gradual release. Each task has clear acceptance criteria and organized dependencies.
+
+**Recommended Implementation Order**:
+1. Phase 1 (Backend Foundation) → Release 1
+2. Phase 2 (AI Features) → Release 2
+3. Phase 3 (Frontend Features) → Release 3
+4. Phase 4 (Testing and Documentation) → Release 4
+5. Phase 6 (Feed Quality Improvement) → Release 5 ★New
+
+This order allows gradual addition of new features without breaking existing functionality.
+
+**Phase 6 (Feed Quality Improvement) Characteristics**:
+- Minimal impact on existing features
+- Significantly improves feed suggestion quality
+- Reduces user errors
+- Gradual implementation possible

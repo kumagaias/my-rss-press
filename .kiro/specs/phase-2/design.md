@@ -1,35 +1,35 @@
-# 設計書 Phase-2
+# Design Document - Phase 2
 
-## 概要
+## Overview
 
-Phase-2 では、MyRSSPress に言語対応機能、過去の新聞閲覧、検索機能の強化、視覚的な改善を追加します。システムは記事の言語を自動検出（日本語/英語）し、言語によるフィルタリングを可能にし、日付ベースの新聞アーカイブ（7日間保持）を提供し、ローディングアニメーションと AI 生成の要約でユーザー体験を向上させます。
+Phase 2 adds language support, historical newspaper viewing, enhanced search capabilities, and visual improvements to MyRSSPress. The system automatically detects article languages (Japanese/English), enables language-based filtering, provides date-based newspaper archives (7-day retention), and enhances user experience with loading animations and AI-generated summaries.
 
-主な機能強化:
-1. 言語検出とフィルタリング（JP/EN）
-2. 日付ベース URL による過去の新聞閲覧
-3. 新聞のフリーワード検索
-4. 生成中のローディングアニメーション
-5. 画像保証付きメインエリアの強化
-6. AI 生成の新聞要約（3行、100-200文字）
-7. 新機能のための拡張データベーススキーマ
+Key enhancements:
+1. Language detection and filtering (JP/EN)
+2. Historical newspaper viewing with date-based URLs
+3. Free-word search for newspapers
+4. Loading animations during generation
+5. Enhanced main area with guaranteed images
+6. AI-generated newspaper summaries (3 lines, 100-200 characters)
+7. Extended database schema for new features
 
-プロジェクト構造は Phase-1 と同じ:
-- `backend/` - TypeScript/Hono API サーバー（Lambda 用）
-- `frontend/` - Next.js + TailwindCSS（Amplify Hosting 用）
-- `infra/` - Terraform IaC コード
+Project structure remains the same as Phase 1:
+- `backend/` - TypeScript/Hono API server (for Lambda)
+- `frontend/` - Next.js + TailwindCSS (for Amplify Hosting)
+- `infra/` - Terraform IaC code
 
-## アーキテクチャ
+## Architecture
 
-### システムアーキテクチャの更新
+### Updated System Architecture
 
-Phase-2 では既存のアーキテクチャに以下のコンポーネントを追加:
+Phase 2 adds the following components to the existing architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │              Frontend (Next.js + TailwindCSS)                │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ 言語         │  │ 日付ベース   │  │ 検索         │      │
-│  │ フィルター   │  │ ナビゲーション│  │ コンポーネント│      │
+│  │ Language     │  │ Date-Based   │  │ Search       │      │
+│  │ Filter       │  │ Navigation   │  │ Component    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 └─────────────────────────────────────────────────────────────┘
           │                  │                  │
@@ -37,53 +37,53 @@ Phase-2 では既存のアーキテクチャに以下のコンポーネントを
 ┌─────────────────────────────────────────────────────────────┐
 │           Backend API (TypeScript/Hono on Lambda)            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ 言語         │  │ 過去の新聞   │  │ 要約         │      │
-│  │ 検出器       │  │ サービス     │  │ 生成器       │      │
-│  │              │  │              │  │ (Bedrock)    │      │
+│  │ Language     │  │ Historical   │  │ Summary      │      │
+│  │ Detector     │  │ Newspaper    │  │ Generator    │      │
+│  │              │  │ Service      │  │ (Bedrock)    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 └─────────────────────────────────────────────────────────────┘
           │                  │                  │
           ↓                  ↓                  ↓
 ┌──────────────────┐  ┌──────────────────┐  ┌──────────────┐
 │   AWS Bedrock    │  │   DynamoDB       │  │  EventBridge │
-│   (言語 +        │  │   (拡張          │  │  (クリーンアップ│
-│    要約)         │  │    スキーマ)     │  │   スケジュール)│
+│   (Language +    │  │   (Extended      │  │  (Cleanup    │
+│    Summary)      │  │    Schema)       │  │   Schedule)  │
 └──────────────────┘  └──────────────────┘  └──────────────┘
 ```
 
-### 新しいコンポーネント
+### New Components
 
-**フロントエンド:**
-- 言語フィルターコンポーネント（JP/EN 選択）
-- 過去の新聞用の日付ピッカー
-- リアルタイムフィルタリング付き検索入力
-- ローディングアニメーションコンポーネント
-- 著作権フリー画像プレースホルダーサービス
+**Frontend:**
+- Language filter component (JP/EN selection)
+- Date picker for historical newspapers
+- Search input with real-time filtering
+- Loading animation component
+- Copyright-free image placeholder service
 
-**バックエンド:**
-- 言語検出サービス
-- 過去の新聞サービス
-- 要約生成サービス（Bedrock）
-- クリーンアップ Lambda 関数（スケジュール実行）
+**Backend:**
+- Language detection service
+- Historical newspaper service
+- Summary generation service (Bedrock)
+- Cleanup Lambda function (scheduled execution)
 
-**インフラストラクチャ:**
-- 毎日のクリーンアップ用 EventBridge ルール
-- 拡張 DynamoDB スキーマ
+**Infrastructure:**
+- EventBridge rule for daily cleanup
+- Extended DynamoDB schema
 
 
-## 主要サービスの設計
+## Key Service Designs
 
-### 0. フィード品質改善サービス
+### 0. Feed Quality Improvement Service
 
-**目的**: AI提案フィードの品質を向上させ、無効/終了したフィードURLを減らす
+**Purpose**: Improve AI-suggested feed quality and reduce invalid/terminated feed URLs
 
-**問題**: 現在、Bedrock AIが提案するフィードURLの中に、無効（404）や終了したサービスのURLが含まれることがある。これによりユーザーが記事を取得できないエラーが発生する。
+**Problem**: Currently, Bedrock AI sometimes suggests invalid (404) or terminated service URLs, causing errors when users try to fetch articles.
 
-**解決策**:
+**Solution**:
 
-#### 1. カテゴリ別信頼できるフィードリストの維持
+#### 1. Maintain Reliable Feeds List by Category
 
-**実装方法**: デフォルトフィードを拡張し、カテゴリ別に整理
+**Implementation**: Extend default feeds and organize by category
 
 ```typescript
 // backend/src/constants/reliableFeeds.ts
@@ -101,40 +101,40 @@ export const RELIABLE_FEEDS_BY_CATEGORY = {
     { url: 'https://www.bbc.com/news/politics/rss.xml', title: 'BBC Politics', language: 'EN' },
     { url: 'https://www.politico.com/rss/politics08.xml', title: 'Politico', language: 'EN' },
   ],
-  // 日本語カテゴリ
+  // Japanese categories
   'technology-jp': [
     { url: 'https://www.itmedia.co.jp/rss/2.0/news_bursts.xml', title: 'ITmedia', language: 'JP' },
     { url: 'https://japan.cnet.com/rss/index.rdf', title: 'CNET Japan', language: 'JP' },
   ],
   'business-jp': [
-    { url: 'https://www.nikkei.com/rss/', title: '日本経済新聞', language: 'JP' },
+    { url: 'https://www.nikkei.com/rss/', title: 'Nikkei', language: 'JP' },
   ],
-  // ... 他のカテゴリ
+  // ... other categories
 };
 
-// カテゴリマッピング（テーマからカテゴリを推測）
+// Category mapping (infer category from theme)
 export function getCategoryFromTheme(theme: string, locale: 'en' | 'ja'): string | null {
-  const themeL lower = theme.toLowerCase();
+  const themeLower = theme.toLowerCase();
   const suffix = locale === 'ja' ? '-jp' : '';
   
-  if (themeL.includes('tech') || themeL.includes('テクノロジー')) {
+  if (themeLower.includes('tech') || themeLower.includes('テクノロジー')) {
     return `technology${suffix}`;
   }
-  if (themeL.includes('business') || themeL.includes('ビジネス')) {
+  if (themeLower.includes('business') || themeLower.includes('ビジネス')) {
     return `business${suffix}`;
   }
-  if (themeL.includes('politics') || themeL.includes('政治')) {
+  if (themeLower.includes('politics') || themeLower.includes('政治')) {
     return `politics${suffix}`;
   }
-  // ... 他のカテゴリ
+  // ... other categories
   
-  return null; // カテゴリが見つからない場合
+  return null; // Category not found
 }
 ```
 
-#### 2. フィードヘルスチェックの追加
+#### 2. Add Feed Health Check
 
-**実装方法**: 定期的にフィードの健全性をチェック
+**Implementation**: Periodically check feed health
 
 ```typescript
 // backend/src/services/feedHealthCheckService.ts
@@ -150,7 +150,7 @@ async function checkFeedHealth(url: string): Promise<FeedHealthStatus> {
   try {
     const feed = await parser.parseURL(url);
     
-    // 記事が存在するかチェック
+    // Check if articles exist
     if (!feed.items || feed.items.length === 0) {
       return {
         url,
@@ -160,7 +160,7 @@ async function checkFeedHealth(url: string): Promise<FeedHealthStatus> {
       };
     }
     
-    // 最新記事の日付をチェック（30日以内なら健全）
+    // Check latest article date (healthy if within 30 days)
     const latestArticle = feed.items[0];
     const latestDate = latestArticle.pubDate ? new Date(latestArticle.pubDate) : null;
     const thirtyDaysAgo = new Date();
@@ -184,211 +184,26 @@ async function checkFeedHealth(url: string): Promise<FeedHealthStatus> {
     };
   }
 }
-
-// 信頼できるフィードリストの健全性を定期的にチェック
-async function checkAllReliableFeeds(): Promise<Map<string, FeedHealthStatus>> {
-  const results = new Map<string, FeedHealthStatus>();
-  
-  for (const [category, feeds] of Object.entries(RELIABLE_FEEDS_BY_CATEGORY)) {
-    for (const feed of feeds) {
-      const status = await checkFeedHealth(feed.url);
-      results.set(feed.url, status);
-    }
-  }
-  
-  return results;
-}
 ```
 
-#### 3. Bedrockプロンプトの改善
+**Benefits**:
+1. **Quality improvement**: Prioritize reliable feeds
+2. **Error reduction**: Reduce invalid URL suggestions
+3. **Performance**: Reduce validation time with caching
+4. **Learning**: Accumulate validation results for future suggestions
 
-**実装方法**: プロンプトに信頼できるフィードリストを含め、キーワードとの関連性を重視
+**Implementation priority**: After Phase 2 (implement as Phase 3)
 
-```typescript
-async function suggestFeedsWithReliableList(
-  theme: string,
-  locale: 'en' | 'ja'
-): Promise<FeedSuggestion[]> {
-  // カテゴリを推測
-  const category = getCategoryFromTheme(theme, locale);
-  
-  // 信頼できるフィードリストを取得
-  const reliableFeeds = category 
-    ? RELIABLE_FEEDS_BY_CATEGORY[category] || []
-    : [];
-  
-  // プロンプトに信頼できるフィードを含める
-  const reliableFeedsList = reliableFeeds
-    .map(f => `- ${f.title}: ${f.url}`)
-    .join('\n');
-  
-  const prompt = locale === 'ja'
-    ? `ユーザーは「${theme}」に興味があります。
-以下の信頼できるRSSフィードリストを優先的に使用し、10個のRSSフィードを提案してください。
 
-信頼できるフィード:
-${reliableFeedsList}
+### 1. Language Detection Service
 
-重要な制約:
-1. 上記の信頼できるフィードリストから、テーマに関連するものを優先的に選択してください
-2. リストにない場合のみ、他の実在する主要メディアの公式RSSフィードを提案してください
-3. テーマとの関連性を最優先してください（一般的な主要ニュースソースになりすぎないように）
-4. 実在しないフィードや終了したサービスのURLは絶対に提案しないでください
-5. 正しいフィードURL形式（/rss, /feed, /rss.xml など）を使用してください
-
-JSON形式で10個のフィードを返してください:
-[
-  {
-    "url": "https://example.com/feed",
-    "title": "Feed Title",
-    "reasoning": "テーマとの関連性の説明"
-  }
-]`
-    : `User is interested in "${theme}".
-Please suggest 10 RSS feeds, prioritizing the following reliable feed list.
-
-Reliable feeds:
-${reliableFeedsList}
-
-Important constraints:
-1. Prioritize feeds from the reliable list above that are relevant to the theme
-2. Only suggest other real, official RSS feeds from major media if not in the list
-3. Prioritize relevance to the theme (avoid becoming too generic major news sources)
-4. Never suggest non-existent feeds or terminated service URLs
-5. Use correct feed URL formats (/rss, /feed, /rss.xml, etc.)
-
-Return 10 feeds in JSON format:
-[
-  {
-    "url": "https://example.com/feed",
-    "title": "Feed Title",
-    "reasoning": "Explanation of relevance to theme"
-  }
-]`;
-  
-  // Bedrock API呼び出し
-  const suggestions = await callBedrockAPI(prompt);
-  
-  // URL検証（既存のロジック）
-  const validatedSuggestions = await validateFeedUrls(suggestions);
-  
-  // 不足している場合、信頼できるフィードから補完
-  if (validatedSuggestions.length < 5 && reliableFeeds.length > 0) {
-    const supplementFeeds = reliableFeeds
-      .slice(0, 5 - validatedSuggestions.length)
-      .map(f => ({
-        url: f.url,
-        title: f.title,
-        reasoning: `Reliable ${category} feed`,
-      }));
-    
-    validatedSuggestions.push(...supplementFeeds);
-  }
-  
-  return validatedSuggestions;
-}
-```
-
-#### 4. 動作確認済みフィードのキャッシュ
-
-**実装方法**: DynamoDBに検証済みフィードをキャッシュ
+**Implementation**: RSS feed language field + character-based detection
 
 ```typescript
-// DynamoDB スキーマ
-interface ValidatedFeed {
-  PK: string; // VALIDATED_FEED#{url_hash}
-  SK: string; // METADATA
-  url: string;
-  title: string;
-  category?: string;
-  language: 'JP' | 'EN';
-  lastValidated: string; // ISO 8601
-  validationCount: number; // 検証成功回数
-  failureCount: number; // 検証失敗回数
-  isHealthy: boolean;
-  lastArticleDate?: string;
-}
-
-// キャッシュから取得
-async function getValidatedFeed(url: string): Promise<ValidatedFeed | null> {
-  const urlHash = hashUrl(url);
-  const result = await dynamodb.get({
-    PK: `VALIDATED_FEED#${urlHash}`,
-    SK: 'METADATA',
-  });
-  
-  return result.Item as ValidatedFeed | null;
-}
-
-// キャッシュに保存
-async function saveValidatedFeed(feed: ValidatedFeed): Promise<void> {
-  await dynamodb.put({ Item: feed });
-}
-
-// フィード提案時にキャッシュを活用
-async function suggestFeedsWithCache(
-  theme: string,
-  locale: 'en' | 'ja'
-): Promise<FeedSuggestion[]> {
-  // Bedrockから提案を取得
-  const suggestions = await suggestFeedsWithReliableList(theme, locale);
-  
-  // キャッシュをチェック
-  const cachedResults = await Promise.all(
-    suggestions.map(async (s) => {
-      const cached = await getValidatedFeed(s.url);
-      return { suggestion: s, cached };
-    })
-  );
-  
-  // キャッシュされた健全なフィードを優先
-  const healthyFeeds = cachedResults
-    .filter(r => r.cached?.isHealthy)
-    .map(r => r.suggestion);
-  
-  // 新しいフィードを検証
-  const newFeeds = cachedResults
-    .filter(r => !r.cached)
-    .map(r => r.suggestion);
-  
-  const validatedNewFeeds = await validateFeedUrls(newFeeds);
-  
-  // キャッシュに保存
-  for (const feed of validatedNewFeeds) {
-    await saveValidatedFeed({
-      PK: `VALIDATED_FEED#${hashUrl(feed.url)}`,
-      SK: 'METADATA',
-      url: feed.url,
-      title: feed.title,
-      language: locale === 'ja' ? 'JP' : 'EN',
-      lastValidated: new Date().toISOString(),
-      validationCount: 1,
-      failureCount: 0,
-      isHealthy: true,
-    });
-  }
-  
-  return [...healthyFeeds, ...validatedNewFeeds];
-}
-```
-
-**メリット**:
-1. **品質向上**: 信頼できるフィードを優先的に提案
-2. **エラー削減**: 無効なURLの提案を減らす
-3. **パフォーマンス**: キャッシュにより検証時間を短縮
-4. **学習**: 検証結果を蓄積し、将来の提案に活用
-
-**実装優先度**: Phase-2の後（Phase-3として実装）
-
-### 1. 言語検出サービス
-
-**実装方法:** RSS フィードの language フィールド + 文字ベースの検出
-
-```typescript
-// RSS パーサーで language フィールドを取得
+// Get language field from RSS parser
 async function parseFeedWithLanguage(url: string): Promise<{ articles: Article[], language?: string }> {
   const feed = await parser.parseURL(url);
-  const language = feed.language; // RSS の <language> フィールド
+  const language = feed.language; // RSS <language> field
   
   const articles = feed.items.map(item => ({
     title: item.title,
@@ -402,13 +217,13 @@ async function parseFeedWithLanguage(url: string): Promise<{ articles: Article[]
   return { articles, language };
 }
 
-// 文字ベースの言語検出（フォールバック）
+// Character-based language detection (fallback)
 function detectLanguage(text: string): 'JP' | 'EN' {
-  // 日本語文字（ひらがな、カタカナ、漢字）をカウント
+  // Count Japanese characters (hiragana, katakana, kanji)
   const japaneseChars = text.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g);
   const japaneseCount = japaneseChars ? japaneseChars.length : 0;
   
-  // 10% 以上が日本語文字なら日本語と判定
+  // If > 10% Japanese characters, classify as Japanese
   const threshold = text.length * 0.1;
   return japaneseCount > threshold ? 'JP' : 'EN';
 }
@@ -420,7 +235,7 @@ async function detectLanguages(
   const languages = new Set<string>();
   
   for (const article of articles) {
-    // 優先順位 1: RSS フィードの <language> フィールドをチェック
+    // Priority 1: Check RSS feed <language> field
     const feedLanguage = feedLanguages.get(article.feedSource);
     if (feedLanguage) {
       const lang = feedLanguage.startsWith('ja') ? 'JP' : 'EN';
@@ -428,7 +243,7 @@ async function detectLanguages(
       continue;
     }
     
-    // 優先順位 2: 記事内容から判定（タイトル + description の最初の 50 文字）
+    // Priority 2: Detect from article content (title + first 50 chars of description)
     const description = article.description || '';
     const text = `${article.title} ${description.substring(0, 50)}`;
     const language = detectLanguage(text);
@@ -439,34 +254,34 @@ async function detectLanguages(
 }
 ```
 
-**選択理由:**
-- コスト: ゼロ
-- 速度: < 1ms/記事
-- 精度: 日本語/英語の判別には十分
-- AWS Comprehend は使用しない（コスト削減）
+**Rationale:**
+- Cost: Zero
+- Speed: < 1ms/article
+- Accuracy: Sufficient for JP/EN distinction
+- AWS Comprehend not used (cost reduction)
 
-**代替案:** AWS Comprehend（より正確だが高コスト）
-- コスト: $0.0001/リクエスト
-- 速度: ~100ms/記事
-- 必要に応じて後でアップグレード可能
+**Alternative:** AWS Comprehend (more accurate but higher cost)
+- Cost: $0.0001/request
+- Speed: ~100ms/article
+- Can upgrade later if needed
 
-### 2. 要約生成サービス
+### 2. Summary Generation Service
 
-**実装方法:** Bedrock (Claude 3 Haiku) を使用
+**Implementation**: Using Bedrock (Claude 3 Haiku)
 
 ```typescript
 async function generateSummary(
   articles: Article[],
   theme: string,
-  languages: string[] // 新聞の言語属性
+  languages: string[] // Newspaper language attributes
 ): Promise<string> {
   const articleList = articles
-    .slice(0, 10) // 上位 10 記事のみ使用
+    .slice(0, 10) // Use only top 10 articles
     .map((a, i) => `${i + 1}. ${a.title}`)
     .join('\n');
   
-  // 新聞の言語に基づいて要約の言語を決定
-  // 優先順位: JP > EN > その他（将来の拡張を考慮）
+  // Determine summary language based on newspaper languages
+  // Priority: JP > EN > others (for future expansion)
   const summaryLanguage = determineSummaryLanguage(languages);
   
   const prompt = summaryLanguage === 'ja'
@@ -503,42 +318,42 @@ Summary (3 lines, 100-200 characters):`;
 }
 ```
 
-**言語決定ロジック（将来の拡張を考慮）:**
+**Language determination logic (for future expansion):**
 ```typescript
 function determineSummaryLanguage(languages: string[]): string {
-  // 優先順位: JP > EN > その他（将来の拡張用）
+  // Priority: JP > EN > others (for future expansion)
   if (languages.includes('JP')) return 'ja';
   if (languages.includes('EN')) return 'en';
   
-  // 将来的に他の言語を追加する場合はここに追加
-  // if (languages.includes('ZH')) return 'zh'; // 中国語
-  // if (languages.includes('KO')) return 'ko'; // 韓国語
+  // For future language additions
+  // if (languages.includes('ZH')) return 'zh'; // Chinese
+  // if (languages.includes('KO')) return 'ko'; // Korean
   
-  // デフォルトは英語
+  // Default to English
   return 'en';
 }
 ```
 
-**キャッシング戦略:**
-- 初回生成: ~5-10 秒
-- 2回目以降: DynamoDB から取得（< 100ms）
-- コスト: ~$0.0001/要約
+**Caching strategy:**
+- First generation: ~5-10 seconds
+- Subsequent access: Retrieved from DynamoDB (< 100ms)
+- Cost: ~$0.0001/summary
 
-**エラーハンドリング:**
-- Bedrock API 失敗時: 要約なしで新聞を表示
-- タイムアウト: 10 秒
-- リトライ: 最大 3 回（指数バックオフ）
+**Error handling:**
+- Bedrock API failure: Display newspaper without summary
+- Timeout: 10 seconds
+- Retry: Up to 3 times (exponential backoff)
 
 
-### 3. 過去の新聞サービス
+### 3. Historical Newspaper Service
 
-**URL 構造:**
+**URL Structure:**
 ```
 /newspapers/[newspaperId]/[date]
-例: /newspapers/uuid-1234/2025-12-09
+Example: /newspapers/uuid-1234/2025-12-09
 ```
 
-**実装方法:**
+**Implementation:**
 
 ```typescript
 async function getOrCreateNewspaper(
@@ -547,19 +362,19 @@ async function getOrCreateNewspaper(
   feedUrls: string[],
   theme: string
 ): Promise<NewspaperData> {
-  // 日付検証
+  // Validate date
   const validation = validateDate(date);
   if (!validation.valid) {
     throw new Error(validation.error);
   }
   
-  // 既存の新聞を取得
+  // Get existing newspaper
   const existing = await getNewspaperByDate(newspaperId, date);
   if (existing) {
-    return existing; // キャッシュから返す
+    return existing; // Return from cache
   }
   
-  // 新しい新聞を生成
+  // Generate new newspaper
   const articles = await fetchArticlesForDate(feedUrls, date);
   const articlesWithImportance = await calculateImportance(articles, theme);
   const languages = await detectLanguages(articlesWithImportance);
@@ -579,11 +394,11 @@ async function getOrCreateNewspaper(
 }
 
 function validateDate(date: string): { valid: boolean; error?: string } {
-  // すべての日付は JST (Asia/Tokyo) で処理
+  // All dates are processed in JST (Asia/Tokyo)
   const targetDate = new Date(date + 'T00:00:00+09:00'); // JST
   const today = new Date();
   
-  // JST の今日の日付（00:00:00）
+  // Today's date in JST (00:00:00)
   const todayJST = new Date(today.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
   todayJST.setHours(0, 0, 0, 0);
   
@@ -604,13 +419,13 @@ function validateDate(date: string): { valid: boolean; error?: string } {
 }
 ```
 
-**記事取得ロジック:**
+**Article fetching logic:**
 ```typescript
 async function fetchArticlesForDate(
   feedUrls: string[],
   date: string
 ): Promise<Article[]> {
-  // すべての日付は JST (Asia/Tokyo) で処理
+  // All dates are processed in JST (Asia/Tokyo)
   const targetDate = new Date(date + 'T00:00:00+09:00'); // JST
   const startOfDay = new Date(targetDate);
   startOfDay.setHours(0, 0, 0, 0);
@@ -620,21 +435,21 @@ async function fetchArticlesForDate(
   todayJST.setHours(0, 0, 0, 0);
   
   const endTime = targetDate.getTime() === todayJST.getTime()
-    ? nowJST // 今日なら現在時刻まで（JST）
-    : new Date(targetDate.setHours(23, 59, 59, 999)); // それ以外は終日
+    ? nowJST // If today, up to current time (JST)
+    : new Date(targetDate.setHours(23, 59, 59, 999)); // Otherwise, full day
   
-  // すべての記事を取得
+  // Fetch all articles
   const allArticles = await Promise.all(
     feedUrls.map(url => parseFeed(url))
   ).then(results => results.flat());
   
-  // 日付範囲でフィルタリング
+  // Filter by date range
   let articles = allArticles.filter(article => {
     const pubDate = new Date(article.pubDate);
     return pubDate >= startOfDay && pubDate <= endTime;
   });
   
-  // 不足している場合、さらに遡る
+  // If insufficient, go back further
   const minArticles = 8;
   if (articles.length < minArticles) {
     const sevenDaysAgo = new Date(startOfDay);
@@ -646,7 +461,7 @@ async function fetchArticlesForDate(
     });
   }
   
-  // 日付順にソート（新しい順）して 8-15 記事を選択
+  // Sort by date (newest first) and select 8-15 articles
   articles.sort((a, b) => 
     new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
   );
@@ -656,9 +471,9 @@ async function fetchArticlesForDate(
 }
 ```
 
-### 4. クリーンアップサービス
+### 4. Cleanup Service
 
-**実装方法:** 毎日 3 AM JST に実行
+**Implementation**: Runs daily at 3 AM JST
 
 ```typescript
 async function cleanupOldNewspapers(): Promise<{ deletedCount: number }> {
@@ -668,12 +483,12 @@ async function cleanupOldNewspapers(): Promise<{ deletedCount: number }> {
   
   const cutoffDate = sevenDaysAgo.toISOString().split('T')[0]; // YYYY-MM-DD
   
-  // 7日より古い新聞をクエリ
+  // Query newspapers older than 7 days
   const oldNewspapers = await queryOldNewspapers(cutoffDate);
   
-  // バッチで削除
+  // Delete in batches
   let deletedCount = 0;
-  const batchSize = 25; // DynamoDB バッチ書き込み制限
+  const batchSize = 25; // DynamoDB batch write limit
   
   for (let i = 0; i < oldNewspapers.length; i += batchSize) {
     const batch = oldNewspapers.slice(i, i + batchSize);
@@ -681,29 +496,28 @@ async function cleanupOldNewspapers(): Promise<{ deletedCount: number }> {
     deletedCount += batch.length;
   }
   
-  console.log(`クリーンアップ完了: ${deletedCount} 件の新聞を削除`);
+  console.log(`Cleanup complete: ${deletedCount} newspapers deleted`);
   return { deletedCount };
 }
 ```
 
-**EventBridge スケジュール:**
+**EventBridge Schedule:**
 ```hcl
 # infra/modules/eventbridge/main.tf
 resource "aws_cloudwatch_event_rule" "cleanup_schedule" {
   name                = "myrsspress-cleanup-schedule"
-  description         = "毎日 3 AM JST にクリーンアップ Lambda をトリガー"
-  schedule_expression = "cron(0 18 * * ? *)" # 3 AM JST = 6 PM UTC (前日)
+  description         = "Trigger cleanup Lambda daily at 3 AM JST"
+  schedule_expression = "cron(0 18 * * ? *)" # 3 AM JST = 6 PM UTC (previous day)
 }
 ```
 
+### 5. Copyright-Free Image Service
 
-### 5. 著作権フリー画像サービス
-
-**実装方法:** Unsplash Source API を使用
+**Implementation**: Using Unsplash Source API
 
 ```typescript
 export function CopyrightFreeImage({ theme, alt }: { theme?: string; alt: string }) {
-  // Unsplash Source API を使用
+  // Use Unsplash Source API
   const imageUrl = theme 
     ? `https://source.unsplash.com/800x600/?${encodeURIComponent(theme)}`
     : 'https://source.unsplash.com/800x600/?newspaper,news';
@@ -714,7 +528,7 @@ export function CopyrightFreeImage({ theme, alt }: { theme?: string; alt: string
       alt={alt}
       className="w-full h-auto object-cover"
       onError={(e) => {
-        // フォールバック: ローカルプレースホルダー
+        // Fallback: Local placeholder
         e.currentTarget.src = '/placeholder-newspaper.jpg';
       }}
     />
@@ -722,79 +536,80 @@ export function CopyrightFreeImage({ theme, alt }: { theme?: string; alt: string
 }
 ```
 
-**使用例:**
+**Usage example:**
 ```typescript
-// リード記事
+// Lead article
 <article className="lead-article">
   {layout.lead.imageUrl ? (
     <img src={layout.lead.imageUrl} alt={layout.lead.title} />
   ) : (
     <CopyrightFreeImage theme={theme} alt={layout.lead.title} />
   )}
-  {/* 記事の残り */}
+  {/* Rest of article */}
 </article>
 ```
 
-**代替サービス:**
+**Alternative services:**
 - Unsplash Source API: `https://source.unsplash.com/`
 - Picsum Photos: `https://picsum.photos/`
 - Lorem Picsum: `https://loremflickr.com/`
 
-**注意:** プレースホルダー画像をキャッシュして、繰り返しの API 呼び出しを避けることを検討。
+**Note:** Consider caching placeholder images to avoid repeated API calls.
 
-## データモデル
 
-### 拡張新聞モデル
+## Data Models
+
+### Extended Newspaper Model
 
 ```typescript
 interface Newspaper {
   newspaperId: string;      // UUID
-  newspaperDate?: string;   // ISO 8601 日付 (YYYY-MM-DD) - 新規
-  name: string;             // 新聞名
-  userName: string;         // 作成者名
-  userId?: string;          // ユーザー ID（オプション）
-  feedUrls: string[];       // RSS フィード URL
-  languages?: string[];     // 言語タグ ["JP", "EN"] - 新規（オプショナル）
-  summary?: string;         // AI 生成要約 - 新規
-  articles?: Article[];     // 記事データ（過去の新聞用）- 新規
-  createdAt: string;        // 作成タイムスタンプ (ISO 8601)
-  updatedAt: string;        // 更新タイムスタンプ (ISO 8601)
-  viewCount: number;        // 閲覧数
-  isPublic: boolean;        // 公開/非公開
+  newspaperDate?: string;   // ISO 8601 date (YYYY-MM-DD) - New
+  name: string;             // Newspaper name
+  userName: string;         // Creator name
+  userId?: string;          // User ID (optional)
+  feedUrls: string[];       // RSS feed URLs
+  languages?: string[];     // Language tags ["JP", "EN"] - New (optional)
+  summary?: string;         // AI-generated summary - New
+  articles?: Article[];     // Article data (for historical newspapers) - New
+  createdAt: string;        // Creation timestamp (ISO 8601)
+  updatedAt: string;        // Update timestamp (ISO 8601)
+  viewCount: number;        // View count
+  isPublic: boolean;        // Public/private
 }
 ```
 
-### 既存の新聞の後方互換性
+### Backward Compatibility for Existing Newspapers
 
-**問題**: Phase-1 で作成された既存の新聞には `languages` フィールドがない
+**Problem**: Existing newspapers created in Phase 1 don't have the `languages` field
 
-**解決策**:
+**Solution**:
 
-1. **フィールドをオプショナルにする**:
-   - `languages?: string[]` - 存在しない場合もある
-   - TypeScript の型定義で `?` を使用
+1. **Make field optional**:
+   - `languages?: string[]` - May not exist
+   - Use `?` in TypeScript type definition
 
-2. **フロントエンドでのデフォルト処理**:
+2. **Default handling in frontend**:
    ```typescript
-   // 言語フィルターでの処理
+   // Handling in language filter
    function filterByLanguage(newspapers: Newspaper[], selectedLanguage: 'JP' | 'EN'): Newspaper[] {
      return newspapers.filter(newspaper => {
-       // languages フィールドがない場合は、すべての言語フィルターで表示
+       // If no languages field, display in all language filters
        if (!newspaper.languages || newspaper.languages.length === 0) {
-         return true; // 言語不明の新聞は常に表示
+         return true; // Always display newspapers with unknown language
        }
        return newspaper.languages.includes(selectedLanguage);
      });
    }
    ```
 
-3. **バックエンドでの処理**:
+3. **Backend handling**:
    ```typescript
-   // 既存の新聞を取得する際
+   // When retrieving existing newspapers
    async function getNewspaper(newspaperId: string): Promise<Newspaper> {
      const newspaper = await dynamodb.get({ PK: `NEWSPAPER#${newspaperId}`, SK: 'METADATA' });
      
-     // languages フィールドがない場合は空配列をデフォルトにする
+     // Default to empty array if no languages field
      return {
        ...newspaper,
        languages: newspaper.languages || [],
@@ -802,83 +617,82 @@ interface Newspaper {
    }
    ```
 
-4. **UI での表示**:
-   - 言語タグがない新聞: 言語バッジを表示しない
-   - または「言語不明」バッジを表示
+4. **UI display**:
+   - Newspapers without language tags: Don't display language badge
+   - Or display "Language unknown" badge
 
-5. **検索での扱い**:
-   - 言語フィルター選択時、`languages` がない新聞も結果に含める
-   - ユーザーは言語不明の新聞も閲覧できる
+5. **Search handling**:
+   - When language filter is selected, include newspapers without `languages` in results
+   - Users can view newspapers with unknown language
 
-**マイグレーション不要**:
-- 既存の新聞レコードを更新する必要はない
-- 新しく作成される新聞のみ `languages` フィールドを持つ
-- 段階的に新しいフィールドが追加される
+**No migration needed**:
+- No need to update existing newspaper records
+- Only newly created newspapers will have `languages` field
+- New fields are added gradually
 
-**言語設定がない新聞の挙動**:
+**Behavior of newspapers without language settings**:
 
-1. **表示**: すべての言語フィルターで表示される
-   - JP フィルター選択時: ✅ 表示される
-   - EN フィルター選択時: ✅ 表示される
-   - 理由: ユーザーが既存の新聞を見られなくなるのを防ぐ
+1. **Display**: Shown in all language filters
+   - JP filter selected: ✅ Displayed
+   - EN filter selected: ✅ Displayed
+   - Reason: Prevent users from not being able to see existing newspapers
 
-2. **検索**: フリーワード検索で検索できる
-   - タイトルで検索: ✅ 検索できる
-   - フィードURLで検索: ✅ 検索できる
-   - 言語に関係なく検索される
+2. **Search**: Searchable with free-word search
+   - Search by title: ✅ Searchable
+   - Search by feed URL: ✅ Searchable
+   - Searched regardless of language
 
-3. **人気の新聞 / 最近の新聞**: 通常通り表示される
-   - ソート順: 閲覧数または作成日時
-   - 言語フィルター適用後も残る
+3. **Popular/Recent newspapers**: Displayed normally
+   - Sort order: View count or creation date
+   - Remains after language filter applied
 
-4. **UI 表示**: 言語バッジを表示しない
-   - 言語タグがない → バッジなし
-   - または「言語不明」バッジを表示（オプション）
+4. **UI display**: Don't display language badge
+   - No language tag → No badge
+   - Or display "Language unknown" badge (optional)
 
-5. **API レスポンス**: `languages: []` として返す
+5. **API response**: Return as `languages: []`
    ```json
    {
      "newspaperId": "uuid-1234",
      "name": "Old Newspaper",
-     "languages": [],  // 空配列
+     "languages": [],  // Empty array
      "createdAt": "2025-12-01T10:00:00Z"
    }
    ```
-```
 
-### DynamoDB スキーマ更新
+### DynamoDB Schema Update
 
-**Newspapers テーブル:**
+**Newspapers Table:**
 
-**プライマリキー:**
-- パーティションキー: `PK` = `NEWSPAPER#{newspaperId}` (String)
-- ソートキー: `SK` = `DATE#{date}` または `METADATA` (String)
+**Primary Key:**
+- Partition Key: `PK` = `NEWSPAPER#{newspaperId}` (String)
+- Sort Key: `SK` = `DATE#{date}` or `METADATA` (String)
 
-**属性:**
-- Phase-1 の既存属性すべて
-- `languages: string[]` - 言語タグ（例: ["JP", "EN"]）
-- `summary: string` - AI 生成要約（100-200 文字）
-- `newspaperDate: string` - YYYY-MM-DD 形式の日付
-- `articles: Article[]` - 完全な記事データ（過去の新聞用）
+**Attributes:**
+- All existing attributes from Phase 1
+- `languages: string[]` - Language tags (e.g., ["JP", "EN"])
+- `summary: string` - AI-generated summary (100-200 characters)
+- `newspaperDate: string` - Date in YYYY-MM-DD format
+- `articles: Article[]` - Complete article data (for historical newspapers)
 
-**アクセスパターン:**
+**Access Patterns:**
 
-1. **新聞メタデータを取得（現在）:**
+1. **Get newspaper metadata (current)**:
    - `PK = NEWSPAPER#{newspaperId}`, `SK = METADATA`
 
-2. **特定の日付の新聞を取得:**
+2. **Get newspaper for specific date**:
    - `PK = NEWSPAPER#{newspaperId}`, `SK = DATE#{date}`
 
-3. **新聞のすべての日付を取得:**
+3. **Get all dates for a newspaper**:
    - `PK = NEWSPAPER#{newspaperId}`, `SK begins_with DATE#`
 
-4. **言語で公開新聞を取得:**
-   - GSI を使用してクエリ後、クライアント側で言語フィルタリング
+4. **Get public newspapers by language**:
+   - Query using GSI, then filter by language on client side
 
-**レコード例:**
+**Record examples:**
 
 ```typescript
-// 現在の新聞（メタデータのみ）
+// Current newspaper (metadata only)
 {
   PK: "NEWSPAPER#uuid-1234",
   SK: "METADATA",
@@ -887,7 +701,7 @@ interface Newspaper {
   userName: "John Doe",
   feedUrls: ["https://example.com/tech-feed"],
   languages: ["EN"],
-  summary: "今日のテクノロジーニュースは AI の進歩、スタートアップの資金調達、クラウドコンピューティングのトレンドをカバーしています。",
+  summary: "Today's tech news covers AI advances, startup funding, and cloud computing trends.",
   createdAt: "2025-12-09T10:00:00Z",
   updatedAt: "2025-12-09T10:00:00Z",
   viewCount: 42,
@@ -898,7 +712,7 @@ interface Newspaper {
   GSI2SK: "CREATED#2025-12-09T10:00:00Z#uuid-1234"
 }
 
-// 過去の新聞（記事付き）
+// Historical newspaper (with articles)
 {
   PK: "NEWSPAPER#uuid-1234",
   SK: "DATE#2025-12-09",
@@ -907,7 +721,7 @@ interface Newspaper {
   name: "Tech Morning Digest",
   feedUrls: ["https://example.com/tech-feed"],
   languages: ["EN"],
-  summary: "今日のテクノロジーニュースは AI の進歩...",
+  summary: "Today's tech news covers AI advances...",
   articles: [
     {
       title: "AI Breakthrough",
@@ -923,32 +737,32 @@ interface Newspaper {
 ```
 
 
-## API エンドポイント
+## API Endpoints
 
-### 新しいエンドポイント
+### New Endpoints
 
 #### GET /api/newspapers/:newspaperId/:date
-**目的:** 特定の日付の新聞を取得または作成
+**Purpose**: Get or create newspaper for a specific date
 
-**リクエスト:**
+**Request:**
 ```
 GET /api/newspapers/uuid-1234/2025-12-09
 ```
 
-**レスポンス:**
+**Response:**
 ```json
 {
   "newspaperId": "uuid-1234",
   "newspaperDate": "2025-12-09",
   "name": "Tech Morning Digest",
   "languages": ["EN"],
-  "summary": "今日のテクノロジーニュースは AI の進歩、スタートアップの資金調達、クラウドコンピューティングのトレンドをカバーしています。",
+  "summary": "Today's tech news covers AI advances, startup funding, and cloud computing trends.",
   "articles": [...],
   "createdAt": "2025-12-09T10:00:00Z"
 }
 ```
 
-**エラーレスポンス:**
+**Error Responses:**
 ```json
 // Future date
 {
@@ -970,9 +784,9 @@ GET /api/newspapers/uuid-1234/2025-12-09
 ```
 
 #### GET /api/newspapers/:newspaperId/dates
-**目的:** 新聞の利用可能な日付リストを取得
+**Purpose**: Get list of available dates for a newspaper
 
-**レスポンス:**
+**Response:**
 ```json
 {
   "dates": [
@@ -984,10 +798,10 @@ GET /api/newspapers/uuid-1234/2025-12-09
 }
 ```
 
-### 更新されたエンドポイント
+### Updated Endpoints
 
 #### POST /api/newspapers
-**リクエスト（更新）:**
+**Request (updated):**
 ```json
 {
   "name": "Tech Morning Digest",
@@ -1000,33 +814,33 @@ GET /api/newspapers/uuid-1234/2025-12-09
 }
 ```
 
-**レスポンス（更新）:**
+**Response (updated):**
 ```json
 {
   "newspaperId": "uuid-1234",
   "languages": ["EN"],
-  "summary": "今日のテクノロジーニュースは AI の進歩...",
+  "summary": "Today's tech news covers AI advances...",
   "createdAt": "2025-12-09T10:00:00Z"
 }
 ```
 
-**バックエンド処理:**
-1. 記事から言語を検出
-2. Bedrock を使用して要約を生成
-3. 言語と要約を含めて新聞を保存
+**Backend processing:**
+1. Detect languages from articles
+2. Generate summary using Bedrock
+3. Save newspaper with languages and summary
 
 #### GET /api/newspapers?sort=popular&limit=10&language=JP
-**リクエスト（更新）:**
+**Request (updated):**
 ```
 GET /api/newspapers?sort=popular&limit=10&language=JP
 ```
 
-**クエリパラメータ:**
-- `sort`: `popular` または `recent`
-- `limit`: 結果数（デフォルト: 10、最大: 50）
-- `language`: `JP`、`EN`、または省略で全て（新規）
+**Query Parameters:**
+- `sort`: `popular` or `recent`
+- `limit`: Number of results (default: 10, max: 50)
+- `language`: `JP`, `EN`, or omit for all (new)
 
-**レスポンス（更新）:**
+**Response (updated):**
 ```json
 {
   "newspapers": [
@@ -1035,7 +849,7 @@ GET /api/newspapers?sort=popular&limit=10&language=JP
       "name": "Tech Morning Digest",
       "userName": "John Doe",
       "languages": ["JP", "EN"],
-      "summary": "今日のテクノロジーニュース...",
+      "summary": "Today's tech news...",
       "createdAt": "2025-12-09T10:00:00Z",
       "viewCount": 42
     }
@@ -1043,188 +857,188 @@ GET /api/newspapers?sort=popular&limit=10&language=JP
 }
 ```
 
-## 正確性プロパティ
 
-*プロパティとは、システムのすべての有効な実行において真であるべき特性または動作です。本質的には、システムが何をすべきかについての形式的な記述です。プロパティは、人間が読める仕様と機械で検証可能な正確性保証の橋渡しをします。*
+## Correctness Properties
 
-### プロパティ 1: 日本語の言語検出
-*任意の* 日本語文字（ひらがな、カタカナ、または漢字）を含む記事に対して、言語検出は "JP" と識別すべきである
-**検証: 要件 1.1, 1.2**
+*A property is a characteristic or behavior that should be true for all valid executions of the system. It's essentially a formal statement about what the system should do. Properties bridge the gap between human-readable specifications and machine-verifiable correctness guarantees.*
 
-### プロパティ 2: 英語の言語検出
-*任意の* 日本語文字を含まない記事に対して、言語検出は "EN" と識別すべきである
-**検証: 要件 1.1, 1.3**
+### Property 1: Japanese Language Detection
+For *any* article containing Japanese characters (hiragana, katakana, or kanji), language detection should identify it as "JP"
+**Verifies: Requirements 1.1, 1.2**
 
-### プロパティ 3: 混合言語検出
-*任意の* 日本語と英語の両方の記事を含む新聞に対して、languages 配列は ["JP", "EN"] の両方を含むべきである
-**検証: 要件 1.4**
+### Property 2: English Language Detection
+For *any* article containing no Japanese characters, language detection should identify it as "EN"
+**Verifies: Requirements 1.1, 1.3**
 
-### プロパティ 4: 言語フィルターの正確性
-*任意の* 言語フィルター選択（JP または EN）に対して、表示されるすべての新聞はその言語を languages 配列に含むべきである
-**検証: 要件 2.4, 2.5, 2.6**
+### Property 3: Mixed Language Detection
+For *any* newspaper containing both Japanese and English articles, the languages array should contain both ["JP", "EN"]
+**Verifies: Requirement 1.4**
 
-### プロパティ 5: デフォルト言語選択
-*任意の* 日本語 UI ロケールのユーザーに対して、デフォルトの言語フィルターは "JP" であるべきで、英語 UI ロケールの場合は "EN" であるべきである
-**検証: 要件 2.2, 2.3**
+### Property 4: Language Filter Accuracy
+For *any* language filter selection (JP or EN), all displayed newspapers should contain that language in their languages array
+**Verifies: Requirements 2.4, 2.5, 2.6**
 
-### プロパティ 6: 検索フィルターの完全性
-*任意の* 検索クエリに対して、表示されるすべての新聞はタイトルまたはフィード URL にクエリ文字列を含むべきである
-**検証: 要件 3.3, 3.4**
+### Property 5: Default Language Selection
+For *any* user with Japanese UI locale, the default language filter should be "JP", and for English UI locale, it should be "EN"
+**Verifies: Requirements 2.2, 2.3**
 
-### プロパティ 7: 日付検証 - 未来の拒否
-*任意の* 未来の日付に対して、システムは「未来の新聞は利用できません」エラーでリクエストを拒否すべきである
-**検証: 要件 4.6**
+### Property 6: Search Filter Completeness
+For *any* search query, all displayed newspapers should contain the query string in either title or feed URL
+**Verifies: Requirements 3.3, 3.4**
 
-### プロパティ 8: 日付検証 - 7日間ウィンドウ
-*任意の* 今日から 7 日より古い日付に対して、システムは適切なエラーメッセージでリクエストを拒否すべきである
-**検証: 要件 4.7**
+### Property 7: Date Validation - Future Rejection
+For *any* future date, the system should reject the request with "Future newspapers are not available" error
+**Verifies: Requirement 4.6**
 
-### プロパティ 9: 過去の新聞のキャッシング
-*任意の* 以前にアクセスされた日付に対して、2 回目のアクセスは再生成せずに同じ新聞を返すべきである
-**検証: 要件 4.5**
+### Property 8: Date Validation - 7-Day Window
+For *any* date older than 7 days from today, the system should reject the request with appropriate error message
+**Verifies: Requirement 4.7**
 
-### プロパティ 10: 日付ベースの記事フィルタリング
-*任意の* 過去の新聞生成に対して、記事は対象日付（00:00 から現在時刻まで）から優先されるべきである
-**検証: 要件 4.3, 4.4**
+### Property 9: Historical Newspaper Caching
+For *any* previously accessed date, the second access should return the same newspaper without regeneration
+**Verifies: Requirement 4.5**
 
-### プロパティ 11: 要約の長さ制約
-*任意の* 生成された要約に対して、100 から 250 文字の間であるべきである
-**検証: 要件 7.2**
+### Property 10: Date-Based Article Filtering
+For *any* historical newspaper generation, articles should be prioritized from the target date (00:00 to current time)
+**Verifies: Requirements 4.3, 4.4**
 
-### プロパティ 12: 要約のキャッシング
-*任意の* 要約付きで保存された新聞に対して、再度取得すると再生成せずに同じ要約を返すべきである
-**検証: 要件 7.5**
+### Property 11: Summary Length Constraint
+For *any* generated summary, it should be between 100 and 250 characters
+**Verifies: Requirement 7.2**
 
-### プロパティ 13: メインエリアの画像存在
-*任意の* 新聞レイアウトに対して、リード記事は常に画像を持つべきである（元画像または著作権フリープレースホルダー）
-**検証: 要件 6.1, 6.3**
+### Property 12: Summary Caching
+For *any* newspaper saved with a summary, retrieving it again should return the same summary without regeneration
+**Verifies: Requirement 7.5**
 
-### プロパティ 14: クリーンアップの日付閾値
-*任意の* 7 日より古い新聞に対して、クリーンアッププロセスはそれを削除すべきである
-**検証: 要件 10.1**
+### Property 13: Main Area Image Presence
+For *any* newspaper layout, the lead article should always have an image (original or copyright-free placeholder)
+**Verifies: Requirements 6.1, 6.3**
 
-### プロパティ 15: 言語の永続性
-*任意の* 保存された新聞に対して、ID で取得すると同じ languages 配列を返すべきである
-**検証: 要件 1.5, 8.1**
+### Property 14: Cleanup Date Threshold
+For *any* newspaper older than 7 days, the cleanup process should delete it
+**Verifies: Requirement 10.1**
 
-### プロパティ 16: 要約の永続性
-*任意の* 要約付きで保存された新聞に対して、ID で取得すると同じ要約を返すべきである
-**検証: 要件 7.4, 8.2**
+### Property 15: Language Persistence
+For *any* saved newspaper, retrieving it by ID should return the same languages array
+**Verifies: Requirements 1.5, 8.1**
 
-### プロパティ 17: 日付ベース URL 構造
-*任意の* 日付パラメータ付きの新聞に対して、URL は /newspapers/[id]/[YYYY-MM-DD] の形式に従うべきである
-**検証: 要件 4.1**
+### Property 16: Summary Persistence
+For *any* newspaper saved with a summary, retrieving it by ID should return the same summary
+**Verifies: Requirements 7.4, 8.2**
 
-### プロパティ 18: ローディングアニメーション表示
-*任意の* 新聞生成プロセスに対して、完了までローディングアニメーションが表示されるべきである
-**検証: 要件 5.1, 5.2, 5.3**
+### Property 17: Date-Based URL Structure
+For *any* newspaper with a date parameter, the URL should follow the format /newspapers/[id]/[YYYY-MM-DD]
+**Verifies: Requirement 4.1**
 
+### Property 18: Loading Animation Display
+For *any* newspaper generation process, a loading animation should be displayed until completion
+**Verifies: Requirements 5.1, 5.2, 5.3**
 
-## テスト戦略
+## Test Strategy
 
-### ユニットテスト
+### Unit Tests
 
-**フロントエンド:**
-- 言語フィルターコンポーネントの動作
-- 検索フィルターロジック
-- 日付検証ロジック
-- 日付ナビゲーションコンポーネント
-- ローディングアニメーション表示
-- 著作権フリー画像のフォールバック
+**Frontend:**
+- Language filter component behavior
+- Search filter logic
+- Date validation logic
+- Date navigation component
+- Loading animation display
+- Copyright-free image fallback
 
-**バックエンド:**
-- 言語検出アルゴリズム（日本語文字カウント）
-- Bedrock を使用した要約生成
-- 過去の新聞サービス
-- 日付検証ロジック
-- クリーンアップサービスロジック
-- 日付範囲による記事フィルタリング
+**Backend:**
+- Language detection algorithm (Japanese character counting)
+- Summary generation with Bedrock
+- Historical newspaper service
+- Date validation logic
+- Cleanup service logic
+- Article filtering by date range
 
-**カバレッジ目標:** 60% 以上
+**Coverage Goal:** 60% or higher
 
-### プロパティベーステスト
+### Property-Based Tests
 
-**テストフレームワーク:** fast-check
+**Test Framework:** fast-check
 
-**設定:**
-- 各プロパティテストは最低 100 回の反復を実行
-- 各テストは設計書の正確性プロパティを明示的に参照
-- タグ形式: `**Feature: phase-2, Property {number}: {property_text}**`
+**Configuration:**
+- Each property test runs at least 100 iterations
+- Each test explicitly references design document correctness properties
+- Tag format: `**Feature: phase-2, Property {number}: {property_text}**`
 
-**テストするプロパティ:**
-1. 言語検出（プロパティ 1, 2, 3）
-2. 言語フィルタリング（プロパティ 4, 5）
-3. 検索フィルタリング（プロパティ 6）
-4. 日付検証（プロパティ 7, 8）
-5. 過去の新聞のキャッシング（プロパティ 9）
-6. 日付ベースの記事フィルタリング（プロパティ 10）
-7. 要約生成（プロパティ 11, 12）
-8. 画像の存在（プロパティ 13）
-9. クリーンアップロジック（プロパティ 14）
-10. データの永続性（プロパティ 15, 16, 17）
-11. ローディングアニメーション（プロパティ 18）
+**Properties to Test:**
+1. Language detection (Properties 1, 2, 3)
+2. Language filtering (Properties 4, 5)
+3. Search filtering (Property 6)
+4. Date validation (Properties 7, 8)
+5. Historical newspaper caching (Property 9)
+6. Date-based article filtering (Property 10)
+7. Summary generation (Properties 11, 12)
+8. Image presence (Property 13)
+9. Cleanup logic (Property 14)
+10. Data persistence (Properties 15, 16, 17)
+11. Loading animation (Property 18)
 
-### E2E テスト (Playwright)
+### E2E Tests (Playwright)
 
-**新しいテストシナリオ:**
-- 言語フィルター選択と新聞フィルタリング
-- フリーワード検索機能
-- 日付ナビゲーション（前日/翌日）
-- 初回アクセス時の過去の新聞生成
-- 2 回目アクセス時の過去の新聞取得
-- 未来の日付の拒否
-- 古い日付（> 7 日）の拒否
-- 生成中のローディングアニメーション表示
-- 新聞内の要約表示
-- 著作権フリー画像のフォールバック
+**New Test Scenarios:**
+- Language filter selection and newspaper filtering
+- Free-word search functionality
+- Date navigation (previous/next day)
+- Historical newspaper generation on first access
+- Historical newspaper retrieval on second access
+- Future date rejection
+- Old date (> 7 days) rejection
+- Loading animation display during generation
+- Summary display in newspaper
+- Copyright-free image fallback
 
-## パフォーマンス最適化
+## Performance Optimization
 
-### 言語検出
+### Language Detection
 
-**戦略:** 文字ベースの検出（外部 API なし）
-- 実行時間: < 1ms/記事
-- コスト: ゼロ
-- 精度: JP/EN 検出には十分
+**Strategy:** Character-based detection (no external API)
+- Execution time: < 1ms/article
+- Cost: Zero
+- Accuracy: Sufficient for JP/EN detection
 
-### 要約生成
+### Summary Generation
 
-**戦略:** DynamoDB に要約をキャッシュ
-- 初回生成: ~5-10 秒
-- 以降の取得: < 100ms（キャッシュから）
-- コスト: ~$0.0001/生成
+**Strategy:** Cache summaries in DynamoDB
+- First generation: ~5-10 seconds
+- Subsequent retrieval: < 100ms (from cache)
+- Cost: ~$0.0001/generation
 
-### 過去の新聞の読み込み
+### Historical Newspaper Loading
 
-**戦略:** 遅延読み込みとキャッシング
-- 初回アクセス: 生成して保存（~5-8 秒）
-- 2 回目アクセス: DynamoDB から取得（< 200ms）
-- 再生成不要
+**Strategy:** Lazy loading and caching
+- First access: Generate and save (~5-8 seconds)
+- Second access: Retrieve from DynamoDB (< 200ms)
+- No regeneration needed
 
-### 検索とフィルタリング
+### Search and Filtering
 
-**戦略:** クライアント側フィルタリング（バックエンドクエリなし）
-- 実行時間: 100 件の新聞で < 100ms
-- バックエンドコスト: ゼロ
-- リアルタイム更新
+**Strategy:** Client-side filtering (no backend query)
+- Execution time: < 100ms for 100 newspapers
+- Backend cost: Zero
+- Real-time updates
 
-### クリーンアップパフォーマンス
+### Cleanup Performance
 
-**戦略:** ページネーション付きバッチ削除
-- バッチあたり 25 件の新聞を処理（DynamoDB 制限）
-- 実行時間: 100 件の新聞あたり ~1-2 秒
-- 低トラフィック時間帯（3 AM JST）にスケジュール
+**Strategy:** Batch deletion with pagination
+- Process 25 newspapers per batch (DynamoDB limit)
+- Execution time: ~1-2 seconds per 100 newspapers
+- Scheduled during low-traffic hours (3 AM JST)
 
-## デプロイ
+## Deployment
 
-### インフラストラクチャの更新
+### Infrastructure Updates
 
-**新しいリソース:**
-- クリーンアップスケジュール用 EventBridge ルール
-- クリーンアップ Lambda 関数
-- 拡張 DynamoDB スキーマ（マイグレーション不要）
+**New Resources:**
+- EventBridge rule for cleanup schedule
+- Cleanup Lambda function
+- Extended DynamoDB schema (no migration needed)
 
-**Terraform モジュール:**
+**Terraform Modules:**
 ```hcl
 # infra/modules/eventbridge/
 module "cleanup_schedule" {
@@ -1250,92 +1064,92 @@ resource "aws_lambda_function" "cleanup" {
 }
 ```
 
-### デプロイ戦略
+### Deployment Strategy
 
-**Phase-2 デプロイ:**
-1. インフラストラクチャの更新をデプロイ（Terraform）
-2. 新しいエンドポイントを含むバックエンドをデプロイ（GitHub Actions）
-3. 新しいコンポーネントを含むフロントエンドをデプロイ（Amplify）
-4. クリーンアップ Lambda の実行を確認
-5. CloudWatch Logs を監視
+**Phase 2 Deployment:**
+1. Deploy infrastructure updates (Terraform)
+2. Deploy backend with new endpoints (GitHub Actions)
+3. Deploy frontend with new components (Amplify)
+4. Verify cleanup Lambda execution
+5. Monitor CloudWatch Logs
 
-**ロールバック計画:**
-- バックエンド: 以前の Lambda イメージに戻す
-- フロントエンド: Amplify デプロイを戻す
-- インフラストラクチャ: 以前の状態で `terraform apply`
+**Rollback Plan:**
+- Backend: Revert to previous Lambda image
+- Frontend: Revert Amplify deployment
+- Infrastructure: Apply previous state with `terraform apply`
 
-### 監視
+### Monitoring
 
-**CloudWatch メトリクス:**
-- 言語検出の実行時間
-- 要約生成の成功率
-- 過去の新聞のキャッシュヒット率
-- クリーンアップの実行回数
-- エンドポイントごとのエラー率
+**CloudWatch Metrics:**
+- Language detection execution time
+- Summary generation success rate
+- Historical newspaper cache hit rate
+- Cleanup execution count
+- Error rate per endpoint
 
-**CloudWatch アラーム:**
-- 要約生成の失敗率 > 10%
-- クリーンアップ Lambda の失敗
-- 過去の新聞生成時間 > 10 秒
-- DynamoDB のスロットリング
+**CloudWatch Alarms:**
+- Summary generation failure rate > 10%
+- Cleanup Lambda failure
+- Historical newspaper generation time > 10 seconds
+- DynamoDB throttling
 
-## エラーハンドリング
+## Error Handling
 
-### フロントエンドエラー
+### Frontend Errors
 
-**言語フィルターエラー:**
-- フィルターに一致する新聞がない → 「新聞が見つかりません」メッセージを表示
-- フィルタリング中のネットワークエラー → 再試行オプション付きエラーを表示
+**Language Filter Errors:**
+- No newspapers match filter → Display "No newspapers found" message
+- Network error during filtering → Display error with retry option
 
-**検索エラー:**
-- 検索結果なし → 「'{query}' の検索結果が見つかりません」メッセージを表示
+**Search Errors:**
+- No search results → Display "No newspapers found for '{query}'" message
 
-**日付ナビゲーションエラー:**
-- 未来の日付を選択 → "Future newspapers are not available" アラートを表示
-- 7 日より古い日付 → "Newspapers older than 7 days are not available" アラートを表示
-- 無効な日付形式 → "Invalid date format" アラートを表示
+**Date Navigation Errors:**
+- Future date selected → Display "Future newspapers are not available" alert
+- Date older than 7 days → Display "Newspapers older than 7 days are not available" alert
+- Invalid date format → Display "Invalid date format" alert
 
-**画像読み込みエラー:**
-- 著作権フリー画像の読み込み失敗 → ローカルプレースホルダー画像にフォールバック
-- 元記事画像の失敗 → 著作権フリープレースホルダーを表示
+**Image Loading Errors:**
+- Copyright-free image load failure → Fall back to local placeholder image
+- Original article image failure → Display copyright-free placeholder
 
-### バックエンドエラー
+### Backend Errors
 
-**言語検出エラー:**
-- 検出失敗 → 空の配列 `[]` をデフォルトにしてエラーをログ
-- 新聞生成を続行
+**Language Detection Errors:**
+- Detection failure → Default to empty array `[]` and log error
+- Continue newspaper generation
 
-**要約生成エラー:**
-- Bedrock API タイムアウト → 要約に `null` を返し、要約なしで新聞を表示
-- API レート制限 → 指数バックオフで再試行（最大 3 回）
-- 無効なレスポンス → エラーをログして `null` を返す
+**Summary Generation Errors:**
+- Bedrock API timeout → Return `null` for summary, display newspaper without summary
+- API rate limit → Retry with exponential backoff (max 3 times)
+- Invalid response → Log error and return `null`
 
-**過去の新聞エラー:**
-- 日付検証失敗 → 特定のメッセージで 400 エラーを返す
-- 日付の記事不足 → 400 エラー "Insufficient articles for this date" を返す
-- DynamoDB クエリ失敗 → 指数バックオフで再試行（最大 3 回）
+**Historical Newspaper Errors:**
+- Date validation failure → Return 400 error with specific message
+- Insufficient articles for date → Return 400 error "Insufficient articles for this date"
+- DynamoDB query failure → Retry with exponential backoff (max 3 times)
 
-**クリーンアップエラー:**
-- DynamoDB バッチ削除失敗 → エラーをログして次のバッチを続行
-- Lambda タイムアウト → 部分完了をログして次のスケジュール実行で再試行
+**Cleanup Errors:**
+- DynamoDB batch delete failure → Log error and continue with next batch
+- Lambda timeout → Log partial completion and retry on next scheduled run
 
-### エラーロギング
+### Error Logging
 
-すべてのエラーは CloudWatch Logs に以下を含めてログ:
-- タイムスタンプ
-- エラータイプ
-- スタックトレース
-- リクエストコンテキスト（newspaperId、日付、言語など）
-- ユーザーアクション（該当する場合）
+All errors are logged to CloudWatch Logs with:
+- Timestamp
+- Error type
+- Stack trace
+- Request context (newspaperId, date, language, etc.)
+- User action (if applicable)
 
-### エラー回復
+### Error Recovery
 
-**自動再試行:**
-- Bedrock API 呼び出し: 指数バックオフで 3 回試行
-- DynamoDB 操作: 指数バックオフで 3 回試行
-- RSS フィード取得: 失敗したフィードをスキップして続行
+**Automatic Retry:**
+- Bedrock API calls: 3 attempts with exponential backoff
+- DynamoDB operations: 3 attempts with exponential backoff
+- RSS feed fetching: Skip failed feeds and continue
 
-**グレースフルデグラデーション:**
-- 要約生成失敗 → 要約なしで新聞を表示
-- 言語検出失敗 → 言語タグなしで新聞を表示
-- 画像読み込み失敗 → プレースホルダー画像を表示
+**Graceful Degradation:**
+- Summary generation failure → Display newspaper without summary
+- Language detection failure → Display newspaper without language tags
+- Image loading failure → Display placeholder image

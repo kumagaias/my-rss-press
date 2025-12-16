@@ -163,29 +163,27 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Selection] Selected top ${maxFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
     }
 
-    // If we have less than 3 valid feeds, supplement with defaults (max 2 default feeds)
-    if (topFeeds.length < 3) {
-      console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with defaults (max 2)`);
-      const defaultFeeds = getDefaultFeedSuggestions(theme);
+    // Minimum 2 feeds required
+    // If we have less than 2 valid feeds, supplement with 1 random default feed
+    if (topFeeds.length < 2) {
+      console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with 1 random default feed`);
+      const defaultFeeds = getDefaultFeedSuggestions(theme, locale);
       
-      // Add default feeds that aren't already in the list (max 2)
+      // Add the random default feed if it's not already in the list
       const existingUrls = new Set(topFeeds.map(s => s.url));
-      let defaultFeedsAdded = 0;
-      const maxDefaultFeeds = 2;
       
       for (const defaultFeed of defaultFeeds) {
-        if (defaultFeedsAdded >= maxDefaultFeeds) {
-          break;
-        }
         if (!existingUrls.has(defaultFeed.url)) {
           // Mark as default feed for lower priority
           topFeeds.push({ ...defaultFeed, isDefault: true } as any);
-          console.log(`[Fallback] Added default feed (${defaultFeedsAdded + 1}/${maxDefaultFeeds}): ${defaultFeed.url}`);
-          defaultFeedsAdded++;
+          console.log(`[Fallback] Added default feed: ${defaultFeed.title} (${defaultFeed.url})`);
+          break; // Only add 1 default feed
         }
       }
       
-      console.log(`[Fallback] Total feeds after supplementing: ${topFeeds.length} (${defaultFeedsAdded} defaults)`);
+      console.log(`[Fallback] Total feeds after supplementing: ${topFeeds.length}`);
+    } else {
+      console.log(`[Success] ${topFeeds.length} valid feeds from Bedrock, no default feed needed`);
     }
 
     // Cache the result in local development
@@ -200,9 +198,9 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.error('[Bedrock] Error message:', error.message);
       console.error('[Bedrock] Error stack:', error.stack);
     }
-    // Fallback to default feeds on error
-    console.log('[Fallback] Using default feeds due to Bedrock error');
-    return getDefaultFeedSuggestions(theme);
+    // Fallback to 1 random default feed on error
+    console.log('[Fallback] Using 1 random default feed due to Bedrock error');
+    return getDefaultFeedSuggestions(theme, locale);
   }
 }
 
@@ -379,100 +377,13 @@ function parseAIResponse(response: any): FeedSuggestion[] {
 
 /**
  * Get theme-specific feed suggestions
+ * 
+ * Note: This function now always returns an empty array to force
+ * Bedrock AI to provide theme-specific suggestions for all themes.
+ * Previously hardcoded theme support has been removed to rely on AI.
  */
-function getThemeSpecificFeeds(theme: string): FeedSuggestion[] {
-  const themeLower = theme.toLowerCase();
-  
-  // Technology/Tech
-  if (themeLower.includes('tech') || themeLower.includes('テクノロジー')) {
-    return [
-      { url: 'https://feeds.arstechnica.com/arstechnica/index', title: 'Ars Technica', reasoning: 'Technology news and analysis' },
-      { url: 'https://www.wired.com/feed/rss', title: 'WIRED', reasoning: 'Technology, science, and culture' },
-      { url: 'https://techcrunch.com/feed/', title: 'TechCrunch', reasoning: 'Startup and technology news' },
-      { url: 'https://www.theverge.com/rss/index.xml', title: 'The Verge', reasoning: 'Technology and digital culture' },
-      { url: 'https://www.engadget.com/rss.xml', title: 'Engadget', reasoning: 'Consumer electronics and gadgets' },
-    ];
-  }
-  
-  // Health/Medical
-  if (themeLower.includes('health') || themeLower.includes('medical') || themeLower.includes('健康') || themeLower.includes('医療')) {
-    return [
-      { url: 'https://www.medicalnewstoday.com/rss', title: 'Medical News Today', reasoning: 'Health and medical news' },
-      { url: 'https://www.healthline.com/rss', title: 'Healthline', reasoning: 'Health information and wellness' },
-      { url: 'https://www.webmd.com/rss/rss.aspx?RSSSource=RSS_PUBLIC', title: 'WebMD', reasoning: 'Medical information and health news' },
-      { url: 'https://www.sciencedaily.com/rss/health_medicine.xml', title: 'ScienceDaily Health', reasoning: 'Health and medicine research news' },
-      { url: 'https://feeds.feedburner.com/HealthNews', title: 'Health News', reasoning: 'Latest health news and updates' },
-    ];
-  }
-  
-  // Business/Finance
-  if (themeLower.includes('business') || themeLower.includes('finance') || themeLower.includes('ビジネス') || themeLower.includes('経済')) {
-    return [
-      { url: 'https://www.bloomberg.com/feed/podcast/etf-report.xml', title: 'Bloomberg', reasoning: 'Business and financial news' },
-      { url: 'https://www.ft.com/?format=rss', title: 'Financial Times', reasoning: 'Global business news' },
-      { url: 'https://www.economist.com/rss', title: 'The Economist', reasoning: 'Business and economic analysis' },
-      { url: 'https://www.wsj.com/xml/rss/3_7085.xml', title: 'Wall Street Journal', reasoning: 'Business and market news' },
-      { url: 'https://feeds.reuters.com/reuters/businessNews', title: 'Reuters Business', reasoning: 'Business news updates' },
-    ];
-  }
-  
-  // Politics
-  if (themeLower.includes('politics') || themeLower.includes('政治')) {
-    return [
-      { url: 'https://www.bbc.com/news/politics/rss.xml', title: 'BBC Politics', reasoning: 'Political news and analysis' },
-      { url: 'https://www.politico.com/rss/politics08.xml', title: 'Politico', reasoning: 'Political news and policy' },
-      { url: 'https://thehill.com/rss/syndicator/19109', title: 'The Hill', reasoning: 'Political news and commentary' },
-      { url: 'https://feeds.reuters.com/Reuters/PoliticsNews', title: 'Reuters Politics', reasoning: 'Political news updates' },
-      { url: 'https://www.theguardian.com/politics/rss', title: 'Guardian Politics', reasoning: 'Political news and opinion' },
-    ];
-  }
-  
-  // Science
-  if (themeLower.includes('science') || themeLower.includes('科学')) {
-    return [
-      { url: 'https://www.sciencedaily.com/rss/all.xml', title: 'ScienceDaily', reasoning: 'Latest science news' },
-      { url: 'https://www.nature.com/nature.rss', title: 'Nature', reasoning: 'Scientific research and news' },
-      { url: 'https://www.sciencemag.org/rss/news_current.xml', title: 'Science Magazine', reasoning: 'Science news and research' },
-      { url: 'https://phys.org/rss-feed/', title: 'Phys.org', reasoning: 'Physics and science news' },
-      { url: 'https://www.newscientist.com/feed/home', title: 'New Scientist', reasoning: 'Science and technology news' },
-    ];
-  }
-  
-  // Sports
-  if (themeLower.includes('sport') || themeLower.includes('スポーツ')) {
-    return [
-      { url: 'https://www.espn.com/espn/rss/news', title: 'ESPN', reasoning: 'Sports news and updates' },
-      { url: 'https://www.bbc.com/sport/rss.xml', title: 'BBC Sport', reasoning: 'Sports news coverage' },
-      { url: 'https://www.theguardian.com/sport/rss', title: 'Guardian Sport', reasoning: 'Sports news and analysis' },
-      { url: 'https://feeds.reuters.com/reuters/sportsNews', title: 'Reuters Sports', reasoning: 'Sports news updates' },
-      { url: 'https://www.si.com/rss/si_topstories.rss', title: 'Sports Illustrated', reasoning: 'Sports news and features' },
-    ];
-  }
-  
-  // Entertainment/Culture
-  if (themeLower.includes('entertainment') || themeLower.includes('culture') || themeLower.includes('エンタメ') || themeLower.includes('文化')) {
-    return [
-      { url: 'https://variety.com/feed/', title: 'Variety', reasoning: 'Entertainment news' },
-      { url: 'https://www.hollywoodreporter.com/feed/', title: 'Hollywood Reporter', reasoning: 'Entertainment industry news' },
-      { url: 'https://www.rollingstone.com/feed/', title: 'Rolling Stone', reasoning: 'Music and culture news' },
-      { url: 'https://www.theguardian.com/culture/rss', title: 'Guardian Culture', reasoning: 'Arts and culture news' },
-      { url: 'https://www.bbc.com/culture/rss', title: 'BBC Culture', reasoning: 'Cultural news and features' },
-    ];
-  }
-  
-  // Travel
-  if (themeLower.includes('travel') || themeLower.includes('旅行') || themeLower.includes('観光')) {
-    return [
-      { url: 'https://www.lonelyplanet.com/feed', title: 'Lonely Planet', reasoning: 'Travel guides and destination information' },
-      { url: 'https://www.nationalgeographic.com/travel/rss', title: 'National Geographic Travel', reasoning: 'Travel stories and photography' },
-      { url: 'https://www.travelandleisure.com/rss', title: 'Travel + Leisure', reasoning: 'Travel tips and destination guides' },
-      { url: 'https://www.cntraveler.com/feed/rss', title: 'Condé Nast Traveler', reasoning: 'Luxury travel and destinations' },
-      { url: 'https://www.nomadicmatt.com/feed/', title: 'Nomadic Matt', reasoning: 'Budget travel tips and guides' },
-    ];
-  }
-  
-  // Default: Return empty array to avoid generic feeds
-  // This forces Bedrock to provide theme-specific suggestions
+function getThemeSpecificFeeds(_theme: string): FeedSuggestion[] {
+  // Always return empty array to force Bedrock to provide suggestions
   return [];
 }
 
@@ -518,8 +429,62 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
 
 /**
  * Get default feed suggestions as fallback
+ * Returns one random feed based on locale
  */
-function getDefaultFeedSuggestions(theme: string): FeedSuggestion[] {
-  console.log('Using default feed suggestions for theme:', theme);
-  return getMockFeedSuggestions(theme);
+function getDefaultFeedSuggestions(theme: string, locale: 'en' | 'ja' = 'en'): FeedSuggestion[] {
+  const englishFeeds: FeedSuggestion[] = [
+    {
+      url: 'https://feeds.bbci.co.uk/news/rss.xml',
+      title: 'BBC News',
+      reasoning: `General news and information relevant to the theme: ${theme}`,
+    },
+    {
+      url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+      title: 'The New York Times',
+      reasoning: `In-depth articles and analysis related to the theme: ${theme}`,
+    },
+    {
+      url: 'https://feeds.reuters.com/reuters/topNews',
+      title: 'Reuters Top News',
+      reasoning: `Breaking news and updates about the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.theguardian.com/world/rss',
+      title: 'The Guardian World News',
+      reasoning: `Global perspective on the theme: ${theme}`,
+    },
+  ];
+
+  const japaneseFeeds: FeedSuggestion[] = [
+    {
+      url: 'https://www3.nhk.or.jp/rss/news/cat0.xml',
+      title: 'NHK ニュース',
+      reasoning: `テーマ「${theme}」に関連する一般的なニュースと情報`,
+    },
+    {
+      url: 'https://www.asahi.com/rss/asahi/newsheadlines.rdf',
+      title: '朝日新聞デジタル',
+      reasoning: `テーマ「${theme}」に関する詳細な記事と分析`,
+    },
+    {
+      url: 'https://news.yahoo.co.jp/rss/topics/top-picks.xml',
+      title: 'Yahoo!ニュース',
+      reasoning: `テーマ「${theme}」に関する速報とアップデート`,
+    },
+    {
+      url: 'https://www.itmedia.co.jp/rss/2.0/news_bursts.xml',
+      title: 'ITmedia NEWS',
+      reasoning: `テーマ「${theme}」に関するテクノロジーとビジネスの情報`,
+    },
+  ];
+
+  const feedPool = locale === 'ja' ? japaneseFeeds : englishFeeds;
+  
+  // Select one random feed
+  const randomIndex = Math.floor(Math.random() * feedPool.length);
+  const selectedFeed = feedPool[randomIndex];
+  
+  console.log(`[Default Feed] Selected ${locale} feed: ${selectedFeed.title}`);
+  
+  return [selectedFeed];
 }

@@ -720,6 +720,13 @@ Check the following before fixing:
 
 ### Debugging Tips
 
+**General Principles:**
+- **Never make assumptions**: Always verify with actual data (logs, responses, etc.)
+- **Check facts first**: Look at CloudWatch Logs, API responses, database records
+- **Don't guess root causes**: Investigate systematically before implementing fixes
+- **Ask when uncertain**: If you're not sure about the cause, ask the user for clarification or more information
+- **Test hypotheses**: Verify your theory with actual tests before making changes
+
 **Frontend:**
 - Check Network tab in browser DevTools
 - Check error messages in Console
@@ -734,3 +741,13 @@ Check the following before fixing:
 - Check data directly in DynamoDB console
 - Verify query conditions are correct
 - Verify GSI (Global Secondary Index) is configured correctly
+
+**Example of Good Debugging Process:**
+1. ❌ Bad: "Validation is failing, probably because of redirects" → Implement redirect handling
+2. ✅ Good: "Validation is failing. Let me check CloudWatch Logs to see the actual error" → Check logs → Find real cause → Implement correct fix
+
+**When to Ask User:**
+- When multiple possible causes exist and you need more information
+- When you need access to production logs or data
+- When the issue requires domain knowledge or business context
+- When you're about to make a significant architectural change based on assumptions

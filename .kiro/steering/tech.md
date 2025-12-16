@@ -524,39 +524,42 @@ async function validateFeedUrl(url: string): Promise<boolean> {
 1. User input (theme)
    ↓
 2. Bedrock API call
-   - Request 10 feed suggestions from Claude 3 Haiku
+   - Request 20 feed suggestions from Claude 3 Haiku (reduced from 30 for faster response)
    - Include constraint to request only real feeds
    ↓
 3. Parse AI response
-   - Extract up to 10 feeds in JSON format
+   - Extract up to 20 feeds in JSON format
    ↓
 4. Feed URL validation (parallel execution) ★Existence check here
-   - HEAD request to each URL (5 second timeout)
+   - HEAD request to each URL (3 second timeout, reduced from 5s)
    - Valid only if 200 OK
    - Skip invalid URLs
    - Parallel execution with Promise.all (up to 15x faster)
    ↓
 5. Return results
    - Return only valid feeds
-   - Supplement with default feeds (BBC, NYT, etc.) if less than 5
-   - Return maximum 10 feeds
+   - Supplement with default feeds (BBC, NYT, etc.) if less than 3
+   - Return maximum 15 feeds
 ```
 
 **Performance Optimization:**
 
-1. **Feed suggestion count adjustment** (Issue #15)
-   - Initial: 15 feed suggestions → Response time ~60 seconds
-   - Optimized: 10 feed suggestions → Response time ~30-40 seconds
-   - Reason: Reduced Bedrock token generation, reduced URL validation count
+1. **Feed suggestion count adjustment** (Issue #15, #504)
+   - Initial: 30 feed suggestions → Response time ~60 seconds → 504 Gateway Timeout
+   - Optimized: 20 feed suggestions → Response time ~20-25 seconds (target)
+   - Reason: API Gateway has 29 second max timeout, must complete within this limit
 
-2. **URL validation parallelization**
-   - Sequential execution: 15 feeds × 5 seconds = max 75 seconds
-   - Parallel execution: max 5 seconds (all executed in parallel)
-   - Improvement: up to 15x faster
+2. **URL validation optimization**
+   - Timeout reduced: 5 seconds → 3 seconds per URL
+   - Parallel execution: All URLs validated simultaneously with Promise.all
+   - Sequential: 20 feeds × 3 seconds = max 60 seconds
+   - Parallel: max 3 seconds (all executed in parallel)
+   - Improvement: up to 20x faster
 
 3. **Lambda timeout setting**
-   - Initial: 30 seconds → 504 Gateway Timeout occurred
-   - Optimized: 60 seconds → Sufficient processing time secured
+   - Lambda: 60 seconds (sufficient)
+   - API Gateway: 29 seconds (hard limit, cannot be changed)
+   - Target: Complete within 25 seconds to avoid timeout
 
 **Benefits of validation:**
 - Exclude fake URLs and non-existent feeds

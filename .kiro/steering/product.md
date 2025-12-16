@@ -61,17 +61,18 @@ MyRSSPress is a web application that transforms RSS feeds into visually appealin
 
 **Specifications:**
 - **AI**: AWS Bedrock (Claude 3 Haiku)
-- **Suggestion count**: Request 30 feeds from Bedrock
-- **Validation**: Check URL existence (HEAD request, 5 second timeout)
-- **Parallel processing**: Parallel validation with Promise.all (up to 15x faster)
+- **Suggestion count**: Request 20 feeds from Bedrock (reduced from 30 for faster response)
+- **Validation**: Check URL existence (HEAD request, 3 second timeout, reduced from 5s)
+- **Parallel processing**: Parallel validation with Promise.all (up to 20x faster)
 - **Minimum guarantee**: 3 feeds (at least 1 from Bedrock)
 - **Retry logic**: If Bedrock returns 0 valid feeds, retry up to 3 times with exponential backoff
 - **Fallback**: After 3 failed retries, return default feeds only (marked as default)
 - **Default supplement**: If Bedrock returns 1-2 valid feeds, supplement with default feeds to reach minimum of 3
 
 **Performance:**
-- Response time: ~30-40 seconds (normal), up to 2 minutes (with retries)
+- Response time: ~20-25 seconds (target), up to 90 seconds (with retries)
 - Lambda timeout: 60 seconds
+- API Gateway timeout: 29 seconds (hard limit)
 
 **Prompt Constraints:**
 - Suggest only real feeds

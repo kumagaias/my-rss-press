@@ -31,7 +31,7 @@ async function validateFeedUrl(url: string): Promise<boolean> {
         'User-Agent': userAgent,
         'Accept': 'application/rss+xml, application/xml, text/xml, */*',
       },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(3000), // Reduced from 5s to 3s for faster validation
       redirect: 'manual', // Don't follow redirects automatically
     });
     
@@ -261,7 +261,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
  */
 function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   if (locale === 'ja') {
-    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを30個提案してください。
+    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを20個提案してください。
 
 重要な制約：
 1. **テーマとの関連性が最重要**: 「${theme}」に特化したフィードのみを提案してください
@@ -308,7 +308,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。
 レスポンスは必ず完全なJSON形式で終わらせてください（}で閉じる）。`;
   } else {
-    return `The user is interested in "${theme}". Please suggest 30 related RSS feeds.
+    return `The user is interested in "${theme}". Please suggest 20 related RSS feeds.
 
 CRITICAL LANGUAGE REQUIREMENT: 
 - You MUST write ALL text in English

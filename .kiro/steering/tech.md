@@ -556,12 +556,12 @@ async function validateFeedUrl(url: string): Promise<boolean> {
    - Parallel: max 2 seconds (all executed in parallel)
    - Improvement: up to 20x faster
 
-3. **Retry logic with timeout consideration**
-   - Max attempts: 2 (1 retry)
-   - Expected time per attempt: ~17 seconds (15s Bedrock + 2s validation)
-   - Total with retry: ~35 seconds (17s + 1s wait + 17s)
-   - Risk: May exceed 29s timeout if both attempts take full time
-   - Mitigation: 2s validation timeout keeps total under 29s in most cases
+3. **No retry logic** (Updated 2025-12-16)
+   - Single attempt only: ~17 seconds (15s Bedrock + 2s validation)
+   - Reason: API Gateway 29s timeout is hard limit (cannot be changed)
+   - Previous approach with retry: ~35 seconds → exceeded timeout
+   - Current approach: Single attempt → stays within 29s limit
+   - Fallback: If Bedrock fails, immediately return default feeds
 
 4. **Lambda timeout setting**
    - Lambda: 60 seconds (sufficient)
@@ -577,11 +577,11 @@ async function validateFeedUrl(url: string): Promise<boolean> {
 - **20 suggestions**: Number of requests to Bedrock (reduced from 30 for faster response)
 - **3 minimum guarantee**: Minimum feeds returned to users
 - **At least 1 from Bedrock**: Must include at least 1 Bedrock-suggested feed (not only defaults)
-- **No retry logic**: Single attempt only to stay within API Gateway 29s timeout
+- **No retry logic**: Single attempt only to stay within API Gateway 29s timeout (hard limit)
 - **Default supplement**: If Bedrock returns 1-2 feeds, supplement with defaults to reach 3
-- **Immediate fallback**: If Bedrock returns 0 valid feeds, immediately return all default feeds
+- **Immediate fallback**: If Bedrock fails or returns 0 valid feeds, immediately return all default feeds
 - **4 default feeds per locale**: Reliable feeds (EN: BBC, NYT, Reuters, Guardian / JP: NHK, Asahi, Yahoo, ITmedia)
-- Reason: API Gateway has hard 29s timeout limit, retries would exceed this
+- **Why no retry**: API Gateway 29s timeout cannot be changed (AWS limitation). Single attempt (~17s) stays within limit, retry (~35s) would timeout.
 
 **Local Development Setup:**
 

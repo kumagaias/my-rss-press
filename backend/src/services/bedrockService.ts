@@ -298,16 +298,8 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   ]
 }
 
-参考: 実在するRSSフィードの例（https://github.com/plenaryapp/awesome-rss-feeds より）
-- 技術: https://www.itmedia.co.jp/rss/2.0/news_bursts.xml
-- ニュース: https://www3.nhk.or.jp/rss/news/cat0.xml
-- Yahoo: https://news.yahoo.co.jp/rss/topics/top-picks.xml
-- 朝日新聞: https://www.asahi.com/rss/asahi/newsheadlines.rdf
-
-重要: 上記は参考例です。必ず「${theme}」に関連する実在のフィードを提案してください。
-一般的なニュースサイトのトップページではなく、「${theme}」専門のセクションやサイトを優先してください。
-
 必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。
+一般的なニュースサイトのトップページではなく、「${theme}」専門のセクションやサイトを優先してください。
 レスポンスは必ず完全なJSON形式で終わらせてください（}で閉じる）。`;
   } else {
     return `The user is interested in "${theme}". Please suggest 20 related RSS feeds.
@@ -355,18 +347,8 @@ Response format (ALL TEXT MUST BE IN ENGLISH):
   ]
 }
 
-Reference: Real RSS feed examples (from https://github.com/plenaryapp/awesome-rss-feeds):
-- Technology: https://techcrunch.com/feed/, https://www.theverge.com/rss/index.xml
-- News: https://feeds.bbci.co.uk/news/rss.xml, https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
-- Science: https://www.sciencedaily.com/rss/all.xml, https://www.nature.com/nature.rss
-- Business: https://feeds.bloomberg.com/markets/news.rss, https://www.economist.com/rss
-- Sports: https://www.espn.com/espn/rss/news, https://www.theguardian.com/sport/rss
-- Health: https://www.health.harvard.edu/blog/feed, https://www.medicalnewstoday.com/rss
-
-IMPORTANT: These are reference examples only. You MUST suggest real feeds specifically related to "${theme}".
-Prioritize specialized sites and sections about "${theme}", not general news homepages.
-
 You MUST suggest real, accessible RSS feed URLs that exist and are currently active.
+Prioritize specialized sites and sections about "${theme}", not general news homepages.
 Response MUST be complete JSON format (end with }).
 
 FINAL REMINDER: Write EVERYTHING in English. No Japanese (日本語), no Chinese, no other languages. Only English alphabet and words.`;

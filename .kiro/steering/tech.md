@@ -547,7 +547,8 @@ async function validateFeedUrl(url: string): Promise<boolean> {
 
 1. **Feed suggestion count adjustment** (Issue #15, #504)
    - Initial: 30 feed suggestions → Response time ~60 seconds → 504 Gateway Timeout
-   - Optimized: 20 feed suggestions → Response time ~20-25 seconds (target)
+   - Reduced to 15: Response time ~17 seconds, but AI often generates incomplete responses
+   - Current: 20 feed suggestions → Response time ~20-25 seconds (target)
    - Reason: API Gateway has 29 second max timeout, must complete within this limit
 
 2. **URL validation optimization**
@@ -575,10 +576,10 @@ async function validateFeedUrl(url: string): Promise<boolean> {
 - Prevent incorrect suggestions due to AI hallucination
 
 **Feed count design decisions:**
-- **20 suggestions**: Number of requests to Bedrock
-- **12 from Bedrock**: Maximum valid feeds selected from Bedrock suggestions
-- **3 default feeds**: Always added to ensure variety and reliability
-- **15 total maximum**: 12 from Bedrock + 3 defaults
+- **20 suggestions**: Number of requests to Bedrock (increased from 15 to improve valid feed count)
+- **14 from Bedrock**: Maximum valid feeds selected from Bedrock suggestions
+- **1 default feed**: Added randomly to ensure reliability
+- **15 total maximum**: 14 from Bedrock + 1 default
 - **No retry logic**: Single attempt only to stay within API Gateway 29s timeout (hard limit)
 - **Immediate fallback**: If Bedrock returns 0 valid feeds, immediately return all 4 default feeds
 - **4 default feeds per locale**: Reliable feeds (EN: BBC, NYT, Reuters, Guardian / JP: NHK, Asahi, Yahoo, ITmedia)

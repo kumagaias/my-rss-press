@@ -275,7 +275,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
  */
 function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   if (locale === 'ja') {
-    return `「${theme}」に関する日本語のRSSフィードを15個提案してください。
+    return `「${theme}」に関する日本語のRSSフィードを20個提案してください。
 
 制約：
 - 実在するアクティブなRSSフィードのみ
@@ -296,7 +296,7 @@ JSON形式：
   ]
 }`;
   } else {
-    return `Suggest 15 RSS feeds about "${theme}".
+    return `Suggest 20 RSS feeds about "${theme}".
 
 Requirements:
 - Only real, active RSS feeds
@@ -379,8 +379,8 @@ function parseAIResponse(response: any): FeedSuggestionsResponse {
     console.log(`[Bedrock] Parsed ${feeds.length} feeds from AI response`);
     console.log(`[Bedrock] Suggested newspaper name: ${newspaperName}`);
 
-    // Validate and return suggestions (up to 15)
-    const suggestions = feeds.slice(0, 15).map((feed: any) => ({
+    // Validate and return suggestions (up to 20)
+    const suggestions = feeds.slice(0, 20).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',

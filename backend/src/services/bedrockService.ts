@@ -211,12 +211,13 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       throw new Error('No valid feeds found from Bedrock');
     }
     
-    // If we have less than 2 valid feeds, supplement with default feeds
-    if (topFeeds.length < 2) {
-      console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with default feeds`);
+    // Minimum 3 feeds required for feed suggestions
+    // If we have less than 3 valid feeds, supplement with default feeds
+    if (topFeeds.length < 3) {
+      console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with default feeds to reach minimum of 3`);
       const defaultFeeds = getAllDefaultFeeds(locale);
       
-      // Add default feeds until we have at least 2 feeds
+      // Add default feeds until we have at least 3 feeds
       const existingUrls = new Set(topFeeds.map(s => s.url));
       
       for (const defaultFeed of defaultFeeds) {
@@ -225,8 +226,8 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
           topFeeds.push({ ...defaultFeed, isDefault: true } as any);
           console.log(`[Fallback] Added default feed: ${defaultFeed.title} (${defaultFeed.url})`);
           
-          // Stop when we have at least 2 feeds
-          if (topFeeds.length >= 2) {
+          // Stop when we have at least 3 feeds
+          if (topFeeds.length >= 3) {
             break;
           }
         }

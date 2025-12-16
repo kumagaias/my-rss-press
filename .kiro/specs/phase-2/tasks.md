@@ -916,14 +916,14 @@ Phase 5: デプロイと検証
 - カテゴリマッピング関数を実装
 
 **受け入れ基準**:
-- [ ] `reliableFeeds.ts` が作成されている
-- [ ] `RELIABLE_FEEDS_BY_CATEGORY` オブジェクトが定義されている
-- [ ] 各カテゴリに最低 3 つのフィードが含まれている
-- [ ] 日本語カテゴリ（`-jp` サフィックス）が含まれている
-- [ ] `getCategoryFromTheme(theme, locale): string | null` 関数が実装されている
-- [ ] テーマからカテゴリを正しく推測できる
-- [ ] ユニットテストが追加されている
-- [ ] `make test` が成功する
+- [x] `reliableFeeds.ts` が作成されている
+- [x] `RELIABLE_FEEDS_BY_CATEGORY` オブジェクトが定義されている
+- [x] 各カテゴリに最低 3 つのフィードが含まれている
+- [x] 日本語カテゴリ（`-jp` サフィックス）が含まれている
+- [x] `getCategoryFromTheme(theme, locale): string | null` 関数が実装されている
+- [x] テーマからカテゴリを正しく推測できる
+- [x] ユニットテストが追加されている
+- [x] `make test` が成功する
 
 _要件: フィード品質改善 1_
 

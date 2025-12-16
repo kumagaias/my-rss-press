@@ -195,12 +195,12 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     
     console.log(`[Validation] Result: ${validatedSuggestions.length}/${uniqueSuggestions.length} feeds are valid`);
 
-    // Select top 15 feeds from validated suggestions (increased from 10 for better article coverage)
-    const maxFeeds = 15;
-    const topFeeds = validatedSuggestions.slice(0, maxFeeds);
+    // Select top 14 feeds from validated suggestions (leave room for 1 default feed)
+    const maxBedrockFeeds = 14;
+    const topFeeds = validatedSuggestions.slice(0, maxBedrockFeeds);
     
-    if (validatedSuggestions.length > maxFeeds) {
-      console.log(`[Selection] Selected top ${maxFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
+    if (validatedSuggestions.length > maxBedrockFeeds) {
+      console.log(`[Selection] Selected top ${maxBedrockFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
     }
 
     // If we have 0 valid feeds, throw error to trigger retry
@@ -209,32 +209,21 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       throw new Error('No valid feeds found from Bedrock');
     }
     
-    // Minimum 3 feeds required for feed suggestions
-    // If we have less than 3 valid feeds, supplement with default feeds
-    if (topFeeds.length < 3) {
-      console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with default feeds to reach minimum of 3`);
-      const defaultFeeds = getAllDefaultFeeds(locale);
-      
-      // Add default feeds until we have at least 3 feeds
-      const existingUrls = new Set(topFeeds.map(s => s.url));
-      
-      for (const defaultFeed of defaultFeeds) {
-        if (!existingUrls.has(defaultFeed.url)) {
-          // Mark as default feed for lower priority
-          topFeeds.push({ ...defaultFeed, isDefault: true } as any);
-          console.log(`[Fallback] Added default feed: ${defaultFeed.title} (${defaultFeed.url})`);
-          
-          // Stop when we have at least 3 feeds
-          if (topFeeds.length >= 3) {
-            break;
-          }
-        }
-      }
-      
-      console.log(`[Fallback] Total feeds after supplementing: ${topFeeds.length}`);
+    // Always add 1 random default feed (with lower priority)
+    const defaultFeeds = getAllDefaultFeeds(locale);
+    const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
+    const randomDefaultFeed = defaultFeeds[randomIndex];
+    
+    // Check if the random default feed is not already in the list
+    const existingUrls = new Set(topFeeds.map(s => s.url));
+    if (!existingUrls.has(randomDefaultFeed.url)) {
+      topFeeds.push({ ...randomDefaultFeed, isDefault: true });
+      console.log(`[Default] Added random default feed: ${randomDefaultFeed.title} (${randomDefaultFeed.url})`);
     } else {
-      console.log(`[Success] ${topFeeds.length} valid feeds from Bedrock, no default feed needed`);
+      console.log(`[Default] Random default feed already exists in Bedrock suggestions: ${randomDefaultFeed.title}`);
     }
+    
+    console.log(`[Success] Total feeds: ${topFeeds.length} (${topFeeds.filter(f => !f.isDefault).length} from Bedrock + ${topFeeds.filter(f => f.isDefault).length} default)`)
 
     // Cache the result in local development
     if (config.isLocal && config.enableCache) {
@@ -259,7 +248,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
  */
 function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   if (locale === 'ja') {
-    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを20個提案してください。
+    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを30個提案してください。
 
 重要な制約：
 1. **テーマとの関連性が最重要**: 「${theme}」に特化したフィードのみを提案してください
@@ -302,7 +291,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 一般的なニュースサイトのトップページではなく、「${theme}」専門のセクションやサイトを優先してください。
 レスポンスは必ず完全なJSON形式で終わらせてください（}で閉じる）。`;
   } else {
-    return `The user is interested in "${theme}". Please suggest 20 related RSS feeds.
+    return `The user is interested in "${theme}". Please suggest 30 related RSS feeds.
 
 CRITICAL LANGUAGE REQUIREMENT: 
 - You MUST write ALL text in English

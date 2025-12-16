@@ -41,6 +41,7 @@ export const translations = {
     viewCount: 'Views',
     saveNewspaper: 'Save Newspaper',
     readMore: 'Read more',
+    summary: 'Summary',
     
     // Settings
     newspaperSettings: 'Newspaper Settings',
@@ -146,6 +147,7 @@ export const translations = {
     viewCount: '閲覧数',
     saveNewspaper: '新聞を保存',
     readMore: '続きを読む',
+    summary: '要約',
     
     // 設定
     newspaperSettings: '新聞設定',

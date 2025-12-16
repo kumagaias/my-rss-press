@@ -90,7 +90,7 @@ export function NewspaperLayout({
         <div className="mb-8 pb-6 border-b-2 border-gray-400">
           <div className="bg-gray-50 border-2 border-gray-800 p-6 rounded shadow-sm">
             <h2 className="text-sm font-bold uppercase tracking-wider text-gray-600 mb-3">
-              {locale === 'ja' ? '要約' : 'Summary'}
+              {t.summary}
             </h2>
             <p className="text-base leading-relaxed text-gray-900 whitespace-pre-line">
               {summary}

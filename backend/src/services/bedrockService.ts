@@ -126,7 +126,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       accept: 'application/json',
       body: JSON.stringify({
         anthropic_version: 'bedrock-2023-05-31',
-        max_tokens: 2048, // Increased from 1024 to prevent JSON truncation
+        max_tokens: 4096, // Increased from 2048 to handle 30 feeds without truncation
         system: systemPrompt,
         messages: [
           {

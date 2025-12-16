@@ -256,7 +256,43 @@ function NewspaperContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f4f1e8]">
+      {/* Header */}
+      <header className="bg-white border-b-4 border-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center relative gap-4 sm:gap-0">
+            <div className="border-l-4 border-r-4 border-black px-4 py-2">
+              <h1 className="text-2xl sm:text-4xl font-serif font-black text-black tracking-tight text-center">
+                {t.appName}
+              </h1>
+              <p className="text-gray-800 text-xs font-serif italic mt-1 text-center">
+                {t.appTagline}
+              </p>
+            </div>
+            <div className="sm:absolute sm:right-0 flex gap-2">
+              {/* Save Button - only show for unsaved newspapers (temp ID) */}
+              {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
+                <button
+                  onClick={handleSaveClick}
+                  disabled={isSaving}
+                  className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? t.saving : t.save}
+                </button>
+              )}
+              
+              {/* Back to Home Button */}
+              <button
+                onClick={() => router.push('/')}
+                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-black text-white hover:bg-gray-800 transition-colors"
+              >
+                {t.backToHome}
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Date Navigation - only show if date parameter is present */}
       {date && (
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
@@ -280,28 +316,6 @@ function NewspaperContent() {
           locale={locale}
           summary={newspaper.summary}
         />
-      </div>
-
-      {/* Action Buttons */}
-      <div className="max-w-7xl mx-auto px-4 pb-8 flex gap-4">
-        {/* Save Button - only show for unsaved newspapers (temp ID) */}
-        {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
-          <button
-            onClick={handleSaveClick}
-            disabled={isSaving}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isSaving ? t.saving : t.save}
-          </button>
-        )}
-
-        {/* Back to Home Button */}
-        <button
-          onClick={() => router.push('/')}
-          className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-        >
-          {t.backToHome}
-        </button>
       </div>
 
       {/* Newspaper Settings Modal */}

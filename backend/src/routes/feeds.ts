@@ -39,17 +39,22 @@ feedsRouter.post(
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.log(`[Feed Suggestion] Failed: ${errorMessage}, falling back to default feeds`);
+        console.log(`[Feed Suggestion] Failed: ${errorMessage}, falling back to 1 random default feed`);
         
-        // Fall back to default feeds immediately
+        // Fall back to 1 random default feed
         const { getAllDefaultFeeds } = await import('../services/bedrockService.js');
         const defaultFeeds = getAllDefaultFeeds(validated.locale || 'en');
         
-        // Mark all as default feeds
-        const suggestions = defaultFeeds.map(feed => ({
-          ...feed,
+        // Select 1 random default feed
+        const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
+        const randomDefaultFeed = defaultFeeds[randomIndex];
+        
+        const suggestions = [{
+          ...randomDefaultFeed,
           isDefault: true,
-        }));
+        }];
+        
+        console.log(`[Feed Suggestion] Returning 1 random default feed: ${randomDefaultFeed.title}`);
         
         return c.json({
           suggestions,

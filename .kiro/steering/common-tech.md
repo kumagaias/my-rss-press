@@ -114,6 +114,29 @@ const logger = {
 - ❌ Unlimited data fetching
 - ❌ Synchronous mass API calls
 
+## Code Review Best Practices
+
+### Common Issues to Address
+
+1. **Error Messages**: Include HTTP status and specific details
+2. **useEffect Dependencies**: Include all used variables/functions
+3. **Hardcoded Text**: Use i18n translation keys
+4. **Input Validation**: Validate at function start with clear errors
+5. **Empty Data Handling**: Check before processing, provide fallback UI
+6. **Accessibility**: Always provide alt text fallbacks
+7. **Performance**: Use `useMemo` for expensive operations
+
+### Response Priority
+
+- **High**: Security, error handling, accessibility
+- **Medium**: Performance, type consistency, i18n
+- **Low**: Code duplication, nitpicks
+
+### When to Refactor
+
+- **3+ duplications**: Extract to utility function
+- **2 or fewer**: Leave as is (avoid over-abstraction)
+
 ## Deployment Best Practices
 
 1. Pull before push

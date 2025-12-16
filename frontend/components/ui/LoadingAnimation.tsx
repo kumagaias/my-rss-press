@@ -14,36 +14,36 @@ interface LoadingAnimationProps {
  */
 export function LoadingAnimation({ message, type = 'newspaper' }: LoadingAnimationProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-12">
+    <div className="flex flex-col items-center justify-center py-12 min-h-[200px]">
       {type === 'feed' ? (
         // Feed suggestion: Wave-like bars animation only
-        <div className="flex items-end gap-2 mb-6 h-16">
+        <div className="flex items-end justify-center gap-2 mb-6 h-16">
           <div 
-            className="bar w-2 bg-black rounded-sm animate-wave" 
+            className="w-2 h-4 bg-black rounded-sm animate-wave" 
             style={{ 
               animationDelay: '0ms',
             }}
           ></div>
           <div 
-            className="bar w-2 bg-black rounded-sm animate-wave" 
+            className="w-2 h-4 bg-black rounded-sm animate-wave" 
             style={{ 
               animationDelay: '150ms',
             }}
           ></div>
           <div 
-            className="bar w-2 bg-black rounded-sm animate-wave" 
+            className="w-2 h-4 bg-black rounded-sm animate-wave" 
             style={{ 
               animationDelay: '300ms',
             }}
           ></div>
           <div 
-            className="bar w-2 bg-black rounded-sm animate-wave" 
+            className="w-2 h-4 bg-black rounded-sm animate-wave" 
             style={{ 
               animationDelay: '450ms',
             }}
           ></div>
           <div 
-            className="bar w-2 bg-black rounded-sm animate-wave" 
+            className="w-2 h-4 bg-black rounded-sm animate-wave" 
             style={{ 
               animationDelay: '600ms',
             }}

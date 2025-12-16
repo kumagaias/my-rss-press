@@ -12,7 +12,7 @@ describe('LoadingAnimation', () => {
     expect(svg).toHaveClass('animate-bounce');
     
     // Should not have wave bars for newspaper type
-    const bars = container.querySelectorAll('.bar');
+    const bars = container.querySelectorAll('.animate-wave');
     expect(bars.length).toBe(0);
   });
 
@@ -35,7 +35,7 @@ describe('LoadingAnimation', () => {
     const { container } = render(<LoadingAnimation type="feed" />);
 
     // Check for wave bars (feed type)
-    const bars = container.querySelectorAll('.bar');
+    const bars = container.querySelectorAll('.animate-wave');
     expect(bars.length).toBeGreaterThanOrEqual(4);
     
     // Should not have pen icon for feed type
@@ -52,7 +52,7 @@ describe('LoadingAnimation', () => {
     expect(svg).toHaveClass('animate-bounce');
     
     // Should not have wave bars for newspaper type
-    const bars = container.querySelectorAll('.bar');
+    const bars = container.querySelectorAll('.animate-wave');
     expect(bars.length).toBe(0);
   });
 

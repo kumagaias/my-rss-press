@@ -533,18 +533,4 @@ export function getAllDefaultFeeds(locale: 'en' | 'ja' = 'en'): FeedSuggestion[]
   return locale === 'ja' ? japaneseFeeds : englishFeeds;
 }
 
-/**
- * Get default feed suggestions as fallback
- * Returns one random feed based on locale
- */
-function getDefaultFeedSuggestions(theme: string, locale: 'en' | 'ja' = 'en'): FeedSuggestion[] {
-  const feedPool = getAllDefaultFeeds(locale);
-  
-  // Select one random feed
-  const randomIndex = Math.floor(Math.random() * feedPool.length);
-  const selectedFeed = feedPool[randomIndex];
-  
-  console.log(`[Default Feed] Selected ${locale} feed: ${selectedFeed.title}`);
-  
-  return [selectedFeed];
-}
+

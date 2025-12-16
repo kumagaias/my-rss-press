@@ -567,13 +567,14 @@ async function validateFeedUrl(url: string): Promise<boolean> {
 - Prevent incorrect suggestions due to AI hallucination
 
 **Feed count design decisions:**
-- **30 suggestions**: Number of requests to Bedrock (increased for better coverage)
+- **20 suggestions**: Number of requests to Bedrock (reduced from 30 for faster response)
 - **3 minimum guarantee**: Minimum feeds returned to users
 - **At least 1 from Bedrock**: Must include at least 1 Bedrock-suggested feed (not only defaults)
-- **Retry logic**: If Bedrock returns 0 valid feeds, retry up to 3 times
+- **No retry logic**: Single attempt only to stay within API Gateway 29s timeout
 - **Default supplement**: If Bedrock returns 1-2 feeds, supplement with defaults to reach 3
+- **Immediate fallback**: If Bedrock returns 0 valid feeds, immediately return all default feeds
 - **4 default feeds per locale**: Reliable feeds (EN: BBC, NYT, Reuters, Guardian / JP: NHK, Asahi, Yahoo, ITmedia)
-- Reason: Provide sufficient choices to users while ensuring AI suggestions are included
+- Reason: API Gateway has hard 29s timeout limit, retries would exceed this
 
 **Local Development Setup:**
 

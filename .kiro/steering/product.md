@@ -65,14 +65,14 @@ MyRSSPress is a web application that transforms RSS feeds into visually appealin
 - **Validation**: Check URL existence (HEAD request, 3 second timeout, reduced from 5s)
 - **Parallel processing**: Parallel validation with Promise.all (up to 20x faster)
 - **Minimum guarantee**: 3 feeds (at least 1 from Bedrock)
-- **Retry logic**: If Bedrock returns 0 valid feeds, retry up to 3 times with exponential backoff
-- **Fallback**: After 3 failed retries, return default feeds only (marked as default)
+- **Retry logic**: No retries (to stay within API Gateway 29s timeout)
+- **Fallback**: If Bedrock fails or returns 0 valid feeds, immediately return default feeds only (marked as default)
 - **Default supplement**: If Bedrock returns 1-2 valid feeds, supplement with default feeds to reach minimum of 3
 
 **Performance:**
-- Response time: ~20-25 seconds (target), up to 90 seconds (with retries)
+- Response time: ~15-20 seconds (single attempt)
 - Lambda timeout: 60 seconds
-- API Gateway timeout: 29 seconds (hard limit)
+- API Gateway timeout: 29 seconds (hard limit, no retries to stay within this)
 
 **Prompt Constraints:**
 - Suggest only real feeds

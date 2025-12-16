@@ -52,6 +52,13 @@ function NewspaperContent() {
     
     if (idParam) {
       setId(idParam);
+      
+      // If no date parameter and it's a saved newspaper (not temp-*),
+      // set today's date as default
+      if (!dateParam && !idParam.startsWith('temp-')) {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        setDate(today);
+      }
     }
     if (dateParam) {
       setDate(dateParam);
@@ -300,8 +307,8 @@ function NewspaperContent() {
         </div>
       </header>
 
-      {/* Date Navigation - only show if date parameter is present */}
-      {date && (
+      {/* Date Navigation - show for saved newspapers (not temp-*) */}
+      {!newspaper.newspaperId.startsWith('temp-') && date && (
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
           <div className="max-w-7xl mx-auto px-4">
             <DateNavigation

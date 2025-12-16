@@ -138,7 +138,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       accept: 'application/json',
       body: JSON.stringify({
         anthropic_version: 'bedrock-2023-05-31',
-        max_tokens: 4096, // Increased from 2048 to handle 30 feeds without truncation
+        max_tokens: 8192, // Increased to handle 20 feeds without truncation
         system: systemPrompt,
         messages: [
           {
@@ -223,13 +223,17 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Selection] Selected top ${maxBedrockFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
     }
 
-    // If we have 0 valid feeds, throw error to trigger retry
+    // If we have 0 valid feeds, return all default feeds immediately
     if (topFeeds.length === 0) {
-      console.log(`[Error] No valid feeds found from Bedrock, will retry`);
-      throw new Error('No valid feeds found from Bedrock');
+      console.log(`[Fallback] No valid feeds from Bedrock, returning all default feeds`);
+      const allDefaultFeeds = getAllDefaultFeeds(locale).map(f => ({ ...f, isDefault: true }));
+      return {
+        feeds: allDefaultFeeds,
+        newspaperName: locale === 'ja' ? `${theme}デイリー` : `The ${theme} Daily`,
+      };
     }
     
-    // Always add 1 random default feed (with lower priority)
+    // Add 1 random default feed (with lower priority)
     const defaultFeeds = getAllDefaultFeeds(locale);
     const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
     const randomDefaultFeed = defaultFeeds[randomIndex];
@@ -271,101 +275,48 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
  */
 function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   if (locale === 'ja') {
-    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを30個提案してください。
+    return `「${theme}」に関する日本語のRSSフィードを15個提案してください。
 
-重要な制約：
-1. **テーマとの関連性が最重要**: 「${theme}」に特化したフィードのみを提案してください
-2. **一般的なニュースサイトは避ける**: NHK、朝日新聞、読売新聞などの一般ニュースサイトは、「${theme}」専門のセクションがない限り提案しないでください
-3. 実際に存在し、現在もアクティブな日本語のRSSフィードのURLのみを提案してください
-4. 「${theme}」に特化した専門メディア、ブログ、ウェブサイトを優先してください
-5. 架空のURLや存在しないフィードは絶対に提案しないでください
-6. フィードURLは必ず /rss、/feed、/rss.xml、/feed.xml、/index.xml などで終わる正しい形式にしてください
-7. テーマとの関連度が高い順に並べてください（最も関連度が高いものを最初に）
-8. 必ず完全なJSON形式で返してください（途中で切れないように）
+制約：
+- 実在するアクティブなRSSフィードのみ
+- 「${theme}」専門のメディア、ブログ、サイトを優先
+- 一般ニュースサイトは避ける
+- URL形式: /rss, /feed, /rss.xml, /feed.xml, /index.xml
+- 完全なJSON形式で返す
 
-「${theme}」の良い提案例：
-- 「${theme}」専門のウェブサイト
-- 「${theme}」業界の専門誌
-- 「${theme}」に特化したエキスパートブログ
-- 「${theme}」に関する学術・研究フィード
-
-悪い提案例（提案しないでください）：
-- 一般的なニュースサイト（NHK、朝日新聞、読売新聞のトップページ）
-- 無関係なテクノロジーやビジネスフィード
-- 一般的な世界ニュースフィード
-
-各フィードについて、以下の情報をJSON形式で返してください：
-- url: RSSフィードのURL（必ず実在する日本語のもの）
-- title: フィードの名前（日本語）
-- reasoning: なぜこのフィードを提案するのか（日本語で1-2文で簡潔に）
-
-レスポンス形式（必ず完全なJSONで返してください）：
+JSON形式：
 {
-  "newspaperName": "${theme}に関する魅力的な新聞名（例：「${theme}タイムズ」「${theme}デイリー」など）",
+  "newspaperName": "${theme}に関する新聞名（例：${theme}タイムズ）",
   "feeds": [
     {
       "url": "https://example.jp/feed",
-      "title": "サンプルフィード",
-      "reasoning": "${theme}に関する最新情報を提供"
+      "title": "フィード名",
+      "reasoning": "簡潔な理由"
     }
   ]
-}
-
-必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。
-一般的なニュースサイトのトップページではなく、「${theme}」専門のセクションやサイトを優先してください。
-レスポンスは必ず完全なJSON形式で終わらせてください（}で閉じる）。`;
+}`;
   } else {
-    return `The user is interested in "${theme}". Please suggest 30 related RSS feeds.
+    return `Suggest 15 RSS feeds about "${theme}".
 
-CRITICAL LANGUAGE REQUIREMENT: 
-- You MUST write ALL text in English
-- Feed titles MUST be in English
-- Reasoning MUST be in English  
-- DO NOT use Japanese characters (日本語) or any other language
-- If the feed is from a non-English source, translate the title to English
+Requirements:
+- Only real, active RSS feeds
+- Specialized media/blogs about "${theme}"
+- Avoid general news sites
+- URL format: /rss, /feed, /rss.xml, /feed.xml, /index.xml
+- ALL text in English (titles, reasoning)
+- Complete JSON format
 
-Important constraints:
-1. **THEME RELEVANCE IS CRITICAL**: Only suggest feeds that are SPECIFICALLY about "${theme}"
-2. **AVOID GENERIC NEWS**: Do NOT suggest general news sites (BBC, NYT, Reuters, Guardian) unless they have a specific "${theme}" section
-3. Only suggest RSS feed URLs that actually exist and are currently active
-4. Prioritize specialized media, blogs, and websites focused on "${theme}"
-5. Never suggest fictional or non-existent feed URLs
-6. Feed URLs must end with proper formats like /rss, /feed, /rss.xml, /feed.xml, /index.xml
-7. Sort by relevance to the theme (most relevant first)
-
-Examples of GOOD suggestions for "${theme}":
-- Specialized websites about "${theme}"
-- Industry-specific publications for "${theme}"
-- Expert blogs focused on "${theme}"
-- Academic or research feeds about "${theme}"
-
-Examples of BAD suggestions (DO NOT SUGGEST):
-- General news sites (BBC News, NYT Homepage, Reuters Top News)
-- Generic world news feeds
-- Unrelated technology or business feeds
-
-For each feed, provide the following information in JSON format:
-- url: RSS feed URL (must be real and in English)
-- title: Feed name (in English - DO NOT use Japanese)
-- reasoning: Why you recommend this feed (1-2 sentences in English - DO NOT use Japanese)
-
-Response format (ALL TEXT MUST BE IN ENGLISH):
+JSON format:
 {
-  "newspaperName": "An attractive newspaper name about ${theme} (e.g., 'The ${theme} Times', '${theme} Daily', etc.) - IN ENGLISH",
+  "newspaperName": "Newspaper name about ${theme} (e.g., The ${theme} Times)",
   "feeds": [
     {
       "url": "https://example.com/feed",
-      "title": "Example Feed (IN ENGLISH)",
-      "reasoning": "This feed provides the latest information about ${theme} (IN ENGLISH)"
+      "title": "Feed name in English",
+      "reasoning": "Brief reason"
     }
   ]
-}
-
-You MUST suggest real, accessible RSS feed URLs that exist and are currently active.
-Prioritize specialized sites and sections about "${theme}", not general news homepages.
-Response MUST be complete JSON format (end with }).
-
-FINAL REMINDER: Write EVERYTHING in English. No Japanese (日本語), no Chinese, no other languages. Only English alphabet and words.`;
+}`;
   }
 }
 
@@ -428,8 +379,8 @@ function parseAIResponse(response: any): FeedSuggestionsResponse {
     console.log(`[Bedrock] Parsed ${feeds.length} feeds from AI response`);
     console.log(`[Bedrock] Suggested newspaper name: ${newspaperName}`);
 
-    // Validate and return suggestions (up to 30)
-    const suggestions = feeds.slice(0, 30).map((feed: any) => ({
+    // Validate and return suggestions (up to 15)
+    const suggestions = feeds.slice(0, 15).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',

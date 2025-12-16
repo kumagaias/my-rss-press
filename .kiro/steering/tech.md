@@ -524,22 +524,23 @@ async function validateFeedUrl(url: string): Promise<boolean> {
 1. User input (theme)
    ↓
 2. Bedrock API call
-   - Request 20 feed suggestions from Claude 3 Haiku (reduced from 30 for faster response)
+   - Request 20 feed suggestions from Claude 3 Haiku
    - Include constraint to request only real feeds
    ↓
 3. Parse AI response
    - Extract up to 20 feeds in JSON format
    ↓
 4. Feed URL validation (parallel execution) ★Existence check here
-   - HEAD request to each URL (3 second timeout, reduced from 5s)
-   - Valid only if 200 OK
+   - GET request to each URL (5 second timeout)
+   - Valid only if 200 OK and valid XML content
    - Skip invalid URLs
-   - Parallel execution with Promise.all (up to 15x faster)
+   - Parallel execution with Promise.all (up to 20x faster)
    ↓
 5. Return results
-   - Return only valid feeds
-   - Supplement with default feeds (BBC, NYT, etc.) if less than 3
-   - Return maximum 15 feeds
+   - Select top 12 valid feeds from Bedrock
+   - Add 3 random default feeds (BBC, NYT, etc.)
+   - If 0 valid feeds from Bedrock, return all 4 default feeds
+   - Return maximum 15 feeds total
 ```
 
 **Performance Optimization:**
@@ -574,12 +575,12 @@ async function validateFeedUrl(url: string): Promise<boolean> {
 - Prevent incorrect suggestions due to AI hallucination
 
 **Feed count design decisions:**
-- **20 suggestions**: Number of requests to Bedrock (reduced from 30 for faster response)
-- **3 minimum guarantee**: Minimum feeds returned to users
-- **At least 1 from Bedrock**: Must include at least 1 Bedrock-suggested feed (not only defaults)
+- **20 suggestions**: Number of requests to Bedrock
+- **12 from Bedrock**: Maximum valid feeds selected from Bedrock suggestions
+- **3 default feeds**: Always added to ensure variety and reliability
+- **15 total maximum**: 12 from Bedrock + 3 defaults
 - **No retry logic**: Single attempt only to stay within API Gateway 29s timeout (hard limit)
-- **Default supplement**: If Bedrock returns 1-2 feeds, supplement with defaults to reach 3
-- **Immediate fallback**: If Bedrock fails or returns 0 valid feeds, immediately return all default feeds
+- **Immediate fallback**: If Bedrock returns 0 valid feeds, immediately return all 4 default feeds
 - **4 default feeds per locale**: Reliable feeds (EN: BBC, NYT, Reuters, Guardian / JP: NHK, Asahi, Yahoo, ITmedia)
 - **Why no retry**: API Gateway 29s timeout cannot be changed (AWS limitation). Single attempt (~17s) stays within limit, retry (~35s) would timeout.
 

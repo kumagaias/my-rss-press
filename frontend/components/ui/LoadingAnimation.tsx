@@ -8,95 +8,50 @@ interface LoadingAnimationProps {
 /**
  * LoadingAnimation Component
  * 
- * Displays a newspaper-themed loading animation with vertical bars.
- * - 'feed' type: Shows RSS feed collection animation
- * - 'newspaper' type: Shows pen writing animation
+ * Displays a newspaper-themed loading animation.
+ * - 'feed' type: Shows wave-like bars animation (bars stretching up and down)
+ * - 'newspaper' type: Shows pen writing animation only
  */
 export function LoadingAnimation({ message, type = 'newspaper' }: LoadingAnimationProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12">
-      {/* Vertical bars animation */}
-      <div className="flex gap-2 mb-6">
-        <div 
-          className="w-2 bg-black rounded-sm animate-pulse" 
-          style={{ 
-            height: '48px',
-            animationDelay: '0ms',
-            animationDuration: '1.2s'
-          }}
-        ></div>
-        <div 
-          className="w-2 bg-black rounded-sm animate-pulse" 
-          style={{ 
-            height: '48px',
-            animationDelay: '150ms',
-            animationDuration: '1.2s'
-          }}
-        ></div>
-        <div 
-          className="w-2 bg-black rounded-sm animate-pulse" 
-          style={{ 
-            height: '48px',
-            animationDelay: '300ms',
-            animationDuration: '1.2s'
-          }}
-        ></div>
-        <div 
-          className="w-2 bg-black rounded-sm animate-pulse" 
-          style={{ 
-            height: '48px',
-            animationDelay: '450ms',
-            animationDuration: '1.2s'
-          }}
-        ></div>
-        <div 
-          className="w-2 bg-black rounded-sm animate-pulse" 
-          style={{ 
-            height: '48px',
-            animationDelay: '600ms',
-            animationDuration: '1.2s'
-          }}
-        ></div>
-      </div>
-
-      {/* Icon animation based on type */}
-      <div className="mb-4">
-        {type === 'feed' ? (
-          // RSS feed collection animation
-          <div className="relative w-16 h-16">
-            <svg 
-              className="w-16 h-16 text-gray-800" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              {/* RSS icon with pulsing circles */}
-              <circle 
-                cx="5" 
-                cy="19" 
-                r="2" 
-                fill="currentColor"
-              />
-              <path 
-                className="animate-ping" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M4 11a9 9 0 019 9"
-                style={{ animationDuration: '2s' }}
-              />
-              <path 
-                className="animate-ping" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M4 4a16 16 0 0116 16"
-                style={{ animationDuration: '2s', animationDelay: '0.5s' }}
-              />
-            </svg>
-          </div>
-        ) : (
-          // Pen writing animation
+      {type === 'feed' ? (
+        // Feed suggestion: Wave-like bars animation only
+        <div className="flex items-end gap-2 mb-6 h-16">
+          <div 
+            className="bar w-2 bg-black rounded-sm animate-wave" 
+            style={{ 
+              animationDelay: '0ms',
+            }}
+          ></div>
+          <div 
+            className="bar w-2 bg-black rounded-sm animate-wave" 
+            style={{ 
+              animationDelay: '150ms',
+            }}
+          ></div>
+          <div 
+            className="bar w-2 bg-black rounded-sm animate-wave" 
+            style={{ 
+              animationDelay: '300ms',
+            }}
+          ></div>
+          <div 
+            className="bar w-2 bg-black rounded-sm animate-wave" 
+            style={{ 
+              animationDelay: '450ms',
+            }}
+          ></div>
+          <div 
+            className="bar w-2 bg-black rounded-sm animate-wave" 
+            style={{ 
+              animationDelay: '600ms',
+            }}
+          ></div>
+        </div>
+      ) : (
+        // Newspaper generation: Pen animation only
+        <div className="mb-4">
           <div className="relative w-16 h-16">
             <svg 
               className="w-16 h-16 text-gray-800 animate-bounce" 
@@ -125,8 +80,8 @@ export function LoadingAnimation({ message, type = 'newspaper' }: LoadingAnimati
               ></div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Message */}
       {message && (
@@ -134,6 +89,21 @@ export function LoadingAnimation({ message, type = 'newspaper' }: LoadingAnimati
           {message}
         </p>
       )}
+
+      <style jsx>{`
+        @keyframes wave {
+          0%, 100% {
+            height: 16px;
+          }
+          50% {
+            height: 48px;
+          }
+        }
+
+        .animate-wave {
+          animation: wave 1.2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }

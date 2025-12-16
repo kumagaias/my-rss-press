@@ -125,13 +125,30 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     
     const suggestions = parseAIResponse(response);
     console.log(`[Bedrock] AI suggested ${suggestions.length} feeds:`, suggestions.map(s => ({ url: s.url, title: s.title })));
+    
+    // Remove duplicate URLs (keep first occurrence)
+    const uniqueSuggestions: FeedSuggestion[] = [];
+    const seenUrls = new Set<string>();
+    
+    for (const suggestion of suggestions) {
+      if (!seenUrls.has(suggestion.url)) {
+        uniqueSuggestions.push(suggestion);
+        seenUrls.add(suggestion.url);
+      } else {
+        console.log(`[Deduplication] Removed duplicate URL: ${suggestion.url}`);
+      }
+    }
+    
+    if (uniqueSuggestions.length < suggestions.length) {
+      console.log(`[Deduplication] Removed ${suggestions.length - uniqueSuggestions.length} duplicate URLs`);
+    }
 
     // Validate feed URLs in parallel for better performance
-    console.log(`[Validation] Starting validation of ${suggestions.length} feed URLs...`);
+    console.log(`[Validation] Starting validation of ${uniqueSuggestions.length} feed URLs...`);
     const validationStartTime = Date.now();
     
     const validationResults = await Promise.all(
-      suggestions.map(async (suggestion) => ({
+      uniqueSuggestions.map(async (suggestion) => ({
         suggestion,
         isValid: await validateFeedUrl(suggestion.url),
       }))
@@ -153,7 +170,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Validation] Invalid feeds (${invalidFeeds.length}): ${invalidFeeds.join(', ')}`);
     }
     
-    console.log(`[Validation] Result: ${validatedSuggestions.length}/${suggestions.length} feeds are valid`);
+    console.log(`[Validation] Result: ${validatedSuggestions.length}/${uniqueSuggestions.length} feeds are valid`);
 
     // Select top 10 feeds from validated suggestions
     const maxFeeds = 10;

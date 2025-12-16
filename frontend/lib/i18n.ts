@@ -86,6 +86,8 @@ export const translations = {
     
     // Status
     saved: 'Saved',
+    saving: 'Saving...',
+    saveFailed: 'Failed to save newspaper. Please try again.',
     
     // Date navigation
     previousDay: 'Previous',
@@ -189,6 +191,8 @@ export const translations = {
     
     // ステータス
     saved: '保存済み',
+    saving: '保存中...',
+    saveFailed: '新聞の保存に失敗しました。もう一度お試しください。',
     
     // 日付ナビゲーション
     previousDay: '前日',

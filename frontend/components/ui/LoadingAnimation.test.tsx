@@ -3,12 +3,17 @@ import { describe, it, expect } from 'vitest';
 import { LoadingAnimation } from './LoadingAnimation';
 
 describe('LoadingAnimation', () => {
-  it('renders vertical bars animation', () => {
+  it('renders newspaper type animation by default', () => {
     const { container } = render(<LoadingAnimation />);
 
-    // Check for vertical bars (should have 5 bars)
-    const bars = container.querySelectorAll('.animate-pulse');
-    expect(bars.length).toBeGreaterThanOrEqual(5);
+    // Check for pen icon (newspaper type)
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveClass('animate-bounce');
+    
+    // Should not have wave bars for newspaper type
+    const bars = container.querySelectorAll('.bar');
+    expect(bars.length).toBe(0);
   });
 
   it('renders without message', () => {
@@ -26,25 +31,29 @@ describe('LoadingAnimation', () => {
     expect(message).toBeInTheDocument();
   });
 
-  it('renders newspaper type animation by default', () => {
-    const { container } = render(<LoadingAnimation />);
+  it('renders feed type animation when specified', () => {
+    const { container } = render(<LoadingAnimation type="feed" />);
+
+    // Check for wave bars (feed type)
+    const bars = container.querySelectorAll('.bar');
+    expect(bars.length).toBeGreaterThanOrEqual(4);
+    
+    // Should not have pen icon for feed type
+    const svg = container.querySelector('svg');
+    expect(svg).toBeNull();
+  });
+
+  it('renders newspaper type animation when specified', () => {
+    const { container } = render(<LoadingAnimation type="newspaper" />);
 
     // Check for pen icon (newspaper type)
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveClass('animate-bounce');
-  });
-
-  it('renders feed type animation when specified', () => {
-    const { container } = render(<LoadingAnimation type="feed" />);
-
-    // Check for RSS icon (feed type)
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
     
-    // Check for ping animation (RSS waves)
-    const pingElements = container.querySelectorAll('.animate-ping');
-    expect(pingElements.length).toBeGreaterThan(0);
+    // Should not have wave bars for newspaper type
+    const bars = container.querySelectorAll('.bar');
+    expect(bars.length).toBe(0);
   });
 
   it('has correct structure', () => {
@@ -53,9 +62,5 @@ describe('LoadingAnimation', () => {
     // Check for flex container
     const flexContainer = container.querySelector('.flex');
     expect(flexContainer).toBeInTheDocument();
-
-    // Check for vertical bars container
-    const barsContainer = container.querySelector('.flex.gap-2');
-    expect(barsContainer).toBeInTheDocument();
   });
 });

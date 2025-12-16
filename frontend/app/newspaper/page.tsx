@@ -3,8 +3,11 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout';
+import { NewspaperSettingsModal } from '@/components/features/newspaper/NewspaperSettings';
 import DateNavigation from '@/components/features/newspaper/DateNavigation';
 import { detectLocale, useTranslations, type Locale } from '@/lib/i18n';
+import { saveNewspaper } from '@/lib/api';
+import type { NewspaperSettings } from '@/types';
 
 interface Article {
   title: string;
@@ -38,6 +41,9 @@ function NewspaperContent() {
   const [error, setError] = useState<string | null>(null);
   const [id, setId] = useState<string>('');
   const [date, setDate] = useState<string>('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // Get id and date from query params
   useEffect(() => {
@@ -150,6 +156,53 @@ function NewspaperContent() {
     router.push(`/newspaper?id=${id}&date=${newDate}`);
   };
 
+  const handleSaveClick = () => {
+    setIsSettingsOpen(true);
+  };
+
+  const handleSaveNewspaper = async (settings: NewspaperSettings) => {
+    if (!newspaper) return;
+
+    try {
+      setIsSaving(true);
+
+      // Get data from sessionStorage for newly generated newspapers
+      const feedsJson = sessionStorage.getItem('newspaperFeeds');
+      const languagesJson = sessionStorage.getItem('newspaperLanguages');
+      const summary = sessionStorage.getItem('newspaperSummary');
+
+      const feedUrls = feedsJson ? JSON.parse(feedsJson) : newspaper.feedUrls;
+      const languages = languagesJson ? JSON.parse(languagesJson) : newspaper.languages || [];
+
+      const result = await saveNewspaper(
+        settings,
+        feedUrls,
+        newspaper.articles,
+        locale,
+        languages,
+        summary || undefined
+      );
+
+      // Clear sessionStorage after successful save
+      sessionStorage.removeItem('newspaperArticles');
+      sessionStorage.removeItem('newspaperTheme');
+      sessionStorage.removeItem('newspaperFeeds');
+      sessionStorage.removeItem('newspaperLocale');
+      sessionStorage.removeItem('newspaperLanguages');
+      sessionStorage.removeItem('newspaperSummary');
+
+      setIsSaved(true);
+
+      // Navigate to the saved newspaper page
+      router.push(`/newspaper?id=${result.newspaperId}`);
+    } catch (err) {
+      console.error('Error saving newspaper:', err);
+      alert(t.saveFailed);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -229,8 +282,20 @@ function NewspaperContent() {
         />
       </div>
 
-      {/* Back to Home Button */}
-      <div className="max-w-7xl mx-auto px-4 pb-8">
+      {/* Action Buttons */}
+      <div className="max-w-7xl mx-auto px-4 pb-8 flex gap-4">
+        {/* Save Button - only show for unsaved newspapers (temp ID) */}
+        {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
+          <button
+            onClick={handleSaveClick}
+            disabled={isSaving}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {isSaving ? t.saving : t.save}
+          </button>
+        )}
+
+        {/* Back to Home Button */}
         <button
           onClick={() => router.push('/')}
           className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
@@ -238,6 +303,15 @@ function NewspaperContent() {
           {t.backToHome}
         </button>
       </div>
+
+      {/* Newspaper Settings Modal */}
+      <NewspaperSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onSave={handleSaveNewspaper}
+        locale={locale}
+        defaultName={newspaper.theme || newspaper.name}
+      />
     </div>
   );
 }

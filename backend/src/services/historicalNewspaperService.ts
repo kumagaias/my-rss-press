@@ -260,6 +260,15 @@ async function getNewspaperByDate(
  * Uses a special GSI1PK pattern 'HISTORICAL' to distinguish from public newspapers.
  */
 async function saveNewspaperByDate(newspaper: NewspaperData): Promise<void> {
+  // Remove undefined values from newspaper object
+  // DynamoDB does not allow undefined values
+  const cleanNewspaper: Record<string, any> = {};
+  for (const [key, value] of Object.entries(newspaper)) {
+    if (value !== undefined) {
+      cleanNewspaper[key] = value;
+    }
+  }
+
   await docClient.send(
     new PutCommand({
       TableName: config.dynamodbTable,
@@ -270,7 +279,7 @@ async function saveNewspaperByDate(newspaper: NewspaperData): Promise<void> {
         // Use 'HISTORICAL' prefix to distinguish from public newspapers
         GSI1PK: 'HISTORICAL',
         GSI1SK: `DATE#${newspaper.newspaperDate}#${newspaper.newspaperId}`,
-        ...newspaper,
+        ...cleanNewspaper,
       },
     })
   );

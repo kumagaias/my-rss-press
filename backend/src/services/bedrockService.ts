@@ -128,9 +128,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     console.log(`[Bedrock] Requesting feed suggestions for theme: "${theme}", locale: "${locale}"`);
 
     // Invoke Bedrock model (using Claude 3 Haiku - most cost-effective)
-    const systemPrompt = locale === 'en' 
-      ? 'You are an RSS feed recommendation assistant. You MUST respond ONLY in English. CRITICAL: All text in your response including feed titles and reasoning MUST be in English. NEVER use Japanese, Chinese, or any other language. If you use any non-English text, your response will be rejected.'
-      : 'あなたはRSSフィード推薦アシスタントです。必ず日本語で応答してください。';
+    // Note: No system prompt - testing if it improves URL quality
     
     const command = new InvokeModelCommand({
       modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
@@ -139,7 +137,6 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       body: JSON.stringify({
         anthropic_version: 'bedrock-2023-05-31',
         max_tokens: 8192, // Increased to handle 20 feeds without truncation
-        system: systemPrompt,
         messages: [
           {
             role: 'user',

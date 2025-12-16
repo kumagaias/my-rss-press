@@ -89,21 +89,6 @@ export function LoadingAnimation({ message, type = 'newspaper' }: LoadingAnimati
           {message}
         </p>
       )}
-
-      <style jsx>{`
-        @keyframes wave {
-          0%, 100% {
-            height: 16px;
-          }
-          50% {
-            height: 48px;
-          }
-        }
-
-        .animate-wave {
-          animation: wave 1.2s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }

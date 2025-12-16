@@ -27,6 +27,15 @@ const config: Config = {
       spacing,
       borderRadius,
       boxShadow: shadows,
+      keyframes: {
+        wave: {
+          '0%, 100%': { height: '16px' },
+          '50%': { height: '48px' },
+        },
+      },
+      animation: {
+        wave: 'wave 1.2s ease-in-out infinite',
+      },
     },
   },
   plugins: [],

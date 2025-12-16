@@ -17,31 +17,14 @@ export interface FeedSuggestion {
 }
 
 /**
- * Validate if a feed URL is accessible
+ * Validate if a feed URL is accessible and contains valid feed content
  */
 async function validateFeedUrl(url: string): Promise<boolean> {
   try {
     // Use a more common User-Agent to avoid blocking
     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
     
-    // Try HEAD request first
-    const headResponse = await fetch(url, {
-      method: 'HEAD',
-      headers: {
-        'User-Agent': userAgent,
-        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-      },
-      signal: AbortSignal.timeout(5000),
-    });
-    
-    if (headResponse.ok) {
-      console.log(`[Validation] HEAD request succeeded for ${url} (${headResponse.status})`);
-      return true;
-    }
-    
-    console.log(`[Validation] HEAD request failed for ${url} (${headResponse.status}), trying GET...`);
-    
-    // If HEAD fails, try GET (some servers don't support HEAD)
+    // Use GET request to check both status and content
     const getResponse = await fetch(url, {
       method: 'GET',
       headers: {
@@ -49,11 +32,53 @@ async function validateFeedUrl(url: string): Promise<boolean> {
         'Accept': 'application/rss+xml, application/xml, text/xml, */*',
       },
       signal: AbortSignal.timeout(5000),
+      redirect: 'manual', // Don't follow redirects automatically
     });
     
-    const isValid = getResponse.ok;
-    console.log(`[Validation] GET request ${isValid ? 'succeeded' : 'failed'} for ${url} (${getResponse.status})`);
-    return isValid;
+    // Reject redirects (3xx status codes)
+    if (getResponse.status >= 300 && getResponse.status < 400) {
+      console.log(`[Validation] Rejected redirect for ${url} (${getResponse.status})`);
+      return false;
+    }
+    
+    // Check if response is OK (2xx)
+    if (!getResponse.ok) {
+      console.log(`[Validation] GET request failed for ${url} (${getResponse.status})`);
+      return false;
+    }
+    
+    // Check Content-Type (should be XML-based)
+    const contentType = getResponse.headers.get('content-type') || '';
+    const isXmlContent = contentType.includes('xml') || contentType.includes('rss') || contentType.includes('atom');
+    
+    if (!isXmlContent) {
+      console.log(`[Validation] Invalid content-type for ${url}: ${contentType}`);
+      return false;
+    }
+    
+    // Check if response has content (not empty)
+    const contentLength = getResponse.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) === 0) {
+      console.log(`[Validation] Empty response for ${url}`);
+      return false;
+    }
+    
+    // Read a small portion of the response to verify it's valid XML
+    const text = await getResponse.text();
+    if (!text || text.trim().length === 0) {
+      console.log(`[Validation] Empty content for ${url}`);
+      return false;
+    }
+    
+    // Check if it looks like XML (starts with < or <?xml)
+    const trimmedText = text.trim();
+    if (!trimmedText.startsWith('<')) {
+      console.log(`[Validation] Content doesn't look like XML for ${url}`);
+      return false;
+    }
+    
+    console.log(`[Validation] Valid feed found for ${url} (${getResponse.status}, ${contentType})`);
+    return true;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.log(`[Validation] Feed URL validation failed for ${url}: ${errorMessage}`);

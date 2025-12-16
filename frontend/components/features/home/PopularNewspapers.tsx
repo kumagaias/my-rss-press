@@ -98,8 +98,8 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
   return (
     <div className="w-full">
       <div className="flex flex-col gap-4 mb-6 border-b-2 border-black pb-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-serif font-black">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-2xl sm:text-3xl font-serif font-black">
             {sortBy === 'popular' ? t.popularNewspapers : t.recentNewspapers}
           </h2>
           <div className="flex gap-2">

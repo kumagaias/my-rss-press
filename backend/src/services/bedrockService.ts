@@ -205,7 +205,12 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Selection] Selected top ${maxFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
     }
 
-    // Minimum 2 feeds required
+    // If we have 0 valid feeds, throw error to trigger retry
+    if (topFeeds.length === 0) {
+      console.log(`[Error] No valid feeds found from Bedrock, will retry`);
+      throw new Error('No valid feeds found from Bedrock');
+    }
+    
     // If we have less than 2 valid feeds, supplement with default feeds
     if (topFeeds.length < 2) {
       console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with default feeds`);
@@ -477,7 +482,7 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
  * Get all default feeds for a locale
  * Returns all available default feeds (not shuffled)
  */
-function getAllDefaultFeeds(locale: 'en' | 'ja' = 'en'): FeedSuggestion[] {
+export function getAllDefaultFeeds(locale: 'en' | 'ja' = 'en'): FeedSuggestion[] {
   const englishFeeds: FeedSuggestion[] = [
     {
       url: 'https://feeds.bbci.co.uk/news/rss.xml',

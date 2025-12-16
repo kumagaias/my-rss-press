@@ -142,6 +142,13 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     const bedrockTime = Date.now() - startTime;
     console.log(`[Bedrock] API call completed in ${bedrockTime}ms`);
     
+    // Log raw response for debugging (first 500 chars)
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const content = responseBody.content[0].text;
+    console.log(`[Bedrock] Raw response (first 500 chars): ${content.substring(0, 500)}`);
+    console.log(`[Bedrock] Raw response (last 500 chars): ${content.substring(Math.max(0, content.length - 500))}`);
+    console.log(`[Bedrock] Total response length: ${content.length} characters`);
+    
     const suggestions = parseAIResponse(response);
     console.log(`[Bedrock] AI suggested ${suggestions.length} feeds:`, suggestions.map(s => ({ url: s.url, title: s.title })));
     
@@ -362,15 +369,21 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error('[Bedrock] No JSON found in response');
+      console.error('[Bedrock] Response content:', content);
       throw new Error('No JSON found in response');
     }
 
+    const jsonString = jsonMatch[0];
+    console.log(`[Bedrock] Extracted JSON length: ${jsonString.length} characters`);
+
     let parsed;
     try {
-      parsed = JSON.parse(jsonMatch[0]);
+      parsed = JSON.parse(jsonString);
     } catch (jsonError) {
       // If JSON parsing fails, try to fix common issues
       console.error('[Bedrock] JSON parse error, attempting to fix:', jsonError);
+      console.error('[Bedrock] JSON string (first 1000 chars):', jsonString.substring(0, 1000));
+      console.error('[Bedrock] JSON string (last 1000 chars):', jsonString.substring(Math.max(0, jsonString.length - 1000)));
       
       // Try to extract feeds array even if JSON is incomplete
       // Use greedy quantifier to capture entire feeds array
@@ -379,6 +392,7 @@ function parseAIResponse(response: any): FeedSuggestion[] {
         // Try to parse just the feeds array
         try {
           const feedsJson = `{${feedsMatch[0]}}`;
+          console.log(`[Bedrock] Attempting to parse feeds array only (${feedsJson.length} chars)`);
           parsed = JSON.parse(feedsJson);
           console.log('[Bedrock] Successfully recovered feeds from partial JSON');
         } catch (recoveryError) {
@@ -386,6 +400,7 @@ function parseAIResponse(response: any): FeedSuggestion[] {
           throw jsonError;
         }
       } else {
+        console.error('[Bedrock] Could not find feeds array in response');
         throw jsonError;
       }
     }

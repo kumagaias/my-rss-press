@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations, type Locale } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
 
 interface LanguageFilterProps {
   selectedLanguage: 'JP' | 'EN' | 'ALL';
@@ -26,26 +26,21 @@ export default function LanguageFilter({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-gray-700">
+      <label htmlFor="language-filter" className="text-sm font-serif font-bold whitespace-nowrap">
         {locale === 'ja' ? '言語:' : 'Language:'}
-      </span>
-      <div className="flex gap-2">
+      </label>
+      <select
+        id="language-filter"
+        value={selectedLanguage}
+        onChange={(e) => onLanguageChange(e.target.value as 'JP' | 'EN' | 'ALL')}
+        className="border-2 border-black px-3 py-2 font-serif bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black min-w-[140px]"
+      >
         {languages.map((lang) => (
-          <button
-            key={lang.value}
-            onClick={() => onLanguageChange(lang.value)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedLanguage === lang.value
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            aria-label={`Filter by ${lang.label}`}
-            aria-pressed={selectedLanguage === lang.value}
-          >
+          <option key={lang.value} value={lang.value}>
             {lang.label}
-          </button>
+          </option>
         ))}
-      </div>
+      </select>
     </div>
   );
 }

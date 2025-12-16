@@ -71,18 +71,16 @@ describe('PopularNewspapers', () => {
       expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
     });
 
-    // Click recent button
-    const recentButton = screen.getByText('Recent');
-    fireEvent.click(recentButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Recent Newspapers')).toBeInTheDocument();
-    });
+    // Change sort to recent using select
+    const sortSelect = screen.getByRole('combobox', { name: /sort/i });
+    fireEvent.change(sortSelect, { target: { value: 'recent' } });
 
     // Verify fetch was called with correct sort parameter
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('sort=recent')
-    );
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('sort=recent')
+      );
+    });
   });
 
   it('displays loading state', () => {
@@ -224,9 +222,9 @@ describe('PopularNewspapers', () => {
         expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
       });
 
-      // Click JP filter
-      const jpButton = screen.getByText('Japanese');
-      fireEvent.click(jpButton);
+      // Change language filter to JP using select
+      const languageSelect = screen.getByRole('combobox', { name: /language/i });
+      fireEvent.change(languageSelect, { target: { value: 'JP' } });
 
       // Should show only JP newspapers and legacy newspapers (backward compatibility)
       await waitFor(() => {
@@ -249,9 +247,9 @@ describe('PopularNewspapers', () => {
         expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
       });
 
-      // Click ALL filter
-      const allButton = screen.getByText('All');
-      fireEvent.click(allButton);
+      // Change language filter to ALL using select
+      const languageSelect = screen.getByRole('combobox', { name: /language/i });
+      fireEvent.change(languageSelect, { target: { value: 'ALL' } });
 
       // Should show all newspapers
       await waitFor(() => {
@@ -277,9 +275,9 @@ describe('PopularNewspapers', () => {
       // Legacy News should be visible in EN filter
       expect(screen.getByText('Legacy News')).toBeInTheDocument();
 
-      // Click JP filter
-      const jpButton = screen.getByText('Japanese');
-      fireEvent.click(jpButton);
+      // Change language filter to JP using select
+      const languageSelect = screen.getByRole('combobox', { name: /language/i });
+      fireEvent.change(languageSelect, { target: { value: 'JP' } });
 
       // Legacy News should still be visible in JP filter
       await waitFor(() => {

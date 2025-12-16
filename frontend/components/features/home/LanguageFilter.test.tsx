@@ -20,12 +20,14 @@ describe('LanguageFilter', () => {
       );
 
       expect(screen.getByText('Language:')).toBeInTheDocument();
+      const select = screen.getByRole('combobox');
+      expect(select).toBeInTheDocument();
       expect(screen.getByText('All')).toBeInTheDocument();
       expect(screen.getByText('Japanese')).toBeInTheDocument();
       expect(screen.getByText('English')).toBeInTheDocument();
     });
 
-    it('should highlight selected language', () => {
+    it('should have selected language as value', () => {
       render(
         <LanguageFilter
           selectedLanguage="EN"
@@ -34,14 +36,11 @@ describe('LanguageFilter', () => {
         />
       );
 
-      const englishButton = screen.getByText('English');
-      expect(englishButton).toHaveClass('bg-gray-900', 'text-white');
-
-      const allButton = screen.getByText('All');
-      expect(allButton).toHaveClass('bg-gray-200', 'text-gray-700');
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+      expect(select.value).toBe('EN');
     });
 
-    it('should call onLanguageChange when clicking a language button', () => {
+    it('should call onLanguageChange when selecting a language', () => {
       render(
         <LanguageFilter
           selectedLanguage="ALL"
@@ -50,8 +49,8 @@ describe('LanguageFilter', () => {
         />
       );
 
-      const japaneseButton = screen.getByText('Japanese');
-      fireEvent.click(japaneseButton);
+      const select = screen.getByRole('combobox');
+      fireEvent.change(select, { target: { value: 'JP' } });
 
       expect(mockOnLanguageChange).toHaveBeenCalledWith('JP');
     });
@@ -68,12 +67,14 @@ describe('LanguageFilter', () => {
       );
 
       expect(screen.getByText('言語:')).toBeInTheDocument();
+      const select = screen.getByRole('combobox');
+      expect(select).toBeInTheDocument();
       expect(screen.getByText('すべて')).toBeInTheDocument();
       expect(screen.getByText('日本語')).toBeInTheDocument();
       expect(screen.getByText('英語')).toBeInTheDocument();
     });
 
-    it('should highlight selected language', () => {
+    it('should have selected language as value', () => {
       render(
         <LanguageFilter
           selectedLanguage="JP"
@@ -82,14 +83,11 @@ describe('LanguageFilter', () => {
         />
       );
 
-      const japaneseButton = screen.getByText('日本語');
-      expect(japaneseButton).toHaveClass('bg-gray-900', 'text-white');
-
-      const allButton = screen.getByText('すべて');
-      expect(allButton).toHaveClass('bg-gray-200', 'text-gray-700');
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+      expect(select.value).toBe('JP');
     });
 
-    it('should call onLanguageChange when clicking a language button', () => {
+    it('should call onLanguageChange when selecting a language', () => {
       render(
         <LanguageFilter
           selectedLanguage="ALL"
@@ -98,15 +96,15 @@ describe('LanguageFilter', () => {
         />
       );
 
-      const englishButton = screen.getByText('英語');
-      fireEvent.click(englishButton);
+      const select = screen.getByRole('combobox');
+      fireEvent.change(select, { target: { value: 'EN' } });
 
       expect(mockOnLanguageChange).toHaveBeenCalledWith('EN');
     });
   });
 
   describe('Accessibility', () => {
-    it('should have proper aria-labels', () => {
+    it('should have proper label', () => {
       render(
         <LanguageFilter
           selectedLanguage="ALL"
@@ -115,16 +113,14 @@ describe('LanguageFilter', () => {
         />
       );
 
-      const allButton = screen.getByLabelText('Filter by All');
-      const japaneseButton = screen.getByLabelText('Filter by Japanese');
-      const englishButton = screen.getByLabelText('Filter by English');
+      const label = screen.getByText('Language:');
+      const select = screen.getByRole('combobox');
 
-      expect(allButton).toBeInTheDocument();
-      expect(japaneseButton).toBeInTheDocument();
-      expect(englishButton).toBeInTheDocument();
+      expect(label).toBeInTheDocument();
+      expect(select).toHaveAttribute('id', 'language-filter');
     });
 
-    it('should have aria-pressed attribute', () => {
+    it('should be keyboard accessible', () => {
       render(
         <LanguageFilter
           selectedLanguage="EN"
@@ -133,11 +129,9 @@ describe('LanguageFilter', () => {
         />
       );
 
-      const englishButton = screen.getByText('English');
-      expect(englishButton).toHaveAttribute('aria-pressed', 'true');
-
-      const allButton = screen.getByText('All');
-      expect(allButton).toHaveAttribute('aria-pressed', 'false');
+      const select = screen.getByRole('combobox');
+      expect(select).toBeInTheDocument();
+      expect(select).not.toBeDisabled();
     });
   });
 
@@ -151,8 +145,8 @@ describe('LanguageFilter', () => {
         />
       );
 
-      const allButton = screen.getByText('All');
-      fireEvent.click(allButton);
+      const select = screen.getByRole('combobox');
+      fireEvent.change(select, { target: { value: 'ALL' } });
 
       expect(mockOnLanguageChange).toHaveBeenCalledWith('ALL');
     });

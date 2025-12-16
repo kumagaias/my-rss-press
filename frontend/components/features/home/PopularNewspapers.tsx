@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import LanguageFilter from './LanguageFilter';
 import SearchInput from './SearchInput';
+import SortFilter from './SortFilter';
 import type { NewspaperData, Locale } from '@/types';
 import { useTranslations, formatDate, formatNumber } from '@/lib/i18n';
 import { getHostnameFromUrl } from '@/lib/utils';
@@ -98,30 +99,17 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
   return (
     <div className="w-full">
       <div className="flex flex-col gap-4 mb-6 border-b-2 border-black pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h2 className="text-2xl sm:text-3xl font-serif font-black">
-            {sortBy === 'popular' ? t.popularNewspapers : t.recentNewspapers}
-          </h2>
-          <div className="flex gap-2">
-            <Button
-              variant={sortBy === 'popular' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => handleSortChange('popular')}
-            >
-              {t.popular}
-            </Button>
-            <Button
-              variant={sortBy === 'recent' ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => handleSortChange('recent')}
-            >
-              {t.recent}
-            </Button>
-          </div>
-        </div>
+        <h2 className="text-2xl sm:text-3xl font-serif font-black">
+          {t.popularNewspapers}
+        </h2>
         
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <SortFilter
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            locale={locale}
+          />
           <LanguageFilter
             selectedLanguage={selectedLanguage}
             onLanguageChange={setSelectedLanguage}

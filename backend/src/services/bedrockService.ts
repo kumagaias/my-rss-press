@@ -220,12 +220,17 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Selection] Selected top ${maxBedrockFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
     }
 
-    // If we have 0 valid feeds, return all default feeds immediately
+    // If we have 0 valid feeds, return 1 random default feed
     if (topFeeds.length === 0) {
-      console.log(`[Fallback] No valid feeds from Bedrock, returning all default feeds`);
-      const allDefaultFeeds = getAllDefaultFeeds(locale).map(f => ({ ...f, isDefault: true }));
+      console.log(`[Fallback] No valid feeds from Bedrock, returning 1 random default feed`);
+      const defaultFeeds = getAllDefaultFeeds(locale);
+      const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
+      const randomDefaultFeed = defaultFeeds[randomIndex];
+      
+      console.log(`[Fallback] Selected random default feed: ${randomDefaultFeed.title} (${randomDefaultFeed.url})`);
+      
       return {
-        feeds: allDefaultFeeds,
+        feeds: [{ ...randomDefaultFeed, isDefault: true }],
         newspaperName: locale === 'ja' ? `${theme}デイリー` : `The ${theme} Daily`,
       };
     }

@@ -64,7 +64,7 @@ export const translations = {
     
     // Loading and errors
     loading: 'Loading...',
-    loadingSuggestions: 'Loading feed suggestions...',
+    loadingSuggestions: 'AI is searching for feeds...',
     generating: 'Generating your newspaper...',
     error: 'Error',
     errorOccurred: 'An error occurred',
@@ -169,7 +169,7 @@ export const translations = {
     
     // ローディングとエラー
     loading: '読み込み中...',
-    loadingSuggestions: 'フィード提案を読み込み中...',
+    loadingSuggestions: 'AIがフィードを探しています...',
     generating: '新聞を生成中...',
     error: 'エラー',
     errorOccurred: 'エラーが発生しました',

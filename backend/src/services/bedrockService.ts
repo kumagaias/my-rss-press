@@ -31,7 +31,7 @@ async function validateFeedUrl(url: string): Promise<boolean> {
         'User-Agent': userAgent,
         'Accept': 'application/rss+xml, application/xml, text/xml, */*',
       },
-      signal: AbortSignal.timeout(3000), // Reduced from 5s to 3s for faster validation
+      signal: AbortSignal.timeout(2000), // Reduced to 2s to stay within API Gateway 29s timeout
       redirect: 'manual', // Don't follow redirects automatically
     });
     

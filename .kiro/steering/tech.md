@@ -550,16 +550,23 @@ async function validateFeedUrl(url: string): Promise<boolean> {
    - Reason: API Gateway has 29 second max timeout, must complete within this limit
 
 2. **URL validation optimization**
-   - Timeout reduced: 5 seconds → 3 seconds per URL
+   - Timeout reduced: 5 seconds → 3 seconds → 2 seconds per URL
    - Parallel execution: All URLs validated simultaneously with Promise.all
-   - Sequential: 20 feeds × 3 seconds = max 60 seconds
-   - Parallel: max 3 seconds (all executed in parallel)
+   - Sequential: 20 feeds × 2 seconds = max 40 seconds
+   - Parallel: max 2 seconds (all executed in parallel)
    - Improvement: up to 20x faster
 
-3. **Lambda timeout setting**
+3. **Retry logic with timeout consideration**
+   - Max attempts: 2 (1 retry)
+   - Expected time per attempt: ~17 seconds (15s Bedrock + 2s validation)
+   - Total with retry: ~35 seconds (17s + 1s wait + 17s)
+   - Risk: May exceed 29s timeout if both attempts take full time
+   - Mitigation: 2s validation timeout keeps total under 29s in most cases
+
+4. **Lambda timeout setting**
    - Lambda: 60 seconds (sufficient)
    - API Gateway: 29 seconds (hard limit, cannot be changed)
-   - Target: Complete within 25 seconds to avoid timeout
+   - Target: Complete within 27 seconds to avoid timeout
 
 **Benefits of validation:**
 - Exclude fake URLs and non-existent feeds

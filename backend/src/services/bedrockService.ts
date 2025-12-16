@@ -460,6 +460,17 @@ function getThemeSpecificFeeds(theme: string): FeedSuggestion[] {
     ];
   }
   
+  // Travel
+  if (themeLower.includes('travel') || themeLower.includes('旅行') || themeLower.includes('観光')) {
+    return [
+      { url: 'https://www.lonelyplanet.com/feed', title: 'Lonely Planet', reasoning: 'Travel guides and destination information' },
+      { url: 'https://www.nationalgeographic.com/travel/rss', title: 'National Geographic Travel', reasoning: 'Travel stories and photography' },
+      { url: 'https://www.travelandleisure.com/rss', title: 'Travel + Leisure', reasoning: 'Travel tips and destination guides' },
+      { url: 'https://www.cntraveler.com/feed/rss', title: 'Condé Nast Traveler', reasoning: 'Luxury travel and destinations' },
+      { url: 'https://www.nomadicmatt.com/feed/', title: 'Nomadic Matt', reasoning: 'Budget travel tips and guides' },
+    ];
+  }
+  
   // Default: Return empty array to avoid generic feeds
   // This forces Bedrock to provide theme-specific suggestions
   return [];

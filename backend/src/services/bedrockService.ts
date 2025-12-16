@@ -21,14 +21,11 @@ export interface FeedSuggestion {
  */
 async function validateFeedUrl(url: string): Promise<boolean> {
   try {
-    // Convert http:// to https:// to avoid redirects
-    const httpsUrl = url.replace(/^http:\/\//i, 'https://');
-    
     // Use a more common User-Agent to avoid blocking
     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
     
     // Use GET request to check both status and content
-    const getResponse = await fetch(httpsUrl, {
+    const getResponse = await fetch(url, {
       method: 'GET',
       headers: {
         'User-Agent': userAgent,
@@ -74,7 +71,7 @@ async function validateFeedUrl(url: string): Promise<boolean> {
       return false;
     }
     
-    console.log(`[Validation] ✅ Valid feed: ${httpsUrl} (${getResponse.status}, ${contentType})`);
+    console.log(`[Validation] ✅ Valid feed: ${url} (${getResponse.status}, ${contentType})`);
     return true;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -165,24 +162,16 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Deduplication] Removed ${suggestions.length - uniqueSuggestions.length} duplicate URLs`);
     }
 
-    // Validate feed URLs with controlled concurrency (5 at a time)
+    // Validate feed URLs in parallel for better performance
     console.log(`[Validation] Starting validation of ${uniqueSuggestions.length} feed URLs...`);
     const validationStartTime = Date.now();
     
-    const validationResults: Array<{ suggestion: FeedSuggestion; isValid: boolean }> = [];
-    const concurrency = 5; // Validate 5 URLs at a time
-    
-    for (let i = 0; i < uniqueSuggestions.length; i += concurrency) {
-      const batch = uniqueSuggestions.slice(i, i + concurrency);
-      const batchResults = await Promise.all(
-        batch.map(async (suggestion) => ({
-          suggestion,
-          isValid: await validateFeedUrl(suggestion.url),
-        }))
-      );
-      validationResults.push(...batchResults);
-      console.log(`[Validation] Batch ${Math.floor(i / concurrency) + 1}/${Math.ceil(uniqueSuggestions.length / concurrency)} completed`);
-    }
+    const validationResults = await Promise.all(
+      uniqueSuggestions.map(async (suggestion) => ({
+        suggestion,
+        isValid: await validateFeedUrl(suggestion.url),
+      }))
+    );
     
     const validationTime = Date.now() - validationStartTime;
     console.log(`[Validation] Completed in ${validationTime}ms`);

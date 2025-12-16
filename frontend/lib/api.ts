@@ -35,7 +35,7 @@ export async function generateNewspaper(
 ): Promise<{ articles: Article[]; languages: string[]; summary: string | null }> {
   // Validate input
   if (!feedUrls || feedUrls.length === 0) {
-    throw new Error('At least one feed URL is required');
+    throw new Error('At least 1 feed URL is required');
   }
   if (feedUrls.length > 15) {
     throw new Error('Maximum 15 feed URLs allowed');

@@ -206,12 +206,12 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     }
 
     // Minimum 2 feeds required
-    // If we have less than 2 valid feeds, supplement with 1 random default feed
+    // If we have less than 2 valid feeds, supplement with default feeds
     if (topFeeds.length < 2) {
-      console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with 1 random default feed`);
-      const defaultFeeds = getDefaultFeedSuggestions(theme, locale);
+      console.log(`[Fallback] Only ${topFeeds.length} valid feeds found, supplementing with default feeds`);
+      const defaultFeeds = getAllDefaultFeeds(locale);
       
-      // Add the random default feed if it's not already in the list
+      // Add default feeds until we have at least 2 feeds
       const existingUrls = new Set(topFeeds.map(s => s.url));
       
       for (const defaultFeed of defaultFeeds) {
@@ -219,7 +219,11 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
           // Mark as default feed for lower priority
           topFeeds.push({ ...defaultFeed, isDefault: true } as any);
           console.log(`[Fallback] Added default feed: ${defaultFeed.title} (${defaultFeed.url})`);
-          break; // Only add 1 default feed
+          
+          // Stop when we have at least 2 feeds
+          if (topFeeds.length >= 2) {
+            break;
+          }
         }
       }
       
@@ -470,30 +474,30 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
 }
 
 /**
- * Get default feed suggestions as fallback
- * Returns one random feed based on locale
+ * Get all default feeds for a locale
+ * Returns all available default feeds (not shuffled)
  */
-function getDefaultFeedSuggestions(theme: string, locale: 'en' | 'ja' = 'en'): FeedSuggestion[] {
+function getAllDefaultFeeds(locale: 'en' | 'ja' = 'en'): FeedSuggestion[] {
   const englishFeeds: FeedSuggestion[] = [
     {
       url: 'https://feeds.bbci.co.uk/news/rss.xml',
       title: 'BBC News',
-      reasoning: `General news and information relevant to the theme: ${theme}`,
+      reasoning: 'General news and information',
     },
     {
       url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
       title: 'The New York Times',
-      reasoning: `In-depth articles and analysis related to the theme: ${theme}`,
+      reasoning: 'In-depth articles and analysis',
     },
     {
       url: 'https://feeds.reuters.com/reuters/topNews',
       title: 'Reuters Top News',
-      reasoning: `Breaking news and updates about the theme: ${theme}`,
+      reasoning: 'Breaking news and updates',
     },
     {
       url: 'https://www.theguardian.com/world/rss',
       title: 'The Guardian World News',
-      reasoning: `Global perspective on the theme: ${theme}`,
+      reasoning: 'Global perspective',
     },
   ];
 
@@ -501,26 +505,34 @@ function getDefaultFeedSuggestions(theme: string, locale: 'en' | 'ja' = 'en'): F
     {
       url: 'https://www3.nhk.or.jp/rss/news/cat0.xml',
       title: 'NHK ニュース',
-      reasoning: `テーマ「${theme}」に関連する一般的なニュースと情報`,
+      reasoning: '一般的なニュースと情報',
     },
     {
       url: 'https://www.asahi.com/rss/asahi/newsheadlines.rdf',
       title: '朝日新聞デジタル',
-      reasoning: `テーマ「${theme}」に関する詳細な記事と分析`,
+      reasoning: '詳細な記事と分析',
     },
     {
       url: 'https://news.yahoo.co.jp/rss/topics/top-picks.xml',
       title: 'Yahoo!ニュース',
-      reasoning: `テーマ「${theme}」に関する速報とアップデート`,
+      reasoning: '速報とアップデート',
     },
     {
       url: 'https://www.itmedia.co.jp/rss/2.0/news_bursts.xml',
       title: 'ITmedia NEWS',
-      reasoning: `テーマ「${theme}」に関するテクノロジーとビジネスの情報`,
+      reasoning: 'テクノロジーとビジネスの情報',
     },
   ];
 
-  const feedPool = locale === 'ja' ? japaneseFeeds : englishFeeds;
+  return locale === 'ja' ? japaneseFeeds : englishFeeds;
+}
+
+/**
+ * Get default feed suggestions as fallback
+ * Returns one random feed based on locale
+ */
+function getDefaultFeedSuggestions(theme: string, locale: 'en' | 'ja' = 'en'): FeedSuggestion[] {
+  const feedPool = getAllDefaultFeeds(locale);
   
   // Select one random feed
   const randomIndex = Math.floor(Math.random() * feedPool.length);

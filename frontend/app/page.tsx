@@ -29,13 +29,17 @@ export default function Home() {
   useEffect(() => {
     // Check localStorage first, then detect from browser
     const savedLocale = localStorage.getItem('locale') as Locale | null;
-    setLocale(savedLocale || detectLocale());
+    const detectedLocale = savedLocale || detectLocale();
+    console.log('[Home] Detected locale:', detectedLocale);
+    setLocale(detectedLocale);
   }, []);
 
   // Save locale to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('locale', locale);
-  }, [locale]);
+    console.log('[Home] Locale changed to:', locale);
+    console.log('[Home] Topic keywords:', t.topicKeywords.slice(0, 5), '... (total:', t.topicKeywords.length, ')');
+  }, [locale, t.topicKeywords]);
 
   const handleThemeSubmit = async (themeValue: string) => {
     setTheme(themeValue);

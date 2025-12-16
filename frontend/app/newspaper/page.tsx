@@ -53,8 +53,43 @@ function NewspaperContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    // Wait for id to be set
+    // If no id, try to load from sessionStorage (newly generated newspaper)
     if (!id) {
+      try {
+        const articlesJson = sessionStorage.getItem('newspaperArticles');
+        const theme = sessionStorage.getItem('newspaperTheme');
+        const feedsJson = sessionStorage.getItem('newspaperFeeds');
+        const savedLocale = sessionStorage.getItem('newspaperLocale');
+        const languagesJson = sessionStorage.getItem('newspaperLanguages');
+        const summary = sessionStorage.getItem('newspaperSummary');
+
+        if (articlesJson && theme && feedsJson) {
+          const articles = JSON.parse(articlesJson);
+          const feedUrls = JSON.parse(feedsJson);
+          const languages = languagesJson ? JSON.parse(languagesJson) : [];
+
+          // Create newspaper object from sessionStorage
+          const newspaperData: Newspaper = {
+            newspaperId: 'temp-' + Date.now(), // Temporary ID for unsaved newspaper
+            name: theme,
+            userName: 'Anonymous',
+            feedUrls,
+            theme,
+            articles,
+            newspaperDate: new Date().toISOString(),
+            summary: summary || undefined,
+            languages,
+          };
+
+          setNewspaper(newspaperData);
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Error loading from sessionStorage:', err);
+      }
+
+      // If sessionStorage is empty, show error
       setError('Newspaper ID is required');
       setLoading(false);
       return;
@@ -98,7 +133,7 @@ function NewspaperContent() {
         }
 
         const data = await response.json();
-        setNewspaper(data.data);
+        setNewspaper(data);
       } catch (err) {
         console.error('Error fetching newspaper:', err);
         setError('Failed to load newspaper');

@@ -98,4 +98,23 @@
     stroke-dashoffset: 50;
     animation: checkmark 0.5s ease-out 0.3s forwards;
   }
+  
+  /* Expand animation for writing lines */
+  @keyframes expand {
+    0% {
+      width: 0%;
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      width: 100%;
+      opacity: 0;
+    }
+  }
+  
+  .animate-expand {
+    animation: expand 1.5s ease-in-out infinite;
+  }
 }

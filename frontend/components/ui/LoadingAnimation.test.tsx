@@ -3,12 +3,12 @@ import { describe, it, expect } from 'vitest';
 import { LoadingAnimation } from './LoadingAnimation';
 
 describe('LoadingAnimation', () => {
-  it('renders spinner', () => {
+  it('renders vertical bars animation', () => {
     const { container } = render(<LoadingAnimation />);
 
-    // Check for spinner elements
-    const spinners = container.querySelectorAll('.animate-spin');
-    expect(spinners.length).toBeGreaterThan(0);
+    // Check for vertical bars (should have 5 bars)
+    const bars = container.querySelectorAll('.animate-pulse');
+    expect(bars.length).toBeGreaterThanOrEqual(5);
   });
 
   it('renders without message', () => {
@@ -26,16 +26,25 @@ describe('LoadingAnimation', () => {
     expect(message).toBeInTheDocument();
   });
 
-  it('applies animation classes', () => {
-    const { container } = render(<LoadingAnimation message="Loading..." />);
+  it('renders newspaper type animation by default', () => {
+    const { container } = render(<LoadingAnimation />);
 
-    // Check for animate-spin class
-    const spinner = container.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    // Check for pen icon (newspaper type)
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveClass('animate-bounce');
+  });
 
-    // Check for animate-pulse class on message
-    const message = screen.getByText('Loading...');
-    expect(message).toHaveClass('animate-pulse');
+  it('renders feed type animation when specified', () => {
+    const { container } = render(<LoadingAnimation type="feed" />);
+
+    // Check for RSS icon (feed type)
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    
+    // Check for ping animation (RSS waves)
+    const pingElements = container.querySelectorAll('.animate-ping');
+    expect(pingElements.length).toBeGreaterThan(0);
   });
 
   it('has correct structure', () => {
@@ -45,8 +54,8 @@ describe('LoadingAnimation', () => {
     const flexContainer = container.querySelector('.flex');
     expect(flexContainer).toBeInTheDocument();
 
-    // Check for spinner container
-    const spinnerContainer = container.querySelector('.relative');
-    expect(spinnerContainer).toBeInTheDocument();
+    // Check for vertical bars container
+    const barsContainer = container.querySelector('.flex.gap-2');
+    expect(barsContainer).toBeInTheDocument();
   });
 });

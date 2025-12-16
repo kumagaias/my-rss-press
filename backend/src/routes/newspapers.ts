@@ -23,7 +23,7 @@ export const newspapersRouter = new Hono();
 
 // Validation schemas
 const GenerateNewspaperSchema = z.object({
-  feedUrls: z.array(z.string().url()).min(3, 'At least 3 feed URLs are required').max(10, 'Too many feed URLs'),
+  feedUrls: z.array(z.string().url()).min(2, 'At least 2 feed URLs are required').max(15, 'Too many feed URLs'),
   theme: z.string().min(1, 'Theme is required'),
   defaultFeedUrls: z.array(z.string().url()).optional(), // URLs of default/fallback feeds
   locale: z.enum(['en', 'ja']).optional().default(DEFAULT_LANGUAGE.LOCALE), // Language setting for the newspaper

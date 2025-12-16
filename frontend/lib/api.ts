@@ -37,8 +37,8 @@ export async function generateNewspaper(
   if (!feedUrls || feedUrls.length === 0) {
     throw new Error('At least one feed URL is required');
   }
-  if (feedUrls.length > 10) {
-    throw new Error('Maximum 10 feed URLs allowed');
+  if (feedUrls.length > 15) {
+    throw new Error('Maximum 15 feed URLs allowed');
   }
 
   const response = await fetch(`${API_BASE_URL}/api/generate-newspaper`, {
@@ -51,7 +51,7 @@ export async function generateNewspaper(
       theme,
       defaultFeedUrls, // Pass default feed URLs for lower priority
       locale, // Language setting for the newspaper
-      daysBack: 3,
+      daysBack: 7,
     }),
   });
 

@@ -197,8 +197,8 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     
     console.log(`[Validation] Result: ${validatedSuggestions.length}/${uniqueSuggestions.length} feeds are valid`);
 
-    // Select top 10 feeds from validated suggestions
-    const maxFeeds = 10;
+    // Select top 15 feeds from validated suggestions (increased from 10 for better article coverage)
+    const maxFeeds = 15;
     const topFeeds = validatedSuggestions.slice(0, maxFeeds);
     
     if (validatedSuggestions.length > maxFeeds) {
@@ -251,7 +251,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
  */
 function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   if (locale === 'ja') {
-    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを20個提案してください。
+    return `ユーザーが「${theme}」に興味があります。関連する日本語のRSSフィードを30個提案してください。
 
 重要な制約：
 1. **テーマとの関連性が最重要**: 「${theme}」に特化したフィードのみを提案してください
@@ -298,7 +298,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 必ず実在する、アクセス可能な日本語のRSSフィードのURLを提案してください。
 レスポンスは必ず完全なJSON形式で終わらせてください（}で閉じる）。`;
   } else {
-    return `The user is interested in "${theme}". Please suggest 20 related RSS feeds.
+    return `The user is interested in "${theme}". Please suggest 30 related RSS feeds.
 
 CRITICAL LANGUAGE REQUIREMENT: 
 - You MUST write ALL text in English
@@ -402,8 +402,8 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     const feeds = parsed.feeds || [];
     console.log(`[Bedrock] Parsed ${feeds.length} feeds from AI response`);
 
-    // Validate and return suggestions (up to 20)
-    return feeds.slice(0, 20).map((feed: any) => ({
+    // Validate and return suggestions (up to 30)
+    return feeds.slice(0, 30).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',

@@ -32,12 +32,12 @@ function shuffle<T>(array: T[]): T[] {
 /**
  * Fetch articles from multiple RSS feeds in parallel
  * @param feedUrls - Array of RSS feed URLs
- * @param daysBack - Number of days to look back (default: 3, fallback to 7)
+ * @param daysBack - Number of days to look back (default: 7, fallback to 14)
  * @returns Object with articles array and feedLanguages map
  */
 export async function fetchArticles(
   feedUrls: string[],
-  daysBack: number = 3
+  daysBack: number = 7
 ): Promise<{ articles: Article[]; feedLanguages: Map<string, string> }> {
   console.log(`Fetching articles from ${feedUrls.length} feeds (${daysBack} days back)`);
 

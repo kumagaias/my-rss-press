@@ -80,16 +80,14 @@ describe('NewspaperPage', () => {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({
-            data: {
-              newspaperId: 'test-newspaper-id',
-              name: 'Test Newspaper',
-              userName: 'Test User',
-              articles: mockArticles,
-              feedUrls: ['https://example.com/feed'],
-              newspaperDate: '2025-12-01T10:00:00Z',
-              viewCount: 5,
-              isPublic: true,
-            },
+            newspaperId: 'test-newspaper-id',
+            name: 'Test Newspaper',
+            userName: 'Test User',
+            articles: mockArticles,
+            feedUrls: ['https://example.com/feed'],
+            newspaperDate: '2025-12-01T10:00:00Z',
+            viewCount: 5,
+            isPublic: true,
           }),
         } as Response);
       }
@@ -97,7 +95,7 @@ describe('NewspaperPage', () => {
     }) as any;
   });
 
-  it('renders newspaper layout with articles', async () => {
+  it('renders newspaper layout with articles from API', async () => {
     render(<NewspaperPage />);
 
     // Wait for articles to appear
@@ -122,8 +120,32 @@ describe('NewspaperPage', () => {
     expect(mockPush).toHaveBeenCalledWith('/');
   });
 
-  it('shows error when no newspaper ID is provided', async () => {
+  it('loads newspaper from sessionStorage when no ID is provided', async () => {
     mockNewspaperId = null; // No ID in query params
+    
+    // Mock sessionStorage with newspaper data
+    mockSessionStorage.getItem.mockImplementation((key) => {
+      if (key === 'newspaperArticles') return JSON.stringify(mockArticles);
+      if (key === 'newspaperTheme') return 'Technology';
+      if (key === 'newspaperFeeds') return JSON.stringify(['https://example.com/feed']);
+      if (key === 'newspaperLocale') return 'en';
+      if (key === 'newspaperLanguages') return JSON.stringify(['EN']);
+      if (key === 'newspaperSummary') return 'Test summary';
+      return null;
+    });
+
+    render(<NewspaperPage />);
+
+    // Should load from sessionStorage and display articles
+    expect(await screen.findByText('Test Article 1', {}, { timeout: 3000 })).toBeInTheDocument();
+    expect(screen.getByText('Test Article 2')).toBeInTheDocument();
+  });
+
+  it('shows error when no ID and no sessionStorage data', async () => {
+    mockNewspaperId = null; // No ID in query params
+    
+    // Mock empty sessionStorage
+    mockSessionStorage.getItem.mockReturnValue(null);
 
     render(<NewspaperPage />);
 

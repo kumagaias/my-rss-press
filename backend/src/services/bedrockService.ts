@@ -16,6 +16,11 @@ export interface FeedSuggestion {
   isDefault?: boolean; // Flag to indicate if this is a default/fallback feed
 }
 
+export interface FeedSuggestionsResponse {
+  feeds: FeedSuggestion[];
+  newspaperName: string; // AI-suggested newspaper name based on theme
+}
+
 /**
  * Validate if a feed URL is accessible and contains valid feed content
  */
@@ -84,16 +89,19 @@ async function validateFeedUrl(url: string): Promise<boolean> {
  * Suggest RSS feeds based on user theme using AWS Bedrock (Claude 3 Haiku)
  * @param theme - User's interest theme
  * @param locale - User's language preference ('en' or 'ja')
- * @returns Array of feed suggestions
+ * @returns Feed suggestions with AI-suggested newspaper name
  */
-export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): Promise<FeedSuggestion[]> {
+export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): Promise<FeedSuggestionsResponse> {
   // Check cache in local development mode
   const cacheKey = `${theme}:${locale}`;
   if (config.isLocal && config.enableCache) {
     const cached = cache.get(cacheKey);
     if (cached) {
       console.log('Using cached Bedrock response for theme:', theme, 'locale:', locale);
-      return cached;
+      return {
+        feeds: cached,
+        newspaperName: `${theme} Daily`, // Default name for cached responses
+      };
     }
   }
 
@@ -101,13 +109,17 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
   if (config.useMockBedrock) {
     console.log('Using mock Bedrock response for theme:', theme);
     const mockSuggestions = getMockFeedSuggestions(theme);
+    const mockResponse: FeedSuggestionsResponse = {
+      feeds: mockSuggestions,
+      newspaperName: `${theme} Daily`,
+    };
     
     // Cache the mock response
     if (config.isLocal && config.enableCache) {
-      cache.set(cacheKey, mockSuggestions);
+      cache.set(cacheKey, mockResponse.feeds);
     }
     
-    return mockSuggestions;
+    return mockResponse;
   }
 
   try {
@@ -149,14 +161,15 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     console.log(`[Bedrock] Raw response (last 500 chars): ${content.substring(Math.max(0, content.length - 500))}`);
     console.log(`[Bedrock] Total response length: ${content.length} characters`);
     
-    const suggestions = parseAIResponse(response);
-    console.log(`[Bedrock] AI suggested ${suggestions.length} feeds:`, suggestions.map(s => ({ url: s.url, title: s.title })));
+    const result = parseAIResponse(response);
+    console.log(`[Bedrock] AI suggested ${result.feeds.length} feeds:`, result.feeds.map(s => ({ url: s.url, title: s.title })));
+    console.log(`[Bedrock] AI suggested newspaper name: ${result.newspaperName}`);
     
     // Remove duplicate URLs (keep first occurrence)
     const uniqueSuggestions: FeedSuggestion[] = [];
     const seenUrls = new Set<string>();
     
-    for (const suggestion of suggestions) {
+    for (const suggestion of result.feeds) {
       if (!seenUrls.has(suggestion.url)) {
         uniqueSuggestions.push(suggestion);
         seenUrls.add(suggestion.url);
@@ -165,8 +178,8 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       }
     }
     
-    if (uniqueSuggestions.length < suggestions.length) {
-      console.log(`[Deduplication] Removed ${suggestions.length - uniqueSuggestions.length} duplicate URLs`);
+    if (uniqueSuggestions.length < result.feeds.length) {
+      console.log(`[Deduplication] Removed ${result.feeds.length - uniqueSuggestions.length} duplicate URLs`);
     }
 
     // Validate feed URLs in parallel for better performance
@@ -237,7 +250,10 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       cache.set(cacheKey, topFeeds);
     }
 
-    return topFeeds;
+    return {
+      feeds: topFeeds,
+      newspaperName: result.newspaperName,
+    };
   } catch (error) {
     console.error('[Bedrock] API error occurred:', error);
     if (error instanceof Error) {
@@ -285,6 +301,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 
 レスポンス形式（必ず完全なJSONで返してください）：
 {
+  "newspaperName": "${theme}に関する魅力的な新聞名（例：「${theme}タイムズ」「${theme}デイリー」など）",
   "feeds": [
     {
       "url": "https://example.jp/feed",
@@ -334,6 +351,7 @@ For each feed, provide the following information in JSON format:
 
 Response format (ALL TEXT MUST BE IN ENGLISH):
 {
+  "newspaperName": "An attractive newspaper name about ${theme} (e.g., 'The ${theme} Times', '${theme} Daily', etc.) - IN ENGLISH",
   "feeds": [
     {
       "url": "https://example.com/feed",
@@ -352,9 +370,9 @@ FINAL REMINDER: Write EVERYTHING in English. No Japanese (日本語), no Chinese
 }
 
 /**
- * Parse AI response to extract feed suggestions
+ * Parse AI response to extract feed suggestions and newspaper name
  */
-function parseAIResponse(response: any): FeedSuggestion[] {
+function parseAIResponse(response: any): FeedSuggestionsResponse {
   try {
     // Decode response body
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
@@ -406,14 +424,21 @@ function parseAIResponse(response: any): FeedSuggestion[] {
     }
 
     const feeds = parsed.feeds || [];
+    const newspaperName = parsed.newspaperName || '';
     console.log(`[Bedrock] Parsed ${feeds.length} feeds from AI response`);
+    console.log(`[Bedrock] Suggested newspaper name: ${newspaperName}`);
 
     // Validate and return suggestions (up to 30)
-    return feeds.slice(0, 30).map((feed: any) => ({
+    const suggestions = feeds.slice(0, 30).map((feed: any) => ({
       url: feed.url || '',
       title: feed.title || 'Unknown Feed',
       reasoning: feed.reasoning || '',
     }));
+
+    return {
+      feeds: suggestions,
+      newspaperName,
+    };
   } catch (error) {
     console.error('[Bedrock] Failed to parse AI response:', error);
     if (error instanceof Error) {

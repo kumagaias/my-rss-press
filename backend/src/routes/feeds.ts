@@ -30,12 +30,13 @@ feedsRouter.post(
         console.log(`[Feed Suggestion] Getting suggestions for theme: ${validated.theme}`);
         
         // Get feed suggestions from Bedrock
-        const suggestions = await suggestFeeds(validated.theme, validated.locale);
+        const result = await suggestFeeds(validated.theme, validated.locale);
 
-        // Success - return suggestions
-        console.log(`[Feed Suggestion] Success, got ${suggestions.length} feeds`);
+        // Success - return suggestions with newspaper name
+        console.log(`[Feed Suggestion] Success, got ${result.feeds.length} feeds and newspaper name: ${result.newspaperName}`);
         return c.json({
-          suggestions,
+          suggestions: result.feeds,
+          newspaperName: result.newspaperName,
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -54,10 +55,17 @@ feedsRouter.post(
           isDefault: true,
         }];
         
+        // Generate default newspaper name based on theme
+        const defaultNewspaperName = validated.locale === 'ja' 
+          ? `${validated.theme}デイリー`
+          : `The ${validated.theme} Daily`;
+        
         console.log(`[Feed Suggestion] Returning 1 random default feed: ${randomDefaultFeed.title}`);
+        console.log(`[Feed Suggestion] Using default newspaper name: ${defaultNewspaperName}`);
         
         return c.json({
           suggestions,
+          newspaperName: defaultNewspaperName,
         });
       }
     } catch (error) {

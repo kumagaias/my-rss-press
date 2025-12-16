@@ -1,13 +1,14 @@
 // API client for MyRSSPress backend
 
-import type { Article, FeedSuggestion, NewspaperData, NewspaperSettings } from '@/types';
+import type { Article, FeedSuggestion, FeedSuggestionsResponse, NewspaperData, NewspaperSettings } from '@/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
 /**
  * Suggest RSS feeds based on a theme
+ * Returns feed suggestions and AI-suggested newspaper name
  */
-export async function suggestFeeds(theme: string, locale?: 'en' | 'ja'): Promise<FeedSuggestion[]> {
+export async function suggestFeeds(theme: string, locale?: 'en' | 'ja'): Promise<FeedSuggestionsResponse> {
   const response = await fetch(`${API_BASE_URL}/api/suggest-feeds`, {
     method: 'POST',
     headers: {
@@ -21,7 +22,10 @@ export async function suggestFeeds(theme: string, locale?: 'en' | 'ja'): Promise
   }
 
   const data = await response.json();
-  return data.suggestions || [];
+  return {
+    suggestions: data.suggestions || [],
+    newspaperName: data.newspaperName || `${theme} Daily`,
+  };
 }
 
 /**

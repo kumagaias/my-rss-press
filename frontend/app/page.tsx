@@ -19,6 +19,7 @@ export default function Home() {
 
   const [theme, setTheme] = useState('');
   const [suggestions, setSuggestions] = useState<FeedSuggestion[]>([]);
+  const [suggestedNewspaperName, setSuggestedNewspaperName] = useState('');
   const [selectedFeeds, setSelectedFeeds] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -48,11 +49,12 @@ export default function Home() {
     setIsLoadingSuggestions(true);
 
     try {
-      const feedSuggestions = await suggestFeeds(themeValue, locale);
-      setSuggestions(feedSuggestions);
+      const result = await suggestFeeds(themeValue, locale);
+      setSuggestions(result.suggestions);
+      setSuggestedNewspaperName(result.newspaperName);
       
       // Auto-select all suggested feeds
-      const feedUrls = feedSuggestions.map(s => s.url);
+      const feedUrls = result.suggestions.map(s => s.url);
       setSelectedFeeds(feedUrls);
       
       // Show success animation
@@ -98,6 +100,7 @@ export default function Home() {
       // Store data in sessionStorage for the newspaper page
       sessionStorage.setItem('newspaperArticles', JSON.stringify(articles));
       sessionStorage.setItem('newspaperTheme', theme);
+      sessionStorage.setItem('newspaperName', suggestedNewspaperName || theme); // Use AI-suggested name or fallback to theme
       sessionStorage.setItem('newspaperFeeds', JSON.stringify(selectedFeeds));
       sessionStorage.setItem('newspaperLocale', locale); // Save selected locale
       sessionStorage.setItem('newspaperLanguages', JSON.stringify(languages)); // Save detected languages

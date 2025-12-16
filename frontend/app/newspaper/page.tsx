@@ -64,6 +64,7 @@ function NewspaperContent() {
       try {
         const articlesJson = sessionStorage.getItem('newspaperArticles');
         const theme = sessionStorage.getItem('newspaperTheme');
+        const newspaperName = sessionStorage.getItem('newspaperName'); // AI-suggested name
         const feedsJson = sessionStorage.getItem('newspaperFeeds');
         const savedLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
         const languagesJson = sessionStorage.getItem('newspaperLanguages');
@@ -82,7 +83,7 @@ function NewspaperContent() {
           // Create newspaper object from sessionStorage
           const newspaperData: Newspaper = {
             newspaperId: 'temp-' + Date.now(), // Temporary ID for unsaved newspaper
-            name: theme,
+            name: newspaperName || theme, // Use AI-suggested name or fallback to theme
             userName: 'Anonymous',
             feedUrls,
             theme,
@@ -191,6 +192,7 @@ function NewspaperContent() {
       // Clear sessionStorage after successful save
       sessionStorage.removeItem('newspaperArticles');
       sessionStorage.removeItem('newspaperTheme');
+      sessionStorage.removeItem('newspaperName');
       sessionStorage.removeItem('newspaperFeeds');
       sessionStorage.removeItem('newspaperLocale');
       sessionStorage.removeItem('newspaperLanguages');

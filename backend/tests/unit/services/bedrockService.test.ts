@@ -17,20 +17,23 @@ describe('Bedrock Service', () => {
     console.log('TEST: USE_BEDROCK_MOCK =', process.env.USE_BEDROCK_MOCK);
     const theme = 'Technology';
     console.log('TEST: Calling suggestFeeds with theme:', theme);
-    const suggestions = await suggestFeeds(theme);
-    console.log('TEST: Got suggestions:', suggestions);
+    const result = await suggestFeeds(theme);
+    console.log('TEST: Got result:', result);
 
-    expect(suggestions).toBeDefined();
-    expect(Array.isArray(suggestions)).toBe(true);
-    expect(suggestions.length).toBeGreaterThan(0);
-    expect(suggestions.length).toBeLessThanOrEqual(10);
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty('feeds');
+    expect(result).toHaveProperty('newspaperName');
+    expect(Array.isArray(result.feeds)).toBe(true);
+    expect(result.feeds.length).toBeGreaterThan(0);
+    expect(result.feeds.length).toBeLessThanOrEqual(15);
+    expect(typeof result.newspaperName).toBe('string');
   }, 10000); // Increase timeout to 10s
 
   it('should return suggestions with required fields', async () => {
     const theme = 'Sports';
-    const suggestions = await suggestFeeds(theme);
+    const result = await suggestFeeds(theme);
 
-    suggestions.forEach(suggestion => {
+    result.feeds.forEach(suggestion => {
       expect(suggestion).toHaveProperty('url');
       expect(suggestion).toHaveProperty('title');
       expect(suggestion).toHaveProperty('reasoning');
@@ -42,9 +45,9 @@ describe('Bedrock Service', () => {
 
   it('should include theme in reasoning', async () => {
     const theme = 'Music';
-    const suggestions = await suggestFeeds(theme);
+    const result = await suggestFeeds(theme);
 
-    const hasThemeInReasoning = suggestions.some(s => 
+    const hasThemeInReasoning = result.feeds.some(s => 
       s.reasoning.includes(theme)
     );
     expect(hasThemeInReasoning).toBe(true);

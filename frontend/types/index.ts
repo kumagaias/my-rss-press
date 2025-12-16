@@ -18,6 +18,11 @@ export interface FeedSuggestion {
   isDefault?: boolean; // Flag to indicate if this is a default/fallback feed
 }
 
+export interface FeedSuggestionsResponse {
+  suggestions: FeedSuggestion[];
+  newspaperName: string; // AI-suggested newspaper name based on theme
+}
+
 export interface NewspaperData {
   newspaperId: string;
   name: string;

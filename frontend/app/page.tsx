@@ -208,6 +208,7 @@ export default function Home() {
                   onGenerate={handleGenerateNewspaper}
                   isGenerating={isGenerating}
                   locale={locale}
+                  generatingMessage={t.generating}
                 />
               </div>
             )}
@@ -216,13 +217,6 @@ export default function Home() {
             {error && (
               <div className="bg-white border-4 border-red-800 p-4 sm:p-6">
                 <p className="text-red-900 font-serif font-bold text-sm sm:text-base">{error}</p>
-              </div>
-            )}
-
-            {/* Loading State */}
-            {isGenerating && (
-              <div className="bg-white border-4 border-black p-4 sm:p-6">
-                <LoadingAnimation message={t.generating} type="newspaper" />
               </div>
             )}
           </div>

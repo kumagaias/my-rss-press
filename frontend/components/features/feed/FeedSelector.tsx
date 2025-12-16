@@ -5,6 +5,7 @@ import { FeedSuggestion } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { LoadingAnimation } from '@/components/ui/LoadingAnimation';
 import { useTranslations } from '@/lib/i18n';
 
 interface FeedSelectorProps {
@@ -14,6 +15,7 @@ interface FeedSelectorProps {
   onGenerate: () => void;
   isGenerating: boolean;
   locale: 'en' | 'ja';
+  generatingMessage?: string;
 }
 
 /**
@@ -32,6 +34,7 @@ export function FeedSelector({
   onGenerate,
   isGenerating,
   locale,
+  generatingMessage,
 }: FeedSelectorProps) {
   const [customFeedUrl, setCustomFeedUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -228,6 +231,13 @@ export function FeedSelector({
         >
           {t.generateButton}
         </Button>
+        
+        {/* Loading Animation - shown below button during generation */}
+        {isGenerating && generatingMessage && (
+          <div className="mt-6">
+            <LoadingAnimation message={generatingMessage} type="newspaper" />
+          </div>
+        )}
       </div>
     </div>
   );

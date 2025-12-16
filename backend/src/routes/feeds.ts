@@ -24,32 +24,43 @@ feedsRouter.post(
       const body = await c.req.json();
       const validated = SuggestFeedsSchema.parse(body);
 
-      // Single attempt only to stay within API Gateway 29s timeout
-      // If Bedrock fails or returns no valid feeds, immediately fall back to defaults
-      try {
-        console.log(`[Feed Suggestion] Requesting feeds for theme: ${validated.theme}`);
-        
-        // Get feed suggestions from Bedrock
-        const suggestions = await suggestFeeds(validated.theme, validated.locale);
+      // Retry up to 1 time (2 attempts total) to stay within API Gateway 29s timeout
+      // If both attempts fail, fall back to default feeds
+      const maxAttempts = 2;
+      let lastError: Error | null = null;
+      
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          console.log(`[Feed Suggestion] Attempt ${attempt}/${maxAttempts} for theme: ${validated.theme}`);
+          
+          // Get feed suggestions from Bedrock
+          const suggestions = await suggestFeeds(validated.theme, validated.locale);
 
-        // Success - return suggestions
-        console.log(`[Feed Suggestion] Success, got ${suggestions.length} feeds`);
-        return c.json({
-          suggestions,
-        });
-      } catch (error) {
-        const lastError = error instanceof Error ? error : new Error('Unknown error');
-        
-        // Check if error is retryable (no valid feeds or Bedrock API error)
-        const shouldFallback = lastError.message.includes('No valid feeds found') || 
-                               lastError.message.includes('Bedrock API error');
-        
-        if (shouldFallback) {
-          console.log(`[Feed Suggestion] Bedrock failed (${lastError.message}), falling back to default feeds`);
-          // Fall through to default feeds below
-        } else {
-          // For other errors, throw immediately
-          throw lastError;
+          // Success - return suggestions
+          console.log(`[Feed Suggestion] Success on attempt ${attempt}, got ${suggestions.length} feeds`);
+          return c.json({
+            suggestions,
+          });
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error('Unknown error');
+          
+          // Check if error is retryable (no valid feeds or Bedrock API error)
+          const shouldRetry = lastError.message.includes('No valid feeds found') || 
+                              lastError.message.includes('Bedrock API error');
+          
+          if (shouldRetry && attempt < maxAttempts) {
+            console.log(`[Feed Suggestion] Attempt ${attempt} failed: ${lastError.message}, retrying...`);
+            // Wait 1 second before retry
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          } else if (shouldRetry) {
+            console.log(`[Feed Suggestion] All ${maxAttempts} attempts failed, falling back to default feeds`);
+            // Fall through to default feeds below
+            break;
+          } else {
+            // For other errors, throw immediately
+            throw lastError;
+          }
         }
       }
 

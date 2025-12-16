@@ -33,7 +33,7 @@ interface Newspaper {
 function NewspaperContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [locale] = useState<Locale>(detectLocale());
+  const [locale, setLocale] = useState<Locale>(detectLocale());
   const t = useTranslations(locale);
   
   const [newspaper, setNewspaper] = useState<Newspaper | null>(null);
@@ -65,9 +65,14 @@ function NewspaperContent() {
         const articlesJson = sessionStorage.getItem('newspaperArticles');
         const theme = sessionStorage.getItem('newspaperTheme');
         const feedsJson = sessionStorage.getItem('newspaperFeeds');
-        const savedLocale = sessionStorage.getItem('newspaperLocale');
+        const savedLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
         const languagesJson = sessionStorage.getItem('newspaperLanguages');
         const summary = sessionStorage.getItem('newspaperSummary');
+
+        // Use saved locale if available
+        if (savedLocale) {
+          setLocale(savedLocale);
+        }
 
         if (articlesJson && theme && feedsJson) {
           const articles = JSON.parse(articlesJson);

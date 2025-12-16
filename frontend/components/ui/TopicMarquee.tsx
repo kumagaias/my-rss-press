@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 
 interface TopicMarqueeProps {
   keywords: string[];
@@ -13,7 +13,8 @@ export function TopicMarquee({ keywords, onKeywordClick }: TopicMarqueeProps) {
   const [dragDistance, setDragDistance] = useState(0);
 
   // Shuffle keywords and duplicate for seamless loop
-  const [shuffledKeywords] = useState(() => {
+  // Use useMemo to re-shuffle when keywords change (e.g., locale change)
+  const shuffledKeywords = useMemo(() => {
     const shuffled = [...keywords];
     // Fisher-Yates shuffle
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -21,7 +22,7 @@ export function TopicMarquee({ keywords, onKeywordClick }: TopicMarqueeProps) {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
-  });
+  }, [keywords]);
   const duplicatedKeywords = [...shuffledKeywords, ...shuffledKeywords];
 
   const handleMouseDown = (e: React.MouseEvent) => {

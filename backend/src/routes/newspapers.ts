@@ -180,12 +180,12 @@ newspapersRouter.get('/newspapers/:id/dates', async (c) => {
  * Note: Date format must be YYYY-MM-DD
  */
 newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async (c) => {
+  const newspaperId = c.req.param('id');
+  const date = c.req.param('date');
+
+  console.log(`Getting historical newspaper: ${newspaperId} for date: ${date}`);
+
   try {
-    const newspaperId = c.req.param('id');
-    const date = c.req.param('date');
-
-    console.log(`Getting historical newspaper: ${newspaperId} for date: ${date}`);
-
     // Get newspaper metadata to get feedUrls and theme
     const metadata = await getNewspaper(newspaperId);
     if (!metadata) {
@@ -224,7 +224,8 @@ newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async 
   } catch (error) {
     if (error instanceof Error) {
       console.error(`Error creating historical newspaper: ${error.message}`);
-      console.error(`Newspaper ID: ${newspaperId}, Date: ${date}`);
+      console.error(`Newspaper ID: ${newspaperId}`);
+      console.error(`Date: ${date}`);
       console.error(`Stack trace: ${error.stack}`);
 
       // Handle validation errors

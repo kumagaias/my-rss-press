@@ -1,6 +1,6 @@
 {
   "name": "Check CLI pager configuration",
-  "description": "AWS CLIとGitのpager設定が正しく無効化されているか確認します",
+  "description": "Verify that AWS CLI and Git pager settings are correctly disabled",
   "trigger": {
     "type": "manual"
   },

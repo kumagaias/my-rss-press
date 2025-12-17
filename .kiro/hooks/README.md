@@ -33,9 +33,8 @@ This directory contains agent automation hooks for MyRSSPress.
 - **pre-commit-security.json** - Check for sensitive information before commit
 
 ### CLI Configuration
-- **setup-pager-config.json** - Add pager disable config to ~/.zshrc
-- **check-pager-config.json** - Verify pager configuration
 - **disable-pagers-on-session-start.json** - Auto-disable pagers on session start
+- **check-pager-config.json** - Verify pager configuration
 
 ## MyRSSPress-Specific Hooks
 

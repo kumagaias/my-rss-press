@@ -1,6 +1,6 @@
 {
   "name": "Disable CLI pagers (auto)",
-  "description": "セッション開始時にAWS CLIとGitのpagerを自動的に無効化します",
+  "description": "Automatically disable AWS CLI and Git pagers when session starts",
   "trigger": {
     "type": "onSessionCreate"
   },

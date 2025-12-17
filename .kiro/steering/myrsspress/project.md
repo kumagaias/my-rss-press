@@ -119,7 +119,7 @@ Available in `.kiro/hooks/`:
 - `run-tests.json` - Unit tests
 - `run-all-tests.json` - All tests
 - `pre-commit-security.json` - Security check
-- `setup-pager-config.json` - CLI pager setup
+- `disable-pagers-on-session-start.json` - Auto-disable pagers (runs on session start)
 - `check-pager-config.json` - Verify pager config
 
 Execute via Command Palette: "Agent Hooks"

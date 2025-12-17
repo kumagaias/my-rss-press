@@ -15,10 +15,9 @@ This directory contains agent automation hooks for MyRSSPress.
 │   │   └── pre-push
 │   ├── scripts/                # Shared scripts
 │   │   ├── security-check.sh
-│   │   └── start-kiro.sh
+│   │   └── start-kiro.sh      # Kiro startup wrapper (loads .env, disables pagers)
 │   ├── check-pager-config.json
 │   ├── commit-push-pr.json
-│   ├── disable-pagers-on-session-start.json
 │   ├── documentation-update-reminder.json
 │   ├── pre-commit-security.json
 │   ├── run-all-tests.json
@@ -37,8 +36,7 @@ This directory contains agent automation hooks for MyRSSPress.
 - **pre-commit-security.json** - Check for sensitive information before commit
 
 ### CLI Configuration
-- **disable-pagers-on-session-start.json** - Auto-disable pagers on session start
-- **check-pager-config.json** - Verify pager configuration
+- **check-pager-config.json** - Verify pager configuration (manual check)
 
 ### Project Setup
 - **setup-git-hooks.json** - Create symbolic link from .husky to .kiro/hooks/common/.husky
@@ -49,20 +47,24 @@ This directory contains agent automation hooks for MyRSSPress.
 ### Development Workflow
 - **commit-push-pr.json** - Commit, push, and create PR with auto-generated content
 
-## Environment Variables for MCP Servers
+## Kiro Startup Wrapper Script
 
-If you're using MCP servers that require environment variables (e.g., GitHub MCP), start Kiro using the wrapper script:
+For optimal Kiro experience, use the startup wrapper script:
 
 ```bash
 ./.kiro/hooks/common/scripts/start-kiro.sh
 ```
 
-This script loads environment variables from `.env` before starting Kiro, ensuring MCP servers have access to required credentials.
+**What it does:**
+- Disables CLI pagers (AWS_PAGER, GIT_PAGER) to prevent command interruption
+- Loads environment variables from `.env` for MCP servers (e.g., GitHub MCP)
 
 **Setup:**
-1. Copy `.env.example` to `.env`
+1. Copy `.env.example` to `.env` (if using MCP servers)
 2. Fill in your credentials
 3. Start Kiro with `./.kiro/hooks/common/scripts/start-kiro.sh`
+
+**Note:** The wrapper script handles both pager configuration and environment variables, so you don't need separate hooks for these tasks.
 
 ## Usage
 

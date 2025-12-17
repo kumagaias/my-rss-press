@@ -1,6 +1,8 @@
 #!/bin/bash
 # Kiro startup wrapper script
-# This script loads environment variables from .env before starting Kiro
+# This script prepares the environment before starting Kiro:
+# - Loads environment variables from .env
+# - Disables CLI pagers (AWS CLI, Git)
 
 set -e
 
@@ -10,6 +12,13 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Change to project root
 cd "$PROJECT_ROOT"
+
+echo "🔧 Preparing Kiro environment..."
+
+# Disable CLI pagers
+export AWS_PAGER=""
+export GIT_PAGER=""
+echo "✅ CLI pagers disabled (AWS_PAGER, GIT_PAGER)"
 
 # Load .env if it exists
 if [ -f .env ]; then

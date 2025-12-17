@@ -184,14 +184,30 @@ newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async 
     const newspaperId = c.req.param('id');
     const date = c.req.param('date');
 
+    console.log(`Getting historical newspaper: ${newspaperId} for date: ${date}`);
+
     // Get newspaper metadata to get feedUrls and theme
     const metadata = await getNewspaper(newspaperId);
     if (!metadata) {
+      console.error(`Newspaper not found: ${newspaperId}`);
       return c.json(
         {
           error: 'Newspaper not found',
+          code: 'NEWSPAPER_NOT_FOUND',
         },
         404
+      );
+    }
+
+    // Validate metadata has required fields
+    if (!metadata.feedUrls || metadata.feedUrls.length === 0) {
+      console.error(`Newspaper ${newspaperId} has no feed URLs`);
+      return c.json(
+        {
+          error: 'Newspaper configuration is invalid',
+          code: 'INVALID_NEWSPAPER_CONFIG',
+        },
+        500
       );
     }
 
@@ -204,9 +220,16 @@ newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async 
         'general' // Use a default theme for now
       );
 
+      console.log(`Successfully retrieved/created newspaper for ${newspaperId} on ${date}`);
       return c.json(newspaper);
     } catch (error) {
       if (error instanceof Error) {
+        console.error(`Error creating historical newspaper: ${error.message}`, {
+          newspaperId,
+          date,
+          error: error.stack,
+        });
+
         // Handle validation errors
         if (error.message.includes('Future newspapers') ||
             error.message.includes('older than 7 days') ||
@@ -237,9 +260,13 @@ newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async 
     }
   } catch (error) {
     console.error('Error in get historical newspaper:', error);
+    if (error instanceof Error) {
+      console.error('Error stack:', error.stack);
+    }
     return c.json(
       {
         error: 'Failed to get newspaper',
+        code: 'INTERNAL_ERROR',
       },
       500
     );

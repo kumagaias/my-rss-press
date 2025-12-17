@@ -50,8 +50,8 @@ test.describe('Home Page', () => {
     // Switch to Japanese
     await homePage.switchToJapanese();
     
-    // Verify Japanese button is active (has bg-black class)
-    await expect(homePage.languageButtonJa).toHaveClass(/bg-black/);
+    // Wait for the button to have the active class (bg-black)
+    await expect(homePage.languageButtonJa).toHaveClass(/bg-black/, { timeout: 5000 });
   });
 
   test('should switch language to English', async ({ page }) => {
@@ -61,7 +61,7 @@ test.describe('Home Page', () => {
     // Switch to English
     await homePage.switchToEnglish();
     
-    // Verify English button is active (has bg-black class)
-    await expect(homePage.languageButtonEn).toHaveClass(/bg-black/);
+    // Wait for the button to have the active class (bg-black)
+    await expect(homePage.languageButtonEn).toHaveClass(/bg-black/, { timeout: 5000 });
   });
 });

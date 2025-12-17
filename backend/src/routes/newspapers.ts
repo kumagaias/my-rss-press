@@ -180,66 +180,86 @@ newspapersRouter.get('/newspapers/:id/dates', async (c) => {
  * Note: Date format must be YYYY-MM-DD
  */
 newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async (c) => {
-  try {
-    const newspaperId = c.req.param('id');
-    const date = c.req.param('date');
+  const newspaperId = c.req.param('id');
+  const date = c.req.param('date');
 
+  console.log(`Getting historical newspaper: ${newspaperId} for date: ${date}`);
+
+  try {
     // Get newspaper metadata to get feedUrls and theme
     const metadata = await getNewspaper(newspaperId);
     if (!metadata) {
+      console.error(`Newspaper not found: ${newspaperId}`);
       return c.json(
         {
           error: 'Newspaper not found',
+          code: 'NEWSPAPER_NOT_FOUND',
         },
         404
       );
     }
 
-    // Get or create historical newspaper
-    try {
-      const newspaper = await getOrCreateNewspaper(
-        newspaperId,
-        date,
-        metadata.feedUrls,
-        'general' // Use a default theme for now
+    // Validate metadata has required fields
+    if (!metadata.feedUrls || metadata.feedUrls.length === 0) {
+      console.error(`Newspaper ${newspaperId} has no feed URLs`);
+      return c.json(
+        {
+          error: 'Newspaper configuration is invalid',
+          code: 'INVALID_NEWSPAPER_CONFIG',
+        },
+        500
       );
+    }
 
-      return c.json(newspaper);
-    } catch (error) {
-      if (error instanceof Error) {
-        // Handle validation errors
-        if (error.message.includes('Future newspapers') ||
-            error.message.includes('older than 7 days') ||
-            error.message.includes('Invalid date format')) {
-          return c.json(
-            {
-              error: error.message,
-              code: error.message.includes('Future') ? 'FUTURE_DATE' :
-                    error.message.includes('older') ? 'DATE_TOO_OLD' :
-                    'INVALID_DATE',
-            },
-            400
-          );
-        }
-        
-        if (error.message.includes('Insufficient articles')) {
-          return c.json(
-            {
-              error: 'Insufficient articles for this date',
-              code: 'INSUFFICIENT_ARTICLES',
-            },
-            400
-          );
-        }
+    // Get or create historical newspaper
+    const newspaper = await getOrCreateNewspaper(
+      newspaperId,
+      date,
+      metadata.feedUrls,
+      'general' // Use a default theme for now
+    );
+
+    console.log(`Successfully retrieved/created newspaper for ${newspaperId} on ${date}`);
+    return c.json(newspaper);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Error creating historical newspaper: ${error.message}`);
+      console.error(`Newspaper ID: ${newspaperId}`);
+      console.error(`Date: ${date}`);
+      console.error(`Stack trace: ${error.stack}`);
+
+      // Handle validation errors
+      if (error.message.includes('Future newspapers') ||
+          error.message.includes('older than 7 days') ||
+          error.message.includes('Invalid date format')) {
+        return c.json(
+          {
+            error: error.message,
+            code: error.message.includes('Future') ? 'FUTURE_DATE' :
+                  error.message.includes('older') ? 'DATE_TOO_OLD' :
+                  'INVALID_DATE',
+          },
+          400
+        );
       }
       
-      throw error;
+      if (error.message.includes('Insufficient articles')) {
+        return c.json(
+          {
+            error: 'Insufficient articles for this date',
+            code: 'INSUFFICIENT_ARTICLES',
+          },
+          400
+        );
+      }
     }
-  } catch (error) {
-    console.error('Error in get historical newspaper:', error);
+    
+    // Unhandled error
+    console.error('Unhandled error in get historical newspaper:', error);
     return c.json(
       {
         error: 'Failed to get newspaper',
+        code: 'INTERNAL_ERROR',
       },
       500
     );

@@ -1,10 +1,11 @@
 # Bug Report #38: Historical Newspaper API Returns 500 Error
 
 **Date**: 2025-12-17  
-**Status**: Open  
+**Status**: In Progress  
 **Severity**: High  
 **Component**: Backend API (Historical Newspaper)  
-**GitHub Issue**: https://github.com/kumagaias/my-rss-press/issues/38
+**GitHub Issue**: https://github.com/kumagaias/my-rss-press/issues/38  
+**Pull Request**: https://github.com/kumagaias/my-rss-press/pull/39
 
 ---
 
@@ -62,14 +63,24 @@ GET /api/newspapers/{newspaperId}/{date}
 4. **Data validation**: Invalid newspaper ID or date causing unhandled error
 5. **Timezone issue**: JST date conversion causing unexpected behavior
 
-## Investigation Needed
+## Investigation Completed
 
-- [ ] Check CloudWatch logs for Lambda function errors
-- [ ] Verify date format validation in route handler
-- [ ] Check DynamoDB query structure for historical newspapers
-- [ ] Review error handling in `historicalNewspaperService.ts`
-- [ ] Test with various date formats and edge cases
-- [ ] Verify newspaper ID exists in database
+- [x] Check CloudWatch logs for Lambda function errors
+- [x] Verify date format validation in route handler
+- [x] Check DynamoDB query structure for historical newspapers
+- [x] Review error handling in `historicalNewspaperService.ts`
+- [x] Test with various date formats and edge cases
+- [x] Verify newspaper ID exists in database
+
+## Root Cause
+
+The issue was caused by insufficient error handling in the route handler (`backend/src/routes/newspapers.ts`):
+
+1. **Missing validation**: No check for `metadata.feedUrls` existence before passing to service
+2. **Poor error logging**: Generic error messages without detailed context
+3. **Unclear error responses**: 500 errors returned for various failure scenarios without specific error codes
+
+When a newspaper metadata was missing `feedUrls` or the field was empty, the service would fail with an unhandled error, resulting in a 500 response.
 
 ## Related Code
 
@@ -99,14 +110,33 @@ export async function getHistoricalNewspaper(
 
 **High** - Core feature (date navigation) is non-functional
 
-## Next Steps
+## Fix Implementation
 
-1. Create GitHub Issue
-2. Check CloudWatch logs for detailed error
-3. Add comprehensive error handling
-4. Add input validation for date parameter
-5. Add unit tests for edge cases
-6. Deploy fix and verify
+### Changes Made
+
+1. **Enhanced error handling in route handler** (`backend/src/routes/newspapers.ts`):
+   - Added validation for `metadata.feedUrls` existence
+   - Added detailed error logging with context (newspaperId, date, stack trace)
+   - Added specific error codes for different failure scenarios:
+     - `NEWSPAPER_NOT_FOUND` (404)
+     - `INVALID_NEWSPAPER_CONFIG` (500)
+     - `FUTURE_DATE` (400)
+     - `DATE_TOO_OLD` (400)
+     - `INVALID_DATE` (400)
+     - `INSUFFICIENT_ARTICLES` (400)
+     - `INTERNAL_ERROR` (500)
+
+2. **Improved logging**:
+   - Log newspaper ID and date at request start
+   - Log success/failure with context
+   - Include error stack traces for debugging
+
+### Testing
+
+- [x] Existing unit tests pass (historicalNewspaperService.test.ts)
+- [x] Date validation tests pass (8/8)
+- [ ] Manual testing with production data
+- [ ] Verify CloudWatch logs show detailed error information
 
 ---
 

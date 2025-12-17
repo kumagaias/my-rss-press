@@ -11,15 +11,12 @@ This directory contains agent automation hooks for MyRSSPress.
 ├── common/                      # Reusable hooks (any project)
 │   ├── check-pager-config.json
 │   ├── disable-pagers-on-session-start.json
+│   ├── documentation-update-reminder.json
 │   ├── pre-commit-security.json
 │   ├── run-all-tests.json
-│   ├── run-tests.json
-│   └── setup-pager-config.json
+│   └── run-tests.json
 ├── myrsspress/                  # MyRSSPress-specific hooks
-│   ├── commit-push-pr.json
-│   ├── create-task-branch.json
-│   ├── request-copilot-review.json
-│   └── update-product-docs.json
+│   └── commit-push-pr.json
 └── README.md                    # This file
 ```
 
@@ -36,15 +33,13 @@ This directory contains agent automation hooks for MyRSSPress.
 - **disable-pagers-on-session-start.json** - Auto-disable pagers on session start
 - **check-pager-config.json** - Verify pager configuration
 
+### Documentation
+- **documentation-update-reminder.json** - Remind to update docs on execution complete
+
 ## MyRSSPress-Specific Hooks
 
 ### Development Workflow
-- **create-task-branch.json** - Create new branch from tasks.md
 - **commit-push-pr.json** - Commit, push, and create PR with auto-generated content
-- **request-copilot-review.json** - Request GitHub Copilot code review
-
-### Documentation
-- **update-product-docs.json** - Reminder to update product documentation
 
 ## Usage
 

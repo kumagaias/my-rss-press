@@ -1,0 +1,11 @@
+{
+  "name": "Documentation Update Reminder",
+  "description": "Remind to update documentation when session ends",
+  "trigger": {
+    "type": "onExecutionComplete"
+  },
+  "action": {
+    "type": "message",
+    "message": "Session complete. Please check if documentation needs updates:\n\n1. **Product specs**: New features, spec changes, performance improvements\n2. **Technical docs**: Architecture changes, optimizations, new patterns\n3. **Project structure**: File organization changes\n4. **Bug reports**: Mark resolved bugs with PR links\n\nIf updates are needed, reflect the changes and record in the update history section."
+  }
+}

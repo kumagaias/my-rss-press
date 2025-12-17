@@ -116,11 +116,13 @@ Task: X.X
 ## Agent Hooks
 
 Available in `.kiro/hooks/`:
-- `run-tests.json` - Unit tests
-- `run-all-tests.json` - All tests
-- `pre-commit-security.json` - Security check
-- `disable-pagers-on-session-start.json` - Auto-disable pagers (runs on session start)
-- `check-pager-config.json` - Verify pager config
+- `run-tests.json` - Unit tests (manual)
+- `run-all-tests.json` - All tests (auto on execution complete)
+- `pre-commit-security.json` - Security check (manual)
+- `disable-pagers-on-session-start.json` - Auto-disable pagers (auto on session start)
+- `check-pager-config.json` - Verify pager config (manual)
+- `documentation-update-reminder.json` - Doc update reminder (auto on execution complete)
+- `commit-push-pr.json` - Commit, push, and create PR (manual)
 
 Execute via Command Palette: "Agent Hooks"
 

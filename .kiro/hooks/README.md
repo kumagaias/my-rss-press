@@ -14,16 +14,16 @@ This directory contains agent automation hooks for MyRSSPress.
 │   │   ├── pre-commit
 │   │   └── pre-push
 │   ├── scripts/                # Shared scripts
-│   │   └── security-check.sh
+│   │   ├── security-check.sh
+│   │   └── start-kiro.sh
 │   ├── check-pager-config.json
+│   ├── commit-push-pr.json
 │   ├── disable-pagers-on-session-start.json
 │   ├── documentation-update-reminder.json
 │   ├── pre-commit-security.json
 │   ├── run-all-tests.json
 │   ├── run-tests.json
 │   └── setup-git-hooks.json
-├── myrsspress/                  # MyRSSPress-specific hooks
-│   └── commit-push-pr.json
 └── README.md                    # This file
 ```
 
@@ -46,8 +46,6 @@ This directory contains agent automation hooks for MyRSSPress.
 ### Documentation
 - **documentation-update-reminder.json** - Remind to update docs on execution complete
 
-## MyRSSPress-Specific Hooks
-
 ### Development Workflow
 - **commit-push-pr.json** - Commit, push, and create PR with auto-generated content
 
@@ -56,7 +54,7 @@ This directory contains agent automation hooks for MyRSSPress.
 If you're using MCP servers that require environment variables (e.g., GitHub MCP), start Kiro using the wrapper script:
 
 ```bash
-./scripts/start-kiro.sh
+./.kiro/hooks/common/scripts/start-kiro.sh
 ```
 
 This script loads environment variables from `.env` before starting Kiro, ensuring MCP servers have access to required credentials.
@@ -64,7 +62,7 @@ This script loads environment variables from `.env` before starting Kiro, ensuri
 **Setup:**
 1. Copy `.env.example` to `.env`
 2. Fill in your credentials
-3. Start Kiro with `./scripts/start-kiro.sh`
+3. Start Kiro with `./.kiro/hooks/common/scripts/start-kiro.sh`
 
 ## Usage
 

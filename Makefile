@@ -90,7 +90,7 @@ test-lint: ## Run ESLint checks
 
 test-security: ## Run security checks
 	@echo "Running security checks..."
-	./scripts/security-check.sh
+	./.kiro/hooks/common/scripts/security-check.sh
 	@echo "✓ Security checks complete"
 
 security-check: test-security ## Alias for test-security

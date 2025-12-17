@@ -3,7 +3,7 @@
 
 # Run security check before commit
 echo "🔒 Running security check..."
-./.kiro/hooks/scripts/security-check.sh
+./.kiro/hooks/common/scripts/security-check.sh
 
 # If security check fails, abort commit
 if [ $? -ne 0 ]; then

@@ -13,6 +13,8 @@ This directory contains agent automation hooks for MyRSSPress.
 │   │   ├── _/
 │   │   ├── pre-commit
 │   │   └── pre-push
+│   ├── scripts/                # Shared scripts
+│   │   └── security-check.sh
 │   ├── check-pager-config.json
 │   ├── disable-pagers-on-session-start.json
 │   ├── documentation-update-reminder.json

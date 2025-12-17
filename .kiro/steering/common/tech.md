@@ -4,78 +4,213 @@ General best practices for TypeScript/React/Node.js projects.
 
 ---
 
-## Project Initialization Checklist
+## Project Initialization Guide
 
-When setting up a new project or cloning an existing one:
+### Quick Start (Existing Project)
 
-### 1. Install Dependencies
+When cloning an existing project:
+
 ```bash
-# Root dependencies
+# 1. Clone repository
+git clone <repository-url>
+cd <project-name>
+
+# 2. Install dependencies
 npm ci
+cd frontend && npm ci && cd ..
+cd backend && npm ci && cd ..
 
-# Frontend dependencies
-cd frontend && npm ci
-
-# Backend dependencies
-cd ../backend && npm ci
-```
-
-### 2. Setup Git Hooks
-```bash
-# Create symbolic link from .husky to .kiro/hooks/common/.husky
-# Run via Kiro hook: "Setup Git Hooks"
-# Or manually:
+# 3. Setup Git hooks
 rm -rf .husky && ln -s .kiro/hooks/common/.husky .husky
-```
 
-### 3. Configure Environment Variables
-```bash
-# Copy example files
+# 4. Install gitleaks (security checks)
+brew install gitleaks  # macOS
+# Or see: https://github.com/gitleaks/gitleaks#installing
+
+# 5. Configure environment variables
 cp frontend/.env.local.example frontend/.env.local
 cp backend/.env.local.example backend/.env.local
+# Edit .env.local files with your values
 
-# Edit with your values
-# frontend/.env.local
-# backend/.env.local
+# 6. Run tests to verify setup
+make test
 ```
 
-### 4. Verify Tool Versions
-```bash
-# Check required tools
-make check-tools
+### New Project Setup (From Scratch)
 
-# Or manually check:
-node --version    # Should match .tool-versions
-npm --version
-terraform --version
-aws --version
-docker --version
+When starting a new project with this structure:
+
+#### Step 1: Copy Common Files
+
+```bash
+# Create new project directory
+mkdir my-new-project && cd my-new-project
+git init
+
+# Copy .kiro directory from template
+cp -r <template-project>/.kiro .kiro
+
+# Copy essential files
+cp <template-project>/.gitignore .gitignore
+cp <template-project>/.gitleaks.toml .gitleaks.toml
+cp <template-project>/Makefile Makefile
 ```
 
-### 5. Run Tests
+#### Step 2: Setup Git Hooks
+
 ```bash
-# All tests
+# Create symbolic link
+ln -s .kiro/hooks/common/.husky .husky
+
+# Initialize husky
+npm install husky --save-dev
+npx husky install
+```
+
+#### Step 3: Install Security Tools
+
+```bash
+# Install gitleaks
+# macOS
+brew install gitleaks
+
+# Linux (Debian/Ubuntu)
+wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.1/gitleaks_8.18.1_linux_x64.tar.gz
+tar -xzf gitleaks_8.18.1_linux_x64.tar.gz
+sudo mv gitleaks /usr/local/bin/
+
+# Windows (via Scoop)
+scoop install gitleaks
+
+# Verify installation
+gitleaks version
+```
+
+#### Step 4: Configure Project Structure
+
+```bash
+# Create project directories
+mkdir -p frontend backend infra docs scripts
+
+# Copy package.json templates
+cp <template-project>/package.json .
+cp <template-project>/frontend/package.json frontend/
+cp <template-project>/backend/package.json backend/
+
+# Update package.json with your project name
+```
+
+#### Step 5: Install Dependencies
+
+```bash
+# Root dependencies
+npm install
+
+# Frontend dependencies
+cd frontend && npm install && cd ..
+
+# Backend dependencies
+cd backend && npm install && cd ..
+```
+
+#### Step 6: Verify Setup
+
+```bash
+# Run tests
 make test
 
-# Unit tests only
-make test-unit
-
-# Security checks
+# Check security
 make test-security
+
+# Verify Git hooks work
+git add .
+git commit -m "test: Verify hooks" --allow-empty
+# Should run security checks automatically
 ```
 
-### 6. Disable CLI Pagers (Optional)
+### Essential Files Checklist
+
+When setting up a new project, ensure these files exist:
+
+- [ ] `.kiro/hooks/common/.husky/` - Git hooks
+- [ ] `.kiro/hooks/scripts/security-check.sh` - Security script
+- [ ] `.kiro/steering/common/` - Common guidelines
+- [ ] `.gitignore` - Ignore patterns
+- [ ] `.gitleaks.toml` - Gitleaks configuration
+- [ ] `Makefile` - Common tasks
+- [ ] `package.json` - Root dependencies
+- [ ] `.tool-versions` - Tool version requirements
+
+### Tool Installation
+
+#### Required Tools
+
 ```bash
-# Auto-disabled on Kiro session start
-# Or add to ~/.zshrc manually:
-export AWS_PAGER=""
-export GIT_PAGER=""
+# Node.js (via nvm or asdf)
+nvm install 24  # or version in .tool-versions
+nvm use 24
+
+# Gitleaks (security scanning)
+brew install gitleaks  # macOS
+# See: https://github.com/gitleaks/gitleaks#installing
+
+# Make (usually pre-installed)
+make --version
 ```
 
-### 7. Review Documentation
-- Read `README.md` for project overview
-- Check `.kiro/steering/` for development guidelines
-- Review `.kiro/specs/` for feature specifications
+#### Optional Tools
+
+```bash
+# Terraform (if using IaC)
+brew install terraform  # macOS
+
+# AWS CLI (if using AWS)
+brew install awscli  # macOS
+
+# Docker (if using containers)
+brew install docker  # macOS
+```
+
+### Troubleshooting
+
+#### Git Hooks Not Running
+
+```bash
+# Verify symbolic link
+ls -la .husky
+# Should show: .husky -> .kiro/hooks/common/.husky
+
+# Recreate if needed
+rm -rf .husky && ln -s .kiro/hooks/common/.husky .husky
+
+# Verify hook permissions
+chmod +x .kiro/hooks/common/.husky/pre-commit
+chmod +x .kiro/hooks/common/.husky/pre-push
+chmod +x .kiro/hooks/scripts/security-check.sh
+```
+
+#### Gitleaks Not Found
+
+```bash
+# Check installation
+which gitleaks
+
+# Install if missing
+brew install gitleaks  # macOS
+
+# Verify
+gitleaks version
+```
+
+#### Security Check Fails
+
+```bash
+# Run manually to see details
+./.kiro/hooks/scripts/security-check.sh
+
+# Check specific files
+gitleaks detect --source . --verbose
+```
 
 ---
 

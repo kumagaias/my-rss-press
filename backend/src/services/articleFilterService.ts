@@ -1,158 +1,173 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config.js';
+import type { Article } from '../models/newspaper.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({
   region: config.bedrockRegion,
 });
 
-export interface Article {
-  title: string;
-  description?: string;
-  link: string;
-  pubDate: Date;
-  imageUrl?: string;
-  feedSource: string;
-  importance?: number;
-}
-
-// Removed unused interface - keeping for future use if needed
-// interface ArticleRelevanceResult {
-//   relevantIndices: number[];
-//   totalArticles: number;
-//   filteredCount: number;
-// }
-
 /**
- * Filter articles by theme relevance using batch AI judgment
- * @param articles - Articles to filter
- * @param theme - User's theme keyword
- * @param locale - Language for prompt
- * @param minThreshold - Minimum relevance threshold (default: 0.3)
- * @returns Filtered articles
+ * Filter articles by theme relevance using Bedrock AI
+ * 
+ * @param articles - Array of articles to filter
+ * @param theme - User's theme/interest
+ * @param locale - User's language preference ('en' or 'ja')
+ * @param minThreshold - Minimum relevance score (0.0-1.0, default: 0.3)
+ * @returns Filtered articles (or all articles if filtering fails)
  */
 export async function filterArticlesByTheme(
   articles: Article[],
   theme: string,
   locale: 'en' | 'ja' = 'en',
-  _minThreshold: number = 0.3 // Prefix with _ to indicate intentionally unused
+  minThreshold: number = 0.3
 ): Promise<Article[]> {
-  // If too few articles, don't filter
+  // Skip filtering if too few articles
   if (articles.length < 8) {
-    console.log(`[Article Filter] Too few articles (${articles.length}), skipping filter`);
+    console.log(`[ArticleFilter] Skipping filter: only ${articles.length} articles (< 8)`);
     return articles;
   }
 
   try {
-    // Build prompt for batch judgment
+    console.log(`[ArticleFilter] Filtering ${articles.length} articles by theme: "${theme}"`);
+    
+    // Build prompt for batch filtering
     const prompt = buildFilterPrompt(articles, theme, locale);
     
-    console.log(`[Article Filter] Filtering ${articles.length} articles for theme: "${theme}"`);
-    
     // Call Bedrock for batch judgment
-    const result = await callBedrockForFiltering(prompt);
+    const startTime = Date.now();
+    const relevanceScores = await callBedrockForFiltering(prompt);
+    const bedrockTime = Date.now() - startTime;
     
-    // Parse response
-    const relevantIndices = parseFilterResponse(result);
+    console.log(`[ArticleFilter] Bedrock API call completed in ${bedrockTime}ms`);
     
-    // Filter articles
-    const filteredArticles = relevantIndices
-      .filter(i => i >= 0 && i < articles.length)
-      .map(i => articles[i]);
+    // Parse response and filter articles
+    const filteredArticles = articles.filter((_, index) => {
+      const score = relevanceScores[index];
+      return score !== undefined && score >= minThreshold;
+    });
     
-    console.log(`[Article Filter] Filtered: ${filteredArticles.length}/${articles.length} articles relevant`);
+    console.log(`[ArticleFilter] Filtered: ${filteredArticles.length}/${articles.length} articles (threshold: ${minThreshold})`);
     
-    // If too few articles after filtering, return all
+    // Fallback: If filtered result has < 8 articles, return all articles
     if (filteredArticles.length < 8) {
-      console.log(`[Article Filter] Too few filtered articles (${filteredArticles.length}), returning all`);
+      console.log(`[ArticleFilter] Fallback: filtered result has only ${filteredArticles.length} articles (< 8), returning all articles`);
       return articles;
     }
     
     return filteredArticles;
   } catch (error) {
-    console.error('[Article Filter] Filtering failed, returning all articles:', error);
-    return articles; // Fallback: return all articles
+    console.error('[ArticleFilter] Filtering failed:', error);
+    if (error instanceof Error) {
+      console.error('[ArticleFilter] Error message:', error.message);
+    }
+    
+    // Fallback: Return all articles if filtering fails
+    console.log('[ArticleFilter] Fallback: returning all articles due to error');
+    return articles;
   }
 }
 
 /**
- * Build prompt for batch article filtering
+ * Build prompt for article filtering
  */
-function buildFilterPrompt(
-  articles: Article[],
-  theme: string,
-  locale: 'en' | 'ja'
-): string {
-  const articleList = articles
-    .map((a, i) => `${i}. ${a.title}`)
-    .join('\n');
+function buildFilterPrompt(articles: Article[], theme: string, locale: 'en' | 'ja'): string {
+  // Create article list with index
+  const articleList = articles.map((article, index) => {
+    return `${index}. ${article.title}\n   ${article.description.substring(0, 100)}...`;
+  }).join('\n\n');
   
   if (locale === 'ja') {
-    return `テーマ: ${theme}
+    return `以下の記事が「${theme}」というテーマにどれだけ関連しているか、0.0〜1.0のスコアで評価してください。
 
-以下の記事のうち、テーマに関連する記事のインデックス番号を配列で返してください。
-関連性が低い記事は除外してください。
+テーマ: ${theme}
 
 記事リスト:
 ${articleList}
 
-JSON形式で返してください（説明不要）:
-{ "relevantIndices": [0, 3, 5, ...] }`;
+重要: JSONのみを返してください。説明文や前置きは不要です。
+
+{
+  "scores": [0.8, 0.3, 0.9, ...]
+}
+
+評価基準:
+- 1.0: テーマに完全に一致
+- 0.7-0.9: テーマに強く関連
+- 0.4-0.6: テーマに部分的に関連
+- 0.1-0.3: テーマにわずかに関連
+- 0.0: テーマに無関係`;
   } else {
-    return `Theme: ${theme}
+    return `Rate how relevant each article is to the theme "${theme}" with a score from 0.0 to 1.0.
 
-From the following articles, return the index numbers of articles related to the theme.
-Exclude articles with low relevance.
+Theme: ${theme}
 
-Article list:
+Article List:
 ${articleList}
 
-Return in JSON format (no explanation):
-{ "relevantIndices": [0, 3, 5, ...] }`;
+IMPORTANT: Return ONLY JSON. No explanations or preamble.
+
+{
+  "scores": [0.8, 0.3, 0.9, ...]
+}
+
+Rating Criteria:
+- 1.0: Perfectly matches the theme
+- 0.7-0.9: Strongly related to the theme
+- 0.4-0.6: Partially related to the theme
+- 0.1-0.3: Slightly related to the theme
+- 0.0: Unrelated to the theme`;
   }
 }
 
 /**
- * Call Bedrock for article filtering
+ * Call Bedrock API for article filtering
  */
-async function callBedrockForFiltering(prompt: string): Promise<{
-  content: Array<{ text: string }>;
-}> {
+async function callBedrockForFiltering(prompt: string): Promise<number[]> {
   const command = new InvokeModelCommand({
     modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
     contentType: 'application/json',
     accept: 'application/json',
     body: JSON.stringify({
       anthropic_version: 'bedrock-2023-05-31',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.3, // Lower temperature for more consistent filtering
+      max_tokens: 4096,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
     }),
   });
-  
+
   const response = await bedrockClient.send(command);
-  return JSON.parse(new TextDecoder().decode(response.body));
+  return parseFilterResponse(response);
 }
 
 /**
- * Parse Bedrock response to extract relevant article indices
+ * Parse Bedrock response to extract relevance scores
  */
-function parseFilterResponse(response: {
-  content: Array<{ text: string }>;
-}): number[] {
+function parseFilterResponse(response: any): number[] {
   try {
-    const content = response.content[0].text;
+    // Decode response body
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const content = responseBody.content[0].text;
     
     // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error('[ArticleFilter] No JSON found in response');
       throw new Error('No JSON found in response');
     }
-    
+
     const parsed = JSON.parse(jsonMatch[0]);
-    return parsed.relevantIndices || [];
+    const scores = parsed.scores || [];
+    
+    console.log(`[ArticleFilter] Parsed ${scores.length} relevance scores`);
+    
+    return scores;
   } catch (error) {
-    console.error('[Article Filter] Failed to parse response:', error);
+    console.error('[ArticleFilter] Failed to parse response:', error);
     throw error;
   }
 }

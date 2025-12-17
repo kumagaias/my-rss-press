@@ -20,19 +20,24 @@ npm ci
 cd frontend && npm ci && cd ..
 cd backend && npm ci && cd ..
 
-# 3. Setup Git hooks
-rm -rf .husky && ln -s .kiro/hooks/common/.husky .husky
+# 3. Setup Git hooks (one-time)
+./.kiro/hooks/common/scripts/setup-git-hooks.sh
 
 # 4. Install gitleaks (security checks)
 brew install gitleaks  # macOS
 # Or see: https://github.com/gitleaks/gitleaks#installing
 
-# 5. Configure environment variables
+# 5. Setup GitHub CLI (for GitHub MCP)
+brew install gh  # macOS
+gh auth login
+# Follow prompts to authenticate
+
+# 6. Configure environment variables (if needed)
 cp frontend/.env.local.example frontend/.env.local
 cp backend/.env.local.example backend/.env.local
 # Edit .env.local files with your values
 
-# 6. Run tests to verify setup
+# 7. Run tests to verify setup
 make test
 ```
 
@@ -59,12 +64,11 @@ cp <template-project>/Makefile Makefile
 #### Step 2: Setup Git Hooks
 
 ```bash
-# Create symbolic link
-ln -s .kiro/hooks/common/.husky .husky
+# Run setup script (one-time)
+./.kiro/hooks/common/scripts/setup-git-hooks.sh
 
-# Initialize husky
-npm install husky --save-dev
-npx husky install
+# Or manually:
+# rm -rf .husky && ln -s .kiro/hooks/common/.husky .husky
 ```
 
 #### Step 3: Install Security Tools
@@ -215,6 +219,10 @@ nvm use 24
 brew install gitleaks  # macOS
 # See: https://github.com/gitleaks/gitleaks#installing
 
+# GitHub CLI (for GitHub MCP)
+brew install gh  # macOS
+gh auth login  # Authenticate with GitHub
+
 # Make (usually pre-installed)
 make --version
 ```
@@ -242,12 +250,12 @@ ls -la .husky
 # Should show: .husky -> .kiro/hooks/common/.husky
 
 # Recreate if needed
-rm -rf .husky && ln -s .kiro/hooks/common/.husky .husky
+./.kiro/hooks/common/scripts/setup-git-hooks.sh
 
 # Verify hook permissions
 chmod +x .kiro/hooks/common/.husky/pre-commit
 chmod +x .kiro/hooks/common/.husky/pre-push
-chmod +x .kiro/hooks/scripts/security-check.sh
+chmod +x .kiro/hooks/common/scripts/security-check.sh
 ```
 
 #### Gitleaks Not Found

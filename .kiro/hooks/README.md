@@ -15,14 +15,14 @@ This directory contains agent automation hooks for MyRSSPress.
 │   │   └── pre-push
 │   ├── scripts/                # Shared scripts
 │   │   ├── security-check.sh
+│   │   ├── setup-git-hooks.sh # One-time Git hooks setup
 │   │   └── start-kiro.sh      # Kiro startup wrapper (loads .env, disables pagers)
-│   ├── check-pager-config.json
 │   ├── commit-push-pr.json
 │   ├── documentation-update-reminder.json
 │   ├── pre-commit-security.json
 │   ├── run-all-tests.json
 │   ├── run-tests.json
-│   └── setup-git-hooks.json
+│   └── setup-on-session-start.json
 └── README.md                    # This file
 ```
 
@@ -35,11 +35,8 @@ This directory contains agent automation hooks for MyRSSPress.
 ### Security
 - **pre-commit-security.json** - Check for sensitive information before commit
 
-### CLI Configuration
-- **check-pager-config.json** - Verify pager configuration (manual check)
-
-### Project Setup
-- **setup-git-hooks.json** - Create symbolic link from .husky to .kiro/hooks/common/.husky
+### Session Setup
+- **setup-on-session-start.json** - Auto-configure environment on session start (pagers, etc.)
 
 ### Documentation
 - **documentation-update-reminder.json** - Remind to update docs on execution complete
@@ -47,7 +44,21 @@ This directory contains agent automation hooks for MyRSSPress.
 ### Development Workflow
 - **commit-push-pr.json** - Commit, push, and create PR with auto-generated content
 
-## Kiro Startup Wrapper Script
+## Project Setup Scripts
+
+### One-Time Setup: Git Hooks
+
+Run once when setting up the project:
+
+```bash
+./.kiro/hooks/common/scripts/setup-git-hooks.sh
+```
+
+**What it does:**
+- Creates symbolic link from `.husky` to `.kiro/hooks/common/.husky`
+- Enables pre-commit and pre-push security checks
+
+### Kiro Startup Wrapper (Optional)
 
 For optimal Kiro experience, use the startup wrapper script:
 
@@ -64,7 +75,7 @@ For optimal Kiro experience, use the startup wrapper script:
 2. Fill in your credentials
 3. Start Kiro with `./.kiro/hooks/common/scripts/start-kiro.sh`
 
-**Note:** The wrapper script handles both pager configuration and environment variables, so you don't need separate hooks for these tasks.
+**Note:** Environment setup is also handled automatically by the `setup-on-session-start.json` hook.
 
 ## Usage
 

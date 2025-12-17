@@ -69,8 +69,32 @@ Task: X.X
 
 ## Bug Fix Workflow (MANDATORY)
 
-1. **Document bug**: Create detailed report in `docs/bugfix/{number}-{description}.md`
-2. **Create GitHub Issue** (via GitHub MCP)
+### Quick Start (Using Scripts)
+
+```bash
+# 1. Create Issue and bugfix documentation
+./.kiro/hooks/common/scripts/create-bugfix-issue.sh
+
+# 2. Create fix branch (use suggested name from script output)
+git checkout -b fix/issue-{number}-{description}
+
+# 3. Fix & test
+make test
+
+# 4. Commit with issue reference
+git commit -m "fix: [description] (Fixes #{number})"
+
+# 5. Create PR
+gh pr create --title "Fix: [description]" --body "Fixes #{number}"
+
+# 6. After merge, close issue and update documentation
+./.kiro/hooks/common/scripts/close-bugfix-issue.sh {number}
+```
+
+### Manual Workflow
+
+1. **Create GitHub Issue** (via GitHub MCP) - Get Issue number first
+2. **Document bug**: Create detailed report in `.kiro/specs/bugfix/issue-{number}-{description}.md`
 3. **Create fix branch**: `fix/issue-{number}-{description}`
 4. **Fix & test**: `make test`
 5. **Commit**: Include `Fixes #{number}`
@@ -86,7 +110,13 @@ Task: X.X
 - Fixing directly on main branch
 - Merging without user approval
 
-**Bug Reports Location**: `docs/bugfix/` - See `common/project.md` for format
+**File Naming**: Always use `issue-{number}-{description}.md` format (e.g., `issue-42-newspaper-generation-error.md`)
+
+**Helper Scripts**:
+- `.kiro/hooks/common/scripts/create-bugfix-issue.sh` - Create Issue + bugfix doc
+- `.kiro/hooks/common/scripts/close-bugfix-issue.sh` - Close Issue + update doc
+
+**Bug Reports Location**: `.kiro/specs/bugfix/` - See `../common/project.md` for format
 
 ## Spec Implementation Priority
 
@@ -132,4 +162,4 @@ Execute via Command Palette: "Agent Hooks"
 - `tech.md` - Technical details
 - `../common/tech.md` - General best practices
 - `../common/project.md` - Bug report format and workflow
-- `../../docs/bugfix/` - Bug reports and investigations
+- `../../specs/bugfix/` - Bug reports and investigations

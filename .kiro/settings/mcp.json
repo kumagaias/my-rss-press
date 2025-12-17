@@ -2,14 +2,20 @@
   "mcpServers": {
     "fetch": {
       "command": "uvx",
-      "args": ["mcp-server-fetch"],
+      "args": [
+        "mcp-server-fetch"
+      ],
       "env": {},
       "disabled": false,
-      "autoApprove": ["fetch"]
+      "autoApprove": [
+        "fetch"
+      ]
     },
     "aws-docs": {
       "command": "uvx",
-      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -18,19 +24,27 @@
     },
     "chrome-devtools": {
       "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ],
       "disabled": true,
       "autoApprove": []
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@executeautomation/playwright-mcp-server"],
+      "args": [
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ],
       "disabled": true,
       "autoApprove": []
     },
     "terraform": {
       "command": "uvx",
-      "args": ["awslabs.terraform-mcp-server@latest"],
+      "args": [
+        "awslabs.terraform-mcp-server@latest"
+      ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -38,14 +52,10 @@
       "autoApprove": []
     },
     "github": {
-      "command": "docker",
+      "command": "npx",
       "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "GITHUB_PERSONAL_ACCESS_TOKEN",
-        "ghcr.io/github/github-mcp-server"
+        "-y",
+        "@modelcontextprotocol/server-github"
       ],
       "disabled": false,
       "autoApprove": [
@@ -61,7 +71,9 @@
         "search_code",
         "add_comment_to_pending_review",
         "add_issue_comment",
-        "get_me"
+        "get_me",
+        "search_repositories",
+        "create_issue"
       ]
     }
   }

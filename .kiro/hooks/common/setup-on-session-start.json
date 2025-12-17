@@ -1,0 +1,11 @@
+{
+  "name": "Disable CLI pagers on session start",
+  "description": "Automatically disable AWS and Git pagers to prevent command interruption when starting a new Kiro session",
+  "trigger": {
+    "type": "onSessionCreate"
+  },
+  "action": {
+    "type": "command",
+    "command": "bash .kiro/hooks/common/scripts/disable-pagers.sh"
+  }
+}

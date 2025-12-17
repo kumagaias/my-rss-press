@@ -1,9 +1,10 @@
-# Bug Report #1: Historical Newspaper API Returns 500 Error
+# Bug Report #38: Historical Newspaper API Returns 500 Error
 
 **Date**: 2025-12-17  
 **Status**: Open  
 **Severity**: High  
-**Component**: Backend API (Historical Newspaper)
+**Component**: Backend API (Historical Newspaper)  
+**GitHub Issue**: https://github.com/kumagaias/my-rss-press/issues/38
 
 ---
 

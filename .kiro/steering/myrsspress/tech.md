@@ -87,9 +87,10 @@ npm run dev  # Starts on http://localhost:3001
 
 ### Security
 
-- **Secrets**: AWS Secrets Manager (GitHub tokens, etc.)
+- **Secrets**: AWS Secrets Manager (for production secrets)
+- **GitHub Authentication**: Uses `gh` CLI (no token in environment variables)
 - **Gitleaks**: Pre-commit/pre-push checks
-- **Environment variables**: `.env.local` (gitignored)
+- **Environment variables**: `.env.local` (gitignored, for local development only)
 
 ### Deployment
 
@@ -105,14 +106,37 @@ npm run dev  # Starts on http://localhost:3001
 - Manual execution from local
 - State: S3 + DynamoDB lock
 
+### MCP (Model Context Protocol) Configuration
+
+**GitHub MCP Setup:**
+```bash
+# Install GitHub CLI
+brew install gh
+
+# Authenticate
+gh auth login
+
+# Verify
+gh auth status
+```
+
+**Configuration:** `.kiro/settings/mcp.json`
+- GitHub MCP uses `gh` CLI authentication (no environment variables needed)
+- Other MCP servers configured as needed
+
 ### CLI Pager Configuration
 
 **IMPORTANT**: Disable pagers to prevent command interruption:
 
 ```bash
-# Add to ~/.zshrc or ~/.bashrc
-export AWS_PAGER=""
-export GIT_PAGER=""
+# Add to ~/.zshrc
+echo 'export AWS_PAGER=""' >> ~/.zshrc
+echo 'export GIT_PAGER=""' >> ~/.zshrc
+source ~/.zshrc
+
+# Verify
+echo $AWS_PAGER  # Should be empty
+echo $GIT_PAGER  # Should be empty
 ```
 
 ## Prohibited Practices

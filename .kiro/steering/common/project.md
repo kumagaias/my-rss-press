@@ -59,12 +59,36 @@ Examples:
 
 ## Bug Fix Workflow
 
-1. **Document bug**: Create bug report in `docs/bugfix/{number}-{description}.md`
-2. **Create GitHub Issue**
+### Quick Start (Using Scripts)
+
+```bash
+# 1. Create Issue and bugfix documentation
+./.kiro/hooks/common/scripts/create-bugfix-issue.sh
+
+# 2. Create fix branch (use suggested name from script output)
+git checkout -b fix/issue-{number}-{description}
+
+# 3. Fix & test
+make test
+
+# 4. Commit with issue reference
+git commit -m "fix: [description] (Fixes #{number})"
+
+# 5. Create PR (via GitHub CLI or MCP)
+gh pr create --title "Fix: [description]" --body "Fixes #{number}"
+
+# 6. After merge, close issue and update documentation
+./.kiro/hooks/common/scripts/close-bugfix-issue.sh {number}
+```
+
+### Manual Workflow
+
+1. **Create GitHub Issue** (via GitHub MCP or CLI) - Get Issue number
+2. **Document bug**: Create detailed report in `.kiro/specs/bugfix/issue-{number}-{description}.md`
 3. **Create fix branch**: `fix/issue-{number}-{description}`
 4. **Fix & test**: `make test`
 5. **Commit**: Include `Fixes #{number}` in message
-6. **Create PR**
+6. **Create PR** (via GitHub MCP or CLI)
 7. **Code review**
 8. **Merge** (after approval)
 9. **Update bug report**: Mark as resolved with PR link
@@ -74,12 +98,18 @@ Examples:
 - Fixing directly on main branch
 - Merging without approval
 
+**File Naming**: Always use `issue-{number}-{description}.md` format to prevent number conflicts
+
+**Helper Scripts**:
+- `.kiro/hooks/common/scripts/create-bugfix-issue.sh` - Create Issue + bugfix doc
+- `.kiro/hooks/common/scripts/close-bugfix-issue.sh` - Close Issue + update doc
+
 ### Bug Report Format
 
-Create detailed bug reports in `docs/bugfix/` directory:
+Create detailed bug reports in `.kiro/specs/bugfix/` directory:
 
 ```markdown
-# Bug Report #{number}: {Title}
+# Bug Report #issue-{number}: {Title}
 
 **Date**: YYYY-MM-DD
 **Status**: Open/In Progress/Resolved

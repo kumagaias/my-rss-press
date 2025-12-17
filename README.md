@@ -37,6 +37,12 @@ myrsspress/
 
 See `.tool-versions` for required tools: Node.js 24.x, Terraform 1.11+, AWS CLI, Docker, Gitleaks
 
+**For GitHub MCP (optional):**
+```bash
+brew install gh
+gh auth login
+```
+
 ### Quick Start
 
 ```bash
@@ -45,14 +51,10 @@ git clone https://github.com/kumagaias/my-rss-press.git
 cd my-rss-press
 make install
 
-# Configure environment variables
-cp .env.example .env  # For Kiro MCP servers (optional)
+# Configure environment variables (for local development)
 cp frontend/.env.local.example frontend/.env.local
 cp backend/.env.local.example backend/.env.local
-# Edit .env files with your values
-
-# Start Kiro with environment variables (if using MCP servers)
-./.kiro/hooks/common/scripts/start-kiro.sh
+# Edit .env.local files with your values
 
 # Frontend development
 cd frontend && npm run dev  # http://localhost:3000

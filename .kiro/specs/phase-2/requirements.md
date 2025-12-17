@@ -258,6 +258,28 @@ This document defines the requirements for Phase 2 features that have been imple
 - ✅ Date validation SHALL prevent injection attacks
 - ✅ All API endpoints SHALL validate input parameters
 
+### Requirement 11: Article Filtering by Theme Relevance
+
+**User Story:** As a user, I want to see only articles relevant to my chosen theme, so that I don't see unrelated content in my newspaper.
+
+**Implementation Status:** ⏳ Planned (Phase 2 Extension)
+
+#### Acceptance Criteria
+
+1. ⏳ WHEN a newspaper is generated THEN the system SHALL filter articles by theme relevance
+2. ⏳ WHEN filtering articles THEN the system SHALL use AI (Bedrock) to determine relevance
+3. ⏳ WHEN an article's relevance score is below threshold (0.3) THEN the system SHALL exclude it
+4. ⏳ WHEN filtering is performed THEN the system SHALL use batch processing for efficiency
+5. ⏳ WHEN filtering fails THEN the system SHALL fall back to showing all articles
+6. ⏳ WHEN filtering results in fewer than 8 articles THEN the system SHALL lower the threshold or show all articles
+7. ⏳ WHEN filtering is complete THEN the system SHALL log the number of filtered articles
+
+**Implementation Details:**
+- Service: `backend/src/services/articleFilterService.ts`
+- Method: Batch AI judgment (all articles in one API call)
+- Performance: ~2-5 seconds for 15 articles
+- Fallback: Show all articles if filtering fails
+
 ## Out of Scope (Not Implemented in Phase 2)
 
 The following were planned but not implemented:
@@ -267,6 +289,7 @@ The following were planned but not implemented:
 - Documentation updates (Task 4.3)
 - Full production deployment verification (Task 5.4)
 - Feed quality improvement (Tasks 6.1-6.7)
+- Article filtering by theme relevance (Requirement 11) - Planned for Phase 2 Extension
 
 ## Success Criteria
 

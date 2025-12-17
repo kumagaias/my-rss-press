@@ -589,9 +589,77 @@ _Requirements: All_
 
 ---
 
-## Phase 6: Feed Quality Improvement (Priority 2)
+## Phase 6: Article Filtering by Theme Relevance (Priority 2)
 
-### Task 6.1: Create Reliable Feeds List by Category
+### Task 6.0: Implement Article Filter Service
+
+**Purpose**: Filter articles by theme relevance to prevent unrelated content
+
+**Implementation**:
+- Create `backend/src/services/articleFilterService.ts`
+- Implement batch AI judgment using Bedrock
+- Filter articles with relevance score below threshold (0.3)
+- Fallback to all articles if filtering fails or results in < 8 articles
+- Add unit tests
+
+**Acceptance Criteria**:
+- [ ] `articleFilterService.ts` created
+- [ ] `filterArticlesByTheme(articles, theme, locale, minThreshold): Promise<Article[]>` function implemented
+- [ ] `buildFilterPrompt(articles, theme, locale): string` function implemented
+- [ ] `callBedrockForFiltering(prompt): Promise<any>` function implemented
+- [ ] `parseFilterResponse(response): number[]` function implemented
+- [ ] Batch judgment correctly implemented (all articles in one API call)
+- [ ] Falls back to all articles if filtering fails
+- [ ] Falls back to all articles if filtered result < 8 articles
+- [ ] Skips filtering if input < 8 articles
+- [ ] Unit tests added (using mocks)
+- [ ] `make test` succeeds
+
+_Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7_
+
+### Task 6.0.1: Integrate Article Filtering into Newspaper Generation
+
+**Purpose**: Apply article filtering during newspaper generation
+
+**Implementation**:
+- Update `historicalNewspaperService.ts` or newspaper generation logic
+- Call `filterArticlesByTheme` after fetching articles
+- Apply filtering before importance calculation
+- Add integration tests
+
+**Acceptance Criteria**:
+- [ ] Newspaper generation calls `filterArticlesByTheme`
+- [ ] Filtering applied after article fetching, before importance calculation
+- [ ] Newspaper generation continues even if filtering fails
+- [ ] Existing newspaper generation flow works normally
+- [ ] Integration tests added
+- [ ] `make test` succeeds
+- [ ] Local verification works
+- [ ] Production verification works
+
+_Requirements: 11.1, 11.7_
+
+### Task 6.0.2: Update Documentation for Article Filtering
+
+**Purpose**: Document article filtering feature
+
+**Implementation**:
+- Add article filtering description to `product.md`
+- Add implementation details to `tech.md`
+- Add new service to `structure.md`
+
+**Acceptance Criteria**:
+- [ ] Article filtering feature added to `product.md`
+- [ ] Implementation details added to `tech.md`
+- [ ] `articleFilterService.ts` added to `structure.md`
+- [ ] Changes recorded in update history section
+- [ ] All documentation maintains consistency
+
+_Requirements: 11.1-11.7_
+
+## Phase 7: Feed Quality Improvement (Priority 3)
+
+### Task 7.1: Create Reliable Feeds List by Category
 
 **Purpose**: Maintain list of reliable RSS feeds by theme
 
@@ -782,14 +850,19 @@ Phase 5: Deployment and Verification
 ├── 5.3 Deploy Frontend (depends on Phase 2, 3)
 └── 5.4 Production Verification (depends on 5.1, 5.2, 5.3)
 
-Phase 6: Feed Quality Improvement (new)
-├── 6.1 Create Reliable Feeds List by Category (independent)
-├── 6.2 Implement Feed Health Check Service (depends on 6.1)
-├── 6.3 Improve Bedrock Prompt (depends on 6.1)
-├── 6.4 Implement Validated Feed Cache (depends on 6.1, 6.2)
-├── 6.5 Update Feed Suggestion API (depends on 6.3, 6.4)
-├── 6.6 Schedule Feed Health Check (depends on 6.2)
-└── 6.7 Update Documentation (depends on 6.1-6.6)
+Phase 6: Article Filtering by Theme Relevance (new)
+├── 6.0 Implement Article Filter Service (independent)
+├── 6.0.1 Integrate Article Filtering into Newspaper Generation (depends on 6.0)
+└── 6.0.2 Update Documentation for Article Filtering (depends on 6.0, 6.0.1)
+
+Phase 7: Feed Quality Improvement (future)
+├── 7.1 Create Reliable Feeds List by Category (independent)
+├── 7.2 Implement Feed Health Check Service (depends on 7.1)
+├── 7.3 Improve Bedrock Prompt (depends on 7.1)
+├── 7.4 Implement Validated Feed Cache (depends on 7.1, 7.2)
+├── 7.5 Update Feed Suggestion API (depends on 7.3, 7.4)
+├── 7.6 Schedule Feed Health Check (depends on 7.2)
+└── 7.7 Update Documentation (depends on 7.1-7.6)
 ```
 
 ## Gradual Release Strategy
@@ -861,11 +934,29 @@ Phase 6: Feed Quality Improvement (new)
 
 **Risk**: Low (no code changes)
 
-### Release 5: Feed Quality Improvement (Phase 6) - New
+### Release 5: Article Filtering (Phase 6) - New
+**Purpose**: Filter articles by theme relevance
+
+**Included Tasks**:
+- 6.0 - 6.0.2 (all)
+
+**Deployment**:
+- Backend (GitHub Actions)
+
+**Verification**:
+- Verify articles filtered by theme relevance
+- Verify unrelated articles excluded
+- Verify fallback works when filtering fails
+- Verify newspaper generation time acceptable
+- Verify existing features not broken
+
+**Risk**: Medium (changes newspaper generation logic)
+
+### Release 6: Feed Quality Improvement (Phase 7) - Future
 **Purpose**: Improve feed suggestion quality
 
 **Included Tasks**:
-- 6.1 - 6.7 (all)
+- 7.1 - 7.7 (all)
 
 **Deployment**:
 - Infrastructure (Terraform)
@@ -1080,7 +1171,13 @@ Phase 2 implementation is divided into 6 phases, designed for gradual release. E
 
 This order allows gradual addition of new features without breaking existing functionality.
 
-**Phase 6 (Feed Quality Improvement) Characteristics**:
+**Phase 6 (Article Filtering) Characteristics**:
+- Solves the core problem of unrelated articles
+- Improves user experience significantly
+- Moderate impact on newspaper generation performance (+2-5 seconds)
+- Robust fallback mechanism
+
+**Phase 7 (Feed Quality Improvement) Characteristics**:
 - Minimal impact on existing features
 - Significantly improves feed suggestion quality
 - Reduces user errors

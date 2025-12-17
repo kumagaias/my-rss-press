@@ -73,7 +73,213 @@ Phase 2 adds the following components to the existing architecture:
 
 ## Key Service Designs
 
-### 0. Feed Quality Improvement Service
+### 0. Article Filtering Service
+
+**Purpose**: Filter articles by theme relevance to prevent unrelated content from appearing in newspapers
+
+**Problem**: When using general news feeds (e.g., Yahoo News, Asahi Shimbun), articles unrelated to the user's theme (e.g., "cooking", "movies") are included, degrading user experience.
+
+**Solution**: Use AI to judge article relevance and filter out unrelated content
+
+**Implementation**: Batch judgment using Bedrock
+
+```typescript
+// backend/src/services/articleFilterService.ts
+
+interface ArticleRelevanceResult {
+  relevantIndices: number[];
+  totalArticles: number;
+  filteredCount: number;
+}
+
+/**
+ * Filter articles by theme relevance using batch AI judgment
+ * @param articles - Articles to filter
+ * @param theme - User's theme keyword
+ * @param locale - Language for prompt
+ * @param minThreshold - Minimum relevance threshold (default: 0.3)
+ * @returns Filtered articles
+ */
+export async function filterArticlesByTheme(
+  articles: Article[],
+  theme: string,
+  locale: 'en' | 'ja' = 'en',
+  minThreshold: number = 0.3
+): Promise<Article[]> {
+  // If too few articles, don't filter
+  if (articles.length < 8) {
+    console.log(`[Article Filter] Too few articles (${articles.length}), skipping filter`);
+    return articles;
+  }
+
+  try {
+    // Build prompt for batch judgment
+    const prompt = buildFilterPrompt(articles, theme, locale);
+    
+    console.log(`[Article Filter] Filtering ${articles.length} articles for theme: "${theme}"`);
+    
+    // Call Bedrock for batch judgment
+    const result = await callBedrockForFiltering(prompt);
+    
+    // Parse response
+    const relevantIndices = parseFilterResponse(result);
+    
+    // Filter articles
+    const filteredArticles = relevantIndices
+      .filter(i => i >= 0 && i < articles.length)
+      .map(i => articles[i]);
+    
+    console.log(`[Article Filter] Filtered: ${filteredArticles.length}/${articles.length} articles relevant`);
+    
+    // If too few articles after filtering, return all
+    if (filteredArticles.length < 8) {
+      console.log(`[Article Filter] Too few filtered articles (${filteredArticles.length}), returning all`);
+      return articles;
+    }
+    
+    return filteredArticles;
+  } catch (error) {
+    console.error('[Article Filter] Filtering failed, returning all articles:', error);
+    return articles; // Fallback: return all articles
+  }
+}
+
+/**
+ * Build prompt for batch article filtering
+ */
+function buildFilterPrompt(
+  articles: Article[],
+  theme: string,
+  locale: 'en' | 'ja'
+): string {
+  const articleList = articles
+    .map((a, i) => `${i}. ${a.title}`)
+    .join('\n');
+  
+  if (locale === 'ja') {
+    return `テーマ: ${theme}
+
+以下の記事のうち、テーマに関連する記事のインデックス番号を配列で返してください。
+関連性が低い記事は除外してください。
+
+記事リスト:
+${articleList}
+
+JSON形式で返してください（説明不要）:
+{ "relevantIndices": [0, 3, 5, ...] }`;
+  } else {
+    return `Theme: ${theme}
+
+From the following articles, return the index numbers of articles related to the theme.
+Exclude articles with low relevance.
+
+Article list:
+${articleList}
+
+Return in JSON format (no explanation):
+{ "relevantIndices": [0, 3, 5, ...] }`;
+  }
+}
+
+/**
+ * Call Bedrock for article filtering
+ */
+async function callBedrockForFiltering(prompt: string): Promise<any> {
+  const command = new InvokeModelCommand({
+    modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
+    contentType: 'application/json',
+    accept: 'application/json',
+    body: JSON.stringify({
+      anthropic_version: 'bedrock-2023-05-31',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3, // Lower temperature for more consistent filtering
+    }),
+  });
+  
+  const response = await bedrockClient.send(command);
+  return JSON.parse(new TextDecoder().decode(response.body));
+}
+
+/**
+ * Parse Bedrock response to extract relevant article indices
+ */
+function parseFilterResponse(response: any): number[] {
+  try {
+    const content = response.content[0].text;
+    
+    // Extract JSON from response
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in response');
+    }
+    
+    const parsed = JSON.parse(jsonMatch[0]);
+    return parsed.relevantIndices || [];
+  } catch (error) {
+    console.error('[Article Filter] Failed to parse response:', error);
+    throw error;
+  }
+}
+```
+
+**Integration into newspaper generation:**
+
+```typescript
+// backend/src/services/historicalNewspaperService.ts
+
+async function generateNewspaper(
+  feedUrls: string[],
+  theme: string,
+  locale: 'en' | 'ja'
+): Promise<NewspaperData> {
+  // 1. Fetch articles from feeds
+  const allArticles = await fetchArticlesFromFeeds(feedUrls);
+  
+  // 2. Filter articles by theme relevance (NEW)
+  const filteredArticles = await filterArticlesByTheme(
+    allArticles,
+    theme,
+    locale,
+    0.3 // 30% relevance threshold
+  );
+  
+  // 3. Calculate importance scores
+  const articlesWithImportance = await calculateImportance(
+    filteredArticles,
+    theme
+  );
+  
+  // 4. Continue with existing logic...
+  const languages = await detectLanguages(articlesWithImportance);
+  const summary = await generateSummary(articlesWithImportance, theme, languages);
+  
+  return {
+    articles: articlesWithImportance,
+    languages,
+    summary,
+    // ...
+  };
+}
+```
+
+**Benefits:**
+1. **Improved relevance**: Only theme-related articles displayed
+2. **Better UX**: Users see content they're interested in
+3. **Efficient**: Single API call for all articles (~2-5 seconds)
+4. **Robust**: Falls back to all articles if filtering fails
+
+**Performance:**
+- Filtering time: ~2-5 seconds for 15 articles
+- Cost: ~$0.0001 per newspaper generation
+- Fallback: Show all articles if filtering fails or results in < 8 articles
+
+**Alternative approaches considered:**
+1. ❌ Individual article scoring: Too slow (15 × 1s = 15s)
+2. ❌ Keyword matching: Low accuracy
+3. ✅ Batch judgment: Fast and accurate
+
+### 1. Feed Quality Improvement Service
 
 **Purpose**: Improve AI-suggested feed quality and reduce invalid/terminated feed URLs
 
@@ -933,6 +1139,18 @@ For *any* newspaper with a date parameter, the URL should follow the format /new
 ### Property 18: Loading Animation Display
 For *any* newspaper generation process, a loading animation should be displayed until completion
 **Verifies: Requirements 5.1, 5.2, 5.3**
+
+### Property 19: Article Filtering Relevance
+For *any* newspaper generation with article filtering enabled, all displayed articles should be relevant to the theme (relevance score >= 0.3)
+**Verifies: Requirement 11.1, 11.3**
+
+### Property 20: Article Filtering Fallback
+For *any* article filtering failure or result with fewer than 8 articles, the system should fall back to displaying all articles
+**Verifies: Requirement 11.5, 11.6**
+
+### Property 21: Article Filtering Performance
+For *any* article filtering operation, the processing time should be less than 10 seconds
+**Verifies: Requirement 11.2, 11.4**
 
 ## Test Strategy
 

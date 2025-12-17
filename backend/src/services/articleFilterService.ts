@@ -16,11 +16,12 @@ export interface Article {
   importance?: number;
 }
 
-interface ArticleRelevanceResult {
-  relevantIndices: number[];
-  totalArticles: number;
-  filteredCount: number;
-}
+// Removed unused interface - keeping for future use if needed
+// interface ArticleRelevanceResult {
+//   relevantIndices: number[];
+//   totalArticles: number;
+//   filteredCount: number;
+// }
 
 /**
  * Filter articles by theme relevance using batch AI judgment
@@ -34,7 +35,7 @@ export async function filterArticlesByTheme(
   articles: Article[],
   theme: string,
   locale: 'en' | 'ja' = 'en',
-  minThreshold: number = 0.3
+  _minThreshold: number = 0.3 // Prefix with _ to indicate intentionally unused
 ): Promise<Article[]> {
   // If too few articles, don't filter
   if (articles.length < 8) {
@@ -114,7 +115,9 @@ Return in JSON format (no explanation):
 /**
  * Call Bedrock for article filtering
  */
-async function callBedrockForFiltering(prompt: string): Promise<any> {
+async function callBedrockForFiltering(prompt: string): Promise<{
+  content: Array<{ text: string }>;
+}> {
   const command = new InvokeModelCommand({
     modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
     contentType: 'application/json',
@@ -134,7 +137,9 @@ async function callBedrockForFiltering(prompt: string): Promise<any> {
 /**
  * Parse Bedrock response to extract relevant article indices
  */
-function parseFilterResponse(response: any): number[] {
+function parseFilterResponse(response: {
+  content: Array<{ text: string }>;
+}): number[] {
   try {
     const content = response.content[0].text;
     

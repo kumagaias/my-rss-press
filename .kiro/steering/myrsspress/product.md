@@ -292,3 +292,11 @@ This document is updated according to product specification changes.
   - Responsive layout (mobile: 1 column, desktop: 3 columns)
   - Support for 320px-768px screen sizes
   - Related Issue: [#19](https://github.com/kumagaias/my-rss-press/issues/19)
+
+- **2025-12-18**: Added article filtering by theme relevance
+  - Filter articles by theme relevance using AI (Bedrock)
+  - Batch judgment for efficiency (single API call)
+  - Robust fallback logic (returns all articles if filtering fails or < 8 results)
+  - Improves newspaper quality by excluding unrelated content
+  - Adds 2-5 seconds to newspaper generation time
+  - Related PR: [#40](https://github.com/kumagaias/my-rss-press/pull/40), [#41](https://github.com/kumagaias/my-rss-press/pull/41)

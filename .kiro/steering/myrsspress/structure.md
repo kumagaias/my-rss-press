@@ -58,6 +58,7 @@ backend/
 │   │   ├── rssFetcherService.ts       # RSS parsing
 │   │   ├── languageDetectionService.ts # JP/EN detection
 │   │   ├── summaryGenerationService.ts # AI summary
+│   │   ├── articleFilterService.ts    # Theme relevance filtering
 │   │   └── historicalNewspaperService.ts # Date-based newspapers
 │   ├── models/
 │   │   └── newspaper.ts  # DynamoDB model
@@ -120,6 +121,7 @@ infra/
 - `routes/feeds.ts` - POST `/api/suggest-feeds` (AI suggestions)
 - `routes/newspapers.ts` - Newspaper CRUD + historical newspapers
 - `services/bedrockService.ts` - Claude 3 Haiku integration
+- `services/articleFilterService.ts` - Article filtering by theme relevance
 - `services/historicalNewspaperService.ts` - Date-based newspaper generation
 
 ### Infrastructure

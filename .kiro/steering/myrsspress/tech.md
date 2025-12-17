@@ -79,6 +79,35 @@ npm run dev  # Starts on http://localhost:3001
 - If Bedrock fails: Return 1 random default feed
 - Default feeds: 4 per locale (EN: BBC, NYT, Reuters, Guardian / JP: NHK, Asahi, Yahoo, ITmedia)
 
+### Article Filtering by Theme Relevance
+
+**Implementation:**
+- Service: `backend/src/services/articleFilterService.ts`
+- AI: AWS Bedrock (Claude 3 Haiku)
+- Method: Batch judgment (all articles in single API call)
+- Threshold: 0.3 (configurable, 0.0-1.0 scale)
+
+**Performance:**
+- Single Bedrock API call: ~2-5 seconds
+- Applied after article fetching, before importance calculation
+- Adds 2-5 seconds to newspaper generation time
+
+**Filtering Logic:**
+1. Skip filtering if < 8 articles (insufficient data)
+2. Call Bedrock with all articles and theme
+3. Parse relevance scores (0.0-1.0 per article)
+4. Filter articles with score >= threshold (default: 0.3)
+5. Return filtered articles if >= 8, otherwise return all
+
+**Fallback:**
+- If Bedrock API fails: Return all articles
+- If filtered result < 8 articles: Return all articles
+- Ensures newspaper generation always succeeds
+
+**Localization:**
+- Supports English and Japanese prompts
+- Prompt adapts to newspaper locale setting
+
 ### Error Handling
 
 - **Error messages**: Always in English

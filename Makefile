@@ -1,3 +1,18 @@
+# MyRSSPress Makefile
+# 
+# Quick Start:
+#   make install    - Install all dependencies
+#   make test       - Run all tests (unit + e2e + lint + security + vulnerabilities)
+#   make help       - Show all available commands
+#
+# Required Tools:
+#   - Node.js 24.x or 22.x
+#   - npm
+#   - Gitleaks (for security checks)
+#   - Playwright (installed via npm)
+#
+# See: make check-tools
+
 .PHONY: help install install-tools check-tools clean test test-unit test-lint test-security security-check
 
 # Default target
@@ -87,5 +102,16 @@ test-vulnerabilities: ## Check npm vulnerabilities (medium+ severity)
 
 audit: test-vulnerabilities ## Alias for test-vulnerabilities
 
-test: test-unit test-e2e test-lint test-security test-vulnerabilities ## Run all tests (unit + e2e + lint + security + vulnerabilities)
+test: test-unit test-e2e test-lint test-security test-vulnerabilities ## Run all tests (comprehensive: unit + e2e + lint + security + vulnerabilities)
+	@echo ""
+	@echo "=========================================="
 	@echo "✓ All tests complete"
+	@echo "=========================================="
+	@echo ""
+	@echo "Tests executed:"
+	@echo "  ✓ Unit tests (frontend + backend)"
+	@echo "  ✓ E2E tests (Playwright)"
+	@echo "  ✓ Lint checks (ESLint)"
+	@echo "  ✓ Security checks (Gitleaks)"
+	@echo "  ✓ Vulnerability checks (npm audit)"
+	@echo ""

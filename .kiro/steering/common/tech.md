@@ -141,6 +141,67 @@ When setting up a new project, ensure these files exist:
 - [ ] `package.json` - Root dependencies
 - [ ] `.tool-versions` - Tool version requirements
 
+## Makefile Commands
+
+The Makefile provides convenient commands for common development tasks.
+
+### Essential Commands
+
+```bash
+# Show all available commands
+make help
+
+# Install all dependencies (root + frontend + backend)
+make install
+
+# Run all tests (comprehensive)
+make test
+# Includes:
+#   - Unit tests (frontend + backend)
+#   - E2E tests (Playwright)
+#   - Lint checks (ESLint)
+#   - Security checks (Gitleaks)
+#   - Vulnerability checks (npm audit)
+```
+
+### Test Commands
+
+```bash
+# Unit tests only
+make test-unit
+
+# E2E tests only
+make test-e2e
+
+# Lint checks only
+make test-lint
+
+# Security checks only
+make test-security
+
+# Vulnerability checks only
+make test-vulnerabilities
+```
+
+### Utility Commands
+
+```bash
+# Check required tools
+make check-tools
+
+# Install tools via asdf (if available)
+make install-tools
+
+# Clean build artifacts
+make clean
+```
+
+### Important Notes
+
+- **`make test` is comprehensive**: Runs ALL tests including unit, E2E, lint, security, and vulnerability checks
+- **Gitleaks is required**: Security checks will fail if Gitleaks is not installed
+- **Run before push**: Always run `make test` before pushing to ensure all checks pass
+
 ### Tool Installation
 
 #### Required Tools

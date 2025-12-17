@@ -45,6 +45,12 @@ git clone https://github.com/kumagaias/my-rss-press.git
 cd my-rss-press
 make install
 
+# Configure environment variables
+cp .env.example .env  # For Kiro MCP servers (optional)
+cp frontend/.env.local.example frontend/.env.local
+cp backend/.env.local.example backend/.env.local
+# Edit .env files with your values
+
 # Frontend development
 cd frontend && npm run dev  # http://localhost:3000
 

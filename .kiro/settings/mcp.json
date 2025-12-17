@@ -36,6 +36,36 @@
       },
       "disabled": false,
       "autoApprove": []
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "create_pull_request",
+        "update_pull_request",
+        "request_copilot_review",
+        "merge_pull_request",
+        "pull_request_read",
+        "list_pull_requests",
+        "issue_write",
+        "list_commits",
+        "get_commit",
+        "search_code",
+        "add_comment_to_pending_review",
+        "add_issue_comment",
+        "get_me"
+      ]
     }
   }
 }

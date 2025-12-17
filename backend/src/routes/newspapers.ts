@@ -77,8 +77,8 @@ newspapersRouter.post(
         return c.json(
           {
             error: articles.length === 0
-              ? 'フィードから記事を取得できませんでした。フィードURLが正しいか、またはフィードが利用可能か確認してください。'
-              : '記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。',
+              ? 'Failed to fetch articles from feeds. Please check if the feed URLs are correct and accessible.'
+              : 'Insufficient articles. Please add more feeds or try again later.',
             articleCount: articles.length,
             suggestion: 'Try using different RSS feeds or check if the feed URLs are accessible.',
           },

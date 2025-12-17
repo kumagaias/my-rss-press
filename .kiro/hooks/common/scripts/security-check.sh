@@ -19,7 +19,7 @@ if ! command -v gitleaks &> /dev/null; then
     
     # Basic pattern matching
     echo "🔍 Checking for AWS credentials..."
-    if git grep -E "AKIA[0-9A-Z]{16}" -- ':!.kiro/hooks/scripts/security-check.sh' 2>/dev/null; then
+    if git grep -E "AKIA[0-9A-Z]{16}" -- ':!.kiro/hooks/common/scripts/security-check.sh' 2>/dev/null; then
         echo "❌ AWS access key found!"
         exit 1
     fi
@@ -31,7 +31,7 @@ if ! command -v gitleaks &> /dev/null; then
     fi
     
     echo "🔍 Checking for passwords and tokens..."
-    if git grep -iE "(password|secret|token|api_key|private_key)\s*[:=]\s*['\"][^'\"]{8,}" -- ':!package-lock.json' ':!*.md' ':!.kiro/hooks/scripts/security-check.sh' 2>/dev/null; then
+    if git grep -iE "(password|secret|token|api_key|private_key)\s*[:=]\s*['\"][^'\"]{8,}" -- ':!package-lock.json' ':!*.md' ':!.kiro/hooks/common/scripts/security-check.sh' 2>/dev/null; then
         echo "⚠️  Potential password or token found"
         echo "Please review"
     fi

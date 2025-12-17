@@ -51,6 +51,9 @@ cp frontend/.env.local.example frontend/.env.local
 cp backend/.env.local.example backend/.env.local
 # Edit .env files with your values
 
+# Start Kiro with environment variables (if using MCP servers)
+./scripts/start-kiro.sh
+
 # Frontend development
 cd frontend && npm run dev  # http://localhost:3000
 

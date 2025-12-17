@@ -51,6 +51,21 @@ This directory contains agent automation hooks for MyRSSPress.
 ### Development Workflow
 - **commit-push-pr.json** - Commit, push, and create PR with auto-generated content
 
+## Environment Variables for MCP Servers
+
+If you're using MCP servers that require environment variables (e.g., GitHub MCP), start Kiro using the wrapper script:
+
+```bash
+./scripts/start-kiro.sh
+```
+
+This script loads environment variables from `.env` before starting Kiro, ensuring MCP servers have access to required credentials.
+
+**Setup:**
+1. Copy `.env.example` to `.env`
+2. Fill in your credentials
+3. Start Kiro with `./scripts/start-kiro.sh`
+
 ## Usage
 
 ### Via Command Palette

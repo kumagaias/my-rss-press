@@ -73,7 +73,10 @@
         "add_issue_comment",
         "get_me",
         "search_repositories",
-        "create_issue"
+        "create_issue",
+        "get_issue",
+        "get_pull_request",
+        "get_pull_request_comments"
       ]
     }
   }

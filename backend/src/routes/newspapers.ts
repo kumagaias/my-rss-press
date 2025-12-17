@@ -212,57 +212,49 @@ newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async 
     }
 
     // Get or create historical newspaper
-    try {
-      const newspaper = await getOrCreateNewspaper(
-        newspaperId,
-        date,
-        metadata.feedUrls,
-        'general' // Use a default theme for now
-      );
+    const newspaper = await getOrCreateNewspaper(
+      newspaperId,
+      date,
+      metadata.feedUrls,
+      'general' // Use a default theme for now
+    );
 
-      console.log(`Successfully retrieved/created newspaper for ${newspaperId} on ${date}`);
-      return c.json(newspaper);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(`Error creating historical newspaper: ${error.message}`, {
-          newspaperId,
-          date,
-          error: error.stack,
-        });
+    console.log(`Successfully retrieved/created newspaper for ${newspaperId} on ${date}`);
+    return c.json(newspaper);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Error creating historical newspaper: ${error.message}`);
+      console.error(`Newspaper ID: ${newspaperId}, Date: ${date}`);
+      console.error(`Stack trace: ${error.stack}`);
 
-        // Handle validation errors
-        if (error.message.includes('Future newspapers') ||
-            error.message.includes('older than 7 days') ||
-            error.message.includes('Invalid date format')) {
-          return c.json(
-            {
-              error: error.message,
-              code: error.message.includes('Future') ? 'FUTURE_DATE' :
-                    error.message.includes('older') ? 'DATE_TOO_OLD' :
-                    'INVALID_DATE',
-            },
-            400
-          );
-        }
-        
-        if (error.message.includes('Insufficient articles')) {
-          return c.json(
-            {
-              error: 'Insufficient articles for this date',
-              code: 'INSUFFICIENT_ARTICLES',
-            },
-            400
-          );
-        }
+      // Handle validation errors
+      if (error.message.includes('Future newspapers') ||
+          error.message.includes('older than 7 days') ||
+          error.message.includes('Invalid date format')) {
+        return c.json(
+          {
+            error: error.message,
+            code: error.message.includes('Future') ? 'FUTURE_DATE' :
+                  error.message.includes('older') ? 'DATE_TOO_OLD' :
+                  'INVALID_DATE',
+          },
+          400
+        );
       }
       
-      throw error;
+      if (error.message.includes('Insufficient articles')) {
+        return c.json(
+          {
+            error: 'Insufficient articles for this date',
+            code: 'INSUFFICIENT_ARTICLES',
+          },
+          400
+        );
+      }
     }
-  } catch (error) {
-    console.error('Error in get historical newspaper:', error);
-    if (error instanceof Error) {
-      console.error('Error stack:', error.stack);
-    }
+    
+    // Unhandled error
+    console.error('Unhandled error in get historical newspaper:', error);
     return c.json(
       {
         error: 'Failed to get newspaper',

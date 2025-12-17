@@ -9,12 +9,17 @@ This directory contains agent automation hooks for MyRSSPress.
 ```
 .kiro/hooks/
 ├── common/                      # Reusable hooks (any project)
+│   ├── .husky/                 # Git hooks (source of truth)
+│   │   ├── _/
+│   │   ├── pre-commit
+│   │   └── pre-push
 │   ├── check-pager-config.json
 │   ├── disable-pagers-on-session-start.json
 │   ├── documentation-update-reminder.json
 │   ├── pre-commit-security.json
 │   ├── run-all-tests.json
-│   └── run-tests.json
+│   ├── run-tests.json
+│   └── setup-git-hooks.json
 ├── myrsspress/                  # MyRSSPress-specific hooks
 │   └── commit-push-pr.json
 └── README.md                    # This file
@@ -32,6 +37,9 @@ This directory contains agent automation hooks for MyRSSPress.
 ### CLI Configuration
 - **disable-pagers-on-session-start.json** - Auto-disable pagers on session start
 - **check-pager-config.json** - Verify pager configuration
+
+### Project Setup
+- **setup-git-hooks.json** - Create symbolic link from .husky to .kiro/hooks/common/.husky
 
 ### Documentation
 - **documentation-update-reminder.json** - Remind to update docs on execution complete

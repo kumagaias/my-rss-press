@@ -4,6 +4,81 @@ General best practices for TypeScript/React/Node.js projects.
 
 ---
 
+## Project Initialization Checklist
+
+When setting up a new project or cloning an existing one:
+
+### 1. Install Dependencies
+```bash
+# Root dependencies
+npm ci
+
+# Frontend dependencies
+cd frontend && npm ci
+
+# Backend dependencies
+cd ../backend && npm ci
+```
+
+### 2. Setup Git Hooks
+```bash
+# Create symbolic link from .husky to .kiro/hooks/common/.husky
+# Run via Kiro hook: "Setup Git Hooks"
+# Or manually:
+rm -rf .husky && ln -s .kiro/hooks/common/.husky .husky
+```
+
+### 3. Configure Environment Variables
+```bash
+# Copy example files
+cp frontend/.env.local.example frontend/.env.local
+cp backend/.env.local.example backend/.env.local
+
+# Edit with your values
+# frontend/.env.local
+# backend/.env.local
+```
+
+### 4. Verify Tool Versions
+```bash
+# Check required tools
+make check-tools
+
+# Or manually check:
+node --version    # Should match .tool-versions
+npm --version
+terraform --version
+aws --version
+docker --version
+```
+
+### 5. Run Tests
+```bash
+# All tests
+make test
+
+# Unit tests only
+make test-unit
+
+# Security checks
+make test-security
+```
+
+### 6. Disable CLI Pagers (Optional)
+```bash
+# Auto-disabled on Kiro session start
+# Or add to ~/.zshrc manually:
+export AWS_PAGER=""
+export GIT_PAGER=""
+```
+
+### 7. Review Documentation
+- Read `README.md` for project overview
+- Check `.kiro/steering/` for development guidelines
+- Review `.kiro/specs/` for feature specifications
+
+---
+
 ## TypeScript Conventions
 
 ### Naming

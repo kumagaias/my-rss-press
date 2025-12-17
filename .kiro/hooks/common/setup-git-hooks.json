@@ -1,0 +1,11 @@
+{
+  "name": "Setup Git Hooks",
+  "description": "Create symbolic links from .husky to .kiro/hooks/common/.husky for version control",
+  "trigger": {
+    "type": "manual"
+  },
+  "action": {
+    "type": "command",
+    "command": "rm -rf .husky && ln -s .kiro/hooks/common/.husky .husky && echo '✅ Git hooks symbolic link created' && echo 'Source: .kiro/hooks/common/.husky' && echo 'Link: .husky'"
+  }
+}

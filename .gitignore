@@ -47,3 +47,6 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+# Git hooks (symbolic link to .kiro/hooks/common/.husky)
+.husky

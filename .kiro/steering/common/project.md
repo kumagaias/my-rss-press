@@ -59,18 +59,64 @@ Examples:
 
 ## Bug Fix Workflow
 
-1. **Create GitHub Issue**
-2. **Create fix branch**: `fix/issue-{number}-{description}`
-3. **Fix & test**: `make test`
-4. **Commit**: Include `Fixes #{number}` in message
-5. **Create PR**
-6. **Code review**
-7. **Merge** (after approval)
+1. **Document bug**: Create bug report in `docs/bugfix/{number}-{description}.md`
+2. **Create GitHub Issue**
+3. **Create fix branch**: `fix/issue-{number}-{description}`
+4. **Fix & test**: `make test`
+5. **Commit**: Include `Fixes #{number}` in message
+6. **Create PR**
+7. **Code review**
+8. **Merge** (after approval)
+9. **Update bug report**: Mark as resolved with PR link
 
 **❌ Prohibited:**
 - Skipping Issue creation
 - Fixing directly on main branch
 - Merging without approval
+
+### Bug Report Format
+
+Create detailed bug reports in `docs/bugfix/` directory:
+
+```markdown
+# Bug Report #{number}: {Title}
+
+**Date**: YYYY-MM-DD
+**Status**: Open/In Progress/Resolved
+**Severity**: Low/Medium/High/Critical
+**Component**: {Component name}
+
+## Summary
+Brief description of the bug
+
+## Error Details
+Error messages, stack traces, logs
+
+## Reproduction Steps
+1. Step 1
+2. Step 2
+3. ...
+
+## Expected Behavior
+What should happen
+
+## Actual Behavior
+What actually happens
+
+## Possible Causes
+List of potential root causes
+
+## Investigation Needed
+- [ ] Check logs
+- [ ] Review code
+- [ ] Test edge cases
+
+## Impact
+User experience and scope
+
+## Next Steps
+Action items
+```
 
 ## Testing Requirements
 

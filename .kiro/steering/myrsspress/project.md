@@ -69,20 +69,24 @@ Task: X.X
 
 ## Bug Fix Workflow (MANDATORY)
 
-1. **Create GitHub Issue** (via GitHub MCP)
-2. **Create fix branch**: `fix/issue-{number}-{description}`
-3. **Fix & test**: `make test`
-4. **Commit**: Include `Fixes #{number}`
-5. **Create PR** (via GitHub MCP)
-6. **Request Copilot review** (via GitHub MCP)
-7. **Check Copilot comments** (via GitHub MCP)
-8. **Code review**
-9. **Merge** (after user approval)
+1. **Document bug**: Create detailed report in `docs/bugfix/{number}-{description}.md`
+2. **Create GitHub Issue** (via GitHub MCP)
+3. **Create fix branch**: `fix/issue-{number}-{description}`
+4. **Fix & test**: `make test`
+5. **Commit**: Include `Fixes #{number}`
+6. **Create PR** (via GitHub MCP)
+7. **Request Copilot review** (via GitHub MCP)
+8. **Check Copilot comments** (via GitHub MCP)
+9. **Code review**
+10. **Merge** (after user approval)
+11. **Update bug report**: Mark as resolved with PR link
 
 **❌ Prohibited:**
 - Skipping Issue creation
 - Fixing directly on main branch
 - Merging without user approval
+
+**Bug Reports Location**: `docs/bugfix/` - See `common/project.md` for format
 
 ## Spec Implementation Priority
 
@@ -124,6 +128,6 @@ Execute via Command Palette: "Agent Hooks"
 
 **For detailed guidelines:**
 - `tech.md` - Technical details
-- `common-tech.md` - General best practices
-- `review.md` - Code review guide
-- `postmortem.md` - Incident handling
+- `../common/tech.md` - General best practices
+- `../common/project.md` - Bug report format and workflow
+- `../../docs/bugfix/` - Bug reports and investigations

@@ -94,6 +94,14 @@ Lambda (Hono)
 
 Environment variables: See `.env.local.example` in `frontend/` and `backend/` directories.
 
+## Documentation
+
+- **Specifications**: `.kiro/specs/` - Feature specifications (Phase 1, 2, 3)
+- **Steering**: `.kiro/steering/` - Development guidelines and best practices
+- **Hooks**: `.kiro/hooks/` - Agent automation hooks
+- **Bug Reports**: `docs/bugfix/` - Detailed bug investigations and resolutions
+- **Deployment**: `DEPLOYMENT-SUMMARY.md` - Deployment guide
+
 ## Contributing
 
 1. Create feature branch: `git checkout -b feat/task-X.X-description`

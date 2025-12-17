@@ -82,6 +82,7 @@ This directory contains development guidelines for MyRSSPress.
 
 - **Specifications**: `.kiro/specs/` - Feature specifications (Phase 1, 2, 3)
 - **Hooks**: `.kiro/hooks/` - Agent automation hooks
+- **Bug Reports**: `../../docs/bugfix/` - Detailed bug reports and investigations
 - **Root README**: `../../README.md` - Project overview
 
 ---

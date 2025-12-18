@@ -1,214 +1,221 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-
-// Mock AWS SDK - same pattern as summaryGenerationService.test.ts
-vi.mock('@aws-sdk/client-bedrock-runtime', () => ({
-  BedrockRuntimeClient: class {
-    send = vi.fn();
-  },
-  InvokeModelCommand: class {
-    constructor(public input: any) {}
-  },
-}));
-
+import { mockClient } from 'aws-sdk-client-mock';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { filterArticlesByTheme } from '../../../src/services/articleFilterService.js';
-import type { Article } from '../../../src/services/articleFilterService.js';
+import type { Article } from '../../../src/models/newspaper.js';
 
-const mockArticles: Article[] = [
-  {
-    title: 'Best Italian Pasta Recipes',
-    description: 'Learn how to make authentic Italian pasta',
-    link: 'https://example.com/pasta',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-  {
-    title: 'Breaking: Political Crisis in Country X',
-    description: 'Major political developments',
-    link: 'https://example.com/politics',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-  {
-    title: 'Homemade Bread Baking Guide',
-    description: 'Step-by-step bread baking tutorial',
-    link: 'https://example.com/bread',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-  {
-    title: 'Stock Market Crashes',
-    description: 'Financial news update',
-    link: 'https://example.com/stocks',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-  {
-    title: 'Vegan Cooking Tips',
-    description: 'Healthy vegan recipes',
-    link: 'https://example.com/vegan',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-  {
-    title: 'Crime Report: Theft in City',
-    description: 'Local crime news',
-    link: 'https://example.com/crime',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-  {
-    title: 'Japanese Sushi Making',
-    description: 'Traditional sushi techniques',
-    link: 'https://example.com/sushi',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-  {
-    title: 'Sports: Team Wins Championship',
-    description: 'Sports news update',
-    link: 'https://example.com/sports',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-  {
-    title: 'Dessert Recipes for Beginners',
-    description: 'Easy dessert ideas',
-    link: 'https://example.com/dessert',
-    pubDate: new Date('2025-12-18'),
-    feedSource: 'https://example.com/feed',
-  },
-];
+// Create mock client
+const bedrockMock = mockClient(BedrockRuntimeClient);
 
 describe('articleFilterService', () => {
+  const mockArticles: Article[] = [
+    {
+      title: 'AI Breakthrough in Machine Learning',
+      description: 'New AI model achieves state-of-the-art results in natural language processing tasks.',
+      link: 'https://example.com/ai-breakthrough',
+      pubDate: '2024-01-01T00:00:00Z',
+      importance: 0.9,
+    },
+    {
+      title: 'Stock Market Update',
+      description: 'Markets closed higher today as investors reacted to economic data.',
+      link: 'https://example.com/stock-market',
+      pubDate: '2024-01-01T00:00:00Z',
+      importance: 0.5,
+    },
+    {
+      title: 'Deep Learning Framework Released',
+      description: 'New open-source framework simplifies deep learning model development.',
+      link: 'https://example.com/deep-learning',
+      pubDate: '2024-01-01T00:00:00Z',
+      importance: 0.8,
+    },
+    {
+      title: 'Weather Forecast',
+      description: 'Sunny weather expected this weekend across the region.',
+      link: 'https://example.com/weather',
+      pubDate: '2024-01-01T00:00:00Z',
+      importance: 0.3,
+    },
+    {
+      title: 'Neural Networks in Healthcare',
+      description: 'AI-powered diagnostic tools show promising results in clinical trials.',
+      link: 'https://example.com/healthcare-ai',
+      pubDate: '2024-01-01T00:00:00Z',
+      importance: 0.85,
+    },
+    {
+      title: 'Sports News',
+      description: 'Local team wins championship in exciting final match.',
+      link: 'https://example.com/sports',
+      pubDate: '2024-01-01T00:00:00Z',
+      importance: 0.4,
+    },
+    {
+      title: 'Computer Vision Advances',
+      description: 'New techniques improve object detection accuracy in real-time applications.',
+      link: 'https://example.com/computer-vision',
+      pubDate: '2024-01-01T00:00:00Z',
+      importance: 0.87,
+    },
+    {
+      title: 'Celebrity Gossip',
+      description: 'Famous actor spotted at local restaurant.',
+      link: 'https://example.com/celebrity',
+      pubDate: '2024-01-01T00:00:00Z',
+      importance: 0.2,
+    },
+  ];
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    bedrockMock.reset();
   });
 
   describe('filterArticlesByTheme', () => {
-    it('should return all articles if fewer than 8 articles', async () => {
+    it('should filter articles by theme relevance', async () => {
+      // Mock Bedrock response with relevance scores (enough high scores to pass minimum)
+      bedrockMock.on(InvokeModelCommand).resolves({
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: JSON.stringify({
+              scores: [0.9, 0.8, 0.85, 0.7, 0.88, 0.75, 0.9, 0.65],
+            }),
+          }],
+        })),
+      });
+
+      const result = await filterArticlesByTheme(mockArticles, 'AI and Machine Learning', 'en');
+
+      // All articles pass threshold (0.3), so all 8 should be returned
+      expect(result.length).toBe(8);
+      expect(result[0].title).toBe('AI Breakthrough in Machine Learning');
+    });
+
+    it('should skip filtering if less than 8 articles', async () => {
       const fewArticles = mockArticles.slice(0, 5);
+      
+      const result = await filterArticlesByTheme(fewArticles, 'AI', 'en');
 
-      const result = await filterArticlesByTheme(fewArticles, 'cooking', 'en');
-
-      expect(result).toHaveLength(5);
       expect(result).toEqual(fewArticles);
+      expect(result.length).toBe(5);
+    });
+
+    it('should return all articles if filtered result has less than 8 articles', async () => {
+      // Mock response with mostly low scores
+      bedrockMock.on(InvokeModelCommand).resolves({
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: JSON.stringify({
+              scores: [0.9, 0.1, 0.85, 0.05, 0.1, 0.05, 0.1, 0.05],
+            }),
+          }],
+        })),
+      });
+
+      const result = await filterArticlesByTheme(mockArticles, 'AI', 'en');
+
+      // Should return all articles because filtered result would be < 8
+      expect(result).toEqual(mockArticles);
+      expect(result.length).toBe(8);
     });
 
     it('should return all articles if Bedrock API fails', async () => {
-      // Bedrock is mocked and will fail, so should return all articles
-      const result = await filterArticlesByTheme(mockArticles, 'cooking', 'en');
+      bedrockMock.on(InvokeModelCommand).rejects(new Error('Bedrock API error'));
+
+      const result = await filterArticlesByTheme(mockArticles, 'AI', 'en');
 
       // Should return all articles as fallback
-      expect(result).toHaveLength(mockArticles.length);
       expect(result).toEqual(mockArticles);
+      expect(result.length).toBe(8);
+    });
+
+    it('should use custom threshold', async () => {
+      bedrockMock.on(InvokeModelCommand).resolves({
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: JSON.stringify({
+              scores: [0.9, 0.5, 0.85, 0.6, 0.88, 0.7, 0.9, 0.55],
+            }),
+          }],
+        })),
+      });
+
+      const result = await filterArticlesByTheme(mockArticles, 'AI', 'en', 0.5);
+
+      // All articles pass threshold 0.5, so all 8 should be returned
+      expect(result.length).toBe(8);
     });
 
     it('should handle Japanese locale', async () => {
-      // Should not throw even with Japanese locale
-      const result = await filterArticlesByTheme(mockArticles, '料理', 'ja');
+      bedrockMock.on(InvokeModelCommand).resolves({
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: JSON.stringify({
+              scores: [0.9, 0.8, 0.85, 0.7, 0.88, 0.75, 0.9, 0.65],
+            }),
+          }],
+        })),
+      });
 
-      // Bedrock is mocked and will fail, so should return all articles
-      expect(result).toHaveLength(mockArticles.length);
+      const result = await filterArticlesByTheme(mockArticles, 'AI', 'ja');
+
+      expect(result.length).toBe(8);
+      
+      // Verify Japanese prompt was used
+      const calls = bedrockMock.commandCalls(InvokeModelCommand);
+      expect(calls.length).toBe(1);
+      const body = JSON.parse(calls[0].args[0].input.body as string);
+      expect(body.messages[0].content).toContain('以下の記事');
+    });
+
+    it('should handle malformed Bedrock response', async () => {
+      bedrockMock.on(InvokeModelCommand).resolves({
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: 'Invalid JSON response',
+          }],
+        })),
+      });
+
+      const result = await filterArticlesByTheme(mockArticles, 'AI', 'en');
+
+      // Should return all articles as fallback
+      expect(result).toEqual(mockArticles);
+      expect(result.length).toBe(8);
+    });
+
+    it('should handle empty scores array', async () => {
+      bedrockMock.on(InvokeModelCommand).resolves({
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: JSON.stringify({
+              scores: [],
+            }),
+          }],
+        })),
+      });
+
+      const result = await filterArticlesByTheme(mockArticles, 'AI', 'en');
+
+      // Should return all articles as fallback (no scores means no filtering)
       expect(result).toEqual(mockArticles);
     });
 
-    it('should handle English locale', async () => {
-      const result = await filterArticlesByTheme(mockArticles, 'cooking', 'en');
+    it('should handle partial scores array', async () => {
+      bedrockMock.on(InvokeModelCommand).resolves({
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: JSON.stringify({
+              scores: [0.9, 0.8, 0.7], // Only 3 scores for 8 articles
+            }),
+          }],
+        })),
+      });
 
-      // Bedrock is mocked and will fail, so should return all articles
-      expect(result).toHaveLength(mockArticles.length);
-      expect(result).toEqual(mockArticles);
-    });
+      const result = await filterArticlesByTheme(mockArticles, 'AI', 'en');
 
-    it('should handle empty articles array', async () => {
-      const result = await filterArticlesByTheme([], 'cooking', 'en');
-
-      expect(result).toHaveLength(0);
-      expect(result).toEqual([]);
-    });
-
-    it('should handle articles with missing description', async () => {
-      const articlesWithoutDescription: Article[] = [
-        {
-          title: 'Article 1',
-          link: 'https://example.com/1',
-          pubDate: new Date('2025-12-18'),
-          feedSource: 'https://example.com/feed',
-        },
-        {
-          title: 'Article 2',
-          link: 'https://example.com/2',
-          pubDate: new Date('2025-12-18'),
-          feedSource: 'https://example.com/feed',
-        },
-        {
-          title: 'Article 3',
-          link: 'https://example.com/3',
-          pubDate: new Date('2025-12-18'),
-          feedSource: 'https://example.com/feed',
-        },
-        {
-          title: 'Article 4',
-          link: 'https://example.com/4',
-          pubDate: new Date('2025-12-18'),
-          feedSource: 'https://example.com/feed',
-        },
-        {
-          title: 'Article 5',
-          link: 'https://example.com/5',
-          pubDate: new Date('2025-12-18'),
-          feedSource: 'https://example.com/feed',
-        },
-        {
-          title: 'Article 6',
-          link: 'https://example.com/6',
-          pubDate: new Date('2025-12-18'),
-          feedSource: 'https://example.com/feed',
-        },
-        {
-          title: 'Article 7',
-          link: 'https://example.com/7',
-          pubDate: new Date('2025-12-18'),
-          feedSource: 'https://example.com/feed',
-        },
-        {
-          title: 'Article 8',
-          link: 'https://example.com/8',
-          pubDate: new Date('2025-12-18'),
-          feedSource: 'https://example.com/feed',
-        },
-      ];
-
-      const result = await filterArticlesByTheme(articlesWithoutDescription, 'cooking', 'en');
-
-      // Should not throw
-      expect(result).toHaveLength(articlesWithoutDescription.length);
-    });
-
-    it('should handle minimum threshold parameter', async () => {
-      const result = await filterArticlesByTheme(mockArticles, 'cooking', 'en', 0.5);
-
-      // Bedrock is mocked and will fail, so should return all articles
-      expect(result).toHaveLength(mockArticles.length);
-      expect(result).toEqual(mockArticles);
-    });
-
-    it('should handle exactly 8 articles', async () => {
-      const exactlyEightArticles = mockArticles.slice(0, 8);
-
-      const result = await filterArticlesByTheme(exactlyEightArticles, 'cooking', 'en');
-
-      // Should attempt filtering (but will fail due to mock)
-      expect(result).toHaveLength(exactlyEightArticles.length);
-      expect(result).toEqual(exactlyEightArticles);
-    });
-
-    it('should handle more than 8 articles', async () => {
-      const result = await filterArticlesByTheme(mockArticles, 'cooking', 'en');
-
-      // Should attempt filtering (but will fail due to mock)
-      expect(result).toHaveLength(mockArticles.length);
-      expect(result).toEqual(mockArticles);
+      // Should return all articles because filtered result (3) < 8
+      expect(result.length).toBe(8);
     });
   });
 });

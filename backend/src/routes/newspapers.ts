@@ -13,6 +13,7 @@ import {
 import { calculateImportance } from '../services/importanceCalculator.js';
 import { detectLanguages } from '../services/languageDetectionService.js';
 import { generateSummaryWithRetry } from '../services/summaryGenerationService.js';
+import { filterArticlesByTheme } from '../services/articleFilterService.js';
 import {
   getOrCreateNewspaper,
   getAvailableDates,
@@ -86,10 +87,24 @@ newspapersRouter.post(
         );
       }
 
+      // Filter articles by theme relevance (optional, continues even if filtering fails)
+      let filteredArticles = articles;
+      try {
+        filteredArticles = await filterArticlesByTheme(
+          articles,
+          validated.theme,
+          validated.locale
+        );
+        console.log(`Article filtering: ${filteredArticles.length}/${articles.length} articles passed relevance check`);
+      } catch (error) {
+        console.error('Error filtering articles by theme:', error);
+        // Continue with all articles if filtering fails
+      }
+
       // Calculate importance scores (with penalty for default feed articles)
       const defaultFeedUrls = new Set(validated.defaultFeedUrls || []);
       const articlesWithImportance = await calculateImportance(
-        articles,
+        filteredArticles,
         validated.theme,
         defaultFeedUrls
       );

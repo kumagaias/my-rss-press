@@ -1,6 +1,6 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config.js';
-import type { Article } from '../models/newspaper.js';
+import type { Article } from './rssFetcherService.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({
@@ -137,6 +137,7 @@ async function callBedrockForFiltering(prompt: string): Promise<number[]> {
           content: prompt,
         },
       ],
+      temperature: 0.3, // Low temperature for consistent filtering
     }),
   });
 

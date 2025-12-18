@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { mockClient } from 'aws-sdk-client-mock';
-import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { app } from '../../../src/app.js';
 
 // Mock Bedrock client
@@ -12,15 +12,32 @@ describe('POST /api/generate-newspaper with article filtering', () => {
   });
 
   it('should filter articles by theme relevance during newspaper generation', async () => {
-    // Mock Bedrock responses for both filtering and importance calculation
-    bedrockMock.resolves({
-      body: new TextEncoder().encode(JSON.stringify({
-        content: [{
-          text: JSON.stringify({
-            scores: [0.9, 0.8, 0.85, 0.7, 0.88, 0.75, 0.9, 0.65],
-          }),
-        }],
-      })),
+    // Mock Bedrock responses - differentiate between filtering and importance calculation
+    let callCount = 0;
+    bedrockMock.on(InvokeModelCommand).callsFake(() => {
+      callCount++;
+      // First call: article filtering (scores 0.0-1.0)
+      if (callCount === 1) {
+        return {
+          body: new TextEncoder().encode(JSON.stringify({
+            content: [{
+              text: JSON.stringify({
+                scores: [0.9, 0.8, 0.85, 0.7, 0.88, 0.75, 0.9, 0.65],
+              }),
+            }],
+          })),
+        };
+      }
+      // Subsequent calls: importance calculation (scores 0-100)
+      return {
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: JSON.stringify({
+              scores: [90, 80, 85, 70, 88, 75, 90, 65],
+            }),
+          }],
+        })),
+      };
     });
 
     const response = await app.request('/api/generate-newspaper', {
@@ -74,15 +91,32 @@ describe('POST /api/generate-newspaper with article filtering', () => {
   });
 
   it('should apply filtering before importance calculation', async () => {
-    // Mock Bedrock to return high scores (all articles pass)
-    bedrockMock.resolves({
-      body: new TextEncoder().encode(JSON.stringify({
-        content: [{
-          text: JSON.stringify({
-            scores: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9],
-          }),
-        }],
-      })),
+    // Mock Bedrock to return high scores (all articles pass filtering)
+    let callCount = 0;
+    bedrockMock.on(InvokeModelCommand).callsFake(() => {
+      callCount++;
+      // First call: article filtering (scores 0.0-1.0)
+      if (callCount === 1) {
+        return {
+          body: new TextEncoder().encode(JSON.stringify({
+            content: [{
+              text: JSON.stringify({
+                scores: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9],
+              }),
+            }],
+          })),
+        };
+      }
+      // Subsequent calls: importance calculation (scores 0-100)
+      return {
+        body: new TextEncoder().encode(JSON.stringify({
+          content: [{
+            text: JSON.stringify({
+              scores: [90, 85, 88, 92, 87, 89, 91, 86],
+            }),
+          }],
+        })),
+      };
     });
 
     const response = await app.request('/api/generate-newspaper', {

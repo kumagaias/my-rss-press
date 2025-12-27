@@ -96,11 +96,11 @@ export async function calculateImportance(
 function buildImportancePrompt(articles: Article[], userTheme: string): string {
   // Add randomness to perspective
   const perspectives = [
-    '今日の気分で',
-    '新鮮な視点で',
-    '異なる角度から',
-    'ユニークな観点で',
-    '多様な視点で',
+    'with today\'s perspective',
+    'with a fresh viewpoint',
+    'from a different angle',
+    'with a unique perspective',
+    'with diverse viewpoints',
   ];
   const randomPerspective = perspectives[Math.floor(Math.random() * perspectives.length)];
   const timestamp = new Date().toISOString();
@@ -108,34 +108,36 @@ function buildImportancePrompt(articles: Article[], userTheme: string): string {
   // Build article list
   const articleList = articles
     .map((article, index) => {
-      return `${index + 1}. タイトル: ${article.title}, 説明: ${article.description.substring(0, 200)}, 画像: ${article.imageUrl ? 'あり' : 'なし'}`;
+      return `${index + 1}. Title: ${article.title}, Description: ${article.description.substring(0, 200)}, Image: ${article.imageUrl ? 'Yes' : 'No'}`;
     })
     .join('\n');
 
-  return `ユーザーは「${userTheme}」に興味があります。
-${randomPerspective}、以下の記事リストからユーザーにとっての重要度を0-100のスコアで評価してください。
+  return `The user is interested in the theme: "${userTheme}".
+Please evaluate the importance of each article for the user ${randomPerspective}, scoring from 0-100.
 
-評価基準（合計100点）：
-1. テーマ「${userTheme}」との関連性: 0-60点
-   - 直接関連（テーマの核心的な内容）: 50-60点
-   - 間接的に関連（テーマに関係する周辺情報）: 30-49点
-   - 関連性が低い（テーマとほぼ無関係）: 0-29点
-2. 画像の有無: +20点（画像ありの場合のみ加算）
-   - 画像は視覚的な魅力を大幅に向上させるため、高く評価してください
-3. タイトルの魅力度と新鮮さ: 0-20点
-   - 魅力的で新鮮なタイトル: 15-20点
-   - 普通のタイトル: 8-14点
-   - 平凡なタイトル: 0-7点
+Scoring criteria (total 100 points):
+1. Relevance to theme "${userTheme}": 0-60 points
+   - Directly related (core content of the theme): 50-60 points
+   - Indirectly related (peripheral information related to the theme): 30-49 points
+   - Low relevance (almost unrelated to the theme): 0-29 points
+2. Image presence: +20 points (only if image is present)
+   - Images significantly enhance visual appeal, so rate them highly
+3. Title appeal and freshness: 0-20 points
+   - Attractive and fresh title: 15-20 points
+   - Average title: 8-14 points
+   - Plain title: 0-7 points
 
-記事リスト：
+Article list:
 ${articleList}
 
-注意: 
-- 同じような重要度の記事がある場合、少しバリエーションを持たせてください
-- 関連性の評価を最優先してください
-生成時刻: ${timestamp}
+Important notes:
+- PRIORITIZE relevance evaluation above all else
+- Articles unrelated to the theme "${userTheme}" should receive LOW scores (0-29 points)
+- Only articles directly or indirectly related to "${userTheme}" should receive higher scores
+- Add slight variation for articles with similar importance
+Generation timestamp: ${timestamp}
 
-各記事の重要度スコア（0-100）をJSON形式で返してください：
+Return the importance scores (0-100) for each article in JSON format:
 {"scores": [85, 70, 60, ...]}`;
 }
 

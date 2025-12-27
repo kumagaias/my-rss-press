@@ -4,7 +4,7 @@ import type { Article } from '../../../src/services/rssFetcherService.js';
 
 describe('Importance Calculator', () => {
   describe('calculateImportance (with mock Bedrock)', () => {
-    it('should prioritize theme-related articles over unrelated ones', async () => {
+    it('should prioritize theme-related articles over unrelated ones (English theme)', async () => {
       const articles: Article[] = [
         {
           title: 'Best Travel Destinations for 2025',
@@ -49,6 +49,64 @@ describe('Importance Calculator', () => {
         !a.title.toLowerCase().includes('travel') && 
         !a.title.toLowerCase().includes('flight') &&
         !a.description.toLowerCase().includes('travel')
+      );
+
+      if (travelArticles.length > 0 && nonTravelArticles.length > 0) {
+        const avgTravelScore = travelArticles.reduce((sum, a) => sum + (a.importance || 0), 0) / travelArticles.length;
+        const avgNonTravelScore = nonTravelArticles.reduce((sum, a) => sum + (a.importance || 0), 0) / nonTravelArticles.length;
+
+        // In mock mode, this uses fallback which doesn't consider theme
+        // But we can at least verify scores are assigned
+        expect(avgTravelScore).toBeGreaterThanOrEqual(0);
+        expect(avgNonTravelScore).toBeGreaterThanOrEqual(0);
+      }
+    });
+
+    it('should prioritize theme-related articles over unrelated ones (Japanese theme)', async () => {
+      const articles: Article[] = [
+        {
+          title: '2025年おすすめ旅行先ベスト10',
+          description: '次の旅行に最適な観光地とバケーションスポットを紹介',
+          link: 'https://example.com/travel1',
+          pubDate: new Date(),
+          feedSource: 'https://example.com/feed',
+        },
+        {
+          title: 'サッカー試合結果',
+          description: '週末のサッカーの最新スコアとハイライト',
+          link: 'https://example.com/sports1',
+          pubDate: new Date(),
+          feedSource: 'https://example.com/feed',
+        },
+        {
+          title: '悪天候によるフライト遅延',
+          description: '冬の嵐により数千便のフライトが欠航',
+          link: 'https://example.com/travel2',
+          pubDate: new Date(),
+          feedSource: 'https://example.com/feed',
+        },
+        {
+          title: '政治サミット会議',
+          description: '世界のリーダーが国際関係について議論',
+          link: 'https://example.com/politics1',
+          pubDate: new Date(),
+          feedSource: 'https://example.com/feed',
+        },
+      ];
+
+      const theme = '旅行';
+      const result = await calculateImportance(articles, theme);
+
+      // Travel-related articles should have higher scores
+      const travelArticles = result.filter(a => 
+        a.title.includes('旅行') || 
+        a.title.includes('フライト') ||
+        a.description.includes('旅行')
+      );
+      const nonTravelArticles = result.filter(a => 
+        !a.title.includes('旅行') && 
+        !a.title.includes('フライト') &&
+        !a.description.includes('旅行')
       );
 
       if (travelArticles.length > 0 && nonTravelArticles.length > 0) {

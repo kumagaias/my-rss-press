@@ -155,9 +155,40 @@ echo $GIT_PAGER  # Should be empty
 - ❌ Hardcoding sensitive information
 - ❌ Disabling security checks
 
+## Phase 2 Implementation Details
+
+### Language Detection
+- **Service**: `languageDetectionService.ts`
+- **Method**: RSS `<language>` field → Character-based detection (Japanese > 10% = JP)
+- **Coverage**: 100% unit test coverage
+- **Performance**: < 1ms per article
+
+### Historical Newspapers
+- **Service**: `historicalNewspaperService.ts`
+- **Date Range**: Up to 7 days (JST timezone)
+- **Caching**: Existing newspapers retrieved from DynamoDB
+- **URL Format**: `/newspaper?id={id}&date={YYYY-MM-DD}`
+
+### AI Summaries
+- **Service**: `summaryGenerationService.ts`
+- **AI Model**: AWS Bedrock (Claude 3 Haiku)
+- **Format**: 3 lines, 100-200 characters
+- **Language**: Auto-detected from newspaper languages
+- **Performance**: ~5-10s (first time), < 100ms (cached)
+
+### Automatic Cleanup
+- **Service**: `cleanupService.ts`
+- **Schedule**: Daily at 3 AM JST (EventBridge cron)
+- **Retention**: 7 days
+- **Batch Size**: 25 newspapers per batch
+
+### DynamoDB Configuration
+- **Important**: All DocumentClients use `removeUndefinedValues: true`
+- **Reason**: Prevent errors when saving optional fields
+- **Applied to**: newspaperService, historicalNewspaperService, cleanupService
+
 ---
 
 **For detailed implementation guidelines, refer to:**
-- Phase 1 specs: `.kiro/specs/phase-1/`
-- Phase 2 specs: `.kiro/specs/phase-2/`
-- Phase 3 specs: `.kiro/specs/phase-3/`
+- Phase 1 specs: `.kiro/specs/features/issue-45-mvp/`
+- Phase 2 specs: `.kiro/specs/features/issue-46-enhance/`

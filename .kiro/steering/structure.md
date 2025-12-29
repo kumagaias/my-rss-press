@@ -28,11 +28,11 @@ frontend/
 │   ├── page.tsx          # Home page
 │   └── newspaper/        # Newspaper page
 ├── components/
-│   ├── ui/               # Button, Input, Card, etc.
+│   ├── ui/               # Button, Input, Card, LoadingAnimation, CopyrightFreeImage
 │   ├── features/
 │   │   ├── feed/         # FeedSelector, ThemeInput
-│   │   ├── newspaper/    # NewspaperRenderer, DateNavigation
-│   │   └── home/         # PopularNewspapers, LanguageFilter, SearchInput
+│   │   ├── newspaper/    # NewspaperRenderer, DateNavigation (Phase 2)
+│   │   └── home/         # PopularNewspapers, LanguageFilter (Phase 2), SearchInput (Phase 2)
 │   └── layouts/
 ├── lib/
 │   ├── api/              # API calls
@@ -54,13 +54,16 @@ backend/
 │   │   ├── newspapers.ts # Newspaper CRUD
 │   │   └── feeds.ts      # Feed suggestions
 │   ├── services/
-│   │   ├── bedrockService.ts          # AI suggestions
-│   │   ├── rssFetcherService.ts       # RSS parsing
-│   │   ├── languageDetectionService.ts # JP/EN detection
-│   │   ├── summaryGenerationService.ts # AI summary
-│   │   └── historicalNewspaperService.ts # Date-based newspapers
+│   │   ├── bedrockService.ts              # AI suggestions
+│   │   ├── rssFetcherService.ts           # RSS parsing
+│   │   ├── importanceCalculator.ts        # Article importance (multilingual)
+│   │   ├── languageDetectionService.ts    # JP/EN detection (Phase 2)
+│   │   ├── summaryGenerationService.ts    # AI summary (Phase 2)
+│   │   ├── historicalNewspaperService.ts  # Date-based newspapers (Phase 2)
+│   │   ├── cleanupService.ts              # Automatic cleanup (Phase 2)
+│   │   └── articleFilterService.ts        # Theme relevance filter (Phase 2)
 │   ├── models/
-│   │   └── newspaper.ts  # DynamoDB model
+│   │   └── newspaper.ts  # DynamoDB model (extended with Phase 2 fields)
 │   ├── middleware/
 │   │   └── rateLimit.ts
 │   ├── app.ts            # Hono app
@@ -94,25 +97,27 @@ infra/
 
 ```
 .kiro/specs/
-├── phase-1/              # MVP (Complete)
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
-├── phase-2/              # Enhanced Features (In Progress)
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
-└── phase-3/              # Dynamic Categories (Planned)
-    ├── requirements.md
-    ├── design.md
-    └── tasks.md
+├── features/
+│   ├── issue-45-mvp/         # Phase 1: MVP (Complete)
+│   │   ├── requirements.md
+│   │   ├── design.md
+│   │   └── tasks.md
+│   └── issue-46-enhance/     # Phase 2: Enhanced Features (Complete)
+│       ├── requirements.md
+│       ├── design.md
+│       └── tasks.md
 ```
 
 ## Key Files
 
 ### Frontend
 - `app/page.tsx` - Home page (theme input, feed selection, popular newspapers)
-- `app/newspaper/page.tsx` - Newspaper display with date navigation
+- `app/newspaper/page.tsx` - Newspaper display with date navigation (Phase 2)
+- `components/features/home/LanguageFilter.tsx` - Language filter (Phase 2)
+- `components/features/home/SearchInput.tsx` - Free-word search (Phase 2)
+- `components/features/newspaper/DateNavigation.tsx` - Date navigation (Phase 2)
+- `components/ui/LoadingAnimation.tsx` - Loading animations (Phase 2)
+- `components/ui/CopyrightFreeImage.tsx` - Placeholder images (Phase 2)
 - `lib/i18n.ts` - Translations (Japanese/English)
 - `lib/api.ts` - API client functions
 
@@ -120,7 +125,12 @@ infra/
 - `routes/feeds.ts` - POST `/api/suggest-feeds` (AI suggestions)
 - `routes/newspapers.ts` - Newspaper CRUD + historical newspapers
 - `services/bedrockService.ts` - Claude 3 Haiku integration
-- `services/historicalNewspaperService.ts` - Date-based newspaper generation
+- `services/importanceCalculator.ts` - Multilingual importance calculation
+- `services/languageDetectionService.ts` - Language detection (Phase 2)
+- `services/summaryGenerationService.ts` - AI summary generation (Phase 2)
+- `services/historicalNewspaperService.ts` - Date-based newspaper generation (Phase 2)
+- `services/cleanupService.ts` - Automatic cleanup (Phase 2)
+- `services/articleFilterService.ts` - Theme relevance filtering (Phase 2)
 
 ### Infrastructure
 - `infra/environments/production/main.tf` - Main Terraform config

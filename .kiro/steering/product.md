@@ -292,3 +292,14 @@ This document is updated according to product specification changes.
   - Responsive layout (mobile: 1 column, desktop: 3 columns)
   - Support for 320px-768px screen sizes
   - Related Issue: [#19](https://github.com/kumagaias/my-rss-press/issues/19)
+
+- **2025-12-30**: Phase 2 Enhanced Features implemented
+  - Language detection and filtering (JP/EN automatic detection)
+  - Historical newspapers (date-based viewing up to 7 days)
+  - Free-word search for newspapers
+  - AI-generated summaries using Bedrock
+  - Loading animations for better UX
+  - Copyright-free images for lead articles
+  - Automatic cleanup service (daily at 3 AM JST)
+  - Fixed DynamoDB undefined value error
+  - Related Issue: [#46](https://github.com/kumagaias/my-rss-press/issues/46)

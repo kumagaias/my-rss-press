@@ -22,7 +22,11 @@ const dynamoClient = new DynamoDBClient({
   ...(config.dynamodbEndpoint && { endpoint: config.dynamodbEndpoint }),
 });
 
-const docClient = DynamoDBDocumentClient.from(dynamoClient);
+const docClient = DynamoDBDocumentClient.from(dynamoClient, {
+  marshallOptions: {
+    removeUndefinedValues: true, // Remove undefined values to prevent DynamoDB errors
+  },
+});
 
 /**
  * Validate date for historical newspaper

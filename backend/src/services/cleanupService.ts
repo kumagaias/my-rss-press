@@ -17,7 +17,11 @@ const dynamoClient = new DynamoDBClient({
   ...(config.dynamodbEndpoint && { endpoint: config.dynamodbEndpoint }),
 });
 
-const docClient = DynamoDBDocumentClient.from(dynamoClient);
+const docClient = DynamoDBDocumentClient.from(dynamoClient, {
+  marshallOptions: {
+    removeUndefinedValues: true, // Remove undefined values to prevent DynamoDB errors
+  },
+});
 
 /**
  * Clean up newspapers older than 7 days

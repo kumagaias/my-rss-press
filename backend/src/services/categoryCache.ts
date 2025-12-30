@@ -16,7 +16,7 @@ interface CacheEntry<T> {
 /**
  * Category cache for in-memory caching with background refresh
  */
-class CategoryCache {
+export class CategoryCache {
   private categoriesCache: Map<string, CacheEntry<Category[]>>;
   private feedsCache: Map<string, CacheEntry<Feed[]>>;
   private readonly TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -153,7 +153,7 @@ class CategoryCache {
    * @param entry - Cache entry
    * @returns True if expired
    */
-  private isExpired(entry: CacheEntry<any>): boolean {
+  private isExpired<T>(entry: CacheEntry<T>): boolean {
     return Date.now() - entry.timestamp > entry.ttl;
   }
 
@@ -162,7 +162,7 @@ class CategoryCache {
    * @param key - Cache key
    * @param refreshFn - Function to refresh the cache
    */
-  private backgroundRefresh(key: string, refreshFn: () => Promise<any>): void {
+  private backgroundRefresh<T>(key: string, refreshFn: () => Promise<T>): void {
     // Prevent multiple concurrent refreshes for the same key
     if (this.refreshInProgress.has(key)) {
       return;

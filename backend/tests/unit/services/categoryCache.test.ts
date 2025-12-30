@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as categoryRepository from '../../../src/repositories/categoryRepository.js';
 import { Category, Feed } from '../../../src/types/category.js';
+import type { CategoryCache } from '../../../src/services/categoryCache.js';
 
 // Mock the repository
 vi.mock('../../../src/repositories/categoryRepository.js');
 
 describe('Category Cache', () => {
-  let categoryCache: any;
+  let categoryCache: CategoryCache;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -101,8 +102,10 @@ describe('Category Cache', () => {
       categoryCache.clear();
 
       // Mock that we still have stale data (simulate expired cache)
+      // Note: Accessing private property for testing purposes
       const cacheKey = 'categories:en';
-      (categoryCache as any).categoriesCache.set(cacheKey, {
+      // @ts-expect-error - Accessing private property for testing
+      categoryCache.categoriesCache.set(cacheKey, {
         data: mockCategories,
         timestamp: Date.now() - 10 * 60 * 1000, // 10 minutes ago (expired)
         ttl: 5 * 60 * 1000,

@@ -143,7 +143,7 @@ export async function updateCategory(
   
   // Build update expression dynamically
   const updateExpressions: string[] = ['updatedAt = :updatedAt'];
-  const expressionAttributeValues: Record<string, any> = {
+  const expressionAttributeValues: Record<string, string | number | boolean | string[]> = {
     ':updatedAt': now,
   };
   const expressionAttributeNames: Record<string, string> = {};
@@ -294,7 +294,7 @@ export async function updateFeed(
   
   // Build update expression dynamically
   const updateExpressions: string[] = ['updatedAt = :updatedAt'];
-  const expressionAttributeValues: Record<string, any> = {
+  const expressionAttributeValues: Record<string, string | number | boolean> = {
     ':updatedAt': now,
   };
 
@@ -366,33 +366,33 @@ export async function deleteFeed(categoryId: string, url: string): Promise<void>
 /**
  * Map DynamoDB item to Category
  */
-function mapItemToCategory(item: Record<string, any>): Category {
+function mapItemToCategory(item: Record<string, unknown>): Category {
   return {
-    categoryId: item.categoryId,
-    parentCategory: item.parentCategory,
-    locale: item.locale,
-    displayName: item.displayName,
-    keywords: item.keywords,
-    order: item.order,
-    isActive: item.isActive,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
+    categoryId: item.categoryId as string,
+    parentCategory: item.parentCategory as string | undefined,
+    locale: item.locale as 'en' | 'ja',
+    displayName: item.displayName as string,
+    keywords: item.keywords as string[],
+    order: item.order as number,
+    isActive: item.isActive as boolean,
+    createdAt: item.createdAt as string,
+    updatedAt: item.updatedAt as string,
   };
 }
 
 /**
  * Map DynamoDB item to Feed
  */
-function mapItemToFeed(item: Record<string, any>): Feed {
+function mapItemToFeed(item: Record<string, unknown>): Feed {
   return {
-    categoryId: item.categoryId,
-    url: item.url,
-    title: item.title,
-    description: item.description,
-    language: item.language,
-    priority: item.priority,
-    isActive: item.isActive,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
+    categoryId: item.categoryId as string,
+    url: item.url as string,
+    title: item.title as string,
+    description: item.description as string,
+    language: item.language as string,
+    priority: item.priority as number,
+    isActive: item.isActive as boolean,
+    createdAt: item.createdAt as string,
+    updatedAt: item.updatedAt as string,
   };
 }

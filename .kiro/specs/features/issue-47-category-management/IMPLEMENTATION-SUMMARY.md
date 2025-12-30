@@ -312,6 +312,17 @@ All criteria met ✅:
 ## Known Limitations
 
 1. **Authentication**: Admin API is unauthenticated (Phase 4)
+   - ⚠️ **SECURITY WARNING**: The Admin API endpoints (`/api/admin/categories`) are currently **NOT protected** by authentication or authorization
+   - **DO NOT deploy to production** without implementing proper authentication
+   - Recommended solutions for Phase 4:
+     - API Key authentication
+     - JWT-based authentication
+     - IP whitelist restrictions
+     - AWS IAM authentication
+   - Until authentication is implemented, consider:
+     - Deploying admin endpoints on a separate internal-only API Gateway
+     - Using VPC endpoints to restrict access
+     - Implementing temporary IP-based restrictions via AWS WAF
 2. **UI**: No admin UI yet (Phase 4)
 3. **Multi-language**: Only en/ja supported
 4. **Feed Health**: No automatic health checks yet

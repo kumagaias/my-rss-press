@@ -161,7 +161,7 @@ describe('Category Repository', () => {
 
   describe('getAllCategories', () => {
     it('should return all active categories sorted by order', async () => {
-      const mockCategories = [
+      const mockCategoriesEn = [
         {
           categoryId: 'technology',
           locale: 'en',
@@ -172,6 +172,9 @@ describe('Category Repository', () => {
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
+      ];
+
+      const mockCategoriesJa = [
         {
           categoryId: 'business',
           locale: 'ja',
@@ -184,9 +187,20 @@ describe('Category Repository', () => {
         },
       ];
 
-      ddbMock.on(QueryCommand).resolves({
-        Items: mockCategories,
-      });
+      // Mock both queries (en and ja) - getAllCategories now queries both locales
+      ddbMock
+        .on(QueryCommand, {
+          IndexName: 'CategoryLocale',
+          KeyConditionExpression: 'GSI1PK = :pk',
+          ExpressionAttributeValues: { ':pk': 'CATEGORY_LOCALE#en' },
+        })
+        .resolves({ Items: mockCategoriesEn })
+        .on(QueryCommand, {
+          IndexName: 'CategoryLocale',
+          KeyConditionExpression: 'GSI1PK = :pk',
+          ExpressionAttributeValues: { ':pk': 'CATEGORY_LOCALE#ja' },
+        })
+        .resolves({ Items: mockCategoriesJa });
 
       const result = await getAllCategories();
 

@@ -33,7 +33,7 @@ export class CategoryCache {
    * @param locale - Locale ('en' or 'ja')
    * @returns Array of categories
    */
-  async getCategories(locale: string): Promise<Category[]> {
+  async getCategories(locale: 'en' | 'ja'): Promise<Category[]> {
     const cacheKey = `categories:${locale}`;
     const cached = this.categoriesCache.get(cacheKey);
 
@@ -204,7 +204,14 @@ export class CategoryCache {
 // Singleton instance
 export const categoryCache = new CategoryCache();
 
-// Pre-load cache on module initialization
-categoryCache.preload().catch((error) => {
-  console.error('Failed to pre-load category cache:', error);
-});
+/**
+ * Explicit initializer to pre-load the category cache.
+ * Call this from application startup code if pre-loading is desired.
+ */
+export async function preloadCategoryCache(): Promise<void> {
+  try {
+    await categoryCache.preload();
+  } catch (error) {
+    console.error('Failed to pre-load category cache:', error);
+  }
+}

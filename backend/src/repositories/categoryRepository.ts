@@ -77,23 +77,33 @@ export async function getCategoriesByLocale(locale: 'en' | 'ja'): Promise<Catego
  * @returns Array of categories sorted by order
  */
 export async function getAllCategories(): Promise<Category[]> {
-  // Query all items with PK starting with CATEGORY# and SK = METADATA
-  const result = await docClient.send(
-    new QueryCommand({
-      TableName: config.dynamodbTable,
-      KeyConditionExpression: 'begins_with(PK, :pk) AND SK = :sk',
-      ExpressionAttributeValues: {
-        ':pk': 'CATEGORY#',
-        ':sk': 'METADATA',
-      },
-    })
-  );
+  // Query both locales using the CategoryLocale GSI
+  const [enResult, jaResult] = await Promise.all([
+    docClient.send(
+      new QueryCommand({
+        TableName: config.dynamodbTable,
+        IndexName: 'CategoryLocale',
+        KeyConditionExpression: 'GSI1PK = :pk',
+        ExpressionAttributeValues: {
+          ':pk': 'CATEGORY_LOCALE#en',
+        },
+      })
+    ),
+    docClient.send(
+      new QueryCommand({
+        TableName: config.dynamodbTable,
+        IndexName: 'CategoryLocale',
+        KeyConditionExpression: 'GSI1PK = :pk',
+        ExpressionAttributeValues: {
+          ':pk': 'CATEGORY_LOCALE#ja',
+        },
+      })
+    ),
+  ]);
 
-  if (!result.Items) {
-    return [];
-  }
+  const allItems = [...(enResult.Items || []), ...(jaResult.Items || [])];
 
-  return result.Items
+  return allItems
     .filter(item => item.isActive)
     .map(mapItemToCategory)
     .sort((a, b) => a.order - b.order);
@@ -319,21 +329,32 @@ export async function updateFeed(
     expressionAttributeValues[':isActive'] = updates.isActive;
   }
 
-  const result = await docClient.send(
-    new UpdateCommand({
-      TableName: config.dynamodbTable,
-      Key: {
-        PK: `CATEGORY#${categoryId}`,
-        SK: `FEED#${url}`,
-      },
-      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ExpressionAttributeNames: {
-        '#language': 'language', // 'language' might be a reserved word
-      },
-      ReturnValues: 'ALL_NEW',
-    })
-  );
+  const updateParams: {
+    TableName: string;
+    Key: { PK: string; SK: string };
+    UpdateExpression: string;
+    ExpressionAttributeValues: Record<string, string | number | boolean>;
+    ExpressionAttributeNames?: Record<string, string>;
+    ReturnValues: string;
+  } = {
+    TableName: config.dynamodbTable,
+    Key: {
+      PK: `CATEGORY#${categoryId}`,
+      SK: `FEED#${url}`,
+    },
+    UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+    ExpressionAttributeValues: expressionAttributeValues,
+    ReturnValues: 'ALL_NEW',
+  };
+
+  // Only include ExpressionAttributeNames when language is actually being updated
+  if (updates.language !== undefined) {
+    updateParams.ExpressionAttributeNames = {
+      '#language': 'language', // 'language' might be a reserved word
+    };
+  }
+
+  const result = await docClient.send(new UpdateCommand(updateParams));
 
   console.log(`Updated feed: ${url} for category ${categoryId}`);
   return mapItemToFeed(result.Attributes!);

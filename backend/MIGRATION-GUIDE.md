@@ -242,7 +242,9 @@ Key metrics to monitor:
 
 ## Admin API Usage
 
-After migration, you can manage categories via API:
+⚠️ **SECURITY WARNING**: The Admin API is currently **NOT protected** by authentication. Do not use these endpoints in production without implementing proper authentication first.
+
+After migration, you can manage categories via API (for development/testing only):
 
 ```bash
 # Create a new category

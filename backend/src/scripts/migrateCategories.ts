@@ -7,7 +7,7 @@
  *   npm run migrate:categories -- --dry-run  # Preview without writing
  */
 
-import { createCategory, createFeed } from '../repositories/categoryRepository.js';
+import { createCategory, createFeed, getCategoryById } from '../repositories/categoryRepository.js';
 import { Category, Feed } from '../types/category.js';
 
 // Define initial categories and feeds
@@ -219,8 +219,17 @@ async function migrate(dryRun: boolean = false): Promise<void> {
   // Migrate categories
   console.log('Migrating categories...');
   let categoryCount = 0;
+  let skippedCount = 0;
   for (const categoryData of INITIAL_DATA.categories) {
     try {
+      // Check if category already exists
+      const existing = await getCategoryById(categoryData.categoryId);
+      if (existing) {
+        console.log(`  ⏭️  Skipped category: ${categoryData.categoryId} (already exists)`);
+        skippedCount++;
+        continue;
+      }
+
       const now = new Date().toISOString();
       const category: Category = {
         ...categoryData,
@@ -235,7 +244,7 @@ async function migrate(dryRun: boolean = false): Promise<void> {
       console.error(`  ❌ Failed to create category ${categoryData.categoryId}:`, error);
     }
   }
-  console.log(`Categories migrated: ${categoryCount}/${INITIAL_DATA.categories.length}`);
+  console.log(`Categories migrated: ${categoryCount}/${INITIAL_DATA.categories.length} (${skippedCount} skipped)`);
   console.log('');
 
   // Migrate feeds

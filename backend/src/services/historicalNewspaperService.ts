@@ -170,8 +170,9 @@ export async function getOrCreateNewspaper(
   // Fetch articles for the date
   const { articles, feedLanguages } = await fetchArticlesForDate(feedUrls, date);
 
-  if (articles.length < 3) {
-    throw new Error('Insufficient articles for this date');
+  // Require at least 1 article (reduced from 3 for better UX)
+  if (articles.length < 1) {
+    throw new Error('No articles found for this date. Please try a different date or add more RSS feeds.');
   }
 
   // Calculate importance scores

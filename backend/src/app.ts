@@ -4,6 +4,7 @@ import { logger } from 'hono/logger';
 import { rateLimit } from './middleware/rateLimit.js';
 import { feedsRouter } from './routes/feeds.js';
 import { newspapersRouter } from './routes/newspapers.js';
+import adminCategoriesRouter from './routes/admin/categories.js';
 
 export const app = new Hono();
 
@@ -52,3 +53,4 @@ app.get('/', (c) => {
 // Mount routers
 app.route('/api', feedsRouter);
 app.route('/api', newspapersRouter);
+app.route('/api/admin/categories', adminCategoriesRouter);

@@ -11,13 +11,16 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "docker:build": "docker build -t myrsspress-backend .",
-    "docker:run": "docker run -p 9000:8080 myrsspress-backend"
+    "docker:run": "docker run -p 9000:8080 myrsspress-backend",
+    "migrate:categories": "tsx src/scripts/migrateCategories.ts",
+    "migrate:categories:dry-run": "tsx src/scripts/migrateCategories.ts --dry-run"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",
     "@aws-sdk/client-dynamodb": "^3.0.0",
     "@aws-sdk/lib-dynamodb": "^3.0.0",
     "@hono/node-server": "^1.0.0",
+    "@hono/zod-validator": "^0.7.6",
     "hono": "^4.0.0",
     "nanoid": "^3.3.11",
     "rss-parser": "^3.13.0",
@@ -28,6 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "@vitest/coverage-v8": "^4.0.14",
+    "aws-sdk-client-mock": "^4.1.0",
     "eslint": "^8.57.1",
     "tsx": "^4.0.0",
     "typescript": "^5.9.0",

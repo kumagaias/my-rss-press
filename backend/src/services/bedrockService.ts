@@ -1,5 +1,6 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config.js';
+import { getAllDefaultFeeds as getDefaultFeedsFromFallback } from './categoryFallback.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({
@@ -456,55 +457,17 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
 /**
  * Get all default feeds for a locale
  * Returns all available default feeds (not shuffled)
+ * 
+ * Note: This function now uses categoryFallback for consistency
  */
 export function getAllDefaultFeeds(locale: 'en' | 'ja' = 'en'): FeedSuggestion[] {
-  const englishFeeds: FeedSuggestion[] = [
-    {
-      url: 'https://feeds.bbci.co.uk/news/rss.xml',
-      title: 'BBC News',
-      reasoning: 'General news and information',
-    },
-    {
-      url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
-      title: 'The New York Times',
-      reasoning: 'In-depth articles and analysis',
-    },
-    {
-      url: 'https://feeds.reuters.com/reuters/topNews',
-      title: 'Reuters Top News',
-      reasoning: 'Breaking news and updates',
-    },
-    {
-      url: 'https://www.theguardian.com/world/rss',
-      title: 'The Guardian World News',
-      reasoning: 'Global perspective',
-    },
-  ];
-
-  const japaneseFeeds: FeedSuggestion[] = [
-    {
-      url: 'https://www3.nhk.or.jp/rss/news/cat0.xml',
-      title: 'NHK ニュース',
-      reasoning: '一般的なニュースと情報',
-    },
-    {
-      url: 'https://www.asahi.com/rss/asahi/newsheadlines.rdf',
-      title: '朝日新聞デジタル',
-      reasoning: '詳細な記事と分析',
-    },
-    {
-      url: 'https://news.yahoo.co.jp/rss/topics/top-picks.xml',
-      title: 'Yahoo!ニュース',
-      reasoning: '速報とアップデート',
-    },
-    {
-      url: 'https://www.itmedia.co.jp/rss/2.0/news_bursts.xml',
-      title: 'ITmedia NEWS',
-      reasoning: 'テクノロジーとビジネスの情報',
-    },
-  ];
-
-  return locale === 'ja' ? japaneseFeeds : englishFeeds;
+  const defaultFeeds = getDefaultFeedsFromFallback(locale);
+  
+  return defaultFeeds.map(feed => ({
+    url: feed.url,
+    title: feed.title,
+    reasoning: feed.description,
+  }));
 }
 
 

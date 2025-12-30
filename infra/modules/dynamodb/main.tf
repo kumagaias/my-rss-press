@@ -1,10 +1,10 @@
 # DynamoDB Table for Newspapers
 
 resource "aws_dynamodb_table" "newspapers" {
-  name           = var.table_name
-  billing_mode   = "PAY_PER_REQUEST" # On-demand pricing
-  hash_key       = "PK"
-  range_key      = "SK"
+  name         = var.table_name
+  billing_mode = "PAY_PER_REQUEST" # On-demand pricing
+  hash_key     = "PK"
+  range_key    = "SK"
 
   attribute {
     name = "PK"
@@ -51,6 +51,17 @@ resource "aws_dynamodb_table" "newspapers" {
     name = "GSI2SK"
     type = "S"
   }
+
+  # GSI for category management (locale-based queries)
+  global_secondary_index {
+    name            = "CategoryLocale"
+    hash_key        = "GSI1PK"
+    range_key       = "GSI1SK"
+    projection_type = "ALL"
+  }
+
+  # Note: GSI1PK and GSI1SK attributes are already defined above
+  # They are reused for both PublicNewspapers and CategoryLocale indexes
 
   # Enable point-in-time recovery
   point_in_time_recovery {

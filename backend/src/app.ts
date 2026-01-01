@@ -4,8 +4,15 @@ import { logger } from 'hono/logger';
 import { rateLimit } from './middleware/rateLimit.js';
 import { feedsRouter } from './routes/feeds.js';
 import { newspapersRouter } from './routes/newspapers.js';
+import adminCategoriesRouter from './routes/admin/categories.js';
+import { preloadCategoryCache } from './services/categoryCache.js';
 
 export const app = new Hono();
+
+// Pre-load category cache on application startup
+preloadCategoryCache().catch((error) => {
+  console.error('Failed to pre-load category cache on startup:', error);
+});
 
 // Middleware configuration
 // 1. Logging
@@ -52,3 +59,4 @@ app.get('/', (c) => {
 // Mount routers
 app.route('/api', feedsRouter);
 app.route('/api', newspapersRouter);
+app.route('/api/admin/categories', adminCategoriesRouter);

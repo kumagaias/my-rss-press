@@ -124,13 +124,32 @@ npm run migrate:categories           # Execute
 - `DELETE /api/admin/categories/feeds/:categoryId/:url` - Deactivate feed
 
 **Features**:
+- API Key authentication via `X-API-Key` header
 - Zod validation for all inputs
 - Proper error responses
+- 401 for missing authentication
+- 403 for invalid API key
 - 404 for not found
 - 400 for validation errors
 - 500 for server errors
 
-### 8. Input Validation ✅
+### 8. Authentication Middleware ✅
+**File**: `backend/src/middleware/adminAuth.ts`
+
+**Features**:
+- API Key stored in AWS Secrets Manager
+- 5-minute cache for API key (reduces Secrets Manager calls)
+- Constant-time comparison (prevents timing attacks)
+- Validates `X-API-Key` header on all admin routes
+- Proper error responses (401/403/500)
+
+**Security**:
+- No hardcoded credentials
+- Secrets Manager integration
+- Cache invalidation on errors
+- Timing attack prevention
+
+### 9. Input Validation ✅
 **File**: `backend/src/validators/categoryValidators.ts`
 
 **Schemas**:
@@ -147,7 +166,7 @@ npm run migrate:categories           # Execute
 - locale: Only 'en' or 'ja'
 - language: Exactly 2 characters
 
-### 9. Infrastructure Updates ✅
+### 10. Infrastructure Updates ✅
 **File**: `infra/modules/dynamodb/main.tf`
 
 **Changes**:
@@ -311,26 +330,14 @@ All criteria met ✅:
 
 ## Known Limitations
 
-1. **Authentication**: Admin API is unauthenticated (Phase 4)
-   - ⚠️ **SECURITY WARNING**: The Admin API endpoints (`/api/admin/categories`) are currently **NOT protected** by authentication or authorization
-   - **DO NOT deploy to production** without implementing proper authentication
-   - Recommended solutions for Phase 4:
-     - API Key authentication
-     - JWT-based authentication
-     - IP whitelist restrictions
-     - AWS IAM authentication
-   - Until authentication is implemented, consider:
-     - Deploying admin endpoints on a separate internal-only API Gateway
-     - Using VPC endpoints to restrict access
-     - Implementing temporary IP-based restrictions via AWS WAF
-2. **UI**: No admin UI yet (Phase 4)
-3. **Multi-language**: Only en/ja supported
-4. **Feed Health**: No automatic health checks yet
+1. **UI**: No admin UI yet (Phase 4)
+2. **Multi-language**: Only en/ja supported
+3. **Feed Health**: No automatic health checks yet
 
 ## Future Enhancements (Phase 4+)
 
 - Admin UI for category management
-- Authentication & authorization
+- Enhanced authentication (JWT, OAuth)
 - Multi-language support (beyond en/ja)
 - A/B testing for categories
 - Analytics & reporting

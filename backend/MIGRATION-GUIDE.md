@@ -240,16 +240,85 @@ Key metrics to monitor:
 - **API Latency**: < 100ms for category queries
 - **Error Rate**: < 1%
 
-## Admin API Usage
+## Admin API Authentication Setup
 
-⚠️ **SECURITY WARNING**: The Admin API is currently **NOT protected** by authentication. Do not use these endpoints in production without implementing proper authentication first.
+⚠️ **SECURITY REQUIREMENT**: The Admin API is protected by API Key authentication using AWS Secrets Manager.
 
-After migration, you can manage categories via API (for development/testing only):
+### Step 1: Create API Key Secret
+
+Generate a secure API key and store it in AWS Secrets Manager:
 
 ```bash
+# Generate a secure random API key (32 characters)
+API_KEY=$(openssl rand -base64 32)
+
+# Create the secret in AWS Secrets Manager
+aws secretsmanager create-secret \
+  --name myrsspress/admin-api-key \
+  --secret-string "{\"apiKey\":\"$API_KEY\"}" \
+  --region ap-northeast-1 \
+  --description "Admin API key for MyRSSPress category management"
+
+# Save the API key securely (you'll need it for API calls)
+echo "Your Admin API Key: $API_KEY"
+```
+
+### Step 2: Update Lambda IAM Role
+
+Grant the Lambda function permission to read the secret:
+
+```bash
+# Get the Lambda role name
+ROLE_NAME=$(aws lambda get-function \
+  --function-name myrsspress-backend-production \
+  --region ap-northeast-1 \
+  --query 'Configuration.Role' \
+  --output text | awk -F'/' '{print $NF}')
+
+# Create and attach the policy
+aws iam put-role-policy \
+  --role-name $ROLE_NAME \
+  --policy-name SecretsManagerAccess \
+  --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": "secretsmanager:GetSecretValue",
+        "Resource": "arn:aws:secretsmanager:ap-northeast-1:*:secret:myrsspress/admin-api-key-*"
+      }
+    ]
+  }'
+```
+
+### Step 3: Verify Authentication
+
+Test the authentication with your API key:
+
+```bash
+# Set your API key
+export ADMIN_API_KEY="your-api-key-here"
+
+# Test authentication (should return 401 without key)
+curl https://api.my-rss-press.com/api/admin/categories
+
+# Test with valid key (should return categories)
+curl https://api.my-rss-press.com/api/admin/categories \
+  -H "X-API-Key: $ADMIN_API_KEY"
+```
+
+## Admin API Usage
+
+After setting up authentication, you can manage categories via API:
+
+```bash
+# Set your API key
+export ADMIN_API_KEY="your-api-key-here"
+
 # Create a new category
 curl -X POST https://api.my-rss-press.com/api/admin/categories \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: $ADMIN_API_KEY" \
   -d '{
     "categoryId": "science-en",
     "locale": "en",
@@ -261,6 +330,7 @@ curl -X POST https://api.my-rss-press.com/api/admin/categories \
 # Update a category
 curl -X PUT https://api.my-rss-press.com/api/admin/categories/science-en \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: $ADMIN_API_KEY" \
   -d '{
     "displayName": "Science & Research"
   }'
@@ -268,6 +338,7 @@ curl -X PUT https://api.my-rss-press.com/api/admin/categories/science-en \
 # Add a feed
 curl -X POST https://api.my-rss-press.com/api/admin/categories/feeds \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: $ADMIN_API_KEY" \
   -d '{
     "categoryId": "science-en",
     "url": "https://www.science.org/rss/news_current.xml",
@@ -277,6 +348,32 @@ curl -X POST https://api.my-rss-press.com/api/admin/categories/feeds \
     "priority": 1
   }'
 ```
+
+### Authentication Errors
+
+**401 Unauthorized**: Missing `X-API-Key` header
+```json
+{
+  "error": "UNAUTHORIZED",
+  "message": "Missing X-API-Key header"
+}
+```
+
+**403 Forbidden**: Invalid API key
+```json
+{
+  "error": "FORBIDDEN",
+  "message": "Invalid API key"
+}
+```
+
+### Security Best Practices
+
+1. **Never commit API keys** to version control
+2. **Rotate keys regularly** (every 90 days recommended)
+3. **Use environment variables** for local development
+4. **Monitor API usage** via CloudWatch logs
+5. **Restrict IP access** via AWS WAF (optional but recommended)
 
 ## Success Criteria
 

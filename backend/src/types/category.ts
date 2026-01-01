@@ -54,3 +54,34 @@ export type UpdateCategoryInput = Partial<Omit<Category, 'categoryId' | 'created
  * Input type for updating a feed (partial, without timestamps)
  */
 export type UpdateFeedInput = Partial<Omit<Feed, 'categoryId' | 'url' | 'createdAt' | 'updatedAt'>>;
+
+/**
+ * Feed usage tracking for learning popular feeds
+ */
+export interface FeedUsage {
+  url: string;
+  categoryId: string;
+  title: string;
+  usageCount: number;        // Number of times this feed was used
+  lastUsedAt: string;        // Last time this feed was used
+  successRate: number;       // Success rate (0-100) of article fetching
+  averageArticles: number;   // Average number of articles fetched
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Input type for recording feed usage
+ */
+export interface RecordFeedUsageInput {
+  url: string;
+  categoryId: string;
+  title: string;
+  articleCount: number;      // Number of articles fetched this time
+  success: boolean;          // Whether article fetching was successful
+}
+
+/**
+ * Input type for creating feed usage (without computed fields)
+ */
+export type CreateFeedUsageInput = Omit<FeedUsage, 'createdAt' | 'updatedAt'>;

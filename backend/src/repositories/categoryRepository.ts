@@ -335,7 +335,7 @@ export async function updateFeed(
     UpdateExpression: string;
     ExpressionAttributeValues: Record<string, string | number | boolean>;
     ExpressionAttributeNames?: Record<string, string>;
-    ReturnValues: string;
+    ReturnValues: 'ALL_NEW';
   } = {
     TableName: config.dynamodbTable,
     Key: {

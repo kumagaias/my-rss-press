@@ -7,8 +7,12 @@ import {
   updateFeedSchema,
 } from '../../validators/categoryValidators.js';
 import * as categoryService from '../../services/categoryService.js';
+import { adminAuth } from '../../middleware/adminAuth.js';
 
 const app = new Hono();
+
+// Apply authentication middleware to all admin routes
+app.use('/*', adminAuth);
 
 // ============================================================
 // Category Endpoints

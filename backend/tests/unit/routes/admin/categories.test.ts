@@ -3,6 +3,11 @@ import { app } from '../../../../src/app.js';
 import * as categoryService from '../../../../src/services/categoryService.js';
 import { Category, Feed } from '../../../../src/types/category.js';
 
+// Mock the admin auth middleware to bypass authentication in tests
+vi.mock('../../../../src/middleware/adminAuth.js', () => ({
+  adminAuth: vi.fn(async (_c, next) => await next()),
+}));
+
 // Mock the category service
 vi.mock('../../../../src/services/categoryService.js');
 

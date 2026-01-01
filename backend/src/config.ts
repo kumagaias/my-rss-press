@@ -16,4 +16,7 @@ export const config = {
   
   // DynamoDB endpoint (for local development)
   dynamodbEndpoint: process.env.DYNAMODB_ENDPOINT,
+  
+  // Admin API Key (AWS Secrets Manager)
+  adminApiKeySecretName: process.env.ADMIN_API_KEY_SECRET_NAME || 'myrsspress/admin-api-key',
 };

@@ -37,3 +37,9 @@ variable "ecr_repository_arn" {
   description = "ARN of the ECR repository"
   type        = string
 }
+
+variable "aws_region" {
+  description = "AWS region for resources"
+  type        = string
+  default     = "ap-northeast-1"
+}

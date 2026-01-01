@@ -125,6 +125,25 @@ resource "aws_iam_role_policy" "kms_access" {
   })
 }
 
+# Policy for Secrets Manager access (Admin API Key)
+resource "aws_iam_role_policy" "secrets_manager_access" {
+  name = "${var.function_name}-secrets-manager-policy"
+  role = aws_iam_role.lambda_exec.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = "arn:aws:secretsmanager:${var.aws_region}:*:secret:myrsspress/admin-api-key-*"
+      }
+    ]
+  })
+}
+
 # Lambda function
 resource "aws_lambda_function" "api" {
   function_name = var.function_name

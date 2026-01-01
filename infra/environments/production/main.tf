@@ -106,6 +106,7 @@ module "lambda" {
   dynamodb_table_name = module.dynamodb.table_name
   dynamodb_table_arn  = module.dynamodb.table_arn
   bedrock_region      = var.bedrock_region
+  aws_region          = var.aws_region
   environment         = var.environment
 
   depends_on = [module.ecr, module.dynamodb]

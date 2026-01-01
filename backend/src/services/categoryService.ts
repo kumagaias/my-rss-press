@@ -20,6 +20,48 @@ import {
 } from '../types/category.js';
 
 /**
+ * Calculate similarity score between theme and keywords
+ * @param theme - User's theme input
+ * @param keywords - Category keywords
+ * @returns Similarity score (0-100)
+ */
+function calculateSimilarityScore(theme: string, keywords: string[]): number {
+  const normalizedTheme = theme.toLowerCase().trim();
+  let maxScore = 0;
+  
+  for (const keyword of keywords) {
+    const normalizedKeyword = keyword.toLowerCase().trim();
+    
+    // Exact match: 100 points
+    if (normalizedTheme === normalizedKeyword) {
+      return 100;
+    }
+    
+    // Theme contains keyword or keyword contains theme: 80 points
+    if (normalizedTheme.includes(normalizedKeyword) || normalizedKeyword.includes(normalizedTheme)) {
+      maxScore = Math.max(maxScore, 80);
+      continue;
+    }
+    
+    // Word-level matching: 60 points
+    const themeWords = normalizedTheme.split(/\s+/);
+    const keywordWords = normalizedKeyword.split(/\s+/);
+    
+    for (const themeWord of themeWords) {
+      for (const keywordWord of keywordWords) {
+        if (themeWord === keywordWord) {
+          maxScore = Math.max(maxScore, 60);
+        } else if (themeWord.includes(keywordWord) || keywordWord.includes(themeWord)) {
+          maxScore = Math.max(maxScore, 40);
+        }
+      }
+    }
+  }
+  
+  return maxScore;
+}
+
+/**
  * Get a category by matching theme keywords
  * @param theme - User's theme input
  * @param locale - Locale ('en' or 'ja')
@@ -31,17 +73,18 @@ export async function getCategoryByTheme(
 ): Promise<Category | null> {
   const categories = await getCategoriesByLocaleRepo(locale);
   
-  // Normalize theme for case-insensitive matching
-  const normalizedTheme = theme.toLowerCase();
+  // Calculate similarity scores for all categories
+  const categoriesWithScores = categories.map(category => ({
+    category,
+    score: calculateSimilarityScore(theme, category.keywords),
+  }));
   
-  // Find first category where any keyword matches the theme
-  const matchingCategory = categories.find(category =>
-    category.keywords.some(keyword =>
-      normalizedTheme.includes(keyword.toLowerCase())
-    )
-  );
+  // Sort by score (highest first)
+  categoriesWithScores.sort((a, b) => b.score - a.score);
   
-  return matchingCategory || null;
+  // Return category with highest score if score > 0
+  const best = categoriesWithScores[0];
+  return best && best.score > 0 ? best.category : null;
 }
 
 /**

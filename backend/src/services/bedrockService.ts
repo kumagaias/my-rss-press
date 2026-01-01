@@ -1,6 +1,8 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config.js';
 import { getAllDefaultFeeds as getDefaultFeedsFromFallback } from './categoryFallback.js';
+import { getCategoryByTheme } from './categoryService.js';
+import { categoryCache } from './categoryCache.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({
@@ -20,6 +22,47 @@ export interface FeedSuggestion {
 export interface FeedSuggestionsResponse {
   feeds: FeedSuggestion[];
   newspaperName: string; // AI-suggested newspaper name based on theme
+}
+
+/**
+ * Get feeds from DynamoDB based on theme
+ * @param theme - User's theme input
+ * @param locale - Locale ('en' or 'ja')
+ * @returns Array of feed suggestions from DynamoDB
+ */
+async function getFeedsFromDynamoDB(theme: string, locale: 'en' | 'ja'): Promise<FeedSuggestion[]> {
+  try {
+    // Find matching category
+    const category = await getCategoryByTheme(theme, locale);
+    
+    if (!category) {
+      console.log(`[DynamoDB] No matching category found for theme: ${theme}`);
+      return [];
+    }
+    
+    console.log(`[DynamoDB] Found matching category: ${category.displayName} (${category.categoryId})`);
+    
+    // Get feeds for the category
+    const feeds = await categoryCache.getFeeds(category.categoryId);
+    
+    if (feeds.length === 0) {
+      console.log(`[DynamoDB] No feeds found for category: ${category.categoryId}`);
+      return [];
+    }
+    
+    console.log(`[DynamoDB] Found ${feeds.length} feeds for category: ${category.categoryId}`);
+    
+    // Convert to FeedSuggestion format
+    return feeds.map(feed => ({
+      url: feed.url,
+      title: feed.title,
+      reasoning: feed.description || `Feed from ${category.displayName} category`,
+      isDefault: false, // DynamoDB feeds are not default feeds
+    }));
+  } catch (error) {
+    console.error('[DynamoDB] Error fetching feeds:', error);
+    return [];
+  }
 }
 
 /**
@@ -221,9 +264,23 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Selection] Selected top ${maxBedrockFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
     }
 
-    // If we have 0 valid feeds, return 1 random default feed
+    // If we have 0 valid feeds, try DynamoDB feeds first, then fall back to default
     if (topFeeds.length === 0) {
-      console.log(`[Fallback] No valid feeds from Bedrock, returning 1 random default feed`);
+      console.log(`[Fallback] No valid feeds from Bedrock, trying DynamoDB feeds`);
+      
+      // Try to get feeds from DynamoDB
+      const dynamoDBFeeds = await getFeedsFromDynamoDB(theme, locale);
+      
+      if (dynamoDBFeeds.length > 0) {
+        console.log(`[DynamoDB] Using ${dynamoDBFeeds.length} feeds from DynamoDB`);
+        return {
+          feeds: dynamoDBFeeds.slice(0, 15), // Limit to 15 feeds
+          newspaperName: locale === 'ja' ? `${theme}デイリー` : `The ${theme} Daily`,
+        };
+      }
+      
+      // If no DynamoDB feeds, use default feeds
+      console.log(`[Fallback] No DynamoDB feeds, returning 1 random default feed`);
       const defaultFeeds = getAllDefaultFeeds(locale);
       const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
       const randomDefaultFeed = defaultFeeds[randomIndex];
@@ -236,21 +293,40 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       };
     }
     
-    // Add 1 random default feed (with lower priority)
-    const defaultFeeds = getAllDefaultFeeds(locale);
-    const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
-    const randomDefaultFeed = defaultFeeds[randomIndex];
-    
-    // Check if the random default feed is not already in the list
-    const existingUrls = new Set(topFeeds.map(s => s.url));
-    if (!existingUrls.has(randomDefaultFeed.url)) {
-      topFeeds.push({ ...randomDefaultFeed, isDefault: true });
-      console.log(`[Default] Added random default feed: ${randomDefaultFeed.title} (${randomDefaultFeed.url})`);
-    } else {
-      console.log(`[Default] Random default feed already exists in Bedrock suggestions: ${randomDefaultFeed.title}`);
+    // Add DynamoDB feeds to supplement Bedrock suggestions
+    const dynamoDBFeeds = await getFeedsFromDynamoDB(theme, locale);
+    if (dynamoDBFeeds.length > 0) {
+      console.log(`[DynamoDB] Found ${dynamoDBFeeds.length} relevant feeds from DynamoDB`);
+      
+      // Add DynamoDB feeds that are not already in the list
+      const existingUrls = new Set(topFeeds.map(s => s.url));
+      const newDynamoDBFeeds = dynamoDBFeeds.filter(feed => !existingUrls.has(feed.url));
+      
+      if (newDynamoDBFeeds.length > 0) {
+        // Add up to 5 DynamoDB feeds
+        const feedsToAdd = newDynamoDBFeeds.slice(0, 5);
+        topFeeds.push(...feedsToAdd);
+        console.log(`[DynamoDB] Added ${feedsToAdd.length} feeds from DynamoDB`);
+      }
     }
     
-    console.log(`[Success] Total feeds: ${topFeeds.length} (${topFeeds.filter(f => !f.isDefault).length} from Bedrock + ${topFeeds.filter(f => f.isDefault).length} default)`)
+    // Add 1 random default feed (with lower priority) if we have room
+    if (topFeeds.length < 15) {
+      const defaultFeeds = getAllDefaultFeeds(locale);
+      const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
+      const randomDefaultFeed = defaultFeeds[randomIndex];
+      
+      // Check if the random default feed is not already in the list
+      const existingUrls = new Set(topFeeds.map(s => s.url));
+      if (!existingUrls.has(randomDefaultFeed.url)) {
+        topFeeds.push({ ...randomDefaultFeed, isDefault: true });
+        console.log(`[Default] Added random default feed: ${randomDefaultFeed.title} (${randomDefaultFeed.url})`);
+      } else {
+        console.log(`[Default] Random default feed already exists in suggestions: ${randomDefaultFeed.title}`);
+      }
+    }
+    
+    console.log(`[Success] Total feeds: ${topFeeds.length} (${topFeeds.filter(f => !f.isDefault).length} from Bedrock/DynamoDB + ${topFeeds.filter(f => f.isDefault).length} default)`)
 
     // Cache the result in local development
     if (config.isLocal && config.enableCache) {

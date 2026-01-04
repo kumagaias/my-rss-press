@@ -3,14 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ThemeInput } from '@/components/features/feed/ThemeInput';
-import { FeedSelector } from '@/components/features/feed/FeedSelector';
 import { PopularNewspapers } from '@/components/features/home/PopularNewspapers';
 import { TopicMarquee } from '@/components/ui/TopicMarquee';
 import { LoadingAnimation } from '@/components/ui/LoadingAnimation';
-import { SuccessAnimation } from '@/components/ui/SuccessAnimation';
 import { detectLocale, useTranslations } from '@/lib/i18n';
-import { suggestFeeds, generateNewspaper } from '@/lib/api';
-import type { Locale, FeedSuggestion } from '@/types';
+import type { Locale } from '@/types';
 
 export default function Home() {
   const router = useRouter();
@@ -18,11 +15,6 @@ export default function Home() {
   const t = useTranslations(locale);
 
   const [theme, setTheme] = useState('');
-  const [suggestions, setSuggestions] = useState<FeedSuggestion[]>([]);
-  const [suggestedNewspaperName, setSuggestedNewspaperName] = useState('');
-  const [selectedFeeds, setSelectedFeeds] = useState<string[]>([]);
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,90 +34,62 @@ export default function Home() {
     console.log('[Home] Topic keywords:', t.topicKeywords.slice(0, 5), '... (total:', t.topicKeywords.length, ')');
   }, [locale, t.topicKeywords]);
 
-  const handleThemeSubmit = async (themeValue: string) => {
+  const handleGenerateNewspaper = async (themeValue: string) => {
     setTheme(themeValue);
-    setError(null);
-    setShowSuccessAnimation(false);
-    setIsLoadingSuggestions(true);
-
-    try {
-      const result = await suggestFeeds(themeValue, locale);
-      setSuggestions(result.suggestions);
-      setSuggestedNewspaperName(result.newspaperName);
-      
-      // Auto-select all suggested feeds
-      const feedUrls = result.suggestions.map(s => s.url);
-      setSelectedFeeds(feedUrls);
-      
-      // Show success animation
-      setShowSuccessAnimation(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to suggest feeds');
-    } finally {
-      setIsLoadingSuggestions(false);
-    }
-  };
-
-  const handleKeywordClick = (keyword: string) => {
-    // Set theme in input field and automatically trigger feed suggestions
-    setTheme(keyword);
-    handleThemeSubmit(keyword);
-  };
-
-  const handleScrollToGenerate = () => {
-    // Scroll to the FeedSelector section
-    const feedSelectorElement = document.getElementById('feed-selector');
-    if (feedSelectorElement) {
-      feedSelectorElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  const handleGenerateNewspaper = async () => {
-    if (selectedFeeds.length === 0) {
-      setError(t.feedRequired);
-      return;
-    }
-
     setError(null);
     setIsGenerating(true);
 
     try {
-      // Extract default feed URLs (feeds marked as default/fallback)
-      const defaultFeedUrls = suggestions
-        .filter(s => s.isDefault)
-        .map(s => s.url);
+      console.log('[Home] Starting one-click generation for theme:', themeValue);
       
-      const { articles, languages, summary } = await generateNewspaper(selectedFeeds, theme, defaultFeedUrls, locale);
+      // Call combined generation endpoint
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiBaseUrl}/api/newspapers/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          theme: themeValue,
+          locale,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate newspaper');
+      }
+
+      const data = await response.json();
+      console.log('[Home] Generation successful, got', data.articles.length, 'articles');
       
       // Store data in sessionStorage for the newspaper page
-      sessionStorage.setItem('newspaperArticles', JSON.stringify(articles));
-      sessionStorage.setItem('newspaperTheme', theme);
-      sessionStorage.setItem('newspaperName', suggestedNewspaperName || theme); // Use AI-suggested name or fallback to theme
-      sessionStorage.setItem('newspaperFeeds', JSON.stringify(selectedFeeds));
-      sessionStorage.setItem('newspaperLocale', locale); // Save selected locale
-      sessionStorage.setItem('newspaperLanguages', JSON.stringify(languages)); // Save detected languages
-      if (summary) {
-        sessionStorage.setItem('newspaperSummary', summary); // Save generated summary
+      sessionStorage.setItem('newspaperArticles', JSON.stringify(data.articles));
+      sessionStorage.setItem('newspaperTheme', themeValue);
+      sessionStorage.setItem('newspaperName', data.newspaperName || themeValue);
+      sessionStorage.setItem('newspaperFeeds', JSON.stringify(data.feedUrls));
+      sessionStorage.setItem('newspaperFeedMetadata', JSON.stringify(data.feedMetadata));
+      sessionStorage.setItem('newspaperLocale', locale);
+      sessionStorage.setItem('newspaperLanguages', JSON.stringify(data.languages || []));
+      if (data.summary) {
+        sessionStorage.setItem('newspaperSummary', data.summary);
       }
       
       // Navigate to newspaper page
       router.push('/newspaper');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to generate newspaper';
+      const errorMessage = err instanceof Error ? err.message : t.generationFailed;
       setError(errorMessage);
-      console.error('Newspaper generation error:', err);
-      
-      // Show user-friendly message for common errors
-      if (errorMessage.includes('記事を取得できませんでした') || errorMessage.includes('記事数が不足')) {
-        setError(
-          locale === 'ja'
-            ? 'フィードから記事を取得できませんでした。別のフィードを試すか、AI提案を使用してください。'
-            : 'Failed to fetch articles from the feeds. Please try different feeds or use AI suggestions.'
-        );
-      }
+      console.error('[Home] Generation error:', err);
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleKeywordClick = (keyword: string) => {
+    // Set theme and automatically trigger generation
+    setTheme(keyword);
+    handleGenerateNewspaper(keyword);
   };
 
   const handleNewspaperClick = (newspaperId: string) => {
@@ -175,7 +139,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Main Content */}
         <div className="space-y-8">
-          {/* Theme Input & Feed Selection */}
+          {/* Theme Input & Generation */}
           <div className="space-y-6">
             {/* Theme Input */}
             <div className="bg-white border-4 border-black shadow-lg p-4 sm:p-8">
@@ -190,35 +154,22 @@ export default function Home() {
               </div>
               
               <ThemeInput
-                onSubmit={handleThemeSubmit}
-                isLoading={isLoadingSuggestions}
+                onSubmit={handleGenerateNewspaper}
+                isLoading={isGenerating}
                 locale={locale}
                 initialTheme={theme}
+                buttonText={t.generateButton}
               />
 
               {/* Loading Animation */}
-              {isLoadingSuggestions && <LoadingAnimation message={t.loadingSuggestions} type="feed" />}
-
-              {/* Success Animation */}
-              {showSuccessAnimation && !isLoadingSuggestions && suggestions.length > 0 && (
-                <SuccessAnimation onScrollToGenerate={handleScrollToGenerate} locale={locale} />
+              {isGenerating && (
+                <LoadingAnimation 
+                  message={t.generatingNewspaper} 
+                  type="newspaper"
+                  helperText={t.pleaseWait}
+                />
               )}
             </div>
-
-            {/* Feed Selection */}
-            {suggestions.length > 0 && (
-              <div id="feed-selector" className="bg-white border-4 border-black shadow-lg p-4 sm:p-8">
-                <FeedSelector
-                  suggestions={suggestions}
-                  selectedFeeds={selectedFeeds}
-                  onSelectionChange={setSelectedFeeds}
-                  onGenerate={handleGenerateNewspaper}
-                  isGenerating={isGenerating}
-                  locale={locale}
-                  generatingMessage={t.generating}
-                />
-              </div>
-            )}
 
             {/* Error Display */}
             {error && (

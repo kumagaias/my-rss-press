@@ -45,6 +45,7 @@ function NewspaperContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [feedMetadata, setFeedMetadata] = useState<Array<{ url: string; title?: string; isDefault?: boolean }>>([]);
 
   // Get id and date from query params
   useEffect(() => {
@@ -77,10 +78,21 @@ function NewspaperContent() {
         const savedLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
         const languagesJson = sessionStorage.getItem('newspaperLanguages');
         const summary = sessionStorage.getItem('newspaperSummary');
+        const feedMetadataJson = sessionStorage.getItem('newspaperFeedMetadata');
 
         // Use saved locale if available
         if (savedLocale) {
           setLocale(savedLocale);
+        }
+
+        // Load feed metadata
+        if (feedMetadataJson) {
+          try {
+            const metadata = JSON.parse(feedMetadataJson);
+            setFeedMetadata(metadata);
+          } catch (err) {
+            console.error('Error parsing feed metadata:', err);
+          }
         }
 
         if (articlesJson && theme && feedsJson) {
@@ -174,23 +186,21 @@ function NewspaperContent() {
     setIsSettingsOpen(true);
   };
 
-  const handleSaveNewspaper = async (settings: NewspaperSettings) => {
+  const handleSaveNewspaper = async (settings: NewspaperSettings, feedUrls: string[]) => {
     if (!newspaper) return;
 
     try {
       setIsSaving(true);
 
       // Get data from sessionStorage for newly generated newspapers
-      const feedsJson = sessionStorage.getItem('newspaperFeeds');
       const languagesJson = sessionStorage.getItem('newspaperLanguages');
       const summary = sessionStorage.getItem('newspaperSummary');
 
-      const feedUrls = feedsJson ? JSON.parse(feedsJson) : newspaper.feedUrls;
       const languages = languagesJson ? JSON.parse(languagesJson) : newspaper.languages || [];
 
       const result = await saveNewspaper(
         settings,
-        feedUrls,
+        feedUrls, // Use modified feed URLs from modal
         newspaper.articles,
         locale,
         languages,
@@ -202,6 +212,7 @@ function NewspaperContent() {
       sessionStorage.removeItem('newspaperTheme');
       sessionStorage.removeItem('newspaperName');
       sessionStorage.removeItem('newspaperFeeds');
+      sessionStorage.removeItem('newspaperFeedMetadata');
       sessionStorage.removeItem('newspaperLocale');
       sessionStorage.removeItem('newspaperLanguages');
       sessionStorage.removeItem('newspaperSummary');
@@ -340,6 +351,7 @@ function NewspaperContent() {
         onSave={handleSaveNewspaper}
         locale={locale}
         defaultName={newspaper.theme || newspaper.name}
+        initialFeeds={feedMetadata}
       />
     </div>
   );

@@ -34,7 +34,7 @@ async function recordFeedUsageAsync(
   feedUrls: string[],
   theme: string,
   locale: 'en' | 'ja',
-  articles: Array<{ feedSource: string; [key: string]: any }>
+  articles: Array<{ feedSource: string }>
 ): Promise<void> {
   try {
     // Get category for the theme

@@ -12,6 +12,7 @@ export interface Article {
   pubDate: Date;
   imageUrl?: string;
   feedSource: string;
+  feedTitle?: string; // Feed title from RSS metadata
   importance?: number;
 }
 
@@ -54,15 +55,28 @@ export async function fetchArticles(
   
   feedResults.forEach((result, index) => {
     if (result.status === 'fulfilled') {
-      allArticles.push(...result.value.articles);
+      const feedUrl = feedUrls[index];
+      const feedTitle = result.value.title;
+      
+      // Add feedTitle to each article
+      const articlesWithTitle = result.value.articles.map(article => ({
+        ...article,
+        feedTitle: feedTitle || feedUrl.split('/')[2] || feedUrl,
+      }));
+      
+      allArticles.push(...articlesWithTitle);
+      
       if (result.value.language) {
-        feedLanguages.set(feedUrls[index], result.value.language);
+        feedLanguages.set(feedUrl, result.value.language);
+      }
+      if (feedTitle) {
+        feedTitles.set(feedUrl, feedTitle);
       }
       if (result.value.title) {
         feedTitles.set(feedUrls[index], result.value.title);
       }
       successCount++;
-      console.log(`✓ Feed ${index + 1}/${feedUrls.length} succeeded: ${feedUrls[index]} (${result.value.articles.length} articles, language: ${result.value.language || 'unknown'}, title: ${result.value.title || 'unknown'})`);
+      console.log(`✓ Feed ${index + 1}/${feedUrls.length} succeeded: ${feedUrl} (${result.value.articles.length} articles, language: ${result.value.language || 'unknown'}, title: ${feedTitle || 'unknown'})`);
     } else {
       failCount++;
       console.error(`✗ Feed ${index + 1}/${feedUrls.length} failed: ${feedUrls[index]}`);

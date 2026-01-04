@@ -15,6 +15,7 @@ interface Article {
   link: string;
   pubDate: string;
   imageUrl?: string;
+  feedTitle?: string;
   importance: number;
 }
 

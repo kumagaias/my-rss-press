@@ -8,6 +8,7 @@ export interface Article {
   link: string;
   pubDate: string;
   imageUrl?: string;
+  feedTitle?: string; // Feed source name from RSS metadata
   importance: number;
 }
 

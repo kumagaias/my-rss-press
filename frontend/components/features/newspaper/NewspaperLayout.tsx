@@ -128,6 +128,11 @@ export function NewspaperLayout({
             <h2 className="text-4xl font-bold leading-tight mb-4">
               {layout.lead.title}
             </h2>
+            {layout.lead.feedTitle && (
+              <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">
+                {layout.lead.feedTitle}
+              </p>
+            )}
             <p className="text-lg leading-relaxed mb-4 text-gray-800">
               {layout.lead.description}
             </p>
@@ -164,6 +169,11 @@ export function NewspaperLayout({
                 <h3 className="text-2xl font-bold leading-tight">
                   {article.title}
                 </h3>
+                {article.feedTitle && (
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    {article.feedTitle}
+                  </p>
+                )}
                 <p className="text-sm leading-relaxed text-gray-800">
                   {article.description}
                 </p>
@@ -191,6 +201,11 @@ export function NewspaperLayout({
                 <h4 className="text-xl font-bold leading-tight mb-2">
                   {article.title}
                 </h4>
+                {article.feedTitle && (
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">
+                    {article.feedTitle}
+                  </p>
+                )}
                 <p className="text-sm leading-relaxed mb-2 text-gray-800">
                   {article.description}
                 </p>

@@ -397,7 +397,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       }
     }
     
-    console.log(`[Success] Total feeds: ${topFeeds.length} (Popular: ${popularFeeds.length}, Bedrock: ${topFeeds.filter(f => !f.isDefault && !popularFeeds.some(p => p.url === f.url) && !dynamoDBFeeds.some(d => d.url === f.url)).length}, DynamoDB: ${dynamoDBFeeds.length}, Default: ${topFeeds.filter(f => f.isDefault).length})`)
+    console.log(`[Success] Total feeds: ${topFeeds.length}`);
 
     // Cache the result in local development
     if (config.isLocal && config.enableCache) {

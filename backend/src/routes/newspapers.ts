@@ -29,12 +29,14 @@ export const newspapersRouter = new Hono();
  * @param theme - Theme keyword
  * @param locale - Locale
  * @param articles - Generated articles
+ * @param feedTitles - Map of feed URLs to their titles
  */
 async function recordFeedUsageAsync(
   feedUrls: string[],
   theme: string,
   locale: 'en' | 'ja',
-  articles: Array<{ feedSource: string }>
+  articles: Array<{ feedSource: string }>,
+  feedTitles: Map<string, string>
 ): Promise<void> {
   try {
     // Get category for the theme
@@ -59,8 +61,8 @@ async function recordFeedUsageAsync(
       const articleCount = feedArticleCounts.get(url) || 0;
       const success = articleCount > 0;
       
-      // Extract title from URL (simple heuristic)
-      const title = url.split('/')[2] || url;
+      // Use actual feed title from RSS metadata, fallback to domain name
+      const title = feedTitles.get(url) || url.split('/')[2] || url;
       
       await recordFeedUsage({
         url,
@@ -124,7 +126,7 @@ newspapersRouter.post(
       console.log(`Generating newspaper for theme: ${validated.theme}`);
 
       // Fetch articles from RSS feeds
-      const { articles, feedLanguages } = await fetchArticlesForNewspaper(
+      const { articles, feedLanguages, feedTitles } = await fetchArticlesForNewspaper(
         validated.feedUrls,
         validated.theme
       );
@@ -186,7 +188,8 @@ newspapersRouter.post(
         validated.feedUrls,
         validated.theme,
         validated.locale || 'en',
-        articlesWithImportance
+        articlesWithImportance,
+        feedTitles
       ).catch(error => {
         console.error('[FeedUsage] Failed to record usage (non-blocking):', error);
       });

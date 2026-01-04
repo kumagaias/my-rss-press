@@ -56,7 +56,8 @@ Learn from user behavior by tracking which feeds successfully generate newspaper
 ### Data
 - Store in existing DynamoDB table
 - Use GSI1 for efficient queries
-- Atomic counter updates
+- Counter updates use read-modify-write pattern
+- Race conditions are acceptable for this use case (low frequency)
 
 ## Success Criteria
 - ✅ 100% of newspapers record usage

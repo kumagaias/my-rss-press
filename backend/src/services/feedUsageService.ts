@@ -11,6 +11,9 @@ import {
 import { FeedUsage, RecordFeedUsageInput } from '../types/category.js';
 
 // Simple in-memory cache for popular feeds
+// Note: In Lambda environment, each instance has its own cache.
+// This is acceptable as cache misses only result in DynamoDB queries,
+// and the 5-minute TTL ensures reasonable freshness.
 interface CacheEntry {
   data: FeedUsage[];
   expiry: number;

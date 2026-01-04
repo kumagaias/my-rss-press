@@ -308,10 +308,13 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
 
     // If we have 0 valid feeds, try popular feeds first, then DynamoDB, then default
     if (topFeeds.length === 0) {
-      console.log(`[Fallback] No valid feeds from Bedrock, trying popular feeds`);
+      console.log(`[Fallback] No valid feeds from Bedrock, trying popular and DynamoDB feeds in parallel`);
       
-      // Try to get popular feeds from usage tracking
-      const popularFeeds = await getPopularFeedsFromUsage(theme, locale);
+      // Try to get popular feeds and DynamoDB feeds in parallel
+      const [popularFeeds, dynamoDBFeeds] = await Promise.all([
+        getPopularFeedsFromUsage(theme, locale),
+        getFeedsFromDynamoDB(theme, locale),
+      ]);
       
       if (popularFeeds.length > 0) {
         console.log(`[Popular] Using ${popularFeeds.length} popular feeds`);
@@ -320,9 +323,6 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
           newspaperName: locale === 'ja' ? `${theme}デイリー` : `The ${theme} Daily`,
         };
       }
-      
-      // Try to get feeds from DynamoDB
-      const dynamoDBFeeds = await getFeedsFromDynamoDB(theme, locale);
       
       if (dynamoDBFeeds.length > 0) {
         console.log(`[DynamoDB] Using ${dynamoDBFeeds.length} feeds from DynamoDB`);
@@ -346,8 +346,12 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       };
     }
     
-    // Add popular feeds to supplement Bedrock suggestions (highest priority)
-    const popularFeeds = await getPopularFeedsFromUsage(theme, locale);
+    // Add popular feeds and DynamoDB feeds to supplement Bedrock suggestions (fetch in parallel)
+    const [popularFeeds, dynamoDBFeeds] = await Promise.all([
+      getPopularFeedsFromUsage(theme, locale),
+      getFeedsFromDynamoDB(theme, locale),
+    ]);
+    
     if (popularFeeds.length > 0) {
       console.log(`[Popular] Found ${popularFeeds.length} popular feeds from usage tracking`);
       
@@ -362,8 +366,6 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       }
     }
     
-    // Add DynamoDB feeds to supplement Bedrock suggestions
-    const dynamoDBFeeds = await getFeedsFromDynamoDB(theme, locale);
     if (dynamoDBFeeds.length > 0) {
       console.log(`[DynamoDB] Found ${dynamoDBFeeds.length} relevant feeds from DynamoDB`);
       

@@ -52,8 +52,9 @@ export function limitDefaultFeedArticles(
     const isDefault = feedMeta?.isDefault || false;
 
     if (isDefault) {
-      // Limit default feed articles to MAX_DEFAULT_ARTICLES_PER_FEED
-      defaultArticles.push(...feedArticles.slice(0, MAX_DEFAULT_ARTICLES_PER_FEED));
+      // Sort by importance (descending) and limit default feed articles to MAX_DEFAULT_ARTICLES_PER_FEED
+      const sortedArticles = feedArticles.sort((a, b) => b.importance - a.importance);
+      defaultArticles.push(...sortedArticles.slice(0, MAX_DEFAULT_ARTICLES_PER_FEED));
     } else {
       // Include all articles from non-default feeds
       nonDefaultArticles.push(...feedArticles);
@@ -67,19 +68,21 @@ export function limitDefaultFeedArticles(
   if (limitedArticles.length < MIN_ARTICLE_COUNT) {
     const additionalNeeded = MIN_ARTICLE_COUNT - limitedArticles.length;
     
-    // Get all default articles that weren't included yet
+    // Get all default articles that weren't included yet, sorted by importance
     const allDefaultArticles: Article[] = [];
     for (const [feedUrl, feedArticles] of articlesByFeed) {
       const feedMeta = feedMetadata.find(f => f.url === feedUrl);
       const isDefault = feedMeta?.isDefault || false;
       
       if (isDefault) {
-        // Add articles beyond the initial limit
-        allDefaultArticles.push(...feedArticles.slice(MAX_DEFAULT_ARTICLES_PER_FEED));
+        // Add articles beyond the initial limit, sorted by importance
+        const sortedArticles = feedArticles.sort((a, b) => b.importance - a.importance);
+        allDefaultArticles.push(...sortedArticles.slice(MAX_DEFAULT_ARTICLES_PER_FEED));
       }
     }
 
-    // Add additional articles to meet minimum count
+    // Sort additional articles by importance and add them
+    allDefaultArticles.sort((a, b) => b.importance - a.importance);
     limitedArticles.push(...allDefaultArticles.slice(0, additionalNeeded));
   }
 

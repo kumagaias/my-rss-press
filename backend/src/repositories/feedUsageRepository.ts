@@ -121,6 +121,7 @@ export async function getFeedUsage(url: string, categoryId: string): Promise<Fee
     return null;
   }
   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { PK, SK, GSI1PK, GSI1SK, ...feedUsage } = result.Item;
   return feedUsage as FeedUsage;
 }
@@ -153,6 +154,7 @@ export async function getPopularFeedsByCategory(
   }
   
   return result.Items.map(item => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { PK, SK, GSI1PK, GSI1SK, ...feedUsage } = item;
     return feedUsage as FeedUsage;
   }).sort((a, b) => b.usageCount - a.usageCount); // Sort by usage count

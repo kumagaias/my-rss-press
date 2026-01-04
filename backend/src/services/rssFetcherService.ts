@@ -33,12 +33,12 @@ function shuffle<T>(array: T[]): T[] {
  * Fetch articles from multiple RSS feeds in parallel
  * @param feedUrls - Array of RSS feed URLs
  * @param daysBack - Number of days to look back (default: 7, fallback to 14)
- * @returns Object with articles array and feedLanguages map
+ * @returns Object with articles array, feedLanguages map, and feedTitles map
  */
 export async function fetchArticles(
   feedUrls: string[],
   daysBack: number = 7
-): Promise<{ articles: Article[]; feedLanguages: Map<string, string> }> {
+): Promise<{ articles: Article[]; feedLanguages: Map<string, string>; feedTitles: Map<string, string> }> {
   console.log(`Fetching articles from ${feedUrls.length} feeds (${daysBack} days back)`);
 
   // Fetch all feeds in parallel
@@ -48,6 +48,7 @@ export async function fetchArticles(
   // Collect all articles from successful feeds
   const allArticles: Article[] = [];
   const feedLanguages = new Map<string, string>();
+  const feedTitles = new Map<string, string>();
   let successCount = 0;
   let failCount = 0;
   
@@ -57,8 +58,11 @@ export async function fetchArticles(
       if (result.value.language) {
         feedLanguages.set(feedUrls[index], result.value.language);
       }
+      if (result.value.title) {
+        feedTitles.set(feedUrls[index], result.value.title);
+      }
       successCount++;
-      console.log(`✓ Feed ${index + 1}/${feedUrls.length} succeeded: ${feedUrls[index]} (${result.value.articles.length} articles, language: ${result.value.language || 'unknown'})`);
+      console.log(`✓ Feed ${index + 1}/${feedUrls.length} succeeded: ${feedUrls[index]} (${result.value.articles.length} articles, language: ${result.value.language || 'unknown'}, title: ${result.value.title || 'unknown'})`);
     } else {
       failCount++;
       console.error(`✗ Feed ${index + 1}/${feedUrls.length} failed: ${feedUrls[index]}`);
@@ -73,15 +77,15 @@ export async function fetchArticles(
 
   console.log(`Fetched ${filteredArticles.length} articles from ${daysBack} days`);
 
-  return { articles: filteredArticles, feedLanguages };
+  return { articles: filteredArticles, feedLanguages, feedTitles };
 }
 
 /**
  * Parse a single RSS feed
  * @param url - RSS feed URL
- * @returns Object with articles array and language code
+ * @returns Object with articles array, language code, and feed title
  */
-async function parseFeed(url: string): Promise<{ articles: Article[]; language?: string }> {
+async function parseFeed(url: string): Promise<{ articles: Article[]; language?: string; title?: string }> {
   try {
     console.log(`Parsing feed: ${url}`);
     const feed = await parser.parseURL(url);
@@ -89,6 +93,7 @@ async function parseFeed(url: string): Promise<{ articles: Article[]; language?:
     
     const articles: Article[] = [];
     const language = feed.language; // Extract RSS <language> field
+    const title = feed.title; // Extract RSS <title> field
 
     for (const item of feed.items) {
       // Skip items without required fields
@@ -119,7 +124,7 @@ async function parseFeed(url: string): Promise<{ articles: Article[]; language?:
     }
 
     console.log(`Extracted ${articles.length} articles from ${url}`);
-    return { articles, language };
+    return { articles, language, title };
   } catch (error) {
     console.error(`Error parsing feed ${url}:`, error);
     if (error instanceof Error) {
@@ -189,12 +194,12 @@ export function determineArticleCount(): number {
  * Select and shuffle articles for newspaper generation
  * @param feedUrls - Array of RSS feed URLs
  * @param _theme - User theme (for logging, currently unused)
- * @returns Object with selected articles and feedLanguages map
+ * @returns Object with selected articles, feedLanguages map, and feedTitles map
  */
 export async function fetchArticlesForNewspaper(
   feedUrls: string[],
   _theme: string
-): Promise<{ articles: Article[]; feedLanguages: Map<string, string> }> {
+): Promise<{ articles: Article[]; feedLanguages: Map<string, string>; feedTitles: Map<string, string> }> {
   const minArticles = 8;
   const targetCount = determineArticleCount();
 
@@ -204,6 +209,7 @@ export async function fetchArticlesForNewspaper(
   let result = await fetchArticles(feedUrls, 3);
   let articles = result.articles;
   let feedLanguages = result.feedLanguages;
+  let feedTitles = result.feedTitles;
 
   // Step 2: If not enough articles, extend to 7 days
   if (articles.length < minArticles) {
@@ -211,6 +217,7 @@ export async function fetchArticlesForNewspaper(
     result = await fetchArticles(feedUrls, 7);
     articles = result.articles;
     feedLanguages = result.feedLanguages;
+    feedTitles = result.feedTitles;
   }
 
   // Step 3: If still not enough, extend to 14 days
@@ -219,6 +226,7 @@ export async function fetchArticlesForNewspaper(
     result = await fetchArticles(feedUrls, 14);
     articles = result.articles;
     feedLanguages = result.feedLanguages;
+    feedTitles = result.feedTitles;
   }
 
   // Step 4: If still not enough, use all available articles
@@ -248,5 +256,5 @@ export async function fetchArticlesForNewspaper(
 
   console.log(`Selected ${shuffled.length} articles for newspaper (lead story has image: ${shuffled[0]?.imageUrl ? 'yes' : 'no'})`);
 
-  return { articles: shuffled, feedLanguages };
+  return { articles: shuffled, feedLanguages, feedTitles };
 }

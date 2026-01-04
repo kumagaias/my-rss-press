@@ -3,6 +3,7 @@ import { config } from '../config.js';
 import { getAllDefaultFeeds as getDefaultFeedsFromFallback } from './categoryFallback.js';
 import { getCategoryByTheme } from './categoryService.js';
 import { categoryCache } from './categoryCache.js';
+import { getPopularFeeds } from './feedUsageService.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({
@@ -61,6 +62,47 @@ async function getFeedsFromDynamoDB(theme: string, locale: 'en' | 'ja'): Promise
     }));
   } catch (error) {
     console.error('[DynamoDB] Error fetching feeds:', error);
+    return [];
+  }
+}
+
+/**
+ * Get popular feeds from usage tracking
+ * @param theme - User's theme input
+ * @param locale - Locale ('en' or 'ja')
+ * @returns Array of popular feed suggestions
+ */
+async function getPopularFeedsFromUsage(theme: string, locale: 'en' | 'ja'): Promise<FeedSuggestion[]> {
+  try {
+    // Find matching category
+    const category = await getCategoryByTheme(theme, locale);
+    
+    if (!category) {
+      console.log(`[Popular] No matching category found for theme: ${theme}`);
+      return [];
+    }
+    
+    console.log(`[Popular] Found matching category: ${category.displayName} (${category.categoryId})`);
+    
+    // Get popular feeds for the category
+    const popularFeeds = await getPopularFeeds(category.categoryId, 5);
+    
+    if (popularFeeds.length === 0) {
+      console.log(`[Popular] No popular feeds found for category: ${category.categoryId}`);
+      return [];
+    }
+    
+    console.log(`[Popular] Found ${popularFeeds.length} popular feeds for category: ${category.categoryId}`);
+    
+    // Convert to FeedSuggestion format
+    return popularFeeds.map(feed => ({
+      url: feed.url,
+      title: feed.title,
+      reasoning: `Popular feed (used ${feed.usageCount} times, ${feed.successRate.toFixed(0)}% success rate)`,
+      isDefault: false,
+    }));
+  } catch (error) {
+    console.error('[Popular] Error fetching popular feeds:', error);
     return [];
   }
 }
@@ -264,12 +306,23 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Selection] Selected top ${maxBedrockFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
     }
 
-    // If we have 0 valid feeds, try DynamoDB feeds first, then fall back to default
+    // If we have 0 valid feeds, try popular feeds first, then DynamoDB, then default
     if (topFeeds.length === 0) {
-      console.log(`[Fallback] No valid feeds from Bedrock, trying DynamoDB feeds`);
+      console.log(`[Fallback] No valid feeds from Bedrock, trying popular and DynamoDB feeds in parallel`);
       
-      // Try to get feeds from DynamoDB
-      const dynamoDBFeeds = await getFeedsFromDynamoDB(theme, locale);
+      // Try to get popular feeds and DynamoDB feeds in parallel
+      const [popularFeeds, dynamoDBFeeds] = await Promise.all([
+        getPopularFeedsFromUsage(theme, locale),
+        getFeedsFromDynamoDB(theme, locale),
+      ]);
+      
+      if (popularFeeds.length > 0) {
+        console.log(`[Popular] Using ${popularFeeds.length} popular feeds`);
+        return {
+          feeds: popularFeeds.slice(0, 15), // Limit to 15 feeds
+          newspaperName: locale === 'ja' ? `${theme}デイリー` : `The ${theme} Daily`,
+        };
+      }
       
       if (dynamoDBFeeds.length > 0) {
         console.log(`[DynamoDB] Using ${dynamoDBFeeds.length} feeds from DynamoDB`);
@@ -279,8 +332,8 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
         };
       }
       
-      // If no DynamoDB feeds, use default feeds
-      console.log(`[Fallback] No DynamoDB feeds, returning 1 random default feed`);
+      // If no popular or DynamoDB feeds, use default feeds
+      console.log(`[Fallback] No popular or DynamoDB feeds, returning 1 random default feed`);
       const defaultFeeds = getAllDefaultFeeds(locale);
       const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
       const randomDefaultFeed = defaultFeeds[randomIndex];
@@ -293,8 +346,26 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       };
     }
     
-    // Add DynamoDB feeds to supplement Bedrock suggestions
-    const dynamoDBFeeds = await getFeedsFromDynamoDB(theme, locale);
+    // Add popular feeds and DynamoDB feeds to supplement Bedrock suggestions (fetch in parallel)
+    const [popularFeeds, dynamoDBFeeds] = await Promise.all([
+      getPopularFeedsFromUsage(theme, locale),
+      getFeedsFromDynamoDB(theme, locale),
+    ]);
+    
+    if (popularFeeds.length > 0) {
+      console.log(`[Popular] Found ${popularFeeds.length} popular feeds from usage tracking`);
+      
+      // Add popular feeds that are not already in the list
+      const existingUrls = new Set(topFeeds.map(s => s.url));
+      const newPopularFeeds = popularFeeds.filter(feed => !existingUrls.has(feed.url));
+      
+      if (newPopularFeeds.length > 0) {
+        // Add popular feeds at the beginning (highest priority)
+        topFeeds.unshift(...newPopularFeeds);
+        console.log(`[Popular] Added ${newPopularFeeds.length} popular feeds at the beginning`);
+      }
+    }
+    
     if (dynamoDBFeeds.length > 0) {
       console.log(`[DynamoDB] Found ${dynamoDBFeeds.length} relevant feeds from DynamoDB`);
       
@@ -326,7 +397,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       }
     }
     
-    console.log(`[Success] Total feeds: ${topFeeds.length} (${topFeeds.filter(f => !f.isDefault).length} from Bedrock/DynamoDB + ${topFeeds.filter(f => f.isDefault).length} default)`)
+    console.log(`[Success] Total feeds: ${topFeeds.length}`);
 
     // Cache the result in local development
     if (config.isLocal && config.enableCache) {

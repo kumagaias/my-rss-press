@@ -3,6 +3,7 @@
 interface LoadingAnimationProps {
   message?: string;
   type?: 'feed' | 'newspaper'; // Type of animation
+  helperText?: string; // Additional helper text below message
 }
 
 /**
@@ -12,7 +13,7 @@ interface LoadingAnimationProps {
  * - 'feed' type: Shows wave-like bars animation (bars stretching up and down)
  * - 'newspaper' type: Shows pen writing animation only
  */
-export function LoadingAnimation({ message, type = 'newspaper' }: LoadingAnimationProps) {
+export function LoadingAnimation({ message, type = 'newspaper', helperText }: LoadingAnimationProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 min-h-[200px]">
       {type === 'feed' ? (
@@ -87,6 +88,13 @@ export function LoadingAnimation({ message, type = 'newspaper' }: LoadingAnimati
       {message && (
         <p className="text-lg text-gray-700 font-serif font-medium">
           {message}
+        </p>
+      )}
+      
+      {/* Helper Text */}
+      {helperText && (
+        <p className="text-sm text-gray-500 font-serif mt-2">
+          {helperText}
         </p>
       )}
     </div>

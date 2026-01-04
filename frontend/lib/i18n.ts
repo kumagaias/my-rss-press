@@ -33,6 +33,15 @@ export const translations = {
     generateButton: 'Generate Newspaper',
     selectedCount: (count: number) => `${count} feed${count !== 1 ? 's' : ''} selected`,
     getFeedSuggestions: 'Get Feed Suggestions',
+    generatingNewspaper: 'Generating your newspaper...',
+    pleaseWait: 'This may take up to 30 seconds',
+    generationFailed: 'Failed to generate newspaper. Please try again.',
+    
+    // Feed editing in modal
+    feedsUsed: 'Feeds Used',
+    editFeeds: 'Edit Feeds',
+    feedList: 'Feed List',
+    defaultFeed: 'Default Feed',
     
     // Newspaper
     newspaperTitle: 'Your Newspaper',
@@ -139,6 +148,15 @@ export const translations = {
     generateButton: '新聞を生成',
     selectedCount: (count: number) => `${count}個のフィードを選択中`,
     getFeedSuggestions: 'フィード提案を取得',
+    generatingNewspaper: '新聞を生成中...',
+    pleaseWait: '最大30秒かかる場合があります',
+    generationFailed: '新聞の生成に失敗しました。もう一度お試しください。',
+    
+    // モーダルでのフィード編集
+    feedsUsed: '使用したフィード',
+    editFeeds: 'フィードを編集',
+    feedList: 'フィード一覧',
+    defaultFeed: 'デフォルトフィード',
     
     // 新聞
     newspaperTitle: 'あなたの新聞',

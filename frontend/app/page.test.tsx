@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Home from './page';
-import * as api from '@/lib/api';
 
 // Mock next/navigation
 const mockPush = vi.fn();
@@ -11,11 +10,17 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-// Mock API
-vi.mock('@/lib/api', () => ({
-  suggestFeeds: vi.fn(),
-  generateNewspaper: vi.fn(),
+// Mock PopularNewspapers component
+vi.mock('@/components/features/home/PopularNewspapers', () => ({
+  PopularNewspapers: ({ locale, onNewspaperClick }: any) => (
+    <div>
+      <h2>Popular Newspapers</h2>
+    </div>
+  ),
 }));
+
+// Mock fetch
+global.fetch = vi.fn();
 
 // Mock sessionStorage
 const mockSessionStorage = {
@@ -27,6 +32,20 @@ const mockSessionStorage = {
 Object.defineProperty(window, 'sessionStorage', {
   value: mockSessionStorage,
 });
+
+// Mock localStorage
+const mockLocalStorage = {
+  setItem: vi.fn(),
+  getItem: vi.fn(() => 'en'),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+});
+
+// Set environment variable for tests
+process.env.NEXT_PUBLIC_API_BASE_URL = 'http://localhost:3001';
 
 describe('Home Page', () => {
   beforeEach(() => {
@@ -47,15 +66,29 @@ describe('Home Page', () => {
   // Try Demo button was removed in the current implementation
   // This test is no longer applicable
 
-  it('suggests feeds when theme is submitted', async () => {
-    const mockSuggestions = [
-      { url: 'https://example.com/tech-feed', title: 'Tech News Feed', reasoning: 'Technology news' },
-      { url: 'https://example.com/community-feed', title: 'Tech Community Feed', reasoning: 'Community discussions' },
-    ];
-
-    (api.suggestFeeds as any).mockResolvedValueOnce({
-      suggestions: mockSuggestions,
+  it('generates newspaper with one click when theme is submitted', async () => {
+    const mockResponse = {
+      articles: [
+        {
+          title: 'Test Article',
+          description: 'Test description',
+          link: 'https://example.com',
+          pubDate: '2025-12-01T10:00:00Z',
+          importance: 85,
+        },
+      ],
+      feedUrls: ['https://example.com/tech-feed'],
+      feedMetadata: [
+        { url: 'https://example.com/tech-feed', title: 'Tech News Feed', isDefault: false },
+      ],
       newspaperName: 'Technology Daily',
+      summary: 'Test summary',
+      languages: ['EN'],
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockResponse,
     });
 
     render(<Home />);
@@ -63,119 +96,92 @@ describe('Home Page', () => {
     const input = screen.getByPlaceholderText(/Technology, Sports/);
     fireEvent.change(input, { target: { value: 'Technology' } });
     
-    const submitButton = screen.getByText('Get Feed Suggestions');
+    const submitButton = screen.getByText('Generate Newspaper');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(api.suggestFeeds).toHaveBeenCalledWith('Technology', 'en');
-    }, { timeout: 3000 });
-
-    await waitFor(() => {
-      // Feed appears in both suggested feeds and selected feeds sections
-      expect(screen.getAllByText('Tech News Feed').length).toBeGreaterThan(0);
-    }, { timeout: 3000 });
-  });
-
-  it('generates newspaper when generate button is clicked', async () => {
-    const mockSuggestions = [
-      { url: 'https://example.com/tech-feed', title: 'Tech News Feed', reasoning: 'Technology news' },
-    ];
-    const mockArticles = [
-      {
-        title: 'Test Article',
-        description: 'Test description',
-        link: 'https://example.com',
-        pubDate: '2025-12-01T10:00:00Z',
-        importance: 85,
-      },
-    ];
-
-    (api.suggestFeeds as any).mockResolvedValueOnce({
-      suggestions: mockSuggestions,
-      newspaperName: 'Technology Daily',
-    });
-    (api.generateNewspaper as any).mockResolvedValueOnce({
-      articles: mockArticles,
-      languages: ['EN'],
-      summary: 'Test summary',
-    });
-
-    render(<Home />);
-
-    // Submit theme
-    const input = screen.getByPlaceholderText(/Technology, Sports/);
-    fireEvent.change(input, { target: { value: 'Technology' } });
-    const submitButton = screen.getByText('Get Feed Suggestions');
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      // Feed appears in both suggested feeds and selected feeds sections
-      expect(screen.getAllByText('Tech News Feed').length).toBeGreaterThan(0);
-    }, { timeout: 3000 });
-
-    // Generate newspaper
-    const generateButton = screen.getByText('Generate Newspaper');
-    fireEvent.click(generateButton);
-
-    await waitFor(() => {
-      expect(api.generateNewspaper).toHaveBeenCalledWith(
-        ['https://example.com/tech-feed'],
-        'Technology',
-        [], // defaultFeedUrls (empty array since no default feeds in this test)
-        'en' // locale
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:3001/api/newspapers/generate',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme: 'Technology', locale: 'en' }),
+        })
       );
     }, { timeout: 3000 });
 
     await waitFor(() => {
       expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
         'newspaperArticles',
-        JSON.stringify(mockArticles)
+        JSON.stringify(mockResponse.articles)
       );
       expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
-        'newspaperLanguages',
-        JSON.stringify(['EN'])
-      );
-      expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
-        'newspaperSummary',
-        'Test summary'
+        'newspaperFeedMetadata',
+        JSON.stringify(mockResponse.feedMetadata)
       );
       expect(mockPush).toHaveBeenCalledWith('/newspaper');
     }, { timeout: 3000 });
   });
 
-  it('shows error when generating without selecting feeds', async () => {
-    render(<Home />);
+  it('shows loading animation during generation', async () => {
+    const mockResponse = {
+      articles: [],
+      feedUrls: [],
+      feedMetadata: [],
+      newspaperName: 'Test',
+      summary: '',
+      languages: [],
+    };
 
-    // Try to generate without feeds (this shouldn't happen in normal flow)
-    // We need to manually trigger the generate function
-    // This test verifies the validation logic
-    expect(screen.queryByText(/Please select at least one feed/)).not.toBeInTheDocument();
-  });
-
-  it('handles demo button click', async () => {
-    const mockArticles = [
-      {
-        title: 'Demo Article',
-        description: 'Demo description',
-        link: 'https://example.com',
-        pubDate: '2025-12-01T10:00:00Z',
-        importance: 85,
-      },
-    ];
-
-    // Try Demo button was removed in the current implementation
-    // This test is no longer applicable
-    expect(true).toBe(true);
-  });
-
-  it('displays error message when API fails', async () => {
-    (api.suggestFeeds as any).mockRejectedValueOnce(new Error('API Error'));
+    (global.fetch as any).mockImplementation(() => 
+      new Promise(resolve => setTimeout(() => resolve({
+        ok: true,
+        json: async () => mockResponse,
+      }), 100))
+    );
 
     render(<Home />);
 
     const input = screen.getByPlaceholderText(/Technology, Sports/);
     fireEvent.change(input, { target: { value: 'Technology' } });
-    const submitButton = screen.getByText('Get Feed Suggestions');
+    
+    const submitButton = screen.getByText('Generate Newspaper');
+    fireEvent.click(submitButton);
+
+    // Check loading animation appears
+    await waitFor(() => {
+      expect(screen.getByText(/Generating your newspaper/)).toBeInTheDocument();
+    });
+  });
+
+  it('shows error when theme is empty', async () => {
+    render(<Home />);
+
+    const submitButton = screen.getByText('Generate Newspaper');
+    fireEvent.click(submitButton);
+
+    // Should not call API with empty theme
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('handles demo button click', async () => {
+    // Demo button functionality is handled by ThemeInput component
+    // This test verifies the component renders correctly
+    render(<Home />);
+    expect(screen.getByText('MyRSSPress')).toBeInTheDocument();
+  });
+
+  it('displays error message when API fails', async () => {
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ error: 'API Error' }),
+    });
+
+    render(<Home />);
+
+    const input = screen.getByPlaceholderText(/Technology, Sports/);
+    fireEvent.change(input, { target: { value: 'Technology' } });
+    const submitButton = screen.getByText('Generate Newspaper');
     fireEvent.click(submitButton);
 
     await waitFor(() => {

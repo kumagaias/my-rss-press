@@ -139,3 +139,32 @@ export async function getPublicNewspapers(
   const data = await response.json();
   return data.newspapers || [];
 }
+
+/**
+ * Generate newspaper with one click (suggest feeds + generate newspaper)
+ */
+export async function generateNewspaperOneClick(
+  theme: string,
+  locale: 'en' | 'ja' = 'en'
+): Promise<{
+  articles: Article[];
+  feedUrls: string[];
+  feedMetadata: Array<{ url: string; title: string; isDefault: boolean; language?: string }>;
+  newspaperName: string;
+  summary: string | null;
+  languages: string[];
+}> {
+  const response = await fetch(`${API_BASE_URL}/api/newspapers/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ theme, locale }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to generate newspaper: ${response.status} ${response.statusText}`);
+  }
+
+  return await response.json();
+}

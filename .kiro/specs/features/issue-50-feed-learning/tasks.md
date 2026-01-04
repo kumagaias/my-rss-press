@@ -15,42 +15,44 @@
   - [x] `getPopularFeedsByCategory()` - Query top feeds
 - [x] Commit and push Phase 1
 
-## Phase 2: Service Layer
+## Phase 2: Service Layer ✅
 
-- [ ] Create `feedUsageService.ts`
-  - [ ] `recordFeedUsage()` - Wrapper with error handling
-  - [ ] `getPopularFeeds()` - Get popular feeds with filtering
-  - [ ] `getFeedStats()` - Get statistics for a feed
-- [ ] Add caching
-  - [ ] Cache popular feeds (5-minute TTL)
-  - [ ] Cache key: `popular_feeds:{categoryId}`
-- [ ] Add logging
-  - [ ] Log successful recordings
-  - [ ] Log errors (don't throw)
+- [x] Create `feedUsageService.ts`
+  - [x] `recordFeedUsage()` - Wrapper with error handling
+  - [x] `getPopularFeeds()` - Get popular feeds with filtering
+  - [x] `getFeedStats()` - Get statistics for a feed
+- [x] Add caching
+  - [x] Cache popular feeds (5-minute TTL)
+  - [x] Cache key: `popular_feeds:{categoryId}`
+- [x] Add logging
+  - [x] Log successful recordings
+  - [x] Log errors (don't throw)
+- [x] Commit and push Phase 2
 
-## Phase 3: Integration
+## Phase 3: Integration ✅
 
 ### A. Newspaper Service
-- [ ] Import `feedUsageService`
-- [ ] After newspaper generation:
-  - [ ] Get category from theme
-  - [ ] For each feed used:
-    - [ ] Record usage (async, fire-and-forget)
-    - [ ] Pass article count and success status
-- [ ] Handle errors gracefully
-  - [ ] Log errors
-  - [ ] Don't fail newspaper generation
+- [x] Import `feedUsageService`
+- [x] After newspaper generation:
+  - [x] Get category from theme
+  - [x] For each feed used:
+    - [x] Record usage (async, fire-and-forget)
+    - [x] Pass article count and success status
+- [x] Handle errors gracefully
+  - [x] Log errors
+  - [x] Don't fail newspaper generation
 
 ### B. Bedrock Service
-- [ ] Import `feedUsageService`
-- [ ] In `suggestFeeds()`:
-  - [ ] Get popular feeds for category
-  - [ ] Merge with Bedrock suggestions
-  - [ ] Prioritize: Popular > Bedrock > Category > Default
-  - [ ] Deduplicate by URL
-- [ ] Add logging
-  - [ ] Log popular feed count
-  - [ ] Log merge results
+- [x] Import `feedUsageService`
+- [x] In `suggestFeeds()`:
+  - [x] Get popular feeds for category
+  - [x] Merge with Bedrock suggestions
+  - [x] Prioritize: Popular > Bedrock > Category > Default
+  - [x] Deduplicate by URL
+- [x] Add logging
+  - [x] Log popular feed count
+  - [x] Log merge results
+- [x] Commit and push Phase 3
 
 ## Phase 4: Testing
 

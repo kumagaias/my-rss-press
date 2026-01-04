@@ -158,13 +158,20 @@ newspapersRouter.post(
       // Check if we have enough articles
       if (articles.length < 3) {
         console.error(`[OneClick] Insufficient articles: ${articles.length} (minimum: 3)`);
+        const isJapanese = validated.locale === 'ja';
         return c.json(
           {
             error: articles.length === 0
-              ? 'フィードから記事を取得できませんでした。フィードURLが正しいか、またはフィードが利用可能か確認してください。'
-              : '記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。',
+              ? (isJapanese
+                  ? 'フィードから記事を取得できませんでした。フィードURLが正しいか、またはフィードが利用可能か確認してください。'
+                  : 'Could not fetch articles from the feeds. Please check that the feed URLs are correct and that the feeds are available.')
+              : (isJapanese
+                  ? '記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。'
+                  : 'Not enough articles were found. Try adding different feeds or try again later.'),
             articleCount: articles.length,
-            suggestion: 'Try using different RSS feeds or check if the feed URLs are accessible.',
+            suggestion: isJapanese
+              ? '別のRSSフィードを試すか、フィードURLがアクセス可能か確認してください。'
+              : 'Try using different RSS feeds or check if the feed URLs are accessible.',
           },
           400
         );

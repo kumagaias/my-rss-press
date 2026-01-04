@@ -88,7 +88,12 @@ export function NewspaperSettingsModal({
     
     // Validate URL
     try {
-      new URL(url);
+      const parsedUrl = new URL(url);
+      // Only allow http and https protocols for security
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        setFeedError(t.invalidUrl);
+        return;
+      }
     } catch {
       setFeedError(t.invalidUrl);
       return;
@@ -100,8 +105,8 @@ export function NewspaperSettingsModal({
       return;
     }
     
-    // Add feed
-    setFeeds([...feeds, { url, title: url.split('/')[2] || url }]);
+    // Add feed with isDefault property
+    setFeeds([...feeds, { url, title: url.split('/')[2] || url, isDefault: false }]);
     setNewFeedUrl('');
     setFeedError(null);
   };
@@ -162,8 +167,8 @@ export function NewspaperSettingsModal({
               </p>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {feeds.map((feed, index) => (
-                  <li key={index} className="p-3 flex items-center justify-between hover:bg-gray-50">
+                {feeds.map((feed) => (
+                  <li key={feed.url} className="p-3 flex items-center justify-between hover:bg-gray-50">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {feed.title || feed.url}

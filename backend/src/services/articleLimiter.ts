@@ -38,6 +38,12 @@ export function limitDefaultFeedArticles(
   // Group articles by feed source
   const articlesByFeed = new Map<string, Article[]>();
   for (const article of articles) {
+    // Skip articles without feedSource
+    if (!article.feedSource) {
+      console.warn('[ArticleLimiter] Article without feedSource:', article.title);
+      continue;
+    }
+    
     const feedArticles = articlesByFeed.get(article.feedSource) || [];
     feedArticles.push(article);
     articlesByFeed.set(article.feedSource, feedArticles);
@@ -53,7 +59,8 @@ export function limitDefaultFeedArticles(
 
     if (isDefault) {
       // Sort by importance (descending) and limit default feed articles to MAX_DEFAULT_ARTICLES_PER_FEED
-      const sortedArticles = feedArticles.sort((a, b) => b.importance - a.importance);
+      // Use slice to avoid mutating the original array
+      const sortedArticles = [...feedArticles].sort((a, b) => (b.importance || 0) - (a.importance || 0));
       defaultArticles.push(...sortedArticles.slice(0, MAX_DEFAULT_ARTICLES_PER_FEED));
     } else {
       // Include all articles from non-default feeds
@@ -76,13 +83,14 @@ export function limitDefaultFeedArticles(
       
       if (isDefault) {
         // Add articles beyond the initial limit, sorted by importance
-        const sortedArticles = feedArticles.sort((a, b) => b.importance - a.importance);
+        // Use slice to avoid mutating the original array
+        const sortedArticles = [...feedArticles].sort((a, b) => (b.importance || 0) - (a.importance || 0));
         allDefaultArticles.push(...sortedArticles.slice(MAX_DEFAULT_ARTICLES_PER_FEED));
       }
     }
 
     // Sort additional articles by importance and add them
-    allDefaultArticles.sort((a, b) => b.importance - a.importance);
+    allDefaultArticles.sort((a, b) => (b.importance || 0) - (a.importance || 0));
     limitedArticles.push(...allDefaultArticles.slice(0, additionalNeeded));
   }
 

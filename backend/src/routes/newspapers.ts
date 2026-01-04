@@ -18,8 +18,66 @@ import {
   getAvailableDates,
 } from '../services/historicalNewspaperService.js';
 import { rateLimit } from '../middleware/rateLimit.js';
+import { recordFeedUsage } from '../services/feedUsageService.js';
+import { getCategoryByTheme } from '../services/categoryService.js';
 
 export const newspapersRouter = new Hono();
+
+/**
+ * Record feed usage asynchronously (fire-and-forget)
+ * @param feedUrls - Array of feed URLs used
+ * @param theme - Theme keyword
+ * @param locale - Locale
+ * @param articles - Generated articles
+ */
+async function recordFeedUsageAsync(
+  feedUrls: string[],
+  theme: string,
+  locale: 'en' | 'ja',
+  articles: Array<{ feedSource: string; [key: string]: any }>
+): Promise<void> {
+  try {
+    // Get category for the theme
+    const category = await getCategoryByTheme(theme, locale);
+    
+    if (!category) {
+      console.log(`[FeedUsage] No category found for theme: ${theme}, skipping usage tracking`);
+      return;
+    }
+    
+    console.log(`[FeedUsage] Recording usage for category: ${category.displayName} (${category.categoryId})`);
+    
+    // Count articles per feed
+    const feedArticleCounts = new Map<string, number>();
+    for (const article of articles) {
+      const count = feedArticleCounts.get(article.feedSource) || 0;
+      feedArticleCounts.set(article.feedSource, count + 1);
+    }
+    
+    // Record usage for each feed
+    const recordPromises = feedUrls.map(async (url) => {
+      const articleCount = feedArticleCounts.get(url) || 0;
+      const success = articleCount > 0;
+      
+      // Extract title from URL (simple heuristic)
+      const title = url.split('/')[2] || url;
+      
+      await recordFeedUsage({
+        url,
+        categoryId: category.categoryId,
+        title,
+        articleCount,
+        success,
+      });
+    });
+    
+    await Promise.all(recordPromises);
+    console.log(`[FeedUsage] Successfully recorded usage for ${feedUrls.length} feeds`);
+  } catch (error) {
+    console.error('[FeedUsage] Error recording usage:', error);
+    // Don't throw - this is fire-and-forget
+  }
+}
 
 // Validation schemas
 const GenerateNewspaperSchema = z.object({
@@ -122,6 +180,16 @@ newspapersRouter.post(
         console.error('Error generating summary:', error);
         // Continue without summary (null)
       }
+
+      // Record feed usage (fire-and-forget, don't block response)
+      recordFeedUsageAsync(
+        validated.feedUrls,
+        validated.theme,
+        validated.locale || 'en',
+        articlesWithImportance
+      ).catch(error => {
+        console.error('[FeedUsage] Failed to record usage (non-blocking):', error);
+      });
 
       return c.json({
         articles: articlesWithImportance,

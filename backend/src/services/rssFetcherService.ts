@@ -206,6 +206,7 @@ export function determineArticleCount(): number {
 
 /**
  * Select and shuffle articles for newspaper generation
+ * Ensures balanced distribution across feeds to prevent one feed from dominating
  * @param feedUrls - Array of RSS feed URLs
  * @param _theme - User theme (for logging, currently unused)
  * @returns Object with selected articles, feedLanguages map, and feedTitles map
@@ -219,22 +220,13 @@ export async function fetchArticlesForNewspaper(
 
   console.log(`Target article count: ${targetCount}`);
 
-  // Step 1: Try to fetch articles from the last 3 days
-  let result = await fetchArticles(feedUrls, 3);
+  // Step 1: Try to fetch articles from the last 7 days (changed from 3)
+  let result = await fetchArticles(feedUrls, 7);
   let articles = result.articles;
   let feedLanguages = result.feedLanguages;
   let feedTitles = result.feedTitles;
 
-  // Step 2: If not enough articles, extend to 7 days
-  if (articles.length < minArticles) {
-    console.log(`Only ${articles.length} articles found in 3 days, extending to 7 days`);
-    result = await fetchArticles(feedUrls, 7);
-    articles = result.articles;
-    feedLanguages = result.feedLanguages;
-    feedTitles = result.feedTitles;
-  }
-
-  // Step 3: If still not enough, extend to 14 days
+  // Step 2: If not enough articles, extend to 14 days
   if (articles.length < minArticles) {
     console.log(`Only ${articles.length} articles found in 7 days, extending to 14 days`);
     result = await fetchArticles(feedUrls, 14);
@@ -243,21 +235,20 @@ export async function fetchArticlesForNewspaper(
     feedTitles = result.feedTitles;
   }
 
-  // Step 4: If still not enough, use all available articles
+  // Step 3: If still not enough, use all available articles
   if (articles.length < minArticles) {
     console.warn(`Only ${articles.length} articles found (minimum: ${minArticles})`);
   }
 
-  // Sort by publication date (newest first)
-  articles.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
+  // Step 4: Balance articles across feeds to prevent one feed from dominating
+  const balancedArticles = balanceArticlesAcrossFeeds(articles, targetCount);
 
-  // Step 5: Select up to target count (prioritize recent articles)
-  const selectedArticles = articles.slice(0, Math.min(targetCount, articles.length));
+  console.log(`Balanced selection: ${balancedArticles.length} articles from ${new Set(balancedArticles.map(a => a.feedSource)).size} feeds`);
 
-  // Step 6: Prioritize articles with images for lead story
+  // Step 5: Prioritize articles with images for lead story
   // Separate articles with and without images
-  const articlesWithImages = selectedArticles.filter(article => article.imageUrl);
-  const articlesWithoutImages = selectedArticles.filter(article => !article.imageUrl);
+  const articlesWithImages = balancedArticles.filter(article => article.imageUrl);
+  const articlesWithoutImages = balancedArticles.filter(article => !article.imageUrl);
 
   console.log(`Articles with images: ${articlesWithImages.length}, without images: ${articlesWithoutImages.length}`);
 
@@ -271,4 +262,75 @@ export async function fetchArticlesForNewspaper(
   console.log(`Selected ${shuffled.length} articles for newspaper (lead story has image: ${shuffled[0]?.imageUrl ? 'yes' : 'no'})`);
 
   return { articles: shuffled, feedLanguages, feedTitles };
+}
+
+/**
+ * Balance articles across feeds to prevent one feed from dominating
+ * Uses round-robin selection to ensure fair distribution
+ * @param articles - All available articles
+ * @param targetCount - Target number of articles to select
+ * @returns Balanced selection of articles
+ */
+function balanceArticlesAcrossFeeds(articles: Article[], targetCount: number): Article[] {
+  // Group articles by feed source
+  const articlesByFeed = new Map<string, Article[]>();
+  
+  for (const article of articles) {
+    if (!article.feedSource) continue;
+    
+    const feedArticles = articlesByFeed.get(article.feedSource) || [];
+    feedArticles.push(article);
+    articlesByFeed.set(article.feedSource, feedArticles);
+  }
+
+  // Sort articles within each feed by date (newest first)
+  for (const [feedUrl, feedArticles] of articlesByFeed) {
+    feedArticles.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
+  }
+
+  console.log(`Articles per feed before balancing:`);
+  for (const [feedUrl, feedArticles] of articlesByFeed) {
+    console.log(`  ${feedUrl}: ${feedArticles.length} articles`);
+  }
+
+  // Round-robin selection: take 1 article from each feed in rotation
+  const selectedArticles: Article[] = [];
+  const feedUrls = Array.from(articlesByFeed.keys());
+  let currentIndex = 0;
+  let roundNumber = 0;
+
+  while (selectedArticles.length < targetCount && selectedArticles.length < articles.length) {
+    const feedUrl = feedUrls[currentIndex];
+    const feedArticles = articlesByFeed.get(feedUrl);
+
+    if (feedArticles && feedArticles.length > roundNumber) {
+      selectedArticles.push(feedArticles[roundNumber]);
+    }
+
+    currentIndex++;
+    
+    // Move to next round when we've checked all feeds
+    if (currentIndex >= feedUrls.length) {
+      currentIndex = 0;
+      roundNumber++;
+    }
+
+    // Safety check: if we've gone through all articles, break
+    if (roundNumber > 10) {
+      console.warn('Round-robin selection exceeded 10 rounds, breaking');
+      break;
+    }
+  }
+
+  console.log(`Articles per feed after balancing:`);
+  const selectedByFeed = new Map<string, number>();
+  for (const article of selectedArticles) {
+    const count = selectedByFeed.get(article.feedSource) || 0;
+    selectedByFeed.set(article.feedSource, count + 1);
+  }
+  for (const [feedUrl, count] of selectedByFeed) {
+    console.log(`  ${feedUrl}: ${count} articles`);
+  }
+
+  return selectedArticles;
 }

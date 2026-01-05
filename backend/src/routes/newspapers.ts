@@ -20,6 +20,8 @@ import {
 import { rateLimit } from '../middleware/rateLimit.js';
 import { recordFeedUsage } from '../services/feedUsageService.js';
 import { getCategoryByTheme } from '../services/categoryService.js';
+import { suggestFeeds } from '../services/bedrockService.js';
+import { limitDefaultFeedArticles, type FeedMetadata } from '../services/articleLimiter.js';
 
 export const newspapersRouter = new Hono();
 
@@ -109,6 +111,163 @@ const SaveNewspaperSchema = z.object({
   summary: z.string().optional(), // AI-generated summary
   newspaperDate: z.string().optional(), // Date of the newspaper (YYYY-MM-DD)
 });
+
+const OneClickGenerateSchema = z.object({
+  theme: z.string().min(1, 'Theme is required'),
+  locale: z.enum(['en', 'ja']).optional().default(DEFAULT_LANGUAGE.LOCALE),
+});
+
+/**
+ * POST /api/newspapers/generate
+ * One-click newspaper generation: suggest feeds + generate newspaper
+ * This combines feed suggestion and newspaper generation into a single endpoint
+ */
+newspapersRouter.post(
+  '/newspapers/generate',
+  rateLimit(10, 60000), // 10 requests per minute (more restrictive than separate endpoints)
+  async (c) => {
+    try {
+      // Parse and validate request body
+      const body = await c.req.json();
+      const validated = OneClickGenerateSchema.parse(body);
+
+      console.log(`[OneClick] Generating newspaper for theme: ${validated.theme}, locale: ${validated.locale}`);
+
+      // Step 1: Suggest feeds
+      console.log('[OneClick] Step 1: Suggesting feeds...');
+      const feedSuggestions = await suggestFeeds(validated.theme, validated.locale);
+      
+      const feedUrls = feedSuggestions.feeds.map(f => f.url);
+      const feedMetadata: FeedMetadata[] = feedSuggestions.feeds.map(f => ({
+        url: f.url,
+        title: f.title,
+        isDefault: f.isDefault || false,
+      }));
+      
+      console.log(`[OneClick] Got ${feedUrls.length} feed suggestions (${feedMetadata.filter(f => f.isDefault).length} default)`);
+
+      // Step 2: Fetch articles
+      console.log('[OneClick] Step 2: Fetching articles...');
+      const { articles, feedLanguages, feedTitles } = await fetchArticlesForNewspaper(
+        feedUrls,
+        validated.theme
+      );
+
+      console.log(`[OneClick] Fetched ${articles.length} articles`);
+
+      // Check if we have enough articles
+      if (articles.length < 3) {
+        console.error(`[OneClick] Insufficient articles: ${articles.length} (minimum: 3)`);
+        const isJapanese = validated.locale === 'ja';
+        return c.json(
+          {
+            error: articles.length === 0
+              ? (isJapanese
+                  ? 'フィードから記事を取得できませんでした。フィードURLが正しいか、またはフィードが利用可能か確認してください。'
+                  : 'Could not fetch articles from the feeds. Please check that the feed URLs are correct and that the feeds are available.')
+              : (isJapanese
+                  ? '記事数が不足しています。別のフィードを追加するか、後でもう一度お試しください。'
+                  : 'Not enough articles were found. Try adding different feeds or try again later.'),
+            articleCount: articles.length,
+            suggestion: isJapanese
+              ? '別のRSSフィードを試すか、フィードURLがアクセス可能か確認してください。'
+              : 'Try using different RSS feeds or check if the feed URLs are accessible.',
+          },
+          400
+        );
+      }
+
+      // Step 3: Limit default feed articles
+      console.log('[OneClick] Step 3: Limiting default feed articles...');
+      const limitedArticles = limitDefaultFeedArticles(articles, feedMetadata);
+      console.log(`[OneClick] Limited to ${limitedArticles.length} articles`);
+
+      // Step 4: Calculate importance scores
+      console.log('[OneClick] Step 4: Calculating importance...');
+      const defaultFeedUrls = new Set(feedMetadata.filter(f => f.isDefault).map(f => f.url));
+      const articlesWithImportance = await calculateImportance(
+        limitedArticles,
+        validated.theme,
+        defaultFeedUrls
+      );
+
+      // Step 5: Detect languages
+      console.log('[OneClick] Step 5: Detecting languages...');
+      let languages: string[] = [];
+      try {
+        languages = await detectLanguages(articlesWithImportance, feedLanguages);
+        console.log(`[OneClick] Detected languages: ${languages.join(', ')}`);
+      } catch (error) {
+        console.error('[OneClick] Error detecting languages:', error);
+      }
+
+      // Step 6: Generate summary
+      console.log('[OneClick] Step 6: Generating summary...');
+      let summary: string | null = null;
+      try {
+        summary = await generateSummaryWithRetry(
+          articlesWithImportance,
+          validated.theme,
+          languages,
+          3
+        );
+        if (summary) {
+          console.log(`[OneClick] Generated summary: ${summary.substring(0, 50)}...`);
+        }
+      } catch (error) {
+        console.error('[OneClick] Error generating summary:', error);
+      }
+
+      // Step 7: Record feed usage (fire-and-forget)
+      recordFeedUsageAsync(
+        feedUrls,
+        validated.theme,
+        validated.locale,
+        articlesWithImportance,
+        feedTitles
+      ).catch(error => {
+        console.error('[OneClick] Failed to record usage (non-blocking):', error);
+      });
+
+      // Step 8: Update feed metadata with actual titles
+      const enrichedFeedMetadata = feedMetadata.map(f => ({
+        ...f,
+        title: feedTitles.get(f.url) || f.title,
+        language: feedLanguages.get(f.url),
+      }));
+
+      console.log('[OneClick] Generation complete!');
+
+      // Return complete newspaper data
+      return c.json({
+        articles: articlesWithImportance,
+        feedUrls,
+        feedMetadata: enrichedFeedMetadata,
+        newspaperName: feedSuggestions.newspaperName,
+        summary,
+        languages,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return c.json(
+          {
+            error: 'Validation error',
+            details: error.errors,
+          },
+          400
+        );
+      }
+
+      console.error('[OneClick] Error in one-click generation:', error);
+      return c.json(
+        {
+          error: 'Failed to generate newspaper',
+        },
+        500
+      );
+    }
+  }
+);
 
 /**
  * POST /api/generate-newspaper

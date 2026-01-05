@@ -132,6 +132,9 @@ describe('NewspaperSettingsModal', () => {
         onClose={mockOnClose}
         onSave={mockOnSave}
         locale="en"
+        initialFeeds={[
+          { url: 'https://example.com/feed', title: 'Example Feed', isDefault: false }
+        ]}
       />
     );
 
@@ -144,11 +147,14 @@ describe('NewspaperSettingsModal', () => {
     const saveButton = screen.getByText('Save');
     fireEvent.click(saveButton);
 
-    expect(mockOnSave).toHaveBeenCalledWith({
-      newspaperName: 'Tech News',
-      userName: 'Jane Smith',
-      isPublic: true, // Default value in Phase 1
-    });
+    expect(mockOnSave).toHaveBeenCalledWith(
+      {
+        newspaperName: 'Tech News',
+        userName: 'Jane Smith',
+        isPublic: true, // Default value in Phase 1
+      },
+      ['https://example.com/feed'] // Feed URLs
+    );
   });
 
   it('calls onClose when cancel button is clicked', () => {
@@ -174,6 +180,9 @@ describe('NewspaperSettingsModal', () => {
         onClose={mockOnClose}
         onSave={mockOnSave}
         locale="en"
+        initialFeeds={[
+          { url: 'https://example.com/feed', title: 'Example Feed', isDefault: false }
+        ]}
       />
     );
 
@@ -183,7 +192,8 @@ describe('NewspaperSettingsModal', () => {
     expect(mockOnSave).toHaveBeenCalledWith(
       expect.objectContaining({
         newspaperName: expect.stringMatching(/Newspaper$/),
-      })
+      }),
+      ['https://example.com/feed']
     );
   });
 
@@ -194,6 +204,9 @@ describe('NewspaperSettingsModal', () => {
         onClose={mockOnClose}
         onSave={mockOnSave}
         locale="en"
+        initialFeeds={[
+          { url: 'https://example.com/feed', title: 'Example Feed', isDefault: false }
+        ]}
       />
     );
 
@@ -206,11 +219,14 @@ describe('NewspaperSettingsModal', () => {
     const saveButton = screen.getByText('Save');
     fireEvent.click(saveButton);
 
-    expect(mockOnSave).toHaveBeenCalledWith({
-      newspaperName: 'Tech News',
-      userName: 'John Doe',
-      isPublic: true,
-    });
+    expect(mockOnSave).toHaveBeenCalledWith(
+      {
+        newspaperName: 'Tech News',
+        userName: 'John Doe',
+        isPublic: true,
+      },
+      ['https://example.com/feed']
+    );
   });
 
   it('uses Japanese translations when locale is ja', () => {

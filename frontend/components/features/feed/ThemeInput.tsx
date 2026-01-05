@@ -10,6 +10,7 @@ interface ThemeInputProps {
   isLoading: boolean;
   locale: 'en' | 'ja';
   initialTheme?: string;
+  buttonText?: string;
 }
 
 /**
@@ -18,7 +19,7 @@ interface ThemeInputProps {
  * Allows users to input their interest theme for RSS feed suggestions.
  * Validates input to ensure it's not empty or whitespace-only.
  */
-export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '' }: ThemeInputProps) {
+export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '', buttonText }: ThemeInputProps) {
   const [theme, setTheme] = useState(initialTheme);
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations(locale);
@@ -87,7 +88,7 @@ export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '' }: T
         loading={isLoading}
         className="w-full"
       >
-        {t.getFeedSuggestions}
+        {buttonText || t.getFeedSuggestions}
       </Button>
     </form>
   );

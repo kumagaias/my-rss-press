@@ -284,7 +284,7 @@ function balanceArticlesAcrossFeeds(articles: Article[], targetCount: number): A
   }
 
   // Sort articles within each feed by date (newest first)
-  for (const [feedUrl, feedArticles] of articlesByFeed) {
+  for (const feedArticles of articlesByFeed.values()) {
     feedArticles.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
   }
 

@@ -449,6 +449,9 @@ newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async 
       'general' // Use a default theme for now
     );
 
+    // Increment view count for the base newspaper
+    await incrementViewCount(newspaperId);
+
     console.log(`Successfully retrieved/created newspaper for ${newspaperId} on ${date}`);
     return c.json(newspaper);
   } catch (error) {

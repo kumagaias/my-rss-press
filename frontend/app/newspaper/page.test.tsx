@@ -149,8 +149,8 @@ describe('NewspaperPage', () => {
 
     render(<NewspaperPage />);
 
-    // Should show error message
-    expect(await screen.findByText(/Newspaper ID is required/i, {}, { timeout: 3000 })).toBeInTheDocument();
+    // Should show error message (now uses translated message)
+    expect(await screen.findByText(/Newspaper not found/i, {}, { timeout: 3000 })).toBeInTheDocument();
   });
 
   it('displays error when fetch fails', async () => {

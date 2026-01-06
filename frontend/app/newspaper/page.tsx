@@ -34,7 +34,15 @@ interface Newspaper {
 function NewspaperContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [locale, setLocale] = useState<Locale>(detectLocale());
+  
+  // Initialize locale from sessionStorage first, then fall back to detectLocale()
+  const [locale, setLocale] = useState<Locale>(() => {
+    if (typeof window !== 'undefined') {
+      const savedLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
+      return savedLocale || detectLocale();
+    }
+    return detectLocale();
+  });
   const t = useTranslations(locale);
   
   const [newspaper, setNewspaper] = useState<Newspaper | null>(null);
@@ -46,6 +54,7 @@ function NewspaperContent() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [feedMetadata, setFeedMetadata] = useState<Array<{ url: string; title?: string; isDefault?: boolean }>>([]);
+  const [isDateChanging, setIsDateChanging] = useState(false);
 
   // Get id and date from query params
   useEffect(() => {
@@ -75,15 +84,9 @@ function NewspaperContent() {
         const theme = sessionStorage.getItem('newspaperTheme');
         const newspaperName = sessionStorage.getItem('newspaperName'); // AI-suggested name
         const feedsJson = sessionStorage.getItem('newspaperFeeds');
-        const savedLocale = sessionStorage.getItem('newspaperLocale') as Locale | null;
         const languagesJson = sessionStorage.getItem('newspaperLanguages');
         const summary = sessionStorage.getItem('newspaperSummary');
         const feedMetadataJson = sessionStorage.getItem('newspaperFeedMetadata');
-
-        // Use saved locale if available
-        if (savedLocale) {
-          setLocale(savedLocale);
-        }
 
         // Load feed metadata
         if (feedMetadataJson) {
@@ -122,7 +125,7 @@ function NewspaperContent() {
       }
 
       // If sessionStorage is empty, show error
-      setError('Newspaper ID is required');
+      setError(t.newspaperNotFound);
       setLoading(false);
       return;
     }
@@ -140,8 +143,9 @@ function NewspaperContent() {
           // Validate date format (YYYY-MM-DD)
           const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
           if (!dateRegex.test(date)) {
-            setError('Invalid date format. Please use YYYY-MM-DD format.');
+            setError(t.error);
             setLoading(false);
+            setIsDateChanging(false);
             return;
           }
           url += `/${date}`;
@@ -154,13 +158,14 @@ function NewspaperContent() {
           
           if (response.status === 400) {
             // Date validation errors
-            setError(errorData.error || 'Invalid date');
+            setError(errorData.error || t.error);
           } else if (response.status === 404) {
-            setError('Newspaper not found');
+            setError(t.newspaperNotFound);
           } else {
-            setError('Failed to load newspaper');
+            setError(t.newspaperLoadError);
           }
           setLoading(false);
+          setIsDateChanging(false);
           return;
         }
 
@@ -168,16 +173,19 @@ function NewspaperContent() {
         setNewspaper(data);
       } catch (err) {
         console.error('Error fetching newspaper:', err);
-        setError('Failed to load newspaper');
+        setError(t.newspaperLoadError);
       } finally {
         setLoading(false);
+        setIsDateChanging(false);
       }
     };
 
     fetchNewspaper();
-  }, [id, date]);
+  }, [id, date, t]);
 
   const handleDateChange = (newDate: string) => {
+    // Set loading state for date change
+    setIsDateChanging(true);
     // Navigate to the new date using query parameter
     router.push(`/newspaper?id=${id}&date=${newDate}`);
   };
@@ -327,13 +335,29 @@ function NewspaperContent() {
               currentDate={date}
               onDateChange={handleDateChange}
               locale={locale}
+              isLoading={isDateChanging}
             />
           </div>
         </div>
       )}
 
       {/* Newspaper Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 relative">
+        {/* Loading overlay for date changes */}
+        {isDateChanging && (
+          <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-20">
+            <div className="text-center">
+              <div className="flex gap-2 justify-center mb-4">
+                <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '300ms' }}></div>
+                <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '450ms' }}></div>
+              </div>
+              <p className="text-gray-600">{t.loading}</p>
+            </div>
+          </div>
+        )}
+        
         <NewspaperLayout
           articles={newspaper.articles}
           newspaperName={newspaper.name}

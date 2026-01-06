@@ -6,6 +6,7 @@ interface DateNavigationProps {
   currentDate: string; // YYYY-MM-DD format
   onDateChange: (date: string) => void;
   locale: Locale;
+  isLoading?: boolean;
 }
 
 /**
@@ -16,6 +17,7 @@ export default function DateNavigation({
   currentDate,
   onDateChange,
   locale,
+  isLoading = false,
 }: DateNavigationProps) {
   const t = useTranslations(locale);
 
@@ -82,9 +84,9 @@ export default function DateNavigation({
     <div className="flex items-center justify-center gap-4 py-4">
       <button
         onClick={handlePrevious}
-        disabled={!canGoPrevious}
+        disabled={!canGoPrevious || isLoading}
         className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-          canGoPrevious
+          canGoPrevious && !isLoading
             ? 'bg-gray-800 text-white hover:bg-gray-700'
             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
         }`}
@@ -101,9 +103,9 @@ export default function DateNavigation({
 
       <button
         onClick={handleNext}
-        disabled={!canGoNext}
+        disabled={!canGoNext || isLoading}
         className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-          canGoNext
+          canGoNext && !isLoading
             ? 'bg-gray-800 text-white hover:bg-gray-700'
             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
         }`}

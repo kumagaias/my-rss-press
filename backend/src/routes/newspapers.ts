@@ -103,7 +103,7 @@ const ArticleSchema = z.object({
 const SaveNewspaperSchema = z.object({
   name: z.string().min(1, 'Newspaper name is required').max(100),
   userName: z.string().min(1).optional().default('Anonymous'),
-  feedUrls: z.array(z.string().url()).min(1).max(10, 'Too many feed URLs'),
+  feedUrls: z.array(z.string().url()).min(1).max(15, 'Too many feed URLs'),
   articles: z.array(ArticleSchema).optional(),
   isPublic: z.boolean().optional().default(true),
   locale: z.enum(['en', 'ja']).optional().default(DEFAULT_LANGUAGE.LOCALE), // Language setting for the newspaper

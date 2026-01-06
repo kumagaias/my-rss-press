@@ -3,7 +3,7 @@
 import { Article } from '@/types';
 import { calculateLayout } from '@/lib/layoutCalculator';
 import { useTranslations, formatDate } from '@/lib/i18n';
-import { CopyrightFreeImage } from '@/components/ui/CopyrightFreeImage';
+import { getPlaceholderImage } from '@/lib/placeholderImages';
 
 interface NewspaperLayoutProps {
   articles: Article[];
@@ -108,21 +108,11 @@ export function NewspaperLayout({
       >
         <article className="grid md:grid-cols-2 gap-8 mb-8 pb-8 border-b-2 border-gray-800">
           <div className="w-full">
-            {layout.lead.imageUrl ? (
-              <img
-                src={layout.lead.imageUrl}
-                alt={layout.lead.title || 'Article image'}
-                className="w-full h-auto object-cover rounded"
-              />
-            ) : (
-              <CopyrightFreeImage
-                theme="news"
-                alt={layout.lead.title || 'Article image'}
-                width={800}
-                height={600}
-                className="w-full h-auto object-cover rounded"
-              />
-            )}
+            <img
+              src={layout.lead.imageUrl || getPlaceholderImage(layout.lead.title, layout.lead.description)}
+              alt={layout.lead.title || 'Article image'}
+              className="w-full h-auto object-cover rounded"
+            />
           </div>
           <div>
             <h2 className="text-4xl font-bold leading-tight mb-4">

@@ -178,16 +178,16 @@ export function NewspaperLayout({
 
       {/* Remaining Articles (2 columns) */}
       {layout.remaining.length > 0 && (
-        <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
+        <div className="grid md:grid-cols-2 gap-x-12 gap-y-6 md:auto-rows-fr">
           {layout.remaining.map((article, index) => (
             <a
               key={`remaining-${index}`}
               href={article.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="block hover:bg-gray-100 transition-colors cursor-pointer p-2 -m-2 rounded"
+              className="block hover:bg-gray-100 transition-colors cursor-pointer p-2 -m-2 rounded h-full"
             >
-              <article className="pb-6 border-b border-gray-300">
+              <article className="pb-6 border-b border-gray-300 h-full flex flex-col">
                 <h4 className="text-xl font-bold leading-tight mb-2">
                   {article.title}
                 </h4>
@@ -196,7 +196,7 @@ export function NewspaperLayout({
                     {article.feedTitle}
                   </p>
                 )}
-                <p className="text-sm leading-relaxed mb-2 text-gray-800">
+                <p className="text-sm leading-relaxed mb-2 text-gray-800 flex-grow">
                   {article.description}
                 </p>
                 <span className="text-blue-600 hover:underline text-sm inline-flex items-center">

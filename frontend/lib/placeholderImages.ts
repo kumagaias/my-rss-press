@@ -35,11 +35,17 @@ const CATEGORY_KEYWORDS: Record<CategoryKey, string[]> = {
 
 /**
  * Get placeholder image path for an article
+ * Currently uses general.jpg for all categories (future: category-specific images)
  * @param title - Article title
  * @param description - Article description
  * @returns Path to placeholder image (1024x1024px)
  */
 export function getPlaceholderImage(title: string, description: string = ''): string {
+  // For now, always use general.jpg
+  // Future: Implement category-specific images when available
+  return '/images/placeholders/general.jpg';
+  
+  /* Future implementation with category-specific images:
   const text = `${title} ${description}`.toLowerCase();
   
   // Find matching category
@@ -55,6 +61,7 @@ export function getPlaceholderImage(title: string, description: string = ''): st
   }
   
   return `/images/placeholders/${matchedCategory}.jpg`;
+  */
 }
 
 /**
@@ -62,6 +69,11 @@ export function getPlaceholderImage(title: string, description: string = ''): st
  * Call this on app initialization
  */
 export function preloadPlaceholderImages(): void {
+  // Currently only general.jpg is available
+  const img = new Image();
+  img.src = '/images/placeholders/general.jpg';
+  
+  /* Future: Preload all category images when available
   const categories: CategoryKey[] = [
     'technology', 'business', 'sports', 'entertainment', 'science',
     'health', 'politics', 'world', 'lifestyle', 'food', 'general'
@@ -71,4 +83,5 @@ export function preloadPlaceholderImages(): void {
     const img = new Image();
     img.src = `/images/placeholders/${category}.jpg`;
   });
+  */
 }

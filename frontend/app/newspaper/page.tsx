@@ -74,6 +74,9 @@ function NewspaperContent() {
     if (dateParam) {
       setDate(dateParam);
     }
+    
+    // Reset date changing state when URL params change
+    setIsDateChanging(false);
   }, [searchParams]);
 
   useEffect(() => {
@@ -383,6 +386,13 @@ function NewspaperContent() {
 
 
 export default function NewspaperPage() {
+  // Detect locale for Suspense fallback
+  const locale = typeof window !== 'undefined' 
+    ? (sessionStorage.getItem('newspaperLocale') as 'en' | 'ja' | null) || 
+      (navigator.language.toLowerCase().startsWith('ja') ? 'ja' : 'en')
+    : 'en';
+  const loadingText = locale === 'ja' ? '読み込み中...' : 'Loading...';
+  
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -393,7 +403,7 @@ export default function NewspaperPage() {
             <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '300ms' }}></div>
             <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '450ms' }}></div>
           </div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">{loadingText}</p>
         </div>
       </div>
     }>

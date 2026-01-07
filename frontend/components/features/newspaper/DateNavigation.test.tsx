@@ -149,4 +149,55 @@ describe('DateNavigation', () => {
       expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
     });
   });
+
+  describe('Loading State', () => {
+    it('should disable buttons when isLoading is true', () => {
+      render(<DateNavigation {...defaultProps} isLoading={true} />);
+
+      const previousButton = screen.getByRole('button', { name: /previous/i });
+      const nextButton = screen.getByRole('button', { name: /next/i });
+
+      expect(previousButton).toBeDisabled();
+      expect(nextButton).toBeDisabled();
+    });
+
+    it('should apply loading styles when isLoading is true', () => {
+      render(<DateNavigation {...defaultProps} isLoading={true} />);
+
+      const previousButton = screen.getByRole('button', { name: /previous/i });
+      const nextButton = screen.getByRole('button', { name: /next/i });
+
+      expect(previousButton).toHaveClass('bg-gray-300');
+      expect(previousButton).toHaveClass('text-gray-500');
+      expect(previousButton).toHaveClass('cursor-not-allowed');
+      
+      expect(nextButton).toHaveClass('bg-gray-300');
+      expect(nextButton).toHaveClass('text-gray-500');
+      expect(nextButton).toHaveClass('cursor-not-allowed');
+    });
+
+    it('should not call onDateChange when buttons are clicked during loading', () => {
+      render(<DateNavigation {...defaultProps} isLoading={true} />);
+
+      const previousButton = screen.getByRole('button', { name: /previous/i });
+      const nextButton = screen.getByRole('button', { name: /next/i });
+
+      fireEvent.click(previousButton);
+      fireEvent.click(nextButton);
+
+      expect(mockOnDateChange).not.toHaveBeenCalled();
+    });
+
+    it('should enable buttons when isLoading is false', () => {
+      render(<DateNavigation {...defaultProps} isLoading={false} />);
+
+      const previousButton = screen.getByRole('button', { name: /previous/i });
+      const nextButton = screen.getByRole('button', { name: /next/i });
+
+      expect(previousButton).not.toBeDisabled();
+      expect(nextButton).not.toBeDisabled();
+      expect(previousButton).toHaveClass('bg-gray-800');
+      expect(nextButton).toHaveClass('bg-gray-800');
+    });
+  });
 });

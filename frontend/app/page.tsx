@@ -11,21 +11,22 @@ import type { Locale } from '@/types';
 
 export default function Home() {
   const router = useRouter();
-  const [locale, setLocale] = useState<Locale>('en');
+  
+  // Initialize locale with SSR-safe detection
+  const [locale, setLocale] = useState<Locale>(() => {
+    // During SSR, return 'en' as default
+    if (typeof window === 'undefined') return 'en';
+    
+    // On client, check localStorage first, then detect from browser
+    const savedLocale = localStorage.getItem('locale') as Locale | null;
+    return savedLocale || detectLocale();
+  });
+  
   const t = useTranslations(locale);
 
   const [theme, setTheme] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Detect locale on mount
-  useEffect(() => {
-    // Check localStorage first, then detect from browser
-    const savedLocale = localStorage.getItem('locale') as Locale | null;
-    const detectedLocale = savedLocale || detectLocale();
-    console.log('[Home] Detected locale:', detectedLocale);
-    setLocale(detectedLocale);
-  }, []);
 
   // Save locale to localStorage when it changes
   useEffect(() => {

@@ -47,12 +47,11 @@ describe('DateNavigation', () => {
       expect(previousButton).toHaveClass('bg-gray-800');
     });
 
-    it('should be disabled when current date is 7 days ago', () => {
+    it('should be hidden when current date is 7 days ago', () => {
       render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
-      const previousButton = screen.getByRole('button', { name: /previous/i });
-      expect(previousButton).toBeDisabled();
-      expect(previousButton).toHaveClass('bg-gray-300');
+      const previousButton = screen.queryByRole('button', { name: /previous/i });
+      expect(previousButton).not.toBeInTheDocument();
     });
 
     it('should call onDateChange with previous day when clicked', () => {
@@ -66,13 +65,11 @@ describe('DateNavigation', () => {
       expect(mockOnDateChange).toHaveBeenCalledWith('2025-12-08');
     });
 
-    it('should not call onDateChange when disabled', () => {
+    it('should not be present when at 7-day limit', () => {
       render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
-      const previousButton = screen.getByRole('button', { name: /previous/i });
-      fireEvent.click(previousButton);
-
-      expect(mockOnDateChange).not.toHaveBeenCalled();
+      const previousButton = screen.queryByRole('button', { name: /previous/i });
+      expect(previousButton).not.toBeInTheDocument();
     });
   });
 
@@ -85,12 +82,11 @@ describe('DateNavigation', () => {
       expect(nextButton).toHaveClass('bg-gray-800');
     });
 
-    it('should be disabled when current date is today', () => {
+    it('should be hidden when current date is today', () => {
       render(<DateNavigation {...defaultProps} currentDate="2025-12-10" />);
 
-      const nextButton = screen.getByRole('button', { name: /next/i });
-      expect(nextButton).toBeDisabled();
-      expect(nextButton).toHaveClass('bg-gray-300');
+      const nextButton = screen.queryByRole('button', { name: /next/i });
+      expect(nextButton).not.toBeInTheDocument();
     });
 
     it('should call onDateChange with next day when clicked', () => {
@@ -104,39 +100,37 @@ describe('DateNavigation', () => {
       expect(mockOnDateChange).toHaveBeenCalledWith('2025-12-09');
     });
 
-    it('should not call onDateChange when disabled', () => {
+    it('should not be present when at today', () => {
       render(<DateNavigation {...defaultProps} currentDate="2025-12-10" />);
 
-      const nextButton = screen.getByRole('button', { name: /next/i });
-      fireEvent.click(nextButton);
-
-      expect(mockOnDateChange).not.toHaveBeenCalled();
+      const nextButton = screen.queryByRole('button', { name: /next/i });
+      expect(nextButton).not.toBeInTheDocument();
     });
   });
 
   describe('Date Boundaries', () => {
-    it('should prevent navigation to future dates', () => {
+    it('should hide next button for future dates', () => {
       render(<DateNavigation {...defaultProps} currentDate="2025-12-10" />);
 
-      const nextButton = screen.getByRole('button', { name: /next/i });
-      expect(nextButton).toBeDisabled();
+      const nextButton = screen.queryByRole('button', { name: /next/i });
+      expect(nextButton).not.toBeInTheDocument();
     });
 
-    it('should prevent navigation to dates older than 7 days', () => {
+    it('should hide previous button for dates older than 7 days', () => {
       render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
-      const previousButton = screen.getByRole('button', { name: /previous/i });
-      expect(previousButton).toBeDisabled();
+      const previousButton = screen.queryByRole('button', { name: /previous/i });
+      expect(previousButton).not.toBeInTheDocument();
     });
 
-    it('should allow navigation within 7-day window', () => {
+    it('should show both buttons within 7-day window', () => {
       render(<DateNavigation {...defaultProps} currentDate="2025-12-05" />);
 
       const previousButton = screen.getByRole('button', { name: /previous/i });
       const nextButton = screen.getByRole('button', { name: /next/i });
 
-      expect(previousButton).not.toBeDisabled();
-      expect(nextButton).not.toBeDisabled();
+      expect(previousButton).toBeInTheDocument();
+      expect(nextButton).toBeInTheDocument();
     });
   });
 

@@ -82,18 +82,21 @@ export default function DateNavigation({
 
   return (
     <div className="flex items-center justify-center gap-4 py-4">
-      <button
-        onClick={handlePrevious}
-        disabled={!canGoPrevious || isLoading}
-        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-          canGoPrevious && !isLoading
-            ? 'bg-gray-800 text-white hover:bg-gray-700'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-        }`}
-        aria-label={t.previousDay || 'Previous day'}
-      >
-        ← {t.previousDay || 'Previous'}
-      </button>
+      {/* Only show Previous button if available */}
+      {canGoPrevious && (
+        <button
+          onClick={handlePrevious}
+          disabled={isLoading}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            isLoading
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-gray-800 text-white hover:bg-gray-700'
+          }`}
+          aria-label={t.previousDay || 'Previous day'}
+        >
+          ← {t.previousDay || 'Previous'}
+        </button>
+      )}
 
       <div className="text-center min-w-[200px]">
         <div className="text-lg font-semibold text-gray-800">
@@ -101,18 +104,21 @@ export default function DateNavigation({
         </div>
       </div>
 
-      <button
-        onClick={handleNext}
-        disabled={!canGoNext || isLoading}
-        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-          canGoNext && !isLoading
-            ? 'bg-gray-800 text-white hover:bg-gray-700'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-        }`}
-        aria-label={t.nextDay || 'Next day'}
-      >
-        {t.nextDay || 'Next'} →
-      </button>
+      {/* Only show Next button if available */}
+      {canGoNext && (
+        <button
+          onClick={handleNext}
+          disabled={isLoading}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            isLoading
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-gray-800 text-white hover:bg-gray-700'
+          }`}
+          aria-label={t.nextDay || 'Next day'}
+        >
+          {t.nextDay || 'Next'} →
+        </button>
+      )}
     </div>
   );
 }

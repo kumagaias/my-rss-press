@@ -112,27 +112,15 @@ export default function Home() {
                 {t.appTagline}
               </p>
             </div>
-            <div className="sm:absolute sm:right-0 flex gap-2">
-              <button
-                onClick={() => setLocale('ja')}
-                className={`px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black transition-colors ${
-                  locale === 'ja'
-                    ? 'bg-black text-white'
-                    : 'bg-white text-black hover:bg-gray-100'
-                }`}
+            <div className="sm:absolute sm:right-0">
+              <select
+                value={locale}
+                onChange={(e) => setLocale(e.target.value as Locale)}
+                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
               >
-                日本語
-              </button>
-              <button
-                onClick={() => setLocale('en')}
-                className={`px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black transition-colors ${
-                  locale === 'en'
-                    ? 'bg-black text-white'
-                    : 'bg-white text-black hover:bg-gray-100'
-                }`}
-              >
-                EN
-              </button>
+                <option value="en">🇺🇸 English</option>
+                <option value="ja">🇯🇵 日本語</option>
+              </select>
             </div>
           </div>
         </div>

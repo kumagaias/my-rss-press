@@ -22,8 +22,8 @@ describe('LanguageFilter', () => {
       expect(screen.getByText('Language:')).toBeInTheDocument();
       const select = screen.getByRole('combobox');
       expect(select).toBeInTheDocument();
-      expect(screen.getByText('All')).toBeInTheDocument();
-      expect(screen.getByText('Japanese')).toBeInTheDocument();
+      expect(screen.getByText('All Languages')).toBeInTheDocument();
+      expect(screen.getByText('日本語')).toBeInTheDocument();
       expect(screen.getByText('English')).toBeInTheDocument();
     });
 
@@ -71,7 +71,7 @@ describe('LanguageFilter', () => {
       expect(select).toBeInTheDocument();
       expect(screen.getByText('すべて')).toBeInTheDocument();
       expect(screen.getByText('日本語')).toBeInTheDocument();
-      expect(screen.getByText('英語')).toBeInTheDocument();
+      expect(screen.getByText('English')).toBeInTheDocument();
     });
 
     it('should have selected language as value', () => {

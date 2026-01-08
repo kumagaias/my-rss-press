@@ -19,9 +19,9 @@ export default function LanguageFilter({
 }: LanguageFilterProps) {
 
   const languages = [
-    { value: 'ALL' as const, label: locale === 'ja' ? 'すべて' : 'All' },
-    { value: 'JP' as const, label: locale === 'ja' ? '日本語' : 'Japanese' },
-    { value: 'EN' as const, label: locale === 'ja' ? '英語' : 'English' },
+    { value: 'ALL' as const, label: locale === 'ja' ? 'すべて' : 'All Languages' },
+    { value: 'EN' as const, label: 'English' },
+    { value: 'JP' as const, label: '日本語' },
   ];
 
   return (

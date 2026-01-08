@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import LanguageFilter from './LanguageFilter';
 import SearchInput from './SearchInput';
 import SortFilter from './SortFilter';
 import type { NewspaperData, Locale } from '@/types';
@@ -25,6 +24,11 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
     locale === 'ja' ? 'JP' : 'EN'
   );
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Auto-sync language filter when locale changes
+  useEffect(() => {
+    setSelectedLanguage(locale === 'ja' ? 'JP' : 'EN');
+  }, [locale]);
 
   const fetchNewspapers = useCallback(async () => {
     setIsLoading(true);
@@ -108,11 +112,6 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
           <SortFilter
             sortBy={sortBy}
             onSortChange={handleSortChange}
-            locale={locale}
-          />
-          <LanguageFilter
-            selectedLanguage={selectedLanguage}
-            onLanguageChange={setSelectedLanguage}
             locale={locale}
           />
           <SearchInput

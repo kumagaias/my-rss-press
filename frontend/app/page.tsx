@@ -31,6 +31,7 @@ export default function Home() {
   // Save locale to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('locale', locale);
+    sessionStorage.setItem('newspaperLocale', locale); // Sync to newspaper page
     console.log('[Home] Locale changed to:', locale);
     console.log('[Home] Topic keywords:', t.topicKeywords.slice(0, 5), '... (total:', t.topicKeywords.length, ')');
   }, [locale, t.topicKeywords]);

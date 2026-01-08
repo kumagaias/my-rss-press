@@ -38,12 +38,19 @@ export default function DateNavigation({
   // Create today's date at UTC midnight for comparison
   const todayJST = new Date(Date.UTC(todayYear, todayMonth, todayDay, 0, 0, 0, 0));
 
-  // Calculate 7 days ago
+  // Calculate 7 days ago (retention period limit)
+  // Newspapers older than 7 days are automatically deleted by cleanup service
   const sevenDaysAgo = new Date(todayJST);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  // Check if previous day is available (not older than 7 days)
-  const canGoPrevious = current > sevenDaysAgo;
+  // Check if previous day would be available (not older than 7 days)
+  // We need to check if the PREVIOUS day (current - 1) would be within the 7-day window
+  // Example: If today is 2026-01-10, sevenDaysAgo is 2026-01-03
+  // - Current: 2026-01-04, Previous would be: 2026-01-03 (>= sevenDaysAgo) → Show button
+  // - Current: 2026-01-03, Previous would be: 2026-01-02 (< sevenDaysAgo) → Hide button
+  const previousDay = new Date(current);
+  previousDay.setDate(previousDay.getDate() - 1);
+  const canGoPrevious = previousDay >= sevenDaysAgo;
 
   // Check if next day is available (not future)
   const canGoNext = current < todayJST;

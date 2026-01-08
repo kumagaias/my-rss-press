@@ -210,7 +210,7 @@ describe('PopularNewspapers', () => {
       },
     ];
 
-    it('filters newspapers by selected language', async () => {
+    it('auto-filters newspapers by locale (EN)', async () => {
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ newspapers: newspapersWithLanguages }),
@@ -218,42 +218,26 @@ describe('PopularNewspapers', () => {
 
       render(<PopularNewspapers locale="en" />);
 
+      // Should automatically show only EN newspapers
       await waitFor(() => {
         expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
-      });
-
-      // Change language filter to JP using select
-      const languageSelect = screen.getByRole('combobox', { name: /language/i });
-      fireEvent.change(languageSelect, { target: { value: 'JP' } });
-
-      // Should show only JP newspapers and legacy newspapers (backward compatibility)
-      await waitFor(() => {
-        expect(screen.queryByText('Tech News Daily')).not.toBeInTheDocument();
-        expect(screen.getByText('Sports Weekly')).toBeInTheDocument();
+        expect(screen.queryByText('Sports Weekly')).not.toBeInTheDocument();
         expect(screen.getByText('Bilingual News')).toBeInTheDocument();
         expect(screen.getByText('Legacy News')).toBeInTheDocument();
       });
     });
 
-    it('shows all newspapers when ALL is selected', async () => {
+    it('auto-filters newspapers by locale (JP)', async () => {
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ newspapers: newspapersWithLanguages }),
       });
 
-      render(<PopularNewspapers locale="en" />);
+      render(<PopularNewspapers locale="ja" />);
 
+      // Should automatically show only JP newspapers
       await waitFor(() => {
-        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
-      });
-
-      // Change language filter to ALL using select
-      const languageSelect = screen.getByRole('combobox', { name: /language/i });
-      fireEvent.change(languageSelect, { target: { value: 'ALL' } });
-
-      // Should show all newspapers
-      await waitFor(() => {
-        expect(screen.getByText('Tech News Daily')).toBeInTheDocument();
+        expect(screen.queryByText('Tech News Daily')).not.toBeInTheDocument();
         expect(screen.getByText('Sports Weekly')).toBeInTheDocument();
         expect(screen.getByText('Bilingual News')).toBeInTheDocument();
         expect(screen.getByText('Legacy News')).toBeInTheDocument();
@@ -268,18 +252,7 @@ describe('PopularNewspapers', () => {
 
       render(<PopularNewspapers locale="en" />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Legacy News')).toBeInTheDocument();
-      });
-
       // Legacy News should be visible in EN filter
-      expect(screen.getByText('Legacy News')).toBeInTheDocument();
-
-      // Change language filter to JP using select
-      const languageSelect = screen.getByRole('combobox', { name: /language/i });
-      fireEvent.change(languageSelect, { target: { value: 'JP' } });
-
-      // Legacy News should still be visible in JP filter
       await waitFor(() => {
         expect(screen.getByText('Legacy News')).toBeInTheDocument();
       });
@@ -414,7 +387,7 @@ describe('PopularNewspapers', () => {
       },
     ];
 
-    it('applies both language and search filters', async () => {
+    it('applies both language (auto) and search filters', async () => {
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ newspapers: newspapersWithLanguages }),
@@ -422,19 +395,17 @@ describe('PopularNewspapers', () => {
 
       render(<PopularNewspapers locale="en" />);
 
+      // Should automatically filter by EN language
       await waitFor(() => {
         expect(screen.getByText('English Tech News')).toBeInTheDocument();
+        expect(screen.queryByText('Japanese Sports News')).not.toBeInTheDocument();
       });
-
-      // Filter by EN language
-      const enButton = screen.getByText('English');
-      fireEvent.click(enButton);
 
       // Search for "sports"
       const searchInput = screen.getByPlaceholderText(/search by newspaper name/i);
       fireEvent.change(searchInput, { target: { value: 'sports' } });
 
-      // Should show only English Sports News
+      // Should show only English Sports News (EN language + sports in name)
       await waitFor(() => {
         expect(screen.queryByText('English Tech News')).not.toBeInTheDocument();
         expect(screen.queryByText('Japanese Sports News')).not.toBeInTheDocument();

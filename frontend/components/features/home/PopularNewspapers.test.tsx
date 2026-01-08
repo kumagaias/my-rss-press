@@ -176,7 +176,7 @@ describe('PopularNewspapers', () => {
     });
   });
 
-  describe('Language Filter', () => {
+  describe('Auto Language Filter by Locale', () => {
     const newspapersWithLanguages: NewspaperData[] = [
       {
         ...mockNewspapers[0],

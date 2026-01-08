@@ -376,9 +376,9 @@ function NewspaperContent() {
 
       {/* Newspaper Content */}
       <div className="max-w-7xl mx-auto px-4 py-8 relative">
-        {/* Loading overlay for date changes */}
-        {isDateChanging && (
-          <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-20">
+        {/* Loading overlay for date changes or initial load */}
+        {(isDateChanging || loading) ? (
+          <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <div className="flex gap-2 justify-center mb-4">
                 <div className="w-2 h-12 bg-gray-900 animate-pulse" style={{ animationDelay: '0ms' }}></div>
@@ -389,16 +389,16 @@ function NewspaperContent() {
               <p className="text-gray-600">{t.loading}</p>
             </div>
           </div>
+        ) : (
+          <NewspaperLayout
+            articles={newspaper.articles}
+            newspaperName={newspaper.name}
+            userName={newspaper.userName}
+            createdAt={new Date(newspaper.newspaperDate)}
+            locale={locale}
+            summary={newspaper.summary}
+          />
         )}
-        
-        <NewspaperLayout
-          articles={newspaper.articles}
-          newspaperName={newspaper.name}
-          userName={newspaper.userName}
-          createdAt={new Date(newspaper.newspaperDate)}
-          locale={locale}
-          summary={newspaper.summary}
-        />
       </div>
 
       {/* Newspaper Settings Modal */}

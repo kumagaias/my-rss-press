@@ -45,12 +45,13 @@ export default function DateNavigation({
 
   // Check if previous day would be available (not older than 7 days)
   // We need to check if the PREVIOUS day (current - 1) would be within the 7-day window
-  // Example: If today is 2026-01-10, sevenDaysAgo is 2026-01-03
-  // - Current: 2026-01-04, Previous would be: 2026-01-03 (>= sevenDaysAgo) → Show button
-  // - Current: 2026-01-03, Previous would be: 2026-01-02 (< sevenDaysAgo) → Hide button
+  // Use > (not >=) to prevent navigation to exactly 7 days ago
+  // Example: If today is 2026-01-08, sevenDaysAgo is 2026-01-01
+  // - Current: 2026-01-02, Previous would be: 2026-01-01 (== sevenDaysAgo) → Hide button
+  // - Current: 2026-01-03, Previous would be: 2026-01-02 (> sevenDaysAgo) → Show button
   const previousDay = new Date(current);
   previousDay.setDate(previousDay.getDate() - 1);
-  const canGoPrevious = previousDay >= sevenDaysAgo;
+  const canGoPrevious = previousDay > sevenDaysAgo;
 
   // Check if next day is available (not future)
   const canGoNext = current < todayJST;

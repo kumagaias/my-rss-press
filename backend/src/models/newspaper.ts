@@ -10,6 +10,7 @@ export interface Article {
   imageUrl?: string;
   importance: number;
   feedSource?: string; // RSS feed URL that this article came from (for language detection)
+  feedTitle?: string; // Feed title from RSS metadata (for display)
 }
 
 export type Locale = 'en' | 'ja';

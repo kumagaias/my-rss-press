@@ -77,6 +77,16 @@ describe('DateNavigation', () => {
       const previousButton = screen.queryByRole('button', { name: /previous/i });
       expect(previousButton).not.toBeInTheDocument();
     });
+
+    it('should hide previous button when previous day would be exactly 7 days ago', () => {
+      // If today is 2025-12-10, 7 days ago is 2025-12-03
+      // When viewing 2025-12-04, previous button should be hidden
+      // because previous day (2025-12-03) would be exactly 7 days ago
+      render(<DateNavigation {...defaultProps} currentDate="2025-12-04" />);
+
+      const previousButton = screen.queryByRole('button', { name: /previous/i });
+      expect(previousButton).not.toBeInTheDocument();
+    });
   });
 
   describe('Next Day Button', () => {

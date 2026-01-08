@@ -48,6 +48,9 @@ describe('DateNavigation', () => {
     });
 
     it('should be hidden when current date is 7 days ago', () => {
+      // If today is 2025-12-10, 7 days ago is 2025-12-03
+      // When viewing 2025-12-03, previous button should be hidden
+      // because previous day (2025-12-02) would be 8 days ago
       render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
       const previousButton = screen.queryByRole('button', { name: /previous/i });
@@ -66,6 +69,9 @@ describe('DateNavigation', () => {
     });
 
     it('should not be present when at 7-day limit', () => {
+      // If today is 2025-12-10, 7 days ago is 2025-12-03
+      // When viewing 2025-12-03, previous button should be hidden
+      // because previous day (2025-12-02) would be 8 days ago
       render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
       const previousButton = screen.queryByRole('button', { name: /previous/i });
@@ -117,6 +123,9 @@ describe('DateNavigation', () => {
     });
 
     it('should hide previous button for dates older than 7 days', () => {
+      // If today is 2025-12-10, 7 days ago is 2025-12-03
+      // When viewing 2025-12-03, previous button should be hidden
+      // because previous day (2025-12-02) would be 8 days ago
       render(<DateNavigation {...defaultProps} currentDate="2025-12-03" />);
 
       const previousButton = screen.queryByRole('button', { name: /previous/i });

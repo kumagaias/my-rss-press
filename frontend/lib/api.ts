@@ -82,21 +82,26 @@ export async function saveNewspaper(
   languages?: string[],
   summary?: string | null
 ): Promise<{ newspaperId: string; createdAt: string }> {
+  const payload = {
+    name: settings.newspaperName,
+    userName: settings.userName,
+    feedUrls,
+    articles,
+    isPublic: settings.isPublic,
+    locale, // Language setting for the newspaper
+    languages, // Detected language tags (e.g., ["JP", "EN"])
+    summary, // AI-generated summary (may be null)
+  };
+  
+  console.log('[API] Saving newspaper with payload:', payload);
+  console.log('[API] feedUrls being sent:', feedUrls);
+  
   const response = await fetch(`${API_BASE_URL}/api/newspapers`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      name: settings.newspaperName,
-      userName: settings.userName,
-      feedUrls,
-      articles,
-      isPublic: settings.isPublic,
-      locale, // Language setting for the newspaper
-      languages, // Detected language tags (e.g., ["JP", "EN"])
-      summary, // AI-generated summary (may be null)
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {

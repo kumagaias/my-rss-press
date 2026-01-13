@@ -70,6 +70,9 @@ export function NewspaperSettingsModal({
     // Filter out default feeds - only save user-selected feeds
     const feedUrls = feeds.filter(f => !f.isDefault).map(f => f.url);
     
+    console.log('[NewspaperSettings] All feeds:', feeds);
+    console.log('[NewspaperSettings] Filtered feedUrls (excluding defaults):', feedUrls);
+    
     // Ensure at least one user feed exists (default feeds don't count)
     if (feedUrls.length === 0) {
       setFeedError(t.feedRequired || 'At least one feed is required');

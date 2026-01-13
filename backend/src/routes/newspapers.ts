@@ -231,19 +231,23 @@ newspapersRouter.post(
         console.error('[OneClick] Failed to record usage (non-blocking):', error);
       });
 
-      // Step 8: Update feed metadata with actual titles
-      const enrichedFeedMetadata = feedMetadata.map(f => ({
-        ...f,
-        title: feedTitles.get(f.url) || f.title,
-        language: feedLanguages.get(f.url),
-      }));
+      // Step 8: Update feed metadata with actual titles and filter out default feeds
+      // Default feeds are internal implementation - don't expose to frontend
+      const enrichedFeedMetadata = feedMetadata
+        .filter(f => !f.isDefault) // Only return user-selected feeds
+        .map(f => ({
+          ...f,
+          title: feedTitles.get(f.url) || f.title,
+          language: feedLanguages.get(f.url),
+        }));
 
       console.log('[OneClick] Generation complete!');
+      console.log(`[OneClick] Returning ${enrichedFeedMetadata.length} user-selected feeds (${feedMetadata.length - enrichedFeedMetadata.length} default feeds excluded)`);
 
       // Return complete newspaper data
       return c.json({
         articles: articlesWithImportance,
-        feedUrls,
+        feedUrls: feedMetadata.filter(f => !f.isDefault).map(f => f.url), // Only user-selected feed URLs
         feedMetadata: enrichedFeedMetadata,
         newspaperName: feedSuggestions.newspaperName,
         summary,

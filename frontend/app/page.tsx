@@ -64,8 +64,6 @@ export default function Home() {
 
       const data = await response.json();
       console.log('[Home] Generation successful, got', data.articles.length, 'articles');
-      console.log('[Home] Feed metadata received:', data.feedMetadata);
-      console.log('[Home] Default feeds count:', data.feedMetadata?.filter((f: any) => f.isDefault).length || 0);
       
       // Store data in sessionStorage for the newspaper page
       sessionStorage.setItem('newspaperArticles', JSON.stringify(data.articles));

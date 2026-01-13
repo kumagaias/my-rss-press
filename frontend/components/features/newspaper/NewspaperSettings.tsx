@@ -47,8 +47,6 @@ export function NewspaperSettingsModal({
   // Update feeds when initialFeeds changes
   useEffect(() => {
     if (isOpen && initialFeeds.length > 0) {
-      console.log('[NewspaperSettings] Received initialFeeds:', initialFeeds);
-      console.log('[NewspaperSettings] Default feeds count:', initialFeeds.filter(f => f.isDefault).length);
       setFeeds(initialFeeds);
     }
   }, [isOpen, initialFeeds]);
@@ -69,13 +67,13 @@ export function NewspaperSettingsModal({
       userName: userName.trim() || 'Anonymous',
       isPublic,
     };
-    // Filter out default feeds - only save user-selected feeds
-    const feedUrls = feeds.filter(f => !f.isDefault).map(f => f.url);
     
-    console.log('[NewspaperSettings] All feeds:', feeds);
-    console.log('[NewspaperSettings] Filtered feedUrls (excluding defaults):', feedUrls);
+    // All feeds in the list are user-selected (no default feeds from backend)
+    const feedUrls = feeds.map(f => f.url);
     
-    // Ensure at least one user feed exists (default feeds don't count)
+    console.log('[NewspaperSettings] Saving with feeds:', feedUrls);
+    
+    // Ensure at least one feed exists
     if (feedUrls.length === 0) {
       setFeedError(t.feedRequired || 'At least one feed is required');
       return;
@@ -168,19 +166,19 @@ export function NewspaperSettingsModal({
           </p>
         </div>
 
-        {/* Feed List - Only show user-selected feeds (exclude defaults) */}
+        {/* Feed List */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t.feedsUsed}
           </label>
           <div className="border border-gray-300 rounded-md max-h-48 overflow-y-auto">
-            {feeds.filter(f => !f.isDefault).length === 0 ? (
+            {feeds.length === 0 ? (
               <p className="text-sm text-gray-500 p-3 text-center">
                 {t.feedRequired}
               </p>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {feeds.filter(f => !f.isDefault).map((feed) => (
+                {feeds.map((feed) => (
                   <li key={feed.url} className="p-3 flex items-center justify-between hover:bg-gray-50">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
@@ -246,7 +244,7 @@ export function NewspaperSettingsModal({
           </Button>
           <button
             onClick={handleSave}
-            disabled={feeds.filter(f => !f.isDefault).length === 0}
+            disabled={feeds.length === 0}
             className="px-6 py-3 text-base font-serif font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {t.save}

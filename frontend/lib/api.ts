@@ -93,9 +93,6 @@ export async function saveNewspaper(
     summary, // AI-generated summary (may be null)
   };
   
-  console.log('[API] Saving newspaper with payload:', payload);
-  console.log('[API] feedUrls being sent:', feedUrls);
-  
   const response = await fetch(`${API_BASE_URL}/api/newspapers`, {
     method: 'POST',
     headers: {

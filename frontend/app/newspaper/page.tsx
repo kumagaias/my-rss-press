@@ -96,8 +96,6 @@ function NewspaperContent() {
         if (feedMetadataJson) {
           try {
             const metadata = JSON.parse(feedMetadataJson);
-            console.log('[Newspaper Page] Loaded feedMetadata from sessionStorage:', metadata);
-            console.log('[Newspaper Page] Default feeds count:', metadata.filter((f: any) => f.isDefault).length);
             setFeedMetadata(metadata);
           } catch (err) {
             console.error('Error parsing feed metadata:', err);

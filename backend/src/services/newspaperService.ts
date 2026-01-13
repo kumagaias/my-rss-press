@@ -10,6 +10,7 @@ import { config } from '../config.js';
 import { nanoid } from 'nanoid';
 import { DEFAULT_LANGUAGE } from '../constants.js';
 import { NewspaperData, Article, Locale } from '../models/newspaper.js';
+import { isDefaultFeed } from './defaultFeedService.js';
 
 // DynamoDB client configuration
 const dynamoClient = new DynamoDBClient({
@@ -37,11 +38,16 @@ export async function saveNewspaper(
   const newspaperId = nanoid();
   const now = new Date().toISOString();
 
+  // Filter out default feeds before saving
+  const userFeedUrls = newspaper.feedUrls.filter(url => !isDefaultFeed(url));
+  
+  console.log(`[Newspaper Service] Filtered feeds: ${newspaper.feedUrls.length} -> ${userFeedUrls.length}`);
+
   const newspaperData: NewspaperData = {
     newspaperId,
     name: newspaper.name,
     userName: newspaper.userName,
-    feedUrls: newspaper.feedUrls,
+    feedUrls: userFeedUrls, // Only user-selected feeds
     articles: newspaper.articles,
     createdAt: now,
     updatedAt: now,

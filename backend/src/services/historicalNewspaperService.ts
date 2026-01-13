@@ -12,10 +12,12 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { config } from '../config.js';
 import { NewspaperData } from '../models/newspaper.js';
-import { fetchArticles, type Article as RSSArticle } from './rssFetcherService.js';
+import { fetchArticles, balanceArticlesAcrossFeeds, type Article as RSSArticle } from './rssFetcherService.js';
 import { calculateImportance } from './importanceCalculator.js';
 import { detectLanguages } from './languageDetectionService.js';
 import { getNewspaper } from './newspaperService.js';
+import { fetchDefaultFeedArticles, isDefaultFeed, getDefaultFeeds } from './defaultFeedService.js';
+import { limitDefaultFeedArticles, type FeedMetadata } from './articleLimiter.js';
 
 // DynamoDB client configuration
 const dynamoClient = new DynamoDBClient({
@@ -145,13 +147,15 @@ export async function fetchArticlesForDate(
  * @param date - Date string in YYYY-MM-DD format
  * @param feedUrls - Array of RSS feed URLs
  * @param theme - User theme
+ * @param locale - User locale (en/ja)
  * @returns Newspaper data
  */
 export async function getOrCreateNewspaper(
   newspaperId: string,
   date: string,
   feedUrls: string[],
-  theme: string
+  theme: string,
+  locale: 'en' | 'ja' = 'en'
 ): Promise<NewspaperData> {
   // Validate date
   const validation = validateDate(date);
@@ -173,21 +177,78 @@ export async function getOrCreateNewspaper(
   const newspaperName = originalNewspaper?.name || `Newspaper for ${date}`;
   const userName = originalNewspaper?.userName || 'System';
 
-  // Fetch articles for the date
-  const { articles, feedLanguages } = await fetchArticlesForDate(feedUrls, date);
+  // Separate user feeds and default feeds
+  const userFeeds = feedUrls.filter(url => !isDefaultFeed(url));
+  const hasDefaultFeeds = userFeeds.length < feedUrls.length;
+  
+  console.log(`[Historical Newspaper] User feeds: ${userFeeds.length}, Has default feeds: ${hasDefaultFeeds}`);
+
+  // Fetch articles from user-selected feeds
+  const { articles: userArticles, feedLanguages } = await fetchArticlesForDate(userFeeds, date);
+  
+  // Fetch articles from default feeds
+  let defaultArticles: RSSArticle[] = [];
+  try {
+    const defaultFeedResult = await fetchDefaultFeedArticles(locale, date, 2);
+    // Convert Article (string pubDate) to RSSArticle (Date pubDate)
+    // feedSource is always set by defaultFeedService
+    defaultArticles = defaultFeedResult.articles.map(a => ({
+      title: a.title,
+      description: a.description,
+      link: a.link,
+      pubDate: new Date(a.pubDate),
+      imageUrl: a.imageUrl,
+      feedSource: a.feedSource!, // Always set by defaultFeedService
+      feedTitle: a.feedTitle,
+      importance: a.importance,
+    }));
+    console.log(`[Historical Newspaper] Fetched ${defaultArticles.length} articles from default feeds`);
+  } catch (error) {
+    console.error('[Historical Newspaper] Failed to fetch default feeds:', error);
+    // Continue without default feed articles
+  }
+
+  // Merge articles
+  const allArticles = [...userArticles, ...defaultArticles];
+  console.log(`[Historical Newspaper] Total articles before balancing: ${allArticles.length}`);
+
+  // Apply article balancing (same as regular newspaper generation)
+  // Target count: 8-15 articles, use upper bound for balancing
+  const balancedArticles = balanceArticlesAcrossFeeds(allArticles, 15);
+  console.log(`[Historical Newspaper] Articles after balancing: ${balancedArticles.length}`);
+
+  // Create feed metadata for article limiter
+  const feedMetadata: FeedMetadata[] = [];
+  const allFeedUrls = [...userFeeds, ...getDefaultFeeds(locale).map(f => f.url)];
+  for (const url of allFeedUrls) {
+    const isDefault = isDefaultFeed(url);
+    feedMetadata.push({ url, isDefault });
+  }
+
+  // Apply article limits (including default feed limits)
+  const limitedArticles = limitDefaultFeedArticles(balancedArticles, feedMetadata);
+  console.log(`[Historical Newspaper] Articles after limiting: ${limitedArticles.length}`);
 
   // Require at least 1 article (reduced from 3 for better UX)
-  if (articles.length < 1) {
+  if (limitedArticles.length < 1) {
     throw new Error('No articles found for this date. Please try a different date or add more RSS feeds.');
   }
 
   // Calculate importance scores
-  const articlesWithImportance = await calculateImportance(articles, theme);
+  const articlesWithImportance = await calculateImportance(limitedArticles, theme);
+
+  // Select 8-15 articles by importance
+  const targetCount = Math.floor(Math.random() * 8) + 8; // 8-15
+  const selectedArticles = articlesWithImportance
+    .sort((a, b) => (b.importance || 0) - (a.importance || 0))
+    .slice(0, Math.min(targetCount, articlesWithImportance.length));
+
+  console.log(`[Historical Newspaper] Selected ${selectedArticles.length} articles for newspaper`);
 
   // Detect languages
   let languages: string[] = [];
   try {
-    languages = await detectLanguages(articlesWithImportance, feedLanguages);
+    languages = await detectLanguages(selectedArticles, feedLanguages);
   } catch (error) {
     console.error('Error detecting languages:', error);
   }
@@ -199,8 +260,8 @@ export async function getOrCreateNewspaper(
     newspaperDate: date,
     name: newspaperName,
     userName: userName,
-    feedUrls,
-    articles: articlesWithImportance.map(a => ({
+    feedUrls: userFeeds, // Only save user-selected feeds
+    articles: selectedArticles.map(a => ({
       title: a.title,
       description: a.description,
       link: a.link,
@@ -215,7 +276,7 @@ export async function getOrCreateNewspaper(
     updatedAt: now,
     viewCount: 0,
     isPublic: false,
-    locale: 'en',
+    locale,
   };
 
   // Save to DynamoDB

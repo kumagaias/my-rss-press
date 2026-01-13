@@ -448,7 +448,8 @@ newspapersRouter.get('/newspapers/:id/:date{[0-9]{4}-[0-9]{2}-[0-9]{2}}', async 
       newspaperId,
       date,
       metadata.feedUrls,
-      'general' // Use a default theme for now
+      'general', // Use a default theme for now
+      metadata.locale || 'en' // Use newspaper's locale
     );
 
     // Increment view count for the base newspaper

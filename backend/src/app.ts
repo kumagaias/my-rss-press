@@ -5,6 +5,7 @@ import { rateLimit } from './middleware/rateLimit.js';
 import { feedsRouter } from './routes/feeds.js';
 import { newspapersRouter } from './routes/newspapers.js';
 import adminCategoriesRouter from './routes/admin/categories.js';
+import defaultFeedsRouter from './routes/defaultFeeds.js';
 import { preloadCategoryCache } from './services/categoryCache.js';
 
 export const app = new Hono();
@@ -60,3 +61,4 @@ app.get('/', (c) => {
 app.route('/api', feedsRouter);
 app.route('/api', newspapersRouter);
 app.route('/api/admin/categories', adminCategoriesRouter);
+app.route('/api/default-feeds', defaultFeedsRouter);

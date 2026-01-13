@@ -67,7 +67,15 @@ export function NewspaperSettingsModal({
       userName: userName.trim() || 'Anonymous',
       isPublic,
     };
-    const feedUrls = feeds.map(f => f.url);
+    // Filter out default feeds - only save user-selected feeds
+    const feedUrls = feeds.filter(f => !f.isDefault).map(f => f.url);
+    
+    // Ensure at least one user feed exists (default feeds don't count)
+    if (feedUrls.length === 0) {
+      setFeedError(t.feedRequired || 'At least one feed is required');
+      return;
+    }
+    
     onSave(settings, feedUrls);
     handleClose();
   };
@@ -238,7 +246,7 @@ export function NewspaperSettingsModal({
           </Button>
           <button
             onClick={handleSave}
-            disabled={feeds.length === 0}
+            disabled={feeds.filter(f => !f.isDefault).length === 0}
             className="px-6 py-3 text-base font-serif font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {t.save}

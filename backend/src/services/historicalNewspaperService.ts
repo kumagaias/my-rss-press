@@ -15,6 +15,7 @@ import { NewspaperData } from '../models/newspaper.js';
 import { fetchArticles, type Article as RSSArticle } from './rssFetcherService.js';
 import { calculateImportance } from './importanceCalculator.js';
 import { detectLanguages } from './languageDetectionService.js';
+import { getNewspaper } from './newspaperService.js';
 
 // DynamoDB client configuration
 const dynamoClient = new DynamoDBClient({
@@ -167,6 +168,11 @@ export async function getOrCreateNewspaper(
 
   console.log(`Creating new newspaper for ${newspaperId} on ${date}`);
 
+  // Get original newspaper metadata for name and userName
+  const originalNewspaper = await getNewspaper(newspaperId);
+  const newspaperName = originalNewspaper?.name || `Newspaper for ${date}`;
+  const userName = originalNewspaper?.userName || 'System';
+
   // Fetch articles for the date
   const { articles, feedLanguages } = await fetchArticlesForDate(feedUrls, date);
 
@@ -191,8 +197,8 @@ export async function getOrCreateNewspaper(
   const newspaper: NewspaperData = {
     newspaperId,
     newspaperDate: date,
-    name: `Newspaper for ${date}`,
-    userName: 'System',
+    name: newspaperName,
+    userName: userName,
     feedUrls,
     articles: articlesWithImportance.map(a => ({
       title: a.title,

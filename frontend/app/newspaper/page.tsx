@@ -248,18 +248,21 @@ function NewspaperContent() {
         <header className="bg-white border-b-4 border-black">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
             <div className="flex flex-col sm:flex-row justify-center items-center relative gap-4 sm:gap-0">
-              <div className="border-l-4 border-r-4 border-black px-4 py-2">
+              <button
+                onClick={() => router.push('/')}
+                className="border-l-4 border-r-4 border-black px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
                 <h1 className="text-2xl sm:text-4xl font-serif font-black text-black tracking-tight text-center">
                   {t.appName}
                 </h1>
                 <p className="text-gray-800 text-xs font-serif italic mt-1 text-center">
                   {t.appTagline}
                 </p>
-              </div>
+              </button>
               <div className="sm:absolute sm:right-0">
                 <button
                   onClick={() => router.push('/')}
-                  className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-black text-white hover:bg-gray-800 transition-colors"
+                  className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors"
                 >
                   {t.backToHome}
                 </button>
@@ -297,7 +300,7 @@ function NewspaperContent() {
           <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="px-6 py-3 border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors"
           >
             {t.backToHome}
           </button>
@@ -313,7 +316,7 @@ function NewspaperContent() {
           <p className="text-gray-600">{t.newspaperNotFound}</p>
           <button
             onClick={() => router.push('/')}
-            className="mt-4 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="mt-4 px-6 py-3 border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors"
           >
             {t.backToHome}
           </button>
@@ -351,7 +354,7 @@ function NewspaperContent() {
               {/* Back to Home Button */}
               <button
                 onClick={() => router.push('/')}
-                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-black text-white hover:bg-gray-800 transition-colors"
+                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors"
               >
                 {t.backToHome}
               </button>

@@ -286,7 +286,7 @@ export async function fetchArticlesForNewspaper(
  * @param targetCount - Target number of articles to select
  * @returns Balanced selection of articles
  */
-function balanceArticlesAcrossFeeds(articles: Article[], targetCount: number): Article[] {
+export function balanceArticlesAcrossFeeds(articles: Article[], targetCount: number): Article[] {
   // Group articles by feed source
   const articlesByFeed = new Map<string, Article[]>();
   

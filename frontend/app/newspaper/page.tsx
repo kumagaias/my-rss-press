@@ -63,8 +63,16 @@ function NewspaperContent() {
     
     if (idParam) {
       setId(idParam);
-    }
-    if (dateParam) {
+      
+      // If no date parameter and it's a saved newspaper (not temp-*),
+      // set today's date as default
+      if (!dateParam && !idParam.startsWith('temp-')) {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        setDate(today);
+      } else if (dateParam) {
+        setDate(dateParam);
+      }
+    } else if (dateParam) {
       setDate(dateParam);
     }
     

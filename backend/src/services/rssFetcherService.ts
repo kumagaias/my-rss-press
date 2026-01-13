@@ -184,15 +184,25 @@ function extractImageUrl(item: any): string | undefined {
 
 /**
  * Filter articles by date range
+ * Start from yesterday (1 day ago) to avoid timezone issues with "today"
  * @param articles - Array of articles
- * @param daysBack - Number of days to look back
+ * @param daysBack - Number of days to look back (from yesterday)
  * @returns Filtered articles
  */
 function filterByDate(articles: Article[], daysBack: number): Article[] {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+  // End date: Yesterday (to avoid timezone issues with incomplete "today")
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() - 1);
+  endDate.setHours(23, 59, 59, 999); // End of yesterday
+  
+  // Start date: daysBack days before yesterday
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - daysBack);
+  startDate.setHours(0, 0, 0, 0); // Start of that day
 
-  return articles.filter(article => article.pubDate >= cutoffDate);
+  return articles.filter(article => 
+    article.pubDate >= startDate && article.pubDate <= endDate
+  );
 }
 
 /**

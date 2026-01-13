@@ -193,7 +193,7 @@ export async function getOrCreateNewspaper(
     // Convert Article (string pubDate) to RSSArticle (Date pubDate)
     // Filter out any articles without feedSource to avoid runtime errors
     defaultArticles = defaultFeedResult.articles
-      .filter(a => a.feedSource != null)
+      .filter((a): a is typeof a & { feedSource: string } => a.feedSource != null)
       .map(a => ({
         title: a.title,
         description: a.description,

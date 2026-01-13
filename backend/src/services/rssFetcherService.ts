@@ -58,17 +58,11 @@ export async function fetchArticles(
       const feedUrl = feedUrls[index];
       const feedTitle = result.value.title;
       
-      console.log(`[DEBUG] Processing feed ${index}: ${feedUrl}`);
-      console.log(`[DEBUG] Feed title from RSS: ${feedTitle}`);
-      console.log(`[DEBUG] Articles before adding feedTitle: ${result.value.articles.length}`);
-      
       // Add feedTitle to each article
       const articlesWithTitle = result.value.articles.map(article => ({
         ...article,
         feedTitle: feedTitle || feedUrl.split('/')[2] || feedUrl,
       }));
-      
-      console.log(`[DEBUG] First article after adding feedTitle:`, JSON.stringify(articlesWithTitle[0], null, 2));
       
       allArticles.push(...articlesWithTitle);
       

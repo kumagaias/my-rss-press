@@ -98,6 +98,8 @@ const ArticleSchema = z.object({
   pubDate: z.string(),
   imageUrl: z.string().url().optional(),
   importance: z.number(),
+  feedSource: z.string().optional(), // RSS feed URL that this article came from
+  feedTitle: z.string().optional(), // Feed title from RSS metadata (for display)
 });
 
 const SaveNewspaperSchema = z.object({

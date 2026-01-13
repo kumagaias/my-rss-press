@@ -168,29 +168,24 @@ export function NewspaperSettingsModal({
           </p>
         </div>
 
-        {/* Feed List */}
+        {/* Feed List - Only show user-selected feeds (exclude defaults) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t.feedsUsed}
           </label>
           <div className="border border-gray-300 rounded-md max-h-48 overflow-y-auto">
-            {feeds.length === 0 ? (
+            {feeds.filter(f => !f.isDefault).length === 0 ? (
               <p className="text-sm text-gray-500 p-3 text-center">
                 {t.feedRequired}
               </p>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {feeds.map((feed) => (
+                {feeds.filter(f => !f.isDefault).map((feed) => (
                   <li key={feed.url} className="p-3 flex items-center justify-between hover:bg-gray-50">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {feed.title || feed.url}
                       </p>
-                      {feed.isDefault && (
-                        <span className="text-xs text-gray-500 italic">
-                          {t.defaultFeed}
-                        </span>
-                      )}
                     </div>
                     <button
                       onClick={() => handleRemoveFeed(feed.url)}

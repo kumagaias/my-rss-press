@@ -126,7 +126,7 @@ async function fetchArticlesFromFeed(
     title: item.title || '',
     description: item.contentSnippet || item.content || '',
     link: item.link || '',
-    pubDate: item.pubDate ? new Date(item.pubDate) : new Date(),
+    pubDate: item.pubDate || new Date().toISOString(),
     imageUrl: extractImageUrl(item),
     feedSource: feed.url,
     feedTitle: feed.title,

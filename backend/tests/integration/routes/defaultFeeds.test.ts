@@ -43,9 +43,18 @@ describe('Default Feeds API', () => {
     });
 
     it('should return 400 when date is in the future', async () => {
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + 1);
-      const dateStr = futureDate.toISOString().split('T')[0];
+      // Get tomorrow in JST
+      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const todayJST = new Date(nowJST);
+      todayJST.setHours(0, 0, 0, 0);
+      const futureDate = new Date(todayJST);
+      futureDate.setDate(todayJST.getDate() + 1);
+      
+      // Format as YYYY-MM-DD in JST
+      const year = futureDate.getFullYear();
+      const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+      const day = String(futureDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       
       const res = await app.request(`/api/default-feeds?locale=en&date=${dateStr}`);
       
@@ -55,9 +64,18 @@ describe('Default Feeds API', () => {
     });
 
     it('should return 400 when date is older than 7 days', async () => {
-      const oldDate = new Date();
-      oldDate.setDate(oldDate.getDate() - 8);
-      const dateStr = oldDate.toISOString().split('T')[0];
+      // Get 8 days ago in JST
+      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const todayJST = new Date(nowJST);
+      todayJST.setHours(0, 0, 0, 0);
+      const oldDate = new Date(todayJST);
+      oldDate.setDate(todayJST.getDate() - 8);
+      
+      // Format as YYYY-MM-DD in JST
+      const year = oldDate.getFullYear();
+      const month = String(oldDate.getMonth() + 1).padStart(2, '0');
+      const day = String(oldDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       
       const res = await app.request(`/api/default-feeds?locale=en&date=${dateStr}`);
       
@@ -75,7 +93,7 @@ describe('Default Feeds API', () => {
             title: 'Test Article',
             description: 'Description',
             link: 'https://example.com/1',
-            pubDate: new Date(),
+            pubDate: new Date().toISOString(),
             feedSource: 'https://example.com/feed',
             feedTitle: 'Test Feed',
             importance: 0,
@@ -103,7 +121,7 @@ describe('Default Feeds API', () => {
             title: 'テスト記事',
             description: '説明',
             link: 'https://example.jp/1',
-            pubDate: new Date(),
+            pubDate: new Date().toISOString(),
             feedSource: 'https://example.jp/feed',
             feedTitle: 'テストフィード',
             importance: 0,
@@ -134,7 +152,7 @@ describe('Default Feeds API', () => {
             title: 'Test Article',
             description: 'Description',
             link: 'https://example.com/1',
-            pubDate: today,
+            pubDate: today.toISOString(),
             feedSource: 'https://example.com/feed',
             feedTitle: 'Test Feed',
             importance: 0,
@@ -186,7 +204,12 @@ describe('Default Feeds API', () => {
       
       // Get today in JST
       const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-      const todayStr = nowJST.toISOString().split('T')[0];
+      
+      // Format as YYYY-MM-DD in JST
+      const year = nowJST.getFullYear();
+      const month = String(nowJST.getMonth() + 1).padStart(2, '0');
+      const day = String(nowJST.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
 
       vi.mocked(fetchDefaultFeedArticles).mockResolvedValue({
         articles: [],
@@ -204,9 +227,16 @@ describe('Default Feeds API', () => {
       
       // Get 7 days ago in JST
       const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-      const sevenDaysAgo = new Date(nowJST);
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const dateStr = sevenDaysAgo.toISOString().split('T')[0];
+      const todayJST = new Date(nowJST);
+      todayJST.setHours(0, 0, 0, 0);
+      const sevenDaysAgo = new Date(todayJST);
+      sevenDaysAgo.setDate(todayJST.getDate() - 7);
+      
+      // Format as YYYY-MM-DD in JST
+      const year = sevenDaysAgo.getFullYear();
+      const month = String(sevenDaysAgo.getMonth() + 1).padStart(2, '0');
+      const day = String(sevenDaysAgo.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
 
       vi.mocked(fetchDefaultFeedArticles).mockResolvedValue({
         articles: [],

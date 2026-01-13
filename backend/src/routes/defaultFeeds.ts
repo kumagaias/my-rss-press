@@ -106,6 +106,7 @@ function validateDate(date: string): { valid: boolean; error?: string } {
   const sevenDaysAgo = new Date(todayJST);
   sevenDaysAgo.setDate(todayJST.getDate() - 7);
 
+  // Allow dates from 7 days ago (inclusive) to today
   if (targetDate < sevenDaysAgo) {
     return { valid: false, error: 'Dates older than 7 days are not allowed' };
   }

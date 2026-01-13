@@ -159,7 +159,7 @@ GET /api/default-feeds?locale={locale}&date={date}
 curl "http://localhost:3001/api/default-feeds?locale=en"
 
 # Get Japanese default feed articles for specific date
-curl "http://localhost:3001/api/default-feeds?locale=ja&date=2026-01-13"
+curl "http://localhost:3001/api/default-feeds?locale=ja&date=2026-01-12"
 ```
 
 ### Root

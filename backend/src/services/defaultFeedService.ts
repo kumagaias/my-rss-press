@@ -73,7 +73,6 @@ export async function fetchDefaultFeedArticles(
 ): Promise<DefaultFeedArticlesResponse> {
   const defaultFeeds = getDefaultFeeds(locale);
   const results: Article[] = [];
-  let successfulFeeds = 0;
 
   console.log(`[Default Feed] Fetching articles for locale: ${locale}, date: ${date || 'last 7 days'}, limit: ${articlesPerFeed}/feed`);
 
@@ -82,7 +81,6 @@ export async function fetchDefaultFeedArticles(
     try {
       const articles = await fetchArticlesFromFeed(feed, date, articlesPerFeed);
       if (articles.length > 0) {
-        successfulFeeds++;
         console.log(`[Default Feed] ${feed.title}: ${articles.length} articles`);
         return articles;
       }
@@ -97,12 +95,15 @@ export async function fetchDefaultFeedArticles(
   const allResults = await Promise.all(fetchPromises);
   allResults.forEach(articles => results.push(...articles));
 
-  console.log(`[Default Feed] Total: ${results.length} articles from ${successfulFeeds}/${defaultFeeds.length} feeds`);
+  // Count successful feeds (those that returned articles)
+  const actualSuccessfulFeeds = allResults.filter(articles => articles.length > 0).length;
+
+  console.log(`[Default Feed] Total: ${results.length} articles from ${actualSuccessfulFeeds}/${defaultFeeds.length} feeds`);
 
   return {
     articles: results,
     totalFeeds: defaultFeeds.length,
-    successfulFeeds,
+    successfulFeeds: actualSuccessfulFeeds,
   };
 }
 
@@ -166,9 +167,13 @@ function filterArticlesByDate(articles: Article[], dateStr: string): Article[] {
   todayJST.setHours(0, 0, 0, 0);
 
   // End time: current time if today, otherwise end of day
-  const endTime = targetDate.getTime() === todayJST.getTime()
-    ? nowJST
-    : new Date(targetDate.setHours(23, 59, 59, 999));
+  let endTime: Date;
+  if (targetDate.getTime() === todayJST.getTime()) {
+    endTime = nowJST;
+  } else {
+    endTime = new Date(targetDate);
+    endTime.setHours(23, 59, 59, 999);
+  }
 
   // Filter articles within date range
   let filtered = articles.filter(article => {

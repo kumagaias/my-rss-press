@@ -2,23 +2,12 @@
  * Unit tests for Default Feed Service
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   getDefaultFeeds,
   isDefaultFeed,
-  fetchDefaultFeedArticles,
   type DefaultFeed,
 } from '../../../src/services/defaultFeedService.js';
-
-// Mock rss-parser
-vi.mock('rss-parser', () => {
-  const mockParseURL = vi.fn();
-  return {
-    default: class MockParser {
-      parseURL = mockParseURL;
-    },
-  };
-});
 
 describe('defaultFeedService', () => {
   describe('getDefaultFeeds', () => {
@@ -69,45 +58,6 @@ describe('defaultFeedService', () => {
     });
   });
 
-  describe('fetchDefaultFeedArticles', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-    });
-
-    it('should fetch articles from English default feeds', async () => {
-      // This test requires actual RSS parsing, skip for now
-      // TODO: Implement proper mocking strategy
-      expect(true).toBe(true);
-    });
-
-    it('should limit articles per feed', async () => {
-      // This test requires actual RSS parsing, skip for now
-      expect(true).toBe(true);
-    });
-
-    it('should handle feed fetch failures gracefully', async () => {
-      // This test requires actual RSS parsing, skip for now
-      expect(true).toBe(true);
-    });
-
-    it('should filter articles by date when date parameter is provided', async () => {
-      // This test requires actual RSS parsing, skip for now
-      expect(true).toBe(true);
-    });
-
-    it('should return empty array when all feeds fail', async () => {
-      // This test requires actual RSS parsing, skip for now
-      expect(true).toBe(true);
-    });
-
-    it('should include feedSource and feedTitle in articles', async () => {
-      // This test requires actual RSS parsing, skip for now
-      expect(true).toBe(true);
-    });
-
-    it('should extract image URLs from RSS items', async () => {
-      // This test requires actual RSS parsing, skip for now
-      expect(true).toBe(true);
-    });
-  });
+  // Note: fetchDefaultFeedArticles is tested via integration tests
+  // Unit tests would require complex RSS parser mocking
 });

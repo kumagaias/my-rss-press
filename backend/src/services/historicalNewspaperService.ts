@@ -191,20 +191,23 @@ export async function getOrCreateNewspaper(
   try {
     const defaultFeedResult = await fetchDefaultFeedArticles(locale, date, 2);
     // Convert Article (string pubDate) to RSSArticle (Date pubDate)
-    // feedSource is always set by defaultFeedService
-    defaultArticles = defaultFeedResult.articles.map(a => ({
-      title: a.title,
-      description: a.description,
-      link: a.link,
-      pubDate: new Date(a.pubDate),
-      imageUrl: a.imageUrl,
-      feedSource: a.feedSource!, // Always set by defaultFeedService
-      feedTitle: a.feedTitle,
-      importance: a.importance,
-    }));
+    // Filter out any articles without feedSource to avoid runtime errors
+    defaultArticles = defaultFeedResult.articles
+      .filter(a => a.feedSource != null)
+      .map(a => ({
+        title: a.title,
+        description: a.description,
+        link: a.link,
+        pubDate: new Date(a.pubDate),
+        imageUrl: a.imageUrl,
+        feedSource: a.feedSource,
+        feedTitle: a.feedTitle,
+        importance: a.importance,
+      }));
     console.log(`[Historical Newspaper] Fetched ${defaultArticles.length} articles from default feeds`);
   } catch (error) {
     console.error('[Historical Newspaper] Failed to fetch default feeds:', error);
+    console.warn('[Historical Newspaper] Proceeding without default feed articles; the generated newspaper may contain fewer or less diverse articles than usual.');
     // Continue without default feed articles
   }
 

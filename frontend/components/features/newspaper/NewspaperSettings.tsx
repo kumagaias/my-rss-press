@@ -236,14 +236,13 @@ export function NewspaperSettingsModal({
           <Button variant="outline" size="md" onClick={handleClose}>
             {t.cancel}
           </Button>
-          <Button 
-            variant="primary" 
-            size="md" 
+          <button
             onClick={handleSave}
             disabled={feeds.length === 0}
+            className="px-6 py-3 text-base font-serif font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {t.save}
-          </Button>
+          </button>
         </div>
       </div>
     </Modal>

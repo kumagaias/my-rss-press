@@ -201,6 +201,8 @@ export async function getOrCreateNewspaper(
       pubDate: a.pubDate.toISOString(), // Convert Date to string
       imageUrl: a.imageUrl,
       importance: a.importance || 0,
+      feedSource: a.feedSource,
+      feedTitle: a.feedTitle,
     })),
     languages,
     createdAt: now,

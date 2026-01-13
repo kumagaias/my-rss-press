@@ -54,7 +54,7 @@ export async function calculateImportance(
     const scores = parseImportanceResponse(response);
 
     // Assign importance scores to articles with penalty for default feeds
-    return articles.map((article, index) => {
+    const result = articles.map((article, index) => {
       let importance = scores[index] || 50; // Default to 50 if score missing
       
       // Apply penalty if article is from a default feed
@@ -68,12 +68,15 @@ export async function calculateImportance(
         importance,
       };
     });
+    
+    console.log(`[DEBUG] First article after calculateImportance:`, JSON.stringify(result[0], null, 2));
+    return result;
   } catch (error) {
     console.error('Bedrock importance calculation error:', error);
     console.log('Falling back to simple algorithm');
 
     // Fallback to simple algorithm with penalty for default feeds
-    return articles.map(article => {
+    const result = articles.map(article => {
       let importance = calculateImportanceFallback(article);
       
       // Apply penalty if article is from a default feed
@@ -87,6 +90,9 @@ export async function calculateImportance(
         importance,
       };
     });
+    
+    console.log(`[DEBUG] First article after calculateImportance (fallback):`, JSON.stringify(result[0], null, 2));
+    return result;
   }
 }
 

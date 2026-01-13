@@ -1,0 +1,222 @@
+/**
+ * Integration tests for Default Feeds API
+ */
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { app } from '../../../src/app.js';
+
+// Mock the default feed service
+vi.mock('../../../src/services/defaultFeedService.js', () => ({
+  fetchDefaultFeedArticles: vi.fn(),
+  getDefaultFeeds: vi.fn(),
+  isDefaultFeed: vi.fn(),
+}));
+
+describe('Default Feeds API', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('GET /api/default-feeds', () => {
+    it('should return 400 when locale is missing', async () => {
+      const res = await app.request('/api/default-feeds');
+      
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('Invalid query parameters');
+    });
+
+    it('should return 400 when locale is invalid', async () => {
+      const res = await app.request('/api/default-feeds?locale=invalid');
+      
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('Invalid query parameters');
+    });
+
+    it('should return 400 when date format is invalid', async () => {
+      const res = await app.request('/api/default-feeds?locale=en&date=2026-1-1');
+      
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('Invalid query parameters');
+    });
+
+    it('should return 400 when date is in the future', async () => {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 1);
+      const dateStr = futureDate.toISOString().split('T')[0];
+      
+      const res = await app.request(`/api/default-feeds?locale=en&date=${dateStr}`);
+      
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('Future dates are not allowed');
+    });
+
+    it('should return 400 when date is older than 7 days', async () => {
+      const oldDate = new Date();
+      oldDate.setDate(oldDate.getDate() - 8);
+      const dateStr = oldDate.toISOString().split('T')[0];
+      
+      const res = await app.request(`/api/default-feeds?locale=en&date=${dateStr}`);
+      
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('Dates older than 7 days are not allowed');
+    });
+
+    it('should return 200 with articles for valid English locale', async () => {
+      const { fetchDefaultFeedArticles } = await import('../../../src/services/defaultFeedService.js');
+      
+      vi.mocked(fetchDefaultFeedArticles).mockResolvedValue({
+        articles: [
+          {
+            title: 'Test Article',
+            description: 'Description',
+            link: 'https://example.com/1',
+            pubDate: new Date(),
+            feedSource: 'https://example.com/feed',
+            feedTitle: 'Test Feed',
+            importance: 0,
+          },
+        ],
+        totalFeeds: 4,
+        successfulFeeds: 4,
+      });
+
+      const res = await app.request('/api/default-feeds?locale=en');
+      
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.articles).toBeInstanceOf(Array);
+      expect(body.totalFeeds).toBe(4);
+      expect(body.successfulFeeds).toBe(4);
+    });
+
+    it('should return 200 with articles for valid Japanese locale', async () => {
+      const { fetchDefaultFeedArticles } = await import('../../../src/services/defaultFeedService.js');
+      
+      vi.mocked(fetchDefaultFeedArticles).mockResolvedValue({
+        articles: [
+          {
+            title: 'テスト記事',
+            description: '説明',
+            link: 'https://example.jp/1',
+            pubDate: new Date(),
+            feedSource: 'https://example.jp/feed',
+            feedTitle: 'テストフィード',
+            importance: 0,
+          },
+        ],
+        totalFeeds: 4,
+        successfulFeeds: 4,
+      });
+
+      const res = await app.request('/api/default-feeds?locale=ja');
+      
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.articles).toBeInstanceOf(Array);
+      expect(body.totalFeeds).toBe(4);
+      expect(body.successfulFeeds).toBe(4);
+    });
+
+    it('should return 200 with articles for valid date', async () => {
+      const { fetchDefaultFeedArticles } = await import('../../../src/services/defaultFeedService.js');
+      
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0];
+
+      vi.mocked(fetchDefaultFeedArticles).mockResolvedValue({
+        articles: [
+          {
+            title: 'Test Article',
+            description: 'Description',
+            link: 'https://example.com/1',
+            pubDate: today,
+            feedSource: 'https://example.com/feed',
+            feedTitle: 'Test Feed',
+            importance: 0,
+          },
+        ],
+        totalFeeds: 4,
+        successfulFeeds: 4,
+      });
+
+      const res = await app.request(`/api/default-feeds?locale=en&date=${dateStr}`);
+      
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.articles).toBeInstanceOf(Array);
+      expect(fetchDefaultFeedArticles).toHaveBeenCalledWith('en', dateStr);
+    });
+
+    it('should return 200 with empty articles when all feeds fail', async () => {
+      const { fetchDefaultFeedArticles } = await import('../../../src/services/defaultFeedService.js');
+      
+      vi.mocked(fetchDefaultFeedArticles).mockResolvedValue({
+        articles: [],
+        totalFeeds: 4,
+        successfulFeeds: 0,
+      });
+
+      const res = await app.request('/api/default-feeds?locale=en');
+      
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.articles).toEqual([]);
+      expect(body.successfulFeeds).toBe(0);
+    });
+
+    it('should return 500 when service throws unexpected error', async () => {
+      const { fetchDefaultFeedArticles } = await import('../../../src/services/defaultFeedService.js');
+      
+      vi.mocked(fetchDefaultFeedArticles).mockRejectedValue(new Error('Unexpected error'));
+
+      const res = await app.request('/api/default-feeds?locale=en');
+      
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to fetch default feed articles');
+    });
+
+    it('should handle date at boundary (today)', async () => {
+      const { fetchDefaultFeedArticles } = await import('../../../src/services/defaultFeedService.js');
+      
+      // Get today in JST
+      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const todayStr = nowJST.toISOString().split('T')[0];
+
+      vi.mocked(fetchDefaultFeedArticles).mockResolvedValue({
+        articles: [],
+        totalFeeds: 4,
+        successfulFeeds: 4,
+      });
+
+      const res = await app.request(`/api/default-feeds?locale=en&date=${todayStr}`);
+      
+      expect(res.status).toBe(200);
+    });
+
+    it('should handle date at boundary (7 days ago)', async () => {
+      const { fetchDefaultFeedArticles } = await import('../../../src/services/defaultFeedService.js');
+      
+      // Get 7 days ago in JST
+      const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const sevenDaysAgo = new Date(nowJST);
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const dateStr = sevenDaysAgo.toISOString().split('T')[0];
+
+      vi.mocked(fetchDefaultFeedArticles).mockResolvedValue({
+        articles: [],
+        totalFeeds: 4,
+        successfulFeeds: 4,
+      });
+
+      const res = await app.request(`/api/default-feeds?locale=en&date=${dateStr}`);
+      
+      expect(res.status).toBe(200);
+    });
+  });
+});

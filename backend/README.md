@@ -88,6 +88,80 @@ Response:
 }
 ```
 
+### Default Feeds
+
+Get articles from default RSS feeds.
+
+```bash
+GET /api/default-feeds?locale={locale}&date={date}
+```
+
+**Query Parameters:**
+- `locale` (required): Language locale - `en` or `ja`
+- `date` (optional): Date in YYYY-MM-DD format (JST timezone)
+  - If omitted, returns articles from last 7 days
+  - Must be within last 7 days
+  - Cannot be in the future
+
+**Response:**
+```json
+{
+  "articles": [
+    {
+      "title": "Article Title",
+      "description": "Article description",
+      "link": "https://example.com/article",
+      "pubDate": "2026-01-13T10:00:00.000Z",
+      "imageUrl": "https://example.com/image.jpg",
+      "feedSource": "https://example.com/feed",
+      "feedTitle": "Feed Name",
+      "importance": 0
+    }
+  ],
+  "totalFeeds": 4,
+  "successfulFeeds": 4
+}
+```
+
+**Error Responses:**
+
+400 Bad Request - Invalid parameters:
+```json
+{
+  "error": "Invalid query parameters",
+  "details": [
+    {
+      "field": "locale",
+      "message": "Locale must be \"en\" or \"ja\""
+    }
+  ]
+}
+```
+
+400 Bad Request - Invalid date:
+```json
+{
+  "error": "Future dates are not allowed"
+}
+```
+
+500 Internal Server Error:
+```json
+{
+  "error": "Failed to fetch default feed articles"
+}
+```
+
+**Examples:**
+
+```bash
+# Get English default feed articles (last 7 days)
+curl "http://localhost:3001/api/default-feeds?locale=en"
+
+# Get Japanese default feed articles for specific date
+curl "http://localhost:3001/api/default-feeds?locale=ja&date=2026-01-13"
+```
+
 ### Root
 
 ```bash

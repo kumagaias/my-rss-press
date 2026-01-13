@@ -47,6 +47,8 @@ export function NewspaperSettingsModal({
   // Update feeds when initialFeeds changes
   useEffect(() => {
     if (isOpen && initialFeeds.length > 0) {
+      console.log('[NewspaperSettings] Received initialFeeds:', initialFeeds);
+      console.log('[NewspaperSettings] Default feeds count:', initialFeeds.filter(f => f.isDefault).length);
       setFeeds(initialFeeds);
     }
   }, [isOpen, initialFeeds]);

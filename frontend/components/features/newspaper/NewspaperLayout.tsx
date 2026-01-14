@@ -88,8 +88,8 @@ export function NewspaperLayout({
         </div>
       </header>
 
-      {/* Summary Section */}
-      {summary && (
+      {/* Summary Section - Temporarily hidden (backend still generates it) */}
+      {/* {summary && (
         <div className="mb-8 pb-6 border-b-2 border-gray-400">
           <div className="bg-gray-50 border-2 border-gray-800 p-6 rounded shadow-sm">
             <h2 className="text-sm font-bold uppercase tracking-wider text-gray-600 mb-3">
@@ -100,7 +100,7 @@ export function NewspaperLayout({
             </p>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Lead Article (Most Important) - Always has an image */}
       <a

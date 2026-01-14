@@ -13,6 +13,7 @@ import {
 import { calculateImportance } from '../services/importanceCalculator.js';
 import { detectLanguages } from '../services/languageDetectionService.js';
 import { generateSummaryWithRetry } from '../services/summaryGenerationService.js';
+import { generateEditorialColumn } from '../services/editorialColumnService.js';
 import {
   getOrCreateNewspaper,
   getAvailableDates,
@@ -220,7 +221,26 @@ newspapersRouter.post(
         console.error('[OneClick] Error generating summary:', error);
       }
 
-      // Step 7: Record feed usage (fire-and-forget)
+      // Step 7: Generate editorial column
+      console.log('[OneClick] Step 7: Generating editorial column...');
+      let editorialColumn: string | null = null;
+      try {
+        const columnResult = await generateEditorialColumn({
+          articles: articlesWithImportance,
+          theme: validated.theme,
+          locale: validated.locale,
+          maxRetries: 2,
+        });
+        if (columnResult) {
+          editorialColumn = `${columnResult.title}\n\n${columnResult.column}`;
+          console.log(`[OneClick] Generated editorial column: ${columnResult.title}`);
+        }
+      } catch (error) {
+        console.error('[OneClick] Error generating editorial column:', error);
+        // Continue without column
+      }
+
+      // Step 8: Record feed usage (fire-and-forget)
       recordFeedUsageAsync(
         feedUrls,
         validated.theme,
@@ -231,7 +251,7 @@ newspapersRouter.post(
         console.error('[OneClick] Failed to record usage (non-blocking):', error);
       });
 
-      // Step 8: Update feed metadata with actual titles and filter out default feeds
+      // Step 9: Update feed metadata with actual titles and filter out default feeds
       // Default feeds are internal implementation - don't expose to frontend
       const enrichedFeedMetadata = feedMetadata
         .filter(f => !f.isDefault) // Only return user-selected feeds
@@ -252,6 +272,7 @@ newspapersRouter.post(
         newspaperName: feedSuggestions.newspaperName,
         summary,
         languages,
+        editorialColumn,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

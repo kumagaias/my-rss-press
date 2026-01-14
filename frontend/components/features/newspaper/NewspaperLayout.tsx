@@ -4,6 +4,7 @@ import { Article } from '@/types';
 import { calculateLayout } from '@/lib/layoutCalculator';
 import { useTranslations, formatDate } from '@/lib/i18n';
 import { getPlaceholderImage } from '@/lib/placeholderImages';
+import { EditorialColumn } from './EditorialColumn';
 
 interface NewspaperLayoutProps {
   articles: Article[];
@@ -12,6 +13,7 @@ interface NewspaperLayoutProps {
   createdAt: Date;
   locale: 'en' | 'ja';
   summary?: string | null;
+  editorialColumn?: string | null;
 }
 
 /**
@@ -32,6 +34,7 @@ export function NewspaperLayout({
   createdAt,
   locale,
   summary,
+  editorialColumn,
 }: NewspaperLayoutProps) {
   const t = useTranslations(locale);
   const formattedDate = formatDate(createdAt, locale);
@@ -206,6 +209,11 @@ export function NewspaperLayout({
             </a>
           ))}
         </div>
+      )}
+
+      {/* Editorial Column */}
+      {editorialColumn && (
+        <EditorialColumn content={editorialColumn} locale={locale} />
       )}
     </div>
   );

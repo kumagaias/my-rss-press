@@ -229,7 +229,7 @@ newspapersRouter.post(
           articles: articlesWithImportance,
           theme: validated.theme,
           locale: validated.locale,
-          maxRetries: 2,
+          maxRetries: 1, // Reduced from 2 to avoid API Gateway timeout
         });
         if (columnResult) {
           editorialColumn = `${columnResult.title}\n\n${columnResult.column}`;

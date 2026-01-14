@@ -145,7 +145,7 @@ function parseEditorialResponse(responseText: string): EditorialColumnResult | n
 export async function generateEditorialColumn(
   options: EditorialColumnOptions
 ): Promise<EditorialColumnResult | null> {
-  const { articles, theme, locale, maxRetries = 2 } = options;
+  const { articles, theme, locale, maxRetries = 1 } = options; // Reduced from 2 to 1
 
   // Validate inputs
   if (!articles || articles.length === 0) {
@@ -177,11 +177,11 @@ export async function generateEditorialColumn(
         }),
       });
 
-      // Execute with timeout (5 seconds)
+      // Execute with timeout (3 seconds)
       const response = await Promise.race([
         bedrockClient.send(command),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Bedrock API timeout')), 5000)
+          setTimeout(() => reject(new Error('Bedrock API timeout')), 3000)
         ),
       ]);
 

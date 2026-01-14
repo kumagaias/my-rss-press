@@ -28,6 +28,7 @@ interface Newspaper {
   articles: Article[];
   newspaperDate: string;
   summary?: string;
+  editorialColumn?: string;
   languages?: string[];
 }
 
@@ -90,6 +91,7 @@ function NewspaperContent() {
         const feedsJson = sessionStorage.getItem('newspaperFeeds');
         const languagesJson = sessionStorage.getItem('newspaperLanguages');
         const summary = sessionStorage.getItem('newspaperSummary');
+        const editorialColumn = sessionStorage.getItem('newspaperEditorialColumn');
         const feedMetadataJson = sessionStorage.getItem('newspaperFeedMetadata');
 
         // Load feed metadata
@@ -117,6 +119,7 @@ function NewspaperContent() {
             articles,
             newspaperDate: new Date().toISOString(),
             summary: summary || undefined,
+            editorialColumn: editorialColumn || undefined,
             languages,
           };
 
@@ -207,6 +210,7 @@ function NewspaperContent() {
       // Get data from sessionStorage for newly generated newspapers
       const languagesJson = sessionStorage.getItem('newspaperLanguages');
       const summary = sessionStorage.getItem('newspaperSummary');
+      const editorialColumn = sessionStorage.getItem('newspaperEditorialColumn');
 
       const languages = languagesJson ? JSON.parse(languagesJson) : newspaper.languages || [];
 
@@ -216,7 +220,8 @@ function NewspaperContent() {
         newspaper.articles,
         locale,
         languages,
-        summary || undefined
+        summary || undefined,
+        editorialColumn || undefined
       );
 
       // Clear sessionStorage after successful save
@@ -228,6 +233,7 @@ function NewspaperContent() {
       sessionStorage.removeItem('newspaperLocale');
       sessionStorage.removeItem('newspaperLanguages');
       sessionStorage.removeItem('newspaperSummary');
+      sessionStorage.removeItem('newspaperEditorialColumn');
 
       setIsSaved(true);
 
@@ -401,6 +407,7 @@ function NewspaperContent() {
             createdAt={new Date(newspaper.newspaperDate)}
             locale={locale}
             summary={newspaper.summary}
+            editorialColumn={newspaper.editorialColumn}
           />
         )}
       </div>

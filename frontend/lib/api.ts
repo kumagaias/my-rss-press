@@ -80,7 +80,8 @@ export async function saveNewspaper(
   articles?: Article[],
   locale: 'en' | 'ja' = 'en',
   languages?: string[],
-  summary?: string | null
+  summary?: string | null,
+  editorialColumn?: string | null
 ): Promise<{ newspaperId: string; createdAt: string }> {
   const payload = {
     name: settings.newspaperName,
@@ -91,6 +92,7 @@ export async function saveNewspaper(
     locale, // Language setting for the newspaper
     languages, // Detected language tags (e.g., ["JP", "EN"])
     summary, // AI-generated summary (may be null)
+    editorialColumn, // AI-generated editorial column (may be null)
   };
   
   const response = await fetch(`${API_BASE_URL}/api/newspapers`, {
@@ -154,6 +156,7 @@ export async function generateNewspaperOneClick(
   feedMetadata: Array<{ url: string; title: string; isDefault: boolean; language?: string }>;
   newspaperName: string;
   summary: string | null;
+  editorialColumn: string | null;
   languages: string[];
 }> {
   const response = await fetch(`${API_BASE_URL}/api/newspapers/generate`, {

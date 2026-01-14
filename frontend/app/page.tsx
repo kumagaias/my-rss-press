@@ -76,6 +76,9 @@ export default function Home() {
       if (data.summary) {
         sessionStorage.setItem('newspaperSummary', data.summary);
       }
+      if (data.editorialColumn) {
+        sessionStorage.setItem('newspaperEditorialColumn', data.editorialColumn);
+      }
       
       // Navigate to newspaper page
       router.push('/newspaper');

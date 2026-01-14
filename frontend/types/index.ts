@@ -40,6 +40,7 @@ export interface NewspaperData {
   languages?: string[]; // Language tags detected from articles (e.g., ["JP", "EN"])
   summary?: string | null; // AI-generated summary (100-200 characters, may be null)
   newspaperDate?: string; // For historical newspapers only: the date for which articles were fetched (YYYY-MM-DD format)
+  editorialColumn?: string | null; // AI-generated editorial column (may be null)
 }
 
 export interface NewspaperSettings {

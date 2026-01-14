@@ -31,4 +31,5 @@ export interface NewspaperData {
   languages?: string[]; // Language tags detected from articles (e.g., ["JP", "EN"])
   summary?: string; // AI-generated summary (100-200 characters)
   newspaperDate?: string; // Date of the newspaper (YYYY-MM-DD format)
+  editorialColumn?: string; // AI-generated editorial column
 }

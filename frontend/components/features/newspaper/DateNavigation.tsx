@@ -89,44 +89,49 @@ export default function DateNavigation({
   );
 
   return (
-    <div className="flex items-center justify-center gap-4 py-4">
-      {/* Only show Previous button if available */}
-      {canGoPrevious && (
-        <button
-          onClick={handlePrevious}
-          disabled={isLoading}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            isLoading
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-gray-800 text-white hover:bg-gray-700'
-          }`}
-          aria-label={t.previousDay || 'Previous day'}
-        >
-          ← {t.previousDay || 'Previous'}
-        </button>
-      )}
+    <div className="grid grid-cols-[140px_1fr_140px] items-center gap-4 py-4 max-w-4xl mx-auto">
+      {/* Previous button - fixed width column */}
+      <div className="flex justify-end">
+        {canGoPrevious && (
+          <button
+            onClick={handlePrevious}
+            disabled={isLoading}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              isLoading
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gray-800 text-white hover:bg-gray-700'
+            }`}
+            aria-label={t.previousDay || 'Previous day'}
+          >
+            ← {t.previousDay || 'Previous'}
+          </button>
+        )}
+      </div>
 
-      <div className="text-center min-w-[200px]">
+      {/* Date display - flexible center column */}
+      <div className="text-center">
         <div className="text-lg font-semibold text-gray-800">
           {formattedDate}
         </div>
       </div>
 
-      {/* Only show Next button if available */}
-      {canGoNext && (
-        <button
-          onClick={handleNext}
-          disabled={isLoading}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            isLoading
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-gray-800 text-white hover:bg-gray-700'
-          }`}
-          aria-label={t.nextDay || 'Next day'}
-        >
-          {t.nextDay || 'Next'} →
-        </button>
-      )}
+      {/* Next button - fixed width column */}
+      <div className="flex justify-start">
+        {canGoNext && (
+          <button
+            onClick={handleNext}
+            disabled={isLoading}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              isLoading
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gray-800 text-white hover:bg-gray-700'
+            }`}
+            aria-label={t.nextDay || 'Next day'}
+          >
+            {t.nextDay || 'Next'} →
+          </button>
+        )}
+      </div>
     </div>
   );
 }

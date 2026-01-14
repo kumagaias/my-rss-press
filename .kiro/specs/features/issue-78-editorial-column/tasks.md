@@ -17,7 +17,7 @@
 - [ ] Implement `generateEditorialColumn()` function
 - [ ] Implement `buildEditorialPrompt()` helper function
 - [ ] Add English prompt template (editorial style)
-- [ ] Add Japanese prompt template (編集後記 style)
+- [ ] Add Japanese prompt template (コラム style)
 - [ ] Integrate with AWS Bedrock (Claude 3 Haiku)
 - [ ] Add error handling and graceful degradation
 - [ ] Add timeout handling (5 seconds)

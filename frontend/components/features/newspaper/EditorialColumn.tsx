@@ -32,7 +32,7 @@ export function EditorialColumn({ content, locale }: EditorialColumnProps) {
       <div className="bg-amber-50 border-2 border-gray-800 p-6 md:p-8 rounded shadow-sm">
         {/* Section Label */}
         <div className="text-xs font-bold uppercase tracking-wider text-gray-600 mb-4 border-b border-gray-400 pb-2">
-          {locale === 'ja' ? '編集後記' : "Editor's Note"}
+          {locale === 'ja' ? 'コラム' : "Editor's Note"}
         </div>
 
         {/* Column Title */}

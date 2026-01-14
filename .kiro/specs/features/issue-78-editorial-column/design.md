@@ -371,7 +371,7 @@ const translations = {
   },
   ja: {
     // ... existing translations
-    editorialColumn: "編集後記",
+    editorialColumn: "コラム",
     dailyReflection: "今日の一言",
     tenseiJingo: "天声人語",
   },

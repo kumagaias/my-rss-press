@@ -37,7 +37,7 @@ Add an AI-generated editorial column to the newspaper layout. The column should 
   - Title: "Editor's Note" or "Daily Reflection"
   - Content: English editorial text
 - **FR-2.2**: Support Japanese language
-  - Title: "編集後記" (Editorial Note)
+  - Title: "コラム" (Column)
   - Content: Japanese editorial text
 - **FR-2.3**: Language detection based on newspaper locale
 

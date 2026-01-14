@@ -258,32 +258,34 @@ export async function getOrCreateNewspaper(
     console.error('Error detecting languages:', error);
   }
 
-  // Generate summary (optional)
-  let summary: string | null = null;
-  try {
-    summary = await generateSummaryWithRetry(selectedArticles, theme, languages, 2);
-    if (summary) {
-      console.log(`[Historical Newspaper] Generated summary: ${summary.substring(0, 50)}...`);
-    }
-  } catch (error) {
-    console.error('[Historical Newspaper] Error generating summary:', error);
-  }
-
-  // Generate editorial column (optional)
-  let editorialColumn: string | null = null;
-  try {
-    const columnResult = await generateEditorialColumn({
+  // Generate summary and editorial column in parallel (optional)
+  const [summaryResult, editorialResult] = await Promise.allSettled([
+    generateSummaryWithRetry(selectedArticles, theme, languages, 2),
+    generateEditorialColumn({
       articles: selectedArticles,
       theme,
       locale,
       maxRetries: 2,
-    });
-    if (columnResult) {
-      editorialColumn = `${columnResult.title}\n\n${columnResult.column}`;
-      console.log(`[Historical Newspaper] Generated editorial column: ${columnResult.title}`);
-    }
-  } catch (error) {
-    console.error('[Historical Newspaper] Error generating editorial column:', error);
+    }),
+  ]);
+
+  // Extract summary
+  let summary: string | null = null;
+  if (summaryResult.status === 'fulfilled' && summaryResult.value) {
+    summary = summaryResult.value;
+    console.log(`[Historical Newspaper] Generated summary: ${summary.substring(0, 50)}...`);
+  } else if (summaryResult.status === 'rejected') {
+    console.error('[Historical Newspaper] Error generating summary:', summaryResult.reason);
+  }
+
+  // Extract editorial column
+  let editorialColumn: string | null = null;
+  if (editorialResult.status === 'fulfilled' && editorialResult.value) {
+    const columnResult = editorialResult.value;
+    editorialColumn = `${columnResult.title}\n\n${columnResult.column}`;
+    console.log(`[Historical Newspaper] Generated editorial column: ${columnResult.title}`);
+  } else if (editorialResult.status === 'rejected') {
+    console.error('[Historical Newspaper] Error generating editorial column:', editorialResult.reason);
   }
 
   // Create newspaper data

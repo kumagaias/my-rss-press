@@ -20,8 +20,6 @@ interface EditorialColumnProps {
  * - Serif font for traditional feel
  */
 export function EditorialColumn({ content, locale }: EditorialColumnProps) {
-  const t = useTranslations(locale);
-
   // Parse title and column from content
   // Format: "Title\n\nColumn content"
   const [title, ...columnParts] = content.split('\n\n');

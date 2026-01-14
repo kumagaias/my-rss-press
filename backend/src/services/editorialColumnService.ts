@@ -54,7 +54,7 @@ function buildEditorialPrompt(
   if (locale === 'ja') {
     return `あなたは伝統的な新聞コラムを書く思慮深いコラムニストです。
 
-以下の記事をもとに、簡潔なコラム（150-200文字）を書いてください：
+以下の記事をもとに、簡潔なコラム（300〜400文字程度）を書いてください：
 1. 今日の記事のテーマを織り交ぜる
 2. 関連する歴史的逸話や哲学的な引用を含める
 3. テクノロジー/ニュースを、より広い人間のテーマに結びつける
@@ -70,7 +70,7 @@ ${articleSummaries}
 
 形式:
 タイトル: [詩的または示唆に富むタイトル]
-コラム: [150-200文字のコラム内容]`;
+コラム: [300〜400文字程度のコラム内容]`;
   }
 
   // English prompt
@@ -107,9 +107,9 @@ Column: [150-200 words of editorial content]`;
  */
 function parseEditorialResponse(responseText: string): EditorialColumnResult | null {
   try {
-    // Try to extract title and column using regex
-    const titleMatch = responseText.match(/Title:\s*(.+?)(?:\n|$)/i);
-    const columnMatch = responseText.match(/Column:\s*(.+)/is);
+    // Try to extract title and column using regex (support both English and Japanese labels)
+    const titleMatch = responseText.match(/(?:Title|タイトル):\s*(.+?)(?:\n|$)/i);
+    const columnMatch = responseText.match(/(?:Column|コラム):\s*(.+)/is);
 
     if (titleMatch && columnMatch) {
       return {

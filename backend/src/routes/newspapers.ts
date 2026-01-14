@@ -236,7 +236,7 @@ newspapersRouter.post(
       const enrichedFeedMetadata = feedMetadata
         .filter(f => !f.isDefault) // Only return user-selected feeds
         .map(f => ({
-          ...f,
+          url: f.url,
           title: feedTitles.get(f.url) || f.title,
           language: feedLanguages.get(f.url),
         }));

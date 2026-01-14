@@ -129,7 +129,9 @@ describe('POST /api/newspapers/generate', () => {
     expect(data).toHaveProperty('summary');
     expect(data).toHaveProperty('languages');
     expect(data.articles.length).toBeGreaterThanOrEqual(3);
-    expect(data.feedMetadata).toHaveLength(2);
+    // Only user-selected feeds are returned (default feeds excluded)
+    expect(data.feedMetadata).toHaveLength(1);
+    expect(data.feedMetadata[0].isDefault).toBeUndefined(); // isDefault not included for user feeds
     expect(data.languages).toEqual(['EN']);
     expect(data.newspaperName).toBe('Technology News');
   });
@@ -230,8 +232,12 @@ describe('POST /api/newspapers/generate', () => {
 
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.feedMetadata[0].isDefault).toBe(false);
-    expect(data.feedMetadata[1].isDefault).toBe(true);
+    // Only user-selected feeds are returned (default feeds excluded)
+    expect(data.feedMetadata).toHaveLength(1);
+    expect(data.feedMetadata[0].url).toBe('http://feed1.com');
+    expect(data.feedMetadata[0].isDefault).toBeUndefined();
+    expect(data.feedUrls).toHaveLength(1);
+    expect(data.feedUrls[0]).toBe('http://feed1.com');
   });
 
   it('should call article limiter with correct parameters', async () => {

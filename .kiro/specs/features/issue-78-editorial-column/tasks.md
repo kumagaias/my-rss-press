@@ -16,8 +16,8 @@
 - [ ] Create service file with TypeScript interfaces
 - [ ] Implement `generateEditorialColumn()` function
 - [ ] Implement `buildEditorialPrompt()` helper function
-- [ ] Add English prompt template (Tensei Jingo style)
-- [ ] Add Japanese prompt template (天声人語 style)
+- [ ] Add English prompt template (editorial style)
+- [ ] Add Japanese prompt template (編集後記 style)
 - [ ] Integrate with AWS Bedrock (Claude 3 Haiku)
 - [ ] Add error handling and graceful degradation
 - [ ] Add timeout handling (5 seconds)

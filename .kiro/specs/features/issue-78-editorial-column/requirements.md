@@ -4,11 +4,10 @@
 
 ## Overview
 
-Add an AI-generated editorial column (similar to Asahi Shimbun's "Tensei Jingo") to the newspaper layout. The column should weave together the day's articles with historical anecdotes and philosophical insights, creating a narrative that connects technology news to broader human themes.
+Add an AI-generated editorial column to the newspaper layout. The column should weave together the day's articles with historical anecdotes and philosophical insights, creating a narrative that connects technology news to broader human themes.
 
 ## Reference
 
-- **Asahi Shimbun's Tensei Jingo**: https://www.asahi.com/rensai/list.html?id=61
 - **Example newspaper**: https://www.my-rss-press.com/newspaper?id=tEF8jSGEL-q8PBUOsNy2E
 
 ## User Stories
@@ -29,7 +28,7 @@ Add an AI-generated editorial column (similar to Asahi Shimbun's "Tensei Jingo")
 ### FR-1: Content Generation
 - **FR-1.1**: Generate editorial column using AWS Bedrock (Claude 3 Haiku)
 - **FR-1.2**: Column length: 150-200 words
-- **FR-1.3**: Style: Tensei Jingo (weave articles with historical/philosophical insights)
+- **FR-1.3**: Style: Editorial style (weave articles with historical/philosophical insights)
 - **FR-1.4**: Input: articles array, theme, locale
 - **FR-1.5**: Output: editorial text with title
 
@@ -38,7 +37,7 @@ Add an AI-generated editorial column (similar to Asahi Shimbun's "Tensei Jingo")
   - Title: "Editor's Note" or "Daily Reflection"
   - Content: English editorial text
 - **FR-2.2**: Support Japanese language
-  - Title: "天声人語" (Tensei Jingo)
+  - Title: "編集後記" (Editorial Note)
   - Content: Japanese editorial text
 - **FR-2.3**: Language detection based on newspaper locale
 

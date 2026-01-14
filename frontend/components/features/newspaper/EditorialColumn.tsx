@@ -11,7 +11,7 @@ interface EditorialColumnProps {
  * Editorial Column Component
  * 
  * Displays an AI-generated editorial column in the style of
- * traditional newspaper editorials (e.g., Tensei Jingo from Asahi Shimbun).
+ * traditional newspaper editorials.
  * 
  * Features:
  * - Styled box with border and background
@@ -32,7 +32,7 @@ export function EditorialColumn({ content, locale }: EditorialColumnProps) {
       <div className="bg-amber-50 border-2 border-gray-800 p-6 md:p-8 rounded shadow-sm">
         {/* Section Label */}
         <div className="text-xs font-bold uppercase tracking-wider text-gray-600 mb-4 border-b border-gray-400 pb-2">
-          {locale === 'ja' ? '天声人語' : "Editor's Note"}
+          {locale === 'ja' ? '編集後記' : "Editor's Note"}
         </div>
 
         {/* Column Title */}

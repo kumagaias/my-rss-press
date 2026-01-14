@@ -7,7 +7,7 @@
 
 ## Overview
 
-This document describes the technical design for implementing an AI-generated editorial column (Tensei Jingo style) in the newspaper layout.
+This document describes the technical design for implementing an AI-generated editorial column in the newspaper layout.
 
 ## Architecture
 
@@ -105,7 +105,7 @@ function buildEditorialPrompt(
 
 ```typescript
 // Prompt template for English
-const ENGLISH_PROMPT = `You are a thoughtful editorial columnist writing in the style of traditional newspaper editorials like "Tensei Jingo" from Asahi Shimbun.
+const ENGLISH_PROMPT = `You are a thoughtful editorial columnist writing in the style of traditional newspaper editorials.
 
 Your task is to write a brief editorial column (150-200 words) that:
 1. Weaves together the themes from today's articles
@@ -285,7 +285,7 @@ interface EditorialColumnProps {
  * Editorial Column Component
  * 
  * Displays an AI-generated editorial column in the style of
- * traditional newspaper editorials (e.g., Tensei Jingo).
+ * traditional newspaper editorials.
  * 
  * Features:
  * - Styled box with border and background
@@ -368,7 +368,6 @@ const translations = {
     // ... existing translations
     editorialColumn: "Editor's Note",
     dailyReflection: "Daily Reflection",
-    tenseiJingo: "Tensei Jingo",
   },
   ja: {
     // ... existing translations

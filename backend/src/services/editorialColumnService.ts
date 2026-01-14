@@ -2,7 +2,7 @@
  * Editorial Column Service
  * 
  * Generates AI-powered editorial columns in the style of traditional
- * newspaper editorials (e.g., Asahi Shimbun's "Tensei Jingo").
+ * newspaper editorials.
  * 
  * Features:
  * - Weaves together article themes with historical/philosophical insights
@@ -52,7 +52,7 @@ function buildEditorialPrompt(
     .join('\n');
 
   if (locale === 'ja') {
-    return `あなたは朝日新聞の「天声人語」のような、伝統的な新聞コラムを書く思慮深いコラムニストです。
+    return `あなたは伝統的な新聞コラムを書く思慮深いコラムニストです。
 
 以下の記事をもとに、簡潔なコラム（150-200文字）を書いてください：
 1. 今日の記事のテーマを織り交ぜる
@@ -74,7 +74,7 @@ ${articleSummaries}
   }
 
   // English prompt
-  return `You are a thoughtful editorial columnist writing in the style of traditional newspaper editorials like "Tensei Jingo" from Asahi Shimbun.
+  return `You are a thoughtful editorial columnist writing in the style of traditional newspaper editorials.
 
 Your task is to write a brief editorial column (150-200 words) that:
 1. Weaves together the themes from today's articles

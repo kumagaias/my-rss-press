@@ -90,12 +90,20 @@ export function transformResponse(response: GoogleBooksResponse): BookData[] {
       continue;
     }
 
+    let infoLink = volumeInfo.infoLink;
+    if (!infoLink) {
+      infoLink = `https://www.google.com/search?q=${encodeURIComponent(volumeInfo.title)}`;
+      console.warn('Google Books volume missing infoLink; using search URL fallback', {
+        title: volumeInfo.title,
+      });
+    }
+
     books.push({
       title: volumeInfo.title,
       authors: volumeInfo.authors,
       description: volumeInfo.description,
       thumbnail: volumeInfo.imageLinks?.thumbnail || volumeInfo.imageLinks?.smallThumbnail,
-      infoLink: volumeInfo.infoLink || `https://www.google.com/search?q=${encodeURIComponent(volumeInfo.title)}`,
+      infoLink,
     });
   }
 

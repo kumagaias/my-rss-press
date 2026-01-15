@@ -106,8 +106,8 @@ export function extractKeywords(
 
   // Extract additional keywords from editorial content
   if (editorialContent && editorialContent.trim().length > 0) {
-    // For Japanese, extract nouns (simplified approach: words 2+ chars)
-    // For English, extract capitalized words and longer words
+    // For Japanese, extract words with 2+ characters (simplified keyword extraction)
+    // For English, extract capitalized words or words with 5+ characters
     const words = editorialContent.split(/\s+/);
     
     const additionalKeywords = words
@@ -118,7 +118,7 @@ export function extractKeywords(
           return cleaned.length >= 2;
         } else {
           // English: capitalized words or words 5+ chars
-          return cleaned.length >= 5 || /^[A-Z]/.test(word);
+          return cleaned.length >= 5 || /^[A-Z]/.test(cleaned);
         }
       })
       .map((word) => word.replace(/[^\p{L}\p{N}]/gu, ''))

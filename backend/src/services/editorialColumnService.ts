@@ -45,54 +45,58 @@ function buildEditorialPrompt(
   theme: string,
   locale: 'en' | 'ja'
 ): string {
-  // Prepare article summaries (max 8 articles for context)
+  // Prepare article summaries with more detail (max 5 articles for focused context)
   const articleSummaries = articles
-    .slice(0, 8)
-    .map((a, i) => `${i + 1}. ${a.title}`)
-    .join('\n');
+    .slice(0, 5)
+    .map((a, i) => `${i + 1}. ${a.title}\n   ${a.description.substring(0, 150)}...`)
+    .join('\n\n');
 
   if (locale === 'ja') {
     return `あなたは伝統的な新聞コラムを書く思慮深いコラムニストです。
 
-以下の記事をもとに、簡潔なコラム（300〜400文字程度）を書いてください：
-1. 今日の記事のテーマを織り交ぜる
-2. 関連する歴史的逸話や哲学的な引用を含める
-3. テクノロジー/ニュースを、より広い人間のテーマに結びつける
-4. 思慮深く、内省的なトーンを保つ
-5. 印象的な洞察や観察で締めくくる
+以下の記事の内容を踏まえて、簡潔なコラム（200〜250文字）を書いてください：
+
+【重要な指示】
+1. 記事の具体的な内容やトピックに言及すること
+2. 記事から読み取れる現代社会の課題や傾向を考察する
+3. 歴史的な視点や哲学的な洞察を加える
+4. 読者に考えさせる問いかけや示唆で締めくくる
+5. 必ず200〜250文字以内に収めること
 
 テーマ: ${theme}
 
-記事:
+記事の内容:
 ${articleSummaries}
 
-日本語でコラムを書いてください。歴史や哲学に言及する魅力的な書き出しで始め、今日のニュースと結びつけ、考えさせられる結論で終わってください。
+日本語でコラムを書いてください。記事の具体的な内容に触れながら、より広い視点で考察してください。
 
 形式:
-タイトル: [詩的または示唆に富むタイトル]
-コラム: [300〜400文字程度のコラム内容]`;
+タイトル: [記事の内容を反映した示唆に富むタイトル]
+コラム: [200〜250文字のコラム内容]`;
   }
 
   // English prompt
   return `You are a thoughtful editorial columnist writing in the style of traditional newspaper editorials.
 
-Your task is to write a brief editorial column (150-200 words) that:
-1. Weaves together the themes from today's articles
-2. Includes a relevant historical anecdote or philosophical reference
-3. Connects the technology/news to broader human themes
-4. Maintains a thoughtful, reflective tone
-5. Ends with a memorable insight or observation
+Your task is to write a brief editorial column (100-150 words) that:
+
+【Important Instructions】
+1. Reference specific content and topics from the articles
+2. Reflect on contemporary issues or trends revealed in the articles
+3. Add historical perspective or philosophical insight
+4. End with a thought-provoking question or suggestion
+5. Keep it strictly within 100-150 words
 
 Theme: ${theme}
 
-Articles:
+Article content:
 ${articleSummaries}
 
-Write the editorial column in English. Start with a compelling opening that references history or philosophy, then connect it to today's news, and end with a thought-provoking conclusion.
+Write the editorial column in English. Reference the specific article content while providing broader perspective and insight.
 
 Format:
-Title: [A poetic or thought-provoking title]
-Column: [150-200 words of editorial content]`;
+Title: [A thought-provoking title reflecting the article content]
+Column: [100-150 words of editorial content]`;
 }
 
 /**
@@ -167,7 +171,7 @@ export async function generateEditorialColumn(
         accept: 'application/json',
         body: JSON.stringify({
           anthropic_version: 'bedrock-2023-05-31',
-          max_tokens: 500, // Enough for 150-200 words
+          max_tokens: 400, // Enough for 100-150 words (EN) or 200-250 chars (JP)
           messages: [
             {
               role: 'user',

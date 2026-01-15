@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalFooter } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Button } from '@/components/ui/Button';
@@ -237,20 +237,21 @@ export function NewspaperSettingsModal({
             {t.publicNote}
           </p>
         </div> */}
-
-        <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" size="md" onClick={handleClose}>
-            {t.cancel}
-          </Button>
-          <button
-            onClick={handleSave}
-            disabled={feeds.length === 0}
-            className="px-6 py-3 text-base font-serif font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {t.save}
-          </button>
-        </div>
       </div>
+
+      {/* Sticky Footer with Buttons */}
+      <ModalFooter>
+        <Button variant="outline" size="md" onClick={handleClose}>
+          {t.cancel}
+        </Button>
+        <button
+          onClick={handleSave}
+          disabled={feeds.length === 0}
+          className="px-6 py-3 text-base font-serif font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {t.save}
+        </button>
+      </ModalFooter>
     </Modal>
   );
 }

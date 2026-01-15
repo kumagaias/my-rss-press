@@ -640,15 +640,18 @@ newspapersRouter.post('/newspapers', async (c) => {
     const newspaperId = await saveNewspaper(validated);
 
     // Generate editorial column asynchronously (fire-and-forget)
-    console.log(`[Save Newspaper] Scheduling editorial column generation for ${newspaperId}`);
-    generateEditorialColumnAsync(
-      newspaperId,
-      validated.articles,
-      validated.name, // Use newspaper name as theme
-      validated.locale || 'en'
-    ).catch(error => {
-      console.error(`[Save Newspaper] Background editorial column generation failed for ${newspaperId}:`, error);
-    });
+    // Only if articles exist
+    if (validated.articles && validated.articles.length > 0) {
+      console.log(`[Save Newspaper] Scheduling editorial column generation for ${newspaperId}`);
+      generateEditorialColumnAsync(
+        newspaperId,
+        validated.articles,
+        validated.name, // Use newspaper name as theme
+        validated.locale || 'en'
+      ).catch(error => {
+        console.error(`[Save Newspaper] Background editorial column generation failed for ${newspaperId}:`, error);
+      });
+    }
 
     return c.json(
       {

@@ -7,6 +7,15 @@
 
 import { searchBooks } from './googleBooksClient.js';
 
+/**
+ * Minimal article shape used for book recommendations.
+ * Only requires title for keyword extraction.
+ */
+export interface ArticleForRecommendation {
+  title: string;
+  description?: string;
+}
+
 export interface BookRecommendation {
   title: string;
   authors: string[];
@@ -16,14 +25,11 @@ export interface BookRecommendation {
   contentType: 'book';
 }
 
-export interface Article {
-  title: string;
-  description: string;
-  [key: string]: any;
-}
-
 const TIMEOUT_MS = 5000; // 5 seconds
 const BOOK_COUNT = 2;
+const TOP_ARTICLES_COUNT = 5; // Number of top articles to extract keywords from
+const EDITORIAL_KEYWORD_COUNT = 2; // Maximum keywords from editorial content
+const ARTICLE_KEYWORD_COUNT = 3; // Maximum keywords from article titles
 
 /**
  * Generate book recommendations based on theme, editorial content, and articles
@@ -37,7 +43,7 @@ const BOOK_COUNT = 2;
 export async function generateBookRecommendations(
   theme: string,
   editorialContent: string,
-  articles: Article[],
+  articles: ArticleForRecommendation[],
   language: 'en' | 'ja'
 ): Promise<BookRecommendation[]> {
   try {
@@ -64,7 +70,7 @@ export async function generateBookRecommendations(
 async function generateRecommendationsInternal(
   theme: string,
   editorialContent: string,
-  articles: Article[],
+  articles: ArticleForRecommendation[],
   language: 'en' | 'ja'
 ): Promise<BookRecommendation[]> {
   // Extract keywords from theme, editorial, and articles
@@ -105,7 +111,7 @@ async function generateRecommendationsInternal(
 export function extractKeywords(
   theme: string,
   editorialContent: string,
-  articles: Article[],
+  articles: ArticleForRecommendation[],
   language: 'en' | 'ja'
 ): string[] {
   const keywords: string[] = [];
@@ -117,15 +123,18 @@ export function extractKeywords(
 
   // Extract keywords from editorial content (up to 2)
   if (editorialContent && editorialContent.trim().length > 0) {
-    const editorialKeywords = extractWordsFromText(editorialContent, language, 2);
+    const editorialKeywords = extractWordsFromText(editorialContent, language, EDITORIAL_KEYWORD_COUNT);
     keywords.push(...editorialKeywords);
   }
 
   // Extract keywords from article titles (up to 3 from top articles)
   if (articles && articles.length > 0) {
-    const topArticles = articles.slice(0, 5); // Use top 5 articles
-    const articleTitles = topArticles.map(a => a.title).join(' ');
-    const articleKeywords = extractWordsFromText(articleTitles, language, 3);
+    const topArticles = articles.slice(0, TOP_ARTICLES_COUNT);
+    const articleTitles = topArticles
+      .filter(a => a && a.title)
+      .map(a => a.title)
+      .join(' ');
+    const articleKeywords = extractWordsFromText(articleTitles, language, ARTICLE_KEYWORD_COUNT);
     keywords.push(...articleKeywords);
   }
 

@@ -177,11 +177,11 @@ export async function generateEditorialColumn(
         }),
       });
 
-      // Execute with timeout (3 seconds)
+      // Execute with timeout (10 seconds for async generation)
       const response = await Promise.race([
         bedrockClient.send(command),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Bedrock API timeout')), 3000)
+          setTimeout(() => reject(new Error('Bedrock API timeout')), 10000)
         ),
       ]);
 

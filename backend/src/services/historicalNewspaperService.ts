@@ -20,6 +20,7 @@ import { generateEditorialColumn } from './editorialColumnService.js';
 import { getNewspaper } from './newspaperService.js';
 import { fetchDefaultFeedArticles, isDefaultFeed, getDefaultFeeds } from './defaultFeedService.js';
 import { limitDefaultFeedArticles, type FeedMetadata } from './articleLimiter.js';
+import { generateBookRecommendations } from './bookRecommendationService.js';
 
 // DynamoDB client configuration
 const dynamoClient = new DynamoDBClient({
@@ -301,6 +302,21 @@ export async function getOrCreateNewspaper(
     // Continue without editorial column
   }
 
+  // Generate book recommendations (after editorial column, with 5 second timeout)
+  let bookRecommendations: Awaited<ReturnType<typeof generateBookRecommendations>> = [];
+  try {
+    if (editorialColumn) {
+      console.log(`[Historical Newspaper] Generating book recommendations for ${newspaperId} on ${date}`);
+      bookRecommendations = await generateBookRecommendations(theme, editorialColumn, locale);
+      console.log(`[Historical Newspaper] Generated ${bookRecommendations.length} book recommendations`);
+    } else {
+      console.log(`[Historical Newspaper] Skipping book recommendations (no editorial column)`);
+    }
+  } catch (error) {
+    console.error('[Historical Newspaper] Error generating book recommendations:', error);
+    // Continue without book recommendations
+  }
+
   // Create newspaper data
   const now = new Date().toISOString();
   const newspaper: NewspaperData = {
@@ -322,6 +338,7 @@ export async function getOrCreateNewspaper(
     languages,
     summary: summary || undefined,
     editorialColumn: editorialColumn || undefined,
+    bookRecommendations: bookRecommendations.length > 0 ? bookRecommendations : undefined,
     createdAt: now,
     updatedAt: now,
     viewCount: 0,
@@ -369,6 +386,7 @@ async function getNewspaperByDate(
     languages: result.Item.languages || [],
     summary: result.Item.summary,
     editorialColumn: result.Item.editorialColumn,
+    bookRecommendations: result.Item.bookRecommendations,
     createdAt: result.Item.createdAt,
     updatedAt: result.Item.updatedAt,
     viewCount: result.Item.viewCount,

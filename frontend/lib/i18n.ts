@@ -52,6 +52,10 @@ export const translations = {
     readMore: 'Read more',
     summary: 'Summary',
     
+    // Book recommendations
+    recommendedBooks: 'Recommended Books',
+    viewOnGoogleBooks: 'View on Google Books',
+    
     // Settings
     newspaperSettings: 'Newspaper Settings',
     newspaperName: 'Newspaper Name',
@@ -166,6 +170,10 @@ export const translations = {
     saveNewspaper: '新聞を保存',
     readMore: '続きを読む',
     summary: '要約',
+    
+    // 書籍推薦
+    recommendedBooks: '関連書籍',
+    viewOnGoogleBooks: 'Google Booksで見る',
     
     // 設定
     newspaperSettings: '新聞設定',

@@ -5,6 +5,7 @@ import { calculateLayout } from '@/lib/layoutCalculator';
 import { useTranslations, formatDate } from '@/lib/i18n';
 import { getPlaceholderImage } from '@/lib/placeholderImages';
 import { EditorialColumn } from './EditorialColumn';
+import { BookRecommendations, type BookRecommendation } from './BookRecommendations';
 
 interface NewspaperLayoutProps {
   articles: Article[];
@@ -14,6 +15,7 @@ interface NewspaperLayoutProps {
   locale: 'en' | 'ja';
   summary?: string | null;
   editorialColumn?: string | null;
+  bookRecommendations?: BookRecommendation[];
 }
 
 /**
@@ -35,6 +37,7 @@ export function NewspaperLayout({
   locale,
   summary,
   editorialColumn,
+  bookRecommendations,
 }: NewspaperLayoutProps) {
   const t = useTranslations(locale);
   const formattedDate = formatDate(createdAt, locale);
@@ -214,6 +217,15 @@ export function NewspaperLayout({
       {/* Editorial Column */}
       {editorialColumn && (
         <EditorialColumn content={editorialColumn} locale={locale} />
+      )}
+
+      {/* Book Recommendations */}
+      {bookRecommendations && bookRecommendations.length > 0 && (
+        <BookRecommendations
+          books={bookRecommendations}
+          sectionTitle={t.recommendedBooks}
+          viewOnGoogleBooksLabel={t.viewOnGoogleBooks}
+        />
       )}
     </div>
   );

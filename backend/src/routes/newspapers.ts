@@ -645,19 +645,24 @@ newspapersRouter.post('/newspapers', async (c) => {
       console.log(`[Save Newspaper] Scheduling editorial column generation for ${newspaperId}`);
       
       // Convert articles to RSSArticle format (pubDate: string -> Date)
-      const articlesForColumn = validated.articles.map(a => ({
-        ...a,
-        pubDate: new Date(a.pubDate),
-      }));
+      // Filter out articles without feedSource (required field)
+      const articlesForColumn = validated.articles
+        .filter((a): a is typeof a & { feedSource: string } => a.feedSource != null)
+        .map(a => ({
+          ...a,
+          pubDate: new Date(a.pubDate),
+        }));
       
-      generateEditorialColumnAsync(
-        newspaperId,
-        articlesForColumn,
-        validated.name, // Use newspaper name as theme
-        validated.locale || 'en'
-      ).catch(error => {
-        console.error(`[Save Newspaper] Background editorial column generation failed for ${newspaperId}:`, error);
-      });
+      if (articlesForColumn.length > 0) {
+        generateEditorialColumnAsync(
+          newspaperId,
+          articlesForColumn,
+          validated.name, // Use newspaper name as theme
+          validated.locale || 'en'
+        ).catch(error => {
+          console.error(`[Save Newspaper] Background editorial column generation failed for ${newspaperId}:`, error);
+        });
+      }
     }
 
     return c.json(

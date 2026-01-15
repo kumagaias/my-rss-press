@@ -143,7 +143,7 @@ Column: As Prometheus brought fire to humanity, today's AI researchers bring the
 
     it('should handle timeout', async () => {
       mockSend.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 10000)) // 10 second delay
+        new Promise(resolve => setTimeout(resolve, 15000)) // 15 second delay (longer than Bedrock timeout)
       );
 
       const result = await generateEditorialColumn({
@@ -154,7 +154,7 @@ Column: As Prometheus brought fire to humanity, today's AI researchers bring the
       });
 
       expect(result).toBeNull();
-    }, 10000); // 10 second test timeout
+    }, 15000); // 15 second test timeout
 
     it('should handle empty response from Bedrock', async () => {
       const mockResponse = {

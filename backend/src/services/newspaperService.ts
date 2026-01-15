@@ -251,3 +251,39 @@ export async function updateNewspaperEditorialColumn(
     throw error;
   }
 }
+
+/**
+ * Update historical newspaper's editorial column
+ * Used for async editorial column generation for date-based newspapers
+ * 
+ * @param newspaperId - Base newspaper ID (without DATE# prefix)
+ * @param date - Date string in YYYY-MM-DD format
+ * @param editorialColumn - Editorial column content
+ */
+export async function updateHistoricalNewspaperEditorialColumn(
+  newspaperId: string,
+  date: string,
+  editorialColumn: string
+): Promise<void> {
+  try {
+    await docClient.send(
+      new UpdateCommand({
+        TableName: config.dynamodbTable,
+        Key: {
+          PK: `NEWSPAPER#${newspaperId}`,
+          SK: `DATE#${date}`,
+        },
+        UpdateExpression: 'SET editorialColumn = :column, updatedAt = :updatedAt',
+        ExpressionAttributeValues: {
+          ':column': editorialColumn,
+          ':updatedAt': new Date().toISOString(),
+        },
+      })
+    );
+
+    console.log(`Updated editorial column for historical newspaper ${newspaperId} on ${date}`);
+  } catch (error) {
+    console.error(`Failed to update editorial column for historical newspaper ${newspaperId} on ${date}:`, error);
+    throw error;
+  }
+}

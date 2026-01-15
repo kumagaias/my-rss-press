@@ -9,7 +9,6 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
-  UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { config } from '../config.js';
 import { NewspaperData } from '../models/newspaper.js';
@@ -18,7 +17,7 @@ import { calculateImportance } from './importanceCalculator.js';
 import { detectLanguages } from './languageDetectionService.js';
 import { generateSummaryWithRetry } from './summaryGenerationService.js';
 import { generateEditorialColumn } from './editorialColumnService.js';
-import { getNewspaper } from './newspaperService.js';
+import { getNewspaper, updateHistoricalNewspaperEditorialColumn } from './newspaperService.js';
 import { fetchDefaultFeedArticles, isDefaultFeed, getDefaultFeeds } from './defaultFeedService.js';
 import { limitDefaultFeedArticles, type FeedMetadata } from './articleLimiter.js';
 
@@ -48,21 +47,8 @@ async function generateEditorialColumnAsync(
       // Parse newspaperId and date from historicalNewspaperId
       const [newspaperId, date] = historicalNewspaperId.split('#');
       
-      // Update DynamoDB directly
-      await docClient.send(
-        new UpdateCommand({
-          TableName: config.dynamodbTable,
-          Key: {
-            PK: `NEWSPAPER#${newspaperId}`,
-            SK: `DATE#${date}`,
-          },
-          UpdateExpression: 'SET editorialColumn = :column, updatedAt = :updatedAt',
-          ExpressionAttributeValues: {
-            ':column': editorialColumn,
-            ':updatedAt': new Date().toISOString(),
-          },
-        })
-      );
+      // Update historical newspaper using dedicated function
+      await updateHistoricalNewspaperEditorialColumn(newspaperId, date, editorialColumn);
       
       console.log(`[Async Editorial] Successfully updated historical newspaper ${historicalNewspaperId}`);
     } else {

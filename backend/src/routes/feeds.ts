@@ -55,13 +55,28 @@ feedsRouter.post(
           isDefault: true,
         }];
         
-        // Generate default newspaper name based on theme
-        const defaultNewspaperName = validated.locale === 'ja' 
-          ? `${validated.theme}デイリー`
-          : `The ${validated.theme} Daily`;
+        // Generate random newspaper name based on theme and locale
+        const locale = validated.locale || 'en';
+        let defaultNewspaperName: string;
+        
+        if (locale === 'ja') {
+          const suffixes = ['新聞', 'デイリー', 'ニュース', 'メディア', 'タイムズ', 'プレス'];
+          const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+          defaultNewspaperName = `${validated.theme}${randomSuffix}`;
+        } else {
+          const formats = [
+            `The ${validated.theme} Daily`,
+            `${validated.theme} News`,
+            `${validated.theme} Times`,
+            `${validated.theme} Press`,
+            `${validated.theme} Media`,
+            `The ${validated.theme} Post`,
+          ];
+          defaultNewspaperName = formats[Math.floor(Math.random() * formats.length)];
+        }
         
         console.log(`[Feed Suggestion] Returning 1 random default feed: ${randomDefaultFeed.title}`);
-        console.log(`[Feed Suggestion] Using default newspaper name: ${defaultNewspaperName}`);
+        console.log(`[Feed Suggestion] Using random newspaper name: ${defaultNewspaperName}`);
         
         return c.json({
           suggestions,

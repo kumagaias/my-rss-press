@@ -26,6 +26,30 @@ export interface FeedSuggestionsResponse {
 }
 
 /**
+ * Generate a random newspaper name based on theme and locale
+ * @param theme - User's theme input
+ * @param locale - Locale ('en' or 'ja')
+ * @returns Random newspaper name
+ */
+function generateNewspaperName(theme: string, locale: 'en' | 'ja'): string {
+  if (locale === 'ja') {
+    const suffixes = ['新聞', 'デイリー', 'ニュース', 'メディア', 'タイムズ', 'プレス'];
+    const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    return `${theme}${randomSuffix}`;
+  } else {
+    const formats = [
+      `The ${theme} Daily`,
+      `${theme} News`,
+      `${theme} Times`,
+      `${theme} Press`,
+      `${theme} Media`,
+      `The ${theme} Post`,
+    ];
+    return formats[Math.floor(Math.random() * formats.length)];
+  }
+}
+
+/**
  * Get feeds from DynamoDB based on theme
  * @param theme - User's theme input
  * @param locale - Locale ('en' or 'ja')
@@ -244,7 +268,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     console.log(`[Bedrock] Raw response (last 500 chars): ${content.substring(Math.max(0, content.length - 500))}`);
     console.log(`[Bedrock] Total response length: ${content.length} characters`);
     
-    const result = parseAIResponse(response);
+    const result = parseAIResponse(response, theme, locale);
     console.log(`[Bedrock] AI suggested ${result.feeds.length} feeds:`, result.feeds.map(s => ({ url: s.url, title: s.title })));
     console.log(`[Bedrock] AI suggested newspaper name: ${result.newspaperName}`);
     
@@ -320,7 +344,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
         console.log(`[Popular] Using ${popularFeeds.length} popular feeds`);
         return {
           feeds: popularFeeds.slice(0, 15), // Limit to 15 feeds
-          newspaperName: locale === 'ja' ? `${theme}デイリー` : `The ${theme} Daily`,
+          newspaperName: generateNewspaperName(theme, locale),
         };
       }
       
@@ -328,7 +352,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
         console.log(`[DynamoDB] Using ${dynamoDBFeeds.length} feeds from DynamoDB`);
         return {
           feeds: dynamoDBFeeds.slice(0, 15), // Limit to 15 feeds
-          newspaperName: locale === 'ja' ? `${theme}デイリー` : `The ${theme} Daily`,
+          newspaperName: generateNewspaperName(theme, locale),
         };
       }
       
@@ -342,7 +366,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       
       return {
         feeds: [{ ...randomDefaultFeed, isDefault: true }],
-        newspaperName: locale === 'ja' ? `${theme}デイリー` : `The ${theme} Daily`,
+        newspaperName: generateNewspaperName(theme, locale),
       };
     }
     
@@ -472,8 +496,11 @@ IMPORTANT: Return ONLY JSON. No explanations or preamble.
 
 /**
  * Parse AI response to extract feed suggestions and newspaper name
+ * @param response - Bedrock API response
+ * @param theme - User's theme (for fallback newspaper name)
+ * @param locale - User's locale (for fallback newspaper name)
  */
-function parseAIResponse(response: any): FeedSuggestionsResponse {
+function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): FeedSuggestionsResponse {
   try {
     // Decode response body
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
@@ -525,9 +552,17 @@ function parseAIResponse(response: any): FeedSuggestionsResponse {
     }
 
     const feeds = parsed.feeds || [];
-    const newspaperName = parsed.newspaperName || '';
+    let newspaperName = parsed.newspaperName || '';
+    
+    // If AI didn't provide a newspaper name, generate a random one
+    if (!newspaperName || newspaperName.trim() === '') {
+      newspaperName = generateNewspaperName(theme, locale);
+      console.log(`[Bedrock] AI didn't provide newspaper name, generated: ${newspaperName}`);
+    } else {
+      console.log(`[Bedrock] AI suggested newspaper name: ${newspaperName}`);
+    }
+    
     console.log(`[Bedrock] Parsed ${feeds.length} feeds from AI response`);
-    console.log(`[Bedrock] Suggested newspaper name: ${newspaperName}`);
 
     // Validate and return suggestions (up to 20)
     const suggestions = feeds.slice(0, 20).map((feed: any) => ({

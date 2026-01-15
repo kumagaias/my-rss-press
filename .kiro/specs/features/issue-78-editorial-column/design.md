@@ -126,7 +126,7 @@ Title: [A poetic or thought-provoking title]
 Column: [150-200 words of editorial content]`;
 
 // Prompt template for Japanese
-const JAPANESE_PROMPT = `あなたは朝日新聞の「天声人語」のような、伝統的な新聞コラムを書く思慮深いコラムニストです。
+const JAPANESE_PROMPT = `あなたは伝統的な新聞コラムを書く思慮深いコラムニストです。
 
 以下の記事をもとに、簡潔なコラム（150-200文字）を書いてください：
 1. 今日の記事のテーマを織り交ぜる
@@ -306,7 +306,7 @@ export function EditorialColumn({ content, locale }: EditorialColumnProps) {
       <div className="bg-amber-50 border-2 border-gray-800 p-6 md:p-8 rounded shadow-sm">
         {/* Section Label */}
         <div className="text-xs font-bold uppercase tracking-wider text-gray-600 mb-4 border-b border-gray-400 pb-2">
-          {locale === 'ja' ? '天声人語' : "Editor's Note"}
+          {locale === 'ja' ? 'コラム' : "Editor's Note"}
         </div>
 
         {/* Column Title */}
@@ -373,7 +373,6 @@ const translations = {
     // ... existing translations
     editorialColumn: "コラム",
     dailyReflection: "今日の一言",
-    tenseiJingo: "天声人語",
   },
 };
 ```

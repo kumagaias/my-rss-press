@@ -307,7 +307,7 @@ export async function getOrCreateNewspaper(
   try {
     if (editorialColumn) {
       console.log(`[Historical Newspaper] Generating book recommendations for ${newspaperId} on ${date}`);
-      bookRecommendations = await generateBookRecommendations(theme, editorialColumn, locale);
+      bookRecommendations = await generateBookRecommendations(theme, editorialColumn, selectedArticles, locale);
       console.log(`[Historical Newspaper] Generated ${bookRecommendations.length} book recommendations`);
     } else {
       console.log(`[Historical Newspaper] Skipping book recommendations (no editorial column)`);

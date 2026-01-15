@@ -9,6 +9,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { config } from '../config.js';
 import { NewspaperData } from '../models/newspaper.js';
@@ -20,6 +21,58 @@ import { generateEditorialColumn } from './editorialColumnService.js';
 import { getNewspaper } from './newspaperService.js';
 import { fetchDefaultFeedArticles, isDefaultFeed, getDefaultFeeds } from './defaultFeedService.js';
 import { limitDefaultFeedArticles, type FeedMetadata } from './articleLimiter.js';
+
+/**
+ * Generate editorial column asynchronously for historical newspaper
+ * Fire-and-forget function that runs in background
+ */
+async function generateEditorialColumnAsync(
+  historicalNewspaperId: string,
+  articles: RSSArticle[],
+  theme: string,
+  locale: 'en' | 'ja'
+): Promise<void> {
+  try {
+    console.log(`[Async Editorial] Starting generation for historical newspaper ${historicalNewspaperId}`);
+    
+    const columnResult = await generateEditorialColumn({
+      articles,
+      theme,
+      locale,
+      maxRetries: 2, // Can use more retries since it's async
+    });
+    
+    if (columnResult) {
+      const editorialColumn = `${columnResult.title}\n\n${columnResult.column}`;
+      
+      // Parse newspaperId and date from historicalNewspaperId
+      const [newspaperId, date] = historicalNewspaperId.split('#');
+      
+      // Update DynamoDB directly
+      await docClient.send(
+        new UpdateCommand({
+          TableName: config.dynamodbTable,
+          Key: {
+            PK: `NEWSPAPER#${newspaperId}`,
+            SK: `DATE#${date}`,
+          },
+          UpdateExpression: 'SET editorialColumn = :column, updatedAt = :updatedAt',
+          ExpressionAttributeValues: {
+            ':column': editorialColumn,
+            ':updatedAt': new Date().toISOString(),
+          },
+        })
+      );
+      
+      console.log(`[Async Editorial] Successfully updated historical newspaper ${historicalNewspaperId}`);
+    } else {
+      console.log(`[Async Editorial] No column generated for historical newspaper ${historicalNewspaperId}`);
+    }
+  } catch (error) {
+    console.error(`[Async Editorial] Failed for historical newspaper ${historicalNewspaperId}:`, error);
+    // Don't throw - this is fire-and-forget
+  }
+}
 
 // DynamoDB client configuration
 const dynamoClient = new DynamoDBClient({
@@ -258,35 +311,29 @@ export async function getOrCreateNewspaper(
     console.error('Error detecting languages:', error);
   }
 
-  // Generate summary and editorial column in parallel (optional)
-  const [summaryResult, editorialResult] = await Promise.allSettled([
-    generateSummaryWithRetry(selectedArticles, theme, languages, 2),
-    generateEditorialColumn({
-      articles: selectedArticles,
-      theme,
-      locale,
-      maxRetries: 1, // Reduced from 2 to avoid API Gateway timeout
-    }),
-  ]);
-
-  // Extract summary
+  // Generate summary (wait for it)
   let summary: string | null = null;
-  if (summaryResult.status === 'fulfilled' && summaryResult.value) {
-    summary = summaryResult.value;
-    console.log(`[Historical Newspaper] Generated summary: ${summary.substring(0, 50)}...`);
-  } else if (summaryResult.status === 'rejected') {
-    console.error('[Historical Newspaper] Error generating summary:', summaryResult.reason);
+  try {
+    summary = await generateSummaryWithRetry(selectedArticles, theme, languages, 2);
+    if (summary) {
+      console.log(`[Historical Newspaper] Generated summary: ${summary.substring(0, 50)}...`);
+    }
+  } catch (error) {
+    console.error('[Historical Newspaper] Error generating summary:', error);
   }
 
-  // Extract editorial column
-  let editorialColumn: string | null = null;
-  if (editorialResult.status === 'fulfilled' && editorialResult.value) {
-    const columnResult = editorialResult.value;
-    editorialColumn = `${columnResult.title}\n\n${columnResult.column}`;
-    console.log(`[Historical Newspaper] Generated editorial column: ${columnResult.title}`);
-  } else if (editorialResult.status === 'rejected') {
-    console.error('[Historical Newspaper] Error generating editorial column:', editorialResult.reason);
-  }
+  // Generate editorial column asynchronously (don't wait)
+  const historicalNewspaperId = `${newspaperId}#${date}`;
+  generateEditorialColumnAsync(
+    historicalNewspaperId,
+    selectedArticles,
+    theme,
+    locale
+  ).catch(error => {
+    console.error('[Historical Newspaper] Background editorial column generation failed:', error);
+  });
+
+  const editorialColumn: string | null = null; // Will be generated asynchronously
 
   // Create newspaper data
   const now = new Date().toISOString();

@@ -217,3 +217,37 @@ export async function incrementViewCount(newspaperId: string): Promise<void> {
     console.log(`Incremented view count for newspaper ${newspaperId}: ${newViewCount}`);
   }
 }
+
+/**
+ * Update newspaper's editorial column
+ * Used for async editorial column generation after newspaper creation
+ * 
+ * @param newspaperId - Newspaper ID
+ * @param editorialColumn - Editorial column content
+ */
+export async function updateNewspaperEditorialColumn(
+  newspaperId: string,
+  editorialColumn: string
+): Promise<void> {
+  try {
+    await docClient.send(
+      new UpdateCommand({
+        TableName: config.dynamodbTable,
+        Key: {
+          PK: `NEWSPAPER#${newspaperId}`,
+          SK: 'METADATA',
+        },
+        UpdateExpression: 'SET editorialColumn = :column, updatedAt = :updatedAt',
+        ExpressionAttributeValues: {
+          ':column': editorialColumn,
+          ':updatedAt': new Date().toISOString(),
+        },
+      })
+    );
+
+    console.log(`Updated editorial column for newspaper ${newspaperId}`);
+  } catch (error) {
+    console.error(`Failed to update editorial column for newspaper ${newspaperId}:`, error);
+    throw error;
+  }
+}

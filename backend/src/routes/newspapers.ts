@@ -6,9 +6,11 @@ import {
   getNewspaper,
   getPublicNewspapers,
   incrementViewCount,
+  updateNewspaperEditorialColumn,
 } from '../services/newspaperService.js';
 import {
   fetchArticlesForNewspaper,
+  type Article as RSSArticle,
 } from '../services/rssFetcherService.js';
 import { calculateImportance } from '../services/importanceCalculator.js';
 import { detectLanguages } from '../services/languageDetectionService.js';
@@ -25,6 +27,39 @@ import { suggestFeeds } from '../services/bedrockService.js';
 import { limitDefaultFeedArticles, type FeedMetadata } from '../services/articleLimiter.js';
 
 export const newspapersRouter = new Hono();
+
+/**
+ * Generate editorial column asynchronously and update newspaper
+ * Fire-and-forget function that runs in background
+ */
+async function generateEditorialColumnAsync(
+  newspaperId: string,
+  articles: RSSArticle[],
+  theme: string,
+  locale: 'en' | 'ja'
+): Promise<void> {
+  try {
+    console.log(`[Async Editorial] Starting generation for newspaper ${newspaperId}`);
+    
+    const columnResult = await generateEditorialColumn({
+      articles,
+      theme,
+      locale,
+      maxRetries: 2, // Can use more retries since it's async
+    });
+    
+    if (columnResult) {
+      const editorialColumn = `${columnResult.title}\n\n${columnResult.column}`;
+      await updateNewspaperEditorialColumn(newspaperId, editorialColumn);
+      console.log(`[Async Editorial] Successfully updated newspaper ${newspaperId}`);
+    } else {
+      console.log(`[Async Editorial] No column generated for newspaper ${newspaperId}`);
+    }
+  } catch (error) {
+    console.error(`[Async Editorial] Failed for newspaper ${newspaperId}:`, error);
+    // Don't throw - this is fire-and-forget
+  }
+}
 
 /**
  * Record feed usage asynchronously (fire-and-forget)
@@ -222,23 +257,19 @@ newspapersRouter.post(
       }
 
       // Step 7: Generate editorial column
-      console.log('[OneClick] Step 7: Generating editorial column...');
-      let editorialColumn: string | null = null;
-      try {
-        const columnResult = await generateEditorialColumn({
-          articles: articlesWithImportance,
-          theme: validated.theme,
-          locale: validated.locale,
-          maxRetries: 1, // Reduced from 2 to avoid API Gateway timeout
-        });
-        if (columnResult) {
-          editorialColumn = `${columnResult.title}\n\n${columnResult.column}`;
-          console.log(`[OneClick] Generated editorial column: ${columnResult.title}`);
-        }
-      } catch (error) {
-        console.error('[OneClick] Error generating editorial column:', error);
-        // Continue without column
-      }
+      // Step 7: Generate editorial column asynchronously (don't wait)
+      console.log('[OneClick] Step 7: Scheduling editorial column generation...');
+      // Fire and forget - generate column in background
+      generateEditorialColumnAsync(
+        newspaperId,
+        articlesWithImportance,
+        validated.theme,
+        validated.locale
+      ).catch(error => {
+        console.error('[OneClick] Background editorial column generation failed:', error);
+      });
+      
+      const editorialColumn: string | null = null; // Will be generated asynchronously
 
       // Step 8: Record feed usage (fire-and-forget)
       recordFeedUsageAsync(

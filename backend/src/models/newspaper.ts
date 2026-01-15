@@ -15,6 +15,15 @@ export interface Article {
 
 export type Locale = 'en' | 'ja';
 
+export interface BookRecommendation {
+  title: string;
+  authors: string[];
+  description?: string;
+  thumbnail?: string;
+  infoLink: string;
+  contentType: 'book';
+}
+
 export interface NewspaperData {
   newspaperId: string;
   name: string;
@@ -32,4 +41,5 @@ export interface NewspaperData {
   summary?: string; // AI-generated summary (100-200 characters)
   newspaperDate?: string; // Date of the newspaper (YYYY-MM-DD format)
   editorialColumn?: string; // AI-generated editorial column
+  bookRecommendations?: BookRecommendation[]; // Book recommendations (Phase 3)
 }

@@ -30,6 +30,14 @@ interface Newspaper {
   summary?: string;
   editorialColumn?: string;
   languages?: string[];
+  bookRecommendations?: Array<{
+    title: string;
+    authors: string[];
+    description?: string;
+    thumbnail?: string;
+    infoLink: string;
+    contentType: 'book';
+  }>;
 }
 
 function NewspaperContent() {
@@ -411,6 +419,7 @@ function NewspaperContent() {
             locale={locale}
             summary={newspaper.summary}
             editorialColumn={newspaper.editorialColumn}
+            bookRecommendations={newspaper.bookRecommendations}
           />
         )}
       </div>

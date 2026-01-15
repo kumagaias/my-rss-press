@@ -12,6 +12,15 @@ export interface Article {
   importance: number;
 }
 
+export interface BookRecommendation {
+  title: string;
+  authors: string[];
+  description?: string;
+  thumbnail?: string;
+  infoLink: string;
+  contentType: 'book';
+}
+
 export interface FeedSuggestion {
   url: string;
   title: string;
@@ -41,6 +50,7 @@ export interface NewspaperData {
   summary?: string | null; // AI-generated summary (100-200 characters, may be null)
   newspaperDate?: string; // For historical newspapers only: the date for which articles were fetched (YYYY-MM-DD format)
   editorialColumn?: string | null; // AI-generated editorial column (may be null)
+  bookRecommendations?: BookRecommendation[]; // Book recommendations (Phase 3)
 }
 
 export interface NewspaperSettings {

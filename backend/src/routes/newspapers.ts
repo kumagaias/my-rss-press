@@ -643,9 +643,16 @@ newspapersRouter.post('/newspapers', async (c) => {
     // Only if articles exist
     if (validated.articles && validated.articles.length > 0) {
       console.log(`[Save Newspaper] Scheduling editorial column generation for ${newspaperId}`);
+      
+      // Convert articles to RSSArticle format (pubDate: string -> Date)
+      const articlesForColumn = validated.articles.map(a => ({
+        ...a,
+        pubDate: new Date(a.pubDate),
+      }));
+      
       generateEditorialColumnAsync(
         newspaperId,
-        validated.articles,
+        articlesForColumn,
         validated.name, // Use newspaper name as theme
         validated.locale || 'en'
       ).catch(error => {

@@ -646,11 +646,19 @@ newspapersRouter.post('/newspapers', async (c) => {
       
       // Convert articles to RSSArticle format (pubDate: string -> Date)
       // Filter out articles without feedSource (required field)
-      const articlesForColumn = validated.articles
-        .filter((a): a is typeof a & { feedSource: string } => a.feedSource != null)
+      const articlesForColumn: RSSArticle[] = validated.articles
+        .filter((a): a is typeof a & { feedSource: string; feedTitle: string } => 
+          a.feedSource != null && a.feedTitle != null
+        )
         .map(a => ({
-          ...a,
+          title: a.title,
+          description: a.description,
+          link: a.link,
           pubDate: new Date(a.pubDate),
+          importance: a.importance,
+          imageUrl: a.imageUrl,
+          feedSource: a.feedSource,
+          feedTitle: a.feedTitle,
         }));
       
       if (articlesForColumn.length > 0) {

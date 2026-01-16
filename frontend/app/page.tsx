@@ -15,12 +15,12 @@ export default function Home() {
   const router = useRouter();
   const { subscriptions } = useSubscriptions();
   
-  // Initialize locale with SSR-safe detection
+  // Get locale from localStorage (set by LayoutClient)
   const [locale, setLocale] = useState<Locale>(() => {
     // During SSR, return 'en' as default
     if (typeof window === 'undefined') return 'en';
     
-    // On client, check localStorage first, then detect from browser
+    // On client, check localStorage
     const savedLocale = localStorage.getItem('locale') as Locale | null;
     return savedLocale || detectLocale();
   });
@@ -50,13 +50,25 @@ export default function Home() {
     setHasCheckedInitialNavigation(true);
   }, [subscriptions, router, hasCheckedInitialNavigation]);
 
-  // Save locale to localStorage when it changes
+  // Sync locale from localStorage (updated by LayoutClient)
   useEffect(() => {
-    localStorage.setItem('locale', locale);
-    sessionStorage.setItem('newspaperLocale', locale); // Sync to newspaper page
-    console.log('[Home] Locale changed to:', locale);
-    console.log('[Home] Topic keywords:', t.topicKeywords.slice(0, 5), '... (total:', t.topicKeywords.length, ')');
-  }, [locale, t.topicKeywords]);
+    const handleStorageChange = () => {
+      const savedLocale = localStorage.getItem('locale') as Locale | null;
+      if (savedLocale && savedLocale !== locale) {
+        setLocale(savedLocale);
+      }
+    };
+
+    // Listen for storage changes from other tabs/components
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check on mount
+    handleStorageChange();
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [locale]);
 
   const handleGenerateNewspaper = async (themeValue: string) => {
     setTheme(themeValue);
@@ -125,35 +137,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#f4f1e8]">
-      {/* Header */}
-      <header className="bg-white border-b-4 border-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row justify-center items-center relative gap-4 sm:gap-0">
-            <button
-              onClick={() => router.push('/')}
-              className="border-l-4 border-r-4 border-black px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer"
-            >
-              <h1 className="text-2xl sm:text-4xl font-serif font-black text-black tracking-tight text-center">
-                {t.appName}
-              </h1>
-              <p className="text-gray-800 text-xs font-serif italic mt-1 text-center">
-                {t.appTagline}
-              </p>
-            </button>
-            <div className="sm:absolute sm:right-0">
-              <select
-                value={locale}
-                onChange={(e) => setLocale(e.target.value as Locale)}
-                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
-              >
-                <option value="en">🇺🇸 English</option>
-                <option value="ja">🇯🇵 日本語</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Main Content */}
         <div className="space-y-8">

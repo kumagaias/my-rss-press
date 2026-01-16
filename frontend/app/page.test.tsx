@@ -52,10 +52,10 @@ describe('Home Page', () => {
     vi.clearAllMocks();
   });
 
-  it('renders app name and tagline', () => {
+  it('renders theme input section', () => {
     render(<Home />);
-    expect(screen.getByText('MyRSSPress')).toBeInTheDocument();
-    expect(screen.getByText(/Your Personalized Morning Digest/)).toBeInTheDocument();
+    // Header is now in LayoutClient, so we check for main content instead
+    expect(screen.getByText(/What are you interested in/)).toBeInTheDocument();
   });
 
   it('renders theme input', () => {
@@ -164,11 +164,10 @@ describe('Home Page', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('handles demo button click', async () => {
-    // Demo button functionality is handled by ThemeInput component
-    // This test verifies the component renders correctly
+  it('renders popular newspapers section', async () => {
+    // Header is now in LayoutClient, so we check for main content instead
     render(<Home />);
-    expect(screen.getByText('MyRSSPress')).toBeInTheDocument();
+    expect(screen.getByText('Popular Newspapers')).toBeInTheDocument();
   });
 
   it('displays error message when API fails', async () => {
@@ -189,8 +188,4 @@ describe('Home Page', () => {
     });
   });
 
-  it('renders popular newspapers section', () => {
-    render(<Home />);
-    expect(screen.getByText('Popular Newspapers')).toBeInTheDocument();
-  });
 });

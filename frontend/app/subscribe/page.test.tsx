@@ -83,7 +83,7 @@ describe('SubscribePage', () => {
         fc.asyncProperty(
           fc.array(
             fc.record({
-              id: fc.string({ minLength: 5, maxLength: 50 }).filter(s => s.trim().length > 0), // Valid IDs only
+              id: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0), // Valid IDs only
               exists: fc.boolean(),
             }),
             { minLength: 1, maxLength: 5 } // Reduce max to avoid timeout

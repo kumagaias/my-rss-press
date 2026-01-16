@@ -30,7 +30,7 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div className="fixed top-[2.25rem] left-4 z-50 transform -translate-y-1/2">
+      <div className="fixed top-[2.5rem] left-4 z-50 transform -translate-y-1/2">
         <HamburgerMenu locale={locale} />
       </div>
       <Header locale={locale} onLocaleChange={handleLocaleChange} />

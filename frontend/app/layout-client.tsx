@@ -1,10 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { HamburgerMenu } from '@/components/ui/HamburgerMenu';
 import { detectLocale } from '@/lib/i18n';
 
 export function LayoutClient({ children }: { children: React.ReactNode }) {
-  const locale = detectLocale();
+  const [locale] = useState(() => detectLocale());
 
   return (
     <>

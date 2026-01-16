@@ -25,13 +25,6 @@ export function SubscribeButton({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent parent click handlers
-
-    // Check if trying to subscribe when at limit
-    if (!subscribed && isAtLimit) {
-      alert(t.subscriptionLimitReached);
-      return;
-    }
-
     toggleSubscription(newspaperId, newspaperTitle);
   };
 
@@ -40,16 +33,14 @@ export function SubscribeButton({
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       e.stopPropagation();
-
-      // Check if trying to subscribe when at limit
-      if (!subscribed && isAtLimit) {
-        alert(t.subscriptionLimitReached);
-        return;
-      }
-
       toggleSubscription(newspaperId, newspaperTitle);
     }
   };
+
+  // Don't show subscribe button if at limit and not already subscribed
+  if (!subscribed && isAtLimit) {
+    return null;
+  }
 
   if (variant === 'icon-only') {
     return (

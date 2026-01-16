@@ -25,9 +25,6 @@ describe('SubscribeButton', () => {
       key: vi.fn(),
     } as any;
 
-    // Mock alert
-    global.alert = vi.fn();
-
     // Clear subscriptions before each test
     subscriptionStorage.clearAll();
   });
@@ -93,7 +90,7 @@ describe('SubscribeButton', () => {
       });
     });
 
-    it('should show alert when trying to subscribe at limit', async () => {
+    it('should not render button when trying to subscribe at limit', async () => {
       // Add 50 subscriptions
       for (let i = 0; i < 50; i++) {
         subscriptionStorage.addSubscription(`newspaper-${i}`);
@@ -102,19 +99,15 @@ describe('SubscribeButton', () => {
       render(<SubscribeButton newspaperId="test-new" variant="full" locale="en" />);
 
       await waitFor(() => {
-        expect(screen.getByText('Subscribe')).toBeInTheDocument();
+        // Button should not be rendered when at limit and not subscribed
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
       });
-
-      const button = screen.getByRole('button');
-      fireEvent.click(button);
-
-      expect(global.alert).toHaveBeenCalledWith('You can subscribe to a maximum of 50 newspapers');
     });
 
     it('should stop propagation on click', async () => {
       const parentClickHandler = vi.fn();
 
-      const { container } = render(
+      render(
         <div onClick={parentClickHandler}>
           <SubscribeButton newspaperId="test-1" variant="full" locale="en" />
         </div>

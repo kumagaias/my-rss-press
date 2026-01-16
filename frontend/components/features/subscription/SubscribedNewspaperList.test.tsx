@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import * as fc from 'fast-check';
 import { SubscribedNewspaperList } from './SubscribedNewspaperList';
 import type { SubscriptionItem, Newspaper } from '@/types';
@@ -79,8 +79,8 @@ describe('SubscribedNewspaperList', () => {
 
     it('should render all subscription cards', () => {
       const subscriptions: SubscriptionItem[] = [
-        { id: '1', title: 'Newspaper 1', subscribedAt: new Date().toISOString() },
-        { id: '2', title: 'Newspaper 2', subscribedAt: new Date().toISOString() },
+        { id: '1', title: 'Newspaper 1', subscribedAt: new Date().toISOString(), order: 0 },
+        { id: '2', title: 'Newspaper 2', subscribedAt: new Date().toISOString(), order: 1 },
       ];
       const newspapers: Newspaper[] = [];
 

@@ -32,14 +32,19 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [hasCheckedInitialNavigation, setHasCheckedInitialNavigation] = useState(false);
 
-  // Initial navigation logic: redirect to first subscribed newspaper if exists
+  // Initial navigation logic: redirect to first subscribed newspaper on app load only
   useEffect(() => {
-    if (hasCheckedInitialNavigation) return;
+    // Check if this is the initial app load using sessionStorage
+    const hasNavigated = sessionStorage.getItem('hasInitialNavigated');
+    
+    if (hasNavigated || hasCheckedInitialNavigation) return;
     
     if (subscriptions.length > 0) {
       const firstNewspaperId = subscriptions[0].id;
-      console.log('[Home] Redirecting to first subscribed newspaper:', firstNewspaperId);
-      router.push(`/newspaper?id=${firstNewspaperId}`);
+      const today = new Date().toISOString().split('T')[0];
+      console.log('[Home] Initial load: Redirecting to first subscribed newspaper:', firstNewspaperId);
+      sessionStorage.setItem('hasInitialNavigated', 'true');
+      router.push(`/newspaper?id=${firstNewspaperId}&date=${today}`);
     }
     
     setHasCheckedInitialNavigation(true);

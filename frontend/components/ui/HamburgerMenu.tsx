@@ -17,26 +17,26 @@ export function HamburgerMenu({ locale }: HamburgerMenuProps) {
   // Close menu on ESC key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         setIsOpen(false);
       }
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen]);
+  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node) && isOpen) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  }, []);
 
   const handleNavigate = (path: string) => {
     setIsOpen(false);

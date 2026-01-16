@@ -67,7 +67,7 @@ export function SortableNewspaperCard({
           {newspaper && (
             <div className="text-sm text-gray-600 space-y-1">
               <p>
-                {t.createdBy}: {newspaper.creatorName || 'Anonymous'}
+                {t.createdBy}: {newspaper.userName || 'Anonymous'}
               </p>
               <p>
                 {t.createdAt}: {formatDate(newspaper.createdAt, locale)}

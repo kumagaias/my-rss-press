@@ -34,14 +34,11 @@ function announceToScreenReader(message: string) {
   document.body.appendChild(announcement);
   
   // Remove after announcement with proper cleanup
-  const timeoutId = setTimeout(() => {
+  setTimeout(() => {
     if (document.body.contains(announcement)) {
       document.body.removeChild(announcement);
     }
   }, 1000);
-  
-  // Store timeout ID for potential cleanup
-  announcement.dataset.timeoutId = String(timeoutId);
 }
 
 /**

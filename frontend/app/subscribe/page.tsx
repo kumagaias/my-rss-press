@@ -6,6 +6,7 @@ import { detectLocale, useTranslations } from '@/lib/i18n';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { SubscribedNewspaperList } from '@/components/features/subscription/SubscribedNewspaperList';
 import { Footer } from '@/components/ui/Footer';
+import { getNewspaper } from '@/lib/api';
 import type { NewspaperData, Locale } from '@/types';
 
 export default function SubscribePage() {
@@ -59,17 +60,15 @@ export default function SubscribePage() {
         const results = await Promise.all(
           subscriptions.map(async (sub) => {
             try {
-              const response = await fetch(`/api/newspapers/${sub.id}`);
-              if (!response.ok) {
-                if (response.status === 404) {
-                  return { id: sub.id, missing: true };
-                }
-                return null;
-              }
-              const data = await response.json();
+              const data = await getNewspaper(sub.id);
               return { id: sub.id, data, missing: false };
             } catch (error) {
               console.error(`Failed to fetch newspaper ${sub.id}:`, error);
+              // If error message contains "404" or "not found", mark as missing
+              const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
+              if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+                return { id: sub.id, missing: true };
+              }
               return null;
             }
           })

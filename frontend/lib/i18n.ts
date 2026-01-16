@@ -108,7 +108,27 @@ export const translations = {
     nextDay: 'Next',
     
     // Footer
-    footerTagline: 'Powered by AI',
+    footerTagline: 'Powered by Kiro',
+    
+    // Subscription
+    subscribe: 'Subscribe',
+    subscribed: 'Subscribed',
+    subscribedNewspapers: 'Subscribed Newspapers',
+    subscriptionLimitReached: 'You can subscribe to a maximum of 50 newspapers',
+    noSubscriptions: 'No subscribed newspapers yet',
+    noSubscriptionsMessage: 'Start subscribing to newspapers to see them here',
+    subscriptionCount: '{count} newspapers subscribed',
+    browsePopular: 'Browse Popular Newspapers',
+    subscribedOn: 'Subscribed on',
+    dragToReorder: 'Drag to reorder',
+    goToHome: 'Go to Home',
+    missingNewspapersTitle: 'Missing Newspapers',
+    missingNewspapersMessage: 'Some subscribed newspapers could not be found. They may have been deleted.',
+    removeFromSubscriptions: 'Remove',
+    
+    // Menu
+    menu: 'Menu',
+    closeMenu: 'Close Menu',
     
     // Topic keywords
     topicKeywords: [
@@ -227,7 +247,27 @@ export const translations = {
     nextDay: '翌日',
     
     // フッター
-    footerTagline: 'AIで動作',
+    footerTagline: 'Powered by Kiro',
+    
+    // Subscription
+    subscribe: '購読',
+    subscribed: '購読中',
+    subscribedNewspapers: '購読中の新聞',
+    subscriptionLimitReached: '購読できる新聞は最大50件です',
+    noSubscriptions: '購読中の新聞はありません',
+    noSubscriptionsMessage: '新聞を購読すると、ここに表示されます',
+    subscriptionCount: '{count}件の新聞を購読中',
+    browsePopular: '人気の新聞を見る',
+    subscribedOn: '購読日',
+    dragToReorder: 'ドラッグして並び替え',
+    goToHome: 'ホームへ',
+    missingNewspapersTitle: '見つからない新聞',
+    missingNewspapersMessage: '一部の購読中の新聞が見つかりませんでした。削除された可能性があります。',
+    removeFromSubscriptions: '削除',
+    
+    // Menu
+    menu: 'メニュー',
+    closeMenu: 'メニューを閉じる',
     
     // トピックキーワード
     topicKeywords: [

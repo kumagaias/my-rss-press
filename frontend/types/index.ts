@@ -58,3 +58,14 @@ export interface NewspaperSettings {
   userName: string;
   isPublic: boolean;
 }
+
+export interface SubscriptionItem {
+  id: string;
+  title?: string; // Optional: newspaper title for display before fetching full data
+  order: number;
+  subscribedAt: string;
+}
+
+export interface SubscriptionStorage {
+  subscriptions: SubscriptionItem[];
+}

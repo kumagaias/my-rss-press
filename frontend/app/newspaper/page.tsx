@@ -258,36 +258,9 @@ function NewspaperContent() {
   };
 
   if (loading && !newspaper) {
-    // Initial loading - show header with loading in content area
+    // Initial loading - show loading in content area
     return (
       <div className="min-h-screen bg-[#f4f1e8]">
-        {/* Header */}
-        <header className="bg-white border-b-4 border-black">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-            <div className="flex flex-col sm:flex-row justify-center items-center relative gap-4 sm:gap-0">
-              <button
-                onClick={() => router.push('/')}
-                className="border-l-4 border-r-4 border-black px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer"
-              >
-                <h1 className="text-2xl sm:text-4xl font-serif font-black text-black tracking-tight text-center">
-                  {t.appName}
-                </h1>
-                <p className="text-gray-800 text-xs font-serif italic mt-1 text-center">
-                  {t.appTagline}
-                </p>
-              </button>
-              <div className="sm:absolute sm:right-0">
-                <button
-                  onClick={() => router.push('/')}
-                  className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors"
-                >
-                  {t.backToHome}
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
         {/* Loading Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
@@ -344,54 +317,41 @@ function NewspaperContent() {
 
   return (
     <div className="min-h-screen bg-[#f4f1e8]">
-      {/* Header */}
-      <header className="bg-white border-b-4 border-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row justify-center items-center relative gap-4 sm:gap-0">
+      {/* Action Buttons Bar */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex justify-end gap-2">
+            {/* Subscribe Button - show for saved newspapers (not temp-*) */}
+            {!newspaper.newspaperId.startsWith('temp-') && (
+              <SubscribeButton
+                newspaperId={newspaper.newspaperId}
+                newspaperTitle={newspaper.name}
+                variant="full"
+                locale={locale}
+              />
+            )}
+
+            {/* Save Button - only show for unsaved newspapers (temp ID) */}
+            {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
+              <button
+                onClick={handleSaveClick}
+                disabled={isSaving}
+                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {isSaving ? t.saving : t.save}
+              </button>
+            )}
+            
+            {/* Back to Home Button */}
             <button
               onClick={() => router.push('/')}
-              className="border-l-4 border-r-4 border-black px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer"
+              className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors"
             >
-              <h1 className="text-2xl sm:text-4xl font-serif font-black text-black tracking-tight text-center">
-                {t.appName}
-              </h1>
-              <p className="text-gray-800 text-xs font-serif italic mt-1 text-center">
-                {t.appTagline}
-              </p>
+              {t.backToHome}
             </button>
-            <div className="sm:absolute sm:right-0 flex gap-2">
-              {/* Subscribe Button - show for saved newspapers (not temp-*) */}
-              {!newspaper.newspaperId.startsWith('temp-') && (
-                <SubscribeButton
-                  newspaperId={newspaper.newspaperId}
-                  newspaperTitle={newspaper.name}
-                  variant="full"
-                  locale={locale}
-                />
-              )}
-
-              {/* Save Button - only show for unsaved newspapers (temp ID) */}
-              {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
-                <button
-                  onClick={handleSaveClick}
-                  disabled={isSaving}
-                  className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  {isSaving ? t.saving : t.save}
-                </button>
-              )}
-              
-              {/* Back to Home Button */}
-              <button
-                onClick={() => router.push('/')}
-                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors"
-              >
-                {t.backToHome}
-              </button>
-            </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Date Navigation - show for saved newspapers (not temp-*) */}
       {!newspaper.newspaperId.startsWith('temp-') && date && (

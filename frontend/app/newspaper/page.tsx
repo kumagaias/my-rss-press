@@ -317,34 +317,6 @@ function NewspaperContent() {
 
   return (
     <div className="min-h-screen bg-[#f4f1e8]">
-      {/* Action Buttons Bar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex justify-end gap-2">
-            {/* Subscribe Button - show for saved newspapers (not temp-*) */}
-            {!newspaper.newspaperId.startsWith('temp-') && (
-              <SubscribeButton
-                newspaperId={newspaper.newspaperId}
-                newspaperTitle={newspaper.name}
-                variant="full"
-                locale={locale}
-              />
-            )}
-
-            {/* Save Button - only show for unsaved newspapers (temp ID) */}
-            {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
-              <button
-                onClick={handleSaveClick}
-                disabled={isSaving}
-                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                {isSaving ? t.saving : t.save}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Date Navigation - show for saved newspapers (not temp-*) */}
       {!newspaper.newspaperId.startsWith('temp-') && date && (
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
@@ -355,6 +327,32 @@ function NewspaperContent() {
               locale={locale}
               isLoading={isDateChanging}
             />
+            {/* Subscribe Button - below date navigation */}
+            <div className="pb-3 flex justify-end">
+              <SubscribeButton
+                newspaperId={newspaper.newspaperId}
+                newspaperTitle={newspaper.name}
+                variant="full"
+                locale={locale}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Button Bar - only show for unsaved newspapers (temp ID) */}
+      {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={handleSaveClick}
+                disabled={isSaving}
+                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {isSaving ? t.saving : t.save}
+              </button>
+            </div>
           </div>
         </div>
       )}

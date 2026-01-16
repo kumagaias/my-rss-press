@@ -83,13 +83,14 @@ describe('SubscribePage', () => {
         fc.asyncProperty(
           fc.array(
             fc.record({
-              id: fc.string({ minLength: 5, maxLength: 50 }), // Avoid single-char IDs
+              id: fc.string({ minLength: 5, maxLength: 50 }).filter(s => s.trim().length > 0), // Valid IDs only
               exists: fc.boolean(),
             }),
             { minLength: 1, maxLength: 5 } // Reduce max to avoid timeout
           ),
           async (newspapers) => {
             subscriptionStorage.clearAll();
+            vi.clearAllMocks();
 
             // Add subscriptions
             newspapers.forEach(n => subscriptionStorage.addSubscription(n.id));
@@ -116,24 +117,28 @@ describe('SubscribePage', () => {
               });
             });
 
-            render(<SubscribePage />);
+            const { unmount } = render(<SubscribePage />);
 
-            // Wait for loading to complete
-            await waitFor(() => {
-              const loadingSpinner = screen.queryByRole('progressbar');
-              return loadingSpinner === null;
-            }, { timeout: 5000 });
+            try {
+              // Wait for loading to complete
+              await waitFor(() => {
+                const loadingSpinner = screen.queryByRole('progressbar');
+                return loadingSpinner === null;
+              }, { timeout: 5000 });
 
-            const missingCount = newspapers.filter(n => !n.exists).length;
+              const missingCount = newspapers.filter(n => !n.exists).length;
 
-            if (missingCount > 0) {
-              // Should display missing newspapers warning
-              const warning = screen.queryByText(/Missing Newspapers/i);
-              return warning !== null;
-            } else {
-              // Should not display warning
-              const warning = screen.queryByText(/Missing Newspapers/i);
-              return warning === null;
+              if (missingCount > 0) {
+                // Should display missing newspapers warning
+                const warnings = screen.queryAllByText(/Missing Newspapers/i);
+                return warnings.length > 0;
+              } else {
+                // Should not display warning
+                const warnings = screen.queryAllByText(/Missing Newspapers/i);
+                return warnings.length === 0;
+              }
+            } finally {
+              unmount();
             }
           }
         ),

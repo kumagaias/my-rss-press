@@ -315,8 +315,25 @@ export function useTranslations(locale: Locale) {
  * @param locale - The locale to use for formatting
  * @returns Formatted date string
  */
-export function formatDate(date: Date | string, locale: Locale): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+export function formatDate(date: Date | string | number, locale: Locale): string {
+  let dateObj: Date;
+  
+  if (date instanceof Date) {
+    dateObj = date;
+  } else if (typeof date === 'string') {
+    dateObj = new Date(date);
+  } else if (typeof date === 'number') {
+    dateObj = new Date(date);
+  } else {
+    // Fallback for invalid input
+    dateObj = new Date();
+  }
+  
+  // Check if date is valid
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date';
+  }
+  
   const dateLocale = locale === 'ja' ? 'ja-JP' : 'en-US';
   
   return dateObj.toLocaleDateString(dateLocale, {

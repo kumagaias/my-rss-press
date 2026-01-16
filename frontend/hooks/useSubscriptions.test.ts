@@ -204,7 +204,10 @@ describe('useSubscriptions', () => {
     it('property: cross-component synchronization', async () => {
       await fc.assert(
         fc.asyncProperty(
-          fc.array(fc.string({ minLength: 1, maxLength: 50 }), { minLength: 1, maxLength: 10 }),
+          fc.array(
+            fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+            { minLength: 1, maxLength: 10 }
+          ),
           async (ids) => {
             subscriptionStorage.clearAll();
 

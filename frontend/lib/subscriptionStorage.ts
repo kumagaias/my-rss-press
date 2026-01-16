@@ -49,6 +49,7 @@ export class SubscriptionStorageService {
     return data.subscriptions.every(
       (item: any) =>
         typeof item.id === 'string' &&
+        item.id.trim().length > 0 && // ID must not be empty or whitespace-only
         typeof item.order === 'number' &&
         typeof item.subscribedAt === 'string'
     );
@@ -126,6 +127,12 @@ export class SubscriptionStorageService {
     
     if (!this.isAvailable) {
       console.warn('[SubscriptionStorage] Cannot add subscription, localStorage not available');
+      return false;
+    }
+
+    // Validate newspaper ID
+    if (!newspaperId || newspaperId.trim().length === 0) {
+      console.warn('[SubscriptionStorage] Invalid newspaper ID: empty or whitespace-only');
       return false;
     }
 

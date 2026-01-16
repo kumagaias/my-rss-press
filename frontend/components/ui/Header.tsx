@@ -13,13 +13,13 @@ export function Header({ locale, onLocaleChange }: HeaderProps) {
 
   return (
     <header className="border-b-4 border-black bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex flex-col sm:flex-row justify-center items-center relative gap-4 sm:gap-0">
           <Link href="/" className="block text-center hover:opacity-80 transition-opacity border-l-4 border-r-4 border-black px-4 py-2">
-            <h1 className="text-2xl sm:text-4xl font-serif font-black mb-2">
+            <h1 className="text-2xl sm:text-4xl font-serif font-black">
               {t.appName}
             </h1>
-            <p className="text-xs sm:text-sm text-gray-600 italic">
+            <p className="text-xs sm:text-sm text-gray-600 italic mt-1">
               {t.appTagline}
             </p>
           </Link>

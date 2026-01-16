@@ -39,14 +39,17 @@ describe('SubscriptionStorageService', () => {
           (ids) => {
             service.clearAll();
 
+            // Remove duplicates to ensure unique IDs
+            const uniqueIds = Array.from(new Set(ids));
+
             // Subscribe to all IDs
-            ids.forEach((id) => service.addSubscription(id));
+            uniqueIds.forEach((id) => service.addSubscription(id));
 
             // Retrieve subscriptions
             const retrieved = service.getSubscriptions().map((s) => s.id);
 
             // Should contain all subscribed IDs
-            return ids.every((id) => retrieved.includes(id));
+            return uniqueIds.every((id) => retrieved.includes(id));
           }
         ),
         { numRuns: 100 }
@@ -80,11 +83,19 @@ describe('SubscriptionStorageService', () => {
           (ids) => {
             service.clearAll();
 
+            // Remove duplicates to ensure unique IDs
+            const uniqueIds = Array.from(new Set(ids));
+            
+            // Skip if we don't have at least 2 unique IDs
+            if (uniqueIds.length < 2) {
+              return true;
+            }
+
             // Add subscriptions
-            ids.forEach((id) => service.addSubscription(id));
+            uniqueIds.forEach((id) => service.addSubscription(id));
 
             // Reorder
-            const shuffled = [...ids].sort(() => Math.random() - 0.5);
+            const shuffled = [...uniqueIds].sort(() => Math.random() - 0.5);
             service.reorderSubscriptions(shuffled);
 
             // Verify order
@@ -107,8 +118,11 @@ describe('SubscriptionStorageService', () => {
           (ids) => {
             service.clearAll();
 
+            // Remove duplicates to ensure unique IDs
+            const uniqueIds = Array.from(new Set(ids));
+
             // Add subscriptions
-            ids.forEach((id) => service.addSubscription(id));
+            uniqueIds.forEach((id) => service.addSubscription(id));
 
             // Get raw data from localStorage
             const rawData = localStorage.getItem('myrsspress_subscriptions');

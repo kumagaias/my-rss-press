@@ -19,6 +19,11 @@ export interface UseSubscriptionsReturn {
  * @param message - Message to announce
  */
 function announceToScreenReader(message: string) {
+  // Check if running in browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
+
   const announcement = document.createElement('div');
   announcement.setAttribute('role', 'status');
   announcement.setAttribute('aria-live', 'polite');
@@ -28,9 +33,11 @@ function announceToScreenReader(message: string) {
   
   document.body.appendChild(announcement);
   
-  // Remove after announcement
+  // Remove after announcement with proper cleanup
   setTimeout(() => {
-    document.body.removeChild(announcement);
+    if (document.body.contains(announcement)) {
+      document.body.removeChild(announcement);
+    }
   }, 1000);
 }
 

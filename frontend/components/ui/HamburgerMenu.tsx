@@ -76,7 +76,7 @@ export function HamburgerMenu({ locale }: HamburgerMenuProps) {
       {/* Menu Panel */}
       <div
         ref={menuRef}
-        className={`fixed top-0 left-0 h-full w-[280px] bg-white border-r-4 border-black shadow-2xl z-50 transform transition-transform duration-200 ease-out ${
+        className={`fixed top-0 left-0 h-full w-[280px] bg-white border-r-4 border-black z-50 transform transition-transform duration-200 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

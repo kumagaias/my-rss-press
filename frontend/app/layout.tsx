@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import { LayoutClient } from './layout-client';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export default function RootLayout({
             style={{ display: 'none', visibility: 'hidden' }}
           />
         </noscript>
-        {children}
+        <LayoutClient>{children}</LayoutClient>
       </body>
     </html>
   );

@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { NewspaperLayout } from '@/components/features/newspaper/NewspaperLayout';
 import { NewspaperSettingsModal } from '@/components/features/newspaper/NewspaperSettings';
 import DateNavigation from '@/components/features/newspaper/DateNavigation';
+import { Footer } from '@/components/ui/Footer';
+import { SubscribeButton } from '@/components/features/subscription/SubscribeButton';
 import { detectLocale, useTranslations, type Locale } from '@/lib/i18n';
 import { saveNewspaper } from '@/lib/api';
 import type { NewspaperSettings } from '@/types';
@@ -358,6 +360,16 @@ function NewspaperContent() {
               </p>
             </button>
             <div className="sm:absolute sm:right-0 flex gap-2">
+              {/* Subscribe Button - show for saved newspapers (not temp-*) */}
+              {!newspaper.newspaperId.startsWith('temp-') && (
+                <SubscribeButton
+                  newspaperId={newspaper.newspaperId}
+                  newspaperTitle={newspaper.name}
+                  variant="full"
+                  locale={locale}
+                />
+              )}
+
               {/* Save Button - only show for unsaved newspapers (temp ID) */}
               {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
                 <button
@@ -433,6 +445,9 @@ function NewspaperContent() {
         defaultName={newspaper.theme || newspaper.name}
         initialFeeds={feedMetadata}
       />
+
+      {/* Footer */}
+      <Footer locale={locale} />
     </div>
   );
 }

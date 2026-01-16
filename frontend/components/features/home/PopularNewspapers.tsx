@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import SearchInput from './SearchInput';
 import SortFilter from './SortFilter';
+import { SubscribeButton } from '@/components/features/subscription/SubscribeButton';
 import type { NewspaperData, Locale } from '@/types';
 import { useTranslations, formatDate, formatNumber } from '@/lib/i18n';
 import { getHostnameFromUrl } from '@/lib/utils';
@@ -164,11 +165,21 @@ export function PopularNewspapers({ locale, onNewspaperClick }: PopularNewspaper
             <div
               key={newspaper.newspaperId}
               onClick={() => handleNewspaperClick(newspaper.newspaperId)}
-              className="cursor-pointer"
+              className="cursor-pointer relative"
             >
               <Card className="hover:shadow-lg transition-all">
+                {/* Subscribe Button - positioned in top-right corner */}
+                <div className="absolute top-2 right-2 z-10">
+                  <SubscribeButton
+                    newspaperId={newspaper.newspaperId}
+                    newspaperTitle={newspaper.name}
+                    variant="icon-only"
+                    locale={locale}
+                  />
+                </div>
+
                 <div className="space-y-3">
-                  <h3 className="text-xl font-serif font-black line-clamp-2 border-b border-gray-300 pb-2">
+                  <h3 className="text-xl font-serif font-black line-clamp-2 border-b border-gray-300 pb-2 pr-12">
                     {newspaper.name}
                   </h3>
                   

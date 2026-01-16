@@ -6,11 +6,14 @@ import { ThemeInput } from '@/components/features/feed/ThemeInput';
 import { PopularNewspapers } from '@/components/features/home/PopularNewspapers';
 import { TopicMarquee } from '@/components/ui/TopicMarquee';
 import { LoadingAnimation } from '@/components/ui/LoadingAnimation';
+import { Footer } from '@/components/ui/Footer';
 import { detectLocale, useTranslations } from '@/lib/i18n';
+import { useSubscriptions } from '@/hooks/useSubscriptions';
 import type { Locale } from '@/types';
 
 export default function Home() {
   const router = useRouter();
+  const { subscriptions } = useSubscriptions();
   
   // Initialize locale with SSR-safe detection
   const [locale, setLocale] = useState<Locale>(() => {
@@ -27,6 +30,25 @@ export default function Home() {
   const [theme, setTheme] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasCheckedInitialNavigation, setHasCheckedInitialNavigation] = useState(false);
+
+  // Initial navigation logic: redirect to first subscribed newspaper on app load only
+  useEffect(() => {
+    // Check if this is the initial app load using sessionStorage
+    const hasNavigated = sessionStorage.getItem('hasInitialNavigated');
+    
+    if (hasNavigated || hasCheckedInitialNavigation) return;
+    
+    if (subscriptions.length > 0) {
+      const firstNewspaperId = subscriptions[0].id;
+      const today = new Date().toISOString().split('T')[0];
+      console.log('[Home] Initial load: Redirecting to first subscribed newspaper:', firstNewspaperId);
+      sessionStorage.setItem('hasInitialNavigated', 'true');
+      router.push(`/newspaper?id=${firstNewspaperId}&date=${today}`);
+    }
+    
+    setHasCheckedInitialNavigation(true);
+  }, [subscriptions, router, hasCheckedInitialNavigation]);
 
   // Save locale to localStorage when it changes
   useEffect(() => {
@@ -186,14 +208,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-black text-white border-t-4 border-black mt-8 sm:mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0 text-xs font-serif">
-            <p>© 2025-2026 MyRSSPress</p>
-            <p className="text-center">{t.footerTagline}</p>
-          </div>
-        </div>
-      </footer>
+      <Footer locale={locale} />
     </main>
   );
 }

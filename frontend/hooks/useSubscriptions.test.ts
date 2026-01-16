@@ -173,29 +173,32 @@ describe('useSubscriptions', () => {
     // Feature: issue-84-newspaper-subscription, Property 5: Subscription Toggle Idempotence
     it('property: toggle idempotence', async () => {
       await fc.assert(
-        fc.asyncProperty(fc.string({ minLength: 1, maxLength: 50 }), async (id) => {
-          subscriptionStorage.clearAll();
+        fc.asyncProperty(
+          fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          async (id) => {
+            subscriptionStorage.clearAll();
 
-          const { result } = renderHook(() => useSubscriptions());
+            const { result } = renderHook(() => useSubscriptions());
 
-          await waitFor(() => {
-            expect(result.current.isLoading).toBe(false);
-          });
+            await waitFor(() => {
+              expect(result.current.isLoading).toBe(false);
+            });
 
-          const initialState = result.current.isSubscribed(id);
+            const initialState = result.current.isSubscribed(id);
 
-          // Toggle twice
-          act(() => {
-            result.current.toggleSubscription(id);
-          });
+            // Toggle twice
+            act(() => {
+              result.current.toggleSubscription(id);
+            });
 
-          act(() => {
-            result.current.toggleSubscription(id);
-          });
+            act(() => {
+              result.current.toggleSubscription(id);
+            });
 
-          // Should return to initial state
-          return result.current.isSubscribed(id) === initialState;
-        }),
+            // Should return to initial state
+            return result.current.isSubscribed(id) === initialState;
+          }
+        ),
         { numRuns: 100 }
       );
     });

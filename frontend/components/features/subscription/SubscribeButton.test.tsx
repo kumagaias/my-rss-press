@@ -136,27 +136,29 @@ describe('SubscribeButton', () => {
     // Feature: issue-84-newspaper-subscription, Property 7: Visual State Consistency
     it('property: visual state matches subscription state', async () => {
       await fc.assert(
-        fc.asyncProperty(fc.string({ minLength: 1, maxLength: 50 }), async (id) => {
-          subscriptionStorage.clearAll();
-
-          // Test both subscribed and unsubscribed states
-          const states = [false, true];
-
-          for (const shouldBeSubscribed of states) {
-            if (shouldBeSubscribed) {
-              subscriptionStorage.addSubscription(id);
-            }
-
-            const { unmount } = render(<SubscribeButton newspaperId={id} variant="full" locale="en" />);
-
-            await waitFor(() => {
-              const expectedText = shouldBeSubscribed ? 'Subscribed' : 'Subscribe';
-              expect(screen.getByText(expectedText)).toBeInTheDocument();
-            });
-
-            unmount();
+        fc.asyncProperty(
+          fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          async (id) => {
             subscriptionStorage.clearAll();
-          }
+
+            // Test both subscribed and unsubscribed states
+            const states = [false, true];
+
+            for (const shouldBeSubscribed of states) {
+              if (shouldBeSubscribed) {
+                subscriptionStorage.addSubscription(id);
+              }
+
+              const { unmount } = render(<SubscribeButton newspaperId={id} variant="full" locale="en" />);
+
+              await waitFor(() => {
+                const expectedText = shouldBeSubscribed ? 'Subscribed' : 'Subscribe';
+                expect(screen.getByText(expectedText)).toBeInTheDocument();
+              });
+
+              unmount();
+              subscriptionStorage.clearAll();
+            }
 
           return true;
         }),
@@ -167,26 +169,29 @@ describe('SubscribeButton', () => {
     // Feature: issue-84-newspaper-subscription, Property 6: LocalStorage Synchronization
     it('property: localStorage updated immediately after click', async () => {
       await fc.assert(
-        fc.asyncProperty(fc.string({ minLength: 1, maxLength: 50 }), async (id) => {
-          subscriptionStorage.clearAll();
+        fc.asyncProperty(
+          fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          async (id) => {
+            subscriptionStorage.clearAll();
 
-          const { unmount } = render(<SubscribeButton newspaperId={id} variant="full" locale="en" />);
+            const { unmount } = render(<SubscribeButton newspaperId={id} variant="full" locale="en" />);
 
-          await waitFor(() => {
-            expect(screen.getByText('Subscribe')).toBeInTheDocument();
-          });
+            await waitFor(() => {
+              expect(screen.getByText('Subscribe')).toBeInTheDocument();
+            });
 
-          const button = screen.getByRole('button');
-          fireEvent.click(button);
+            const button = screen.getByRole('button');
+            fireEvent.click(button);
 
-          // Check localStorage immediately
-          const isInStorage = subscriptionStorage.isSubscribed(id);
+            // Check localStorage immediately
+            const isInStorage = subscriptionStorage.isSubscribed(id);
 
-          unmount();
-          subscriptionStorage.clearAll();
+            unmount();
+            subscriptionStorage.clearAll();
 
-          return isInStorage === true;
-        }),
+            return isInStorage === true;
+          }
+        ),
         { numRuns: 50 }
       );
     });

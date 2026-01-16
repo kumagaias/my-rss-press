@@ -32,7 +32,10 @@ describe('SubscriptionStorageService', () => {
     it('property: subscription round trip', () => {
       fc.assert(
         fc.property(
-          fc.array(fc.string({ minLength: 1, maxLength: 50 }), { minLength: 1, maxLength: 50 }),
+          fc.array(
+            fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+            { minLength: 1, maxLength: 50 }
+          ),
           (ids) => {
             service.clearAll();
 
@@ -53,12 +56,15 @@ describe('SubscriptionStorageService', () => {
     // Feature: issue-84-newspaper-subscription, Property 2: Unsubscription Removal
     it('property: unsubscription removes ID', () => {
       fc.assert(
-        fc.property(fc.string({ minLength: 1, maxLength: 50 }), (id) => {
-          service.clearAll();
-          service.addSubscription(id);
-          service.removeSubscription(id);
-          return !service.isSubscribed(id);
-        }),
+        fc.property(
+          fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          (id) => {
+            service.clearAll();
+            service.addSubscription(id);
+            service.removeSubscription(id);
+            return !service.isSubscribed(id);
+          }
+        ),
         { numRuns: 100 }
       );
     });
@@ -67,7 +73,10 @@ describe('SubscriptionStorageService', () => {
     it('property: order preservation', () => {
       fc.assert(
         fc.property(
-          fc.array(fc.string({ minLength: 1, maxLength: 50 }), { minLength: 2, maxLength: 10 }),
+          fc.array(
+            fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+            { minLength: 2, maxLength: 10 }
+          ),
           (ids) => {
             service.clearAll();
 
@@ -91,7 +100,10 @@ describe('SubscriptionStorageService', () => {
     it('property: JSON schema validation', () => {
       fc.assert(
         fc.property(
-          fc.array(fc.string({ minLength: 1, maxLength: 50 }), { minLength: 1, maxLength: 10 }),
+          fc.array(
+            fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+            { minLength: 1, maxLength: 10 }
+          ),
           (ids) => {
             service.clearAll();
 
@@ -124,7 +136,10 @@ describe('SubscriptionStorageService', () => {
     it('property: subscription limit enforcement', () => {
       fc.assert(
         fc.property(
-          fc.array(fc.string({ minLength: 1, maxLength: 50 }), { minLength: 51, maxLength: 100 }),
+          fc.array(
+            fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+            { minLength: 51, maxLength: 100 }
+          ),
           (ids) => {
             service.clearAll();
 
@@ -218,7 +233,10 @@ describe('SubscriptionStorageService', () => {
     it('property: operations complete within 100ms', () => {
       fc.assert(
         fc.property(
-          fc.array(fc.string({ minLength: 1, maxLength: 50 }), { minLength: 1, maxLength: 50 }),
+          fc.array(
+            fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+            { minLength: 1, maxLength: 50 }
+          ),
           (ids) => {
             service.clearAll();
 

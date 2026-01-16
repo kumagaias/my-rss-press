@@ -35,7 +35,8 @@ function announceToScreenReader(message: string) {
   
   // Remove after announcement with proper cleanup
   setTimeout(() => {
-    if (document.body.contains(announcement)) {
+    // Check again in case environment changed
+    if (typeof document !== 'undefined' && document.body && document.body.contains(announcement)) {
       document.body.removeChild(announcement);
     }
   }, 1000);

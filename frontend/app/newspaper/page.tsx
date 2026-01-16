@@ -342,19 +342,18 @@ function NewspaperContent() {
 
       {/* Save Button Bar - only show for unsaved newspapers (temp ID) */}
       {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={handleSaveClick}
-                disabled={isSaving}
-                className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                {isSaving ? t.saving : t.save}
-              </button>
-            </div>
+        <>
+          {/* Fixed Save Button - aligned with hamburger menu */}
+          <div className="fixed top-[1.25rem] right-4 z-50">
+            <button
+              onClick={handleSaveClick}
+              disabled={isSaving}
+              className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {isSaving ? t.saving : t.save}
+            </button>
           </div>
-        </div>
+        </>
       )}
 
       {/* Newspaper Content */}

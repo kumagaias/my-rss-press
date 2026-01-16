@@ -103,23 +103,6 @@ describe('NewspaperPage', () => {
     expect(screen.getByText('Test Article 2')).toBeInTheDocument();
   });
 
-  it('renders back to home button', async () => {
-    render(<NewspaperPage />);
-
-    expect(await screen.findByText(/Back to Home/, {}, { timeout: 5000 })).toBeInTheDocument();
-  });
-
-
-
-  it('navigates back to home when back button is clicked', async () => {
-    render(<NewspaperPage />);
-
-    const backButton = await screen.findByText(/Back to Home/, {}, { timeout: 3000 });
-    fireEvent.click(backButton);
-
-    expect(mockPush).toHaveBeenCalledWith('/');
-  });
-
   it('loads newspaper from sessionStorage when no ID is provided', async () => {
     mockNewspaperId = null; // No ID in query params
     

@@ -341,14 +341,6 @@ function NewspaperContent() {
                 {isSaving ? t.saving : t.save}
               </button>
             )}
-            
-            {/* Back to Home Button */}
-            <button
-              onClick={() => router.push('/')}
-              className="px-4 py-2 min-h-[44px] text-sm font-serif font-bold border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors"
-            >
-              {t.backToHome}
-            </button>
           </div>
         </div>
       </div>

@@ -44,7 +44,7 @@ export default function SubscribePage() {
           })
         );
 
-        const validNewspapers: Newspaper[] = [];
+        const validNewspapers: NewspaperData[] = [];
         const missing: string[] = [];
 
         results.forEach((result) => {

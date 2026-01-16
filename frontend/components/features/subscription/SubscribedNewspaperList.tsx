@@ -49,7 +49,7 @@ export function SubscribedNewspaperList({
         <SortableContext items={subscriptions.map((s) => s.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-4">
             {subscriptions.map((subscription) => {
-              const newspaper = newspapers.find((n) => n.id === subscription.id);
+              const newspaper = newspapers.find((n) => n.newspaperId === subscription.id);
               return (
                 <SortableNewspaperCard
                   key={subscription.id}

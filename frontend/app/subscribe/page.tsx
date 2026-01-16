@@ -6,16 +6,45 @@ import { detectLocale, useTranslations } from '@/lib/i18n';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { SubscribedNewspaperList } from '@/components/features/subscription/SubscribedNewspaperList';
 import { Footer } from '@/components/ui/Footer';
-import type { NewspaperData } from '@/types';
+import type { NewspaperData, Locale } from '@/types';
 
 export default function SubscribePage() {
-  const locale = detectLocale();
+  // Get locale from localStorage (set by LayoutClient)
+  const [locale, setLocale] = useState<Locale>(() => {
+    // During SSR, return 'en' as default
+    if (typeof window === 'undefined') return 'en';
+    
+    // On client, check localStorage
+    const savedLocale = localStorage.getItem('locale') as Locale | null;
+    return savedLocale || detectLocale();
+  });
+  
   const t = useTranslations(locale);
   const router = useRouter();
   const { subscriptions, removeSubscription } = useSubscriptions();
   const [newspapers, setNewspapers] = useState<NewspaperData[]>([]);
   const [loading, setLoading] = useState(true);
   const [missingNewspaperIds, setMissingNewspaperIds] = useState<string[]>([]);
+
+  // Sync locale from localStorage (updated by LayoutClient)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedLocale = localStorage.getItem('locale') as Locale | null;
+      if (savedLocale && savedLocale !== locale) {
+        setLocale(savedLocale);
+      }
+    };
+
+    // Listen for storage changes from other tabs/components
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check on mount
+    handleStorageChange();
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [locale]);
 
   useEffect(() => {
     const fetchNewspapers = async () => {

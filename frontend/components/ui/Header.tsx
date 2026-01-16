@@ -24,7 +24,7 @@ export function Header({ locale, onLocaleChange }: HeaderProps) {
             </p>
           </Link>
           {onLocaleChange && (
-            <div className="sm:absolute sm:right-0">
+            <div className="sm:absolute sm:right-0 flex items-center">
               <select
                 value={locale}
                 onChange={(e) => onLocaleChange(e.target.value as Locale)}

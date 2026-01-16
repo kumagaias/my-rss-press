@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import * as fc from 'fast-check';
 import { SubscribedNewspaperList } from './SubscribedNewspaperList';
-import type { SubscriptionItem, Newspaper } from '@/types';
+import type { SubscriptionItem, NewspaperData } from '@/types';
 
 // Mock useSubscriptions hook
 const mockReorderSubscriptions = vi.fn();
@@ -63,7 +63,7 @@ describe('SubscribedNewspaperList', () => {
   describe('Unit Tests', () => {
     it('should render drag instruction', () => {
       const subscriptions: SubscriptionItem[] = [];
-      const newspapers: Newspaper[] = [];
+      const newspapers: NewspaperData[] = [];
 
       render(
         <SubscribedNewspaperList
@@ -82,7 +82,7 @@ describe('SubscribedNewspaperList', () => {
         { id: '1', title: 'Newspaper 1', subscribedAt: new Date().toISOString(), order: 0 },
         { id: '2', title: 'Newspaper 2', subscribedAt: new Date().toISOString(), order: 1 },
       ];
-      const newspapers: Newspaper[] = [];
+      const newspapers: NewspaperData[] = [];
 
       render(
         <SubscribedNewspaperList
@@ -99,7 +99,7 @@ describe('SubscribedNewspaperList', () => {
 
     it('should render empty list when no subscriptions', () => {
       const subscriptions: SubscriptionItem[] = [];
-      const newspapers: Newspaper[] = [];
+      const newspapers: NewspaperData[] = [];
 
       const { container } = render(
         <SubscribedNewspaperList

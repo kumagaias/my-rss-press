@@ -3,11 +3,11 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { formatDate, useTranslations, type Locale } from '@/lib/i18n';
-import type { SubscriptionItem, Newspaper } from '@/types';
+import type { SubscriptionItem, NewspaperData } from '@/types';
 
 interface SortableNewspaperCardProps {
   subscription: SubscriptionItem;
-  newspaper?: Newspaper;
+  newspaper?: NewspaperData;
   onClick: () => void;
   locale: Locale;
 }

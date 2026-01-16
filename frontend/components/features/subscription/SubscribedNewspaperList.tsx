@@ -5,11 +5,11 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { SortableNewspaperCard } from './SortableNewspaperCard';
 import { useTranslations, type Locale } from '@/lib/i18n';
-import type { SubscriptionItem, Newspaper } from '@/types';
+import type { SubscriptionItem, NewspaperData } from '@/types';
 
 interface SubscribedNewspaperListProps {
   subscriptions: SubscriptionItem[];
-  newspapers: Newspaper[];
+  newspapers: NewspaperData[];
   onNewspaperClick: (id: string) => void;
   locale: Locale;
 }

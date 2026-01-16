@@ -6,14 +6,14 @@ import { detectLocale, useTranslations } from '@/lib/i18n';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { SubscribedNewspaperList } from '@/components/features/subscription/SubscribedNewspaperList';
 import { Footer } from '@/components/ui/Footer';
-import type { Newspaper } from '@/types';
+import type { NewspaperData } from '@/types';
 
 export default function SubscribePage() {
   const locale = detectLocale();
   const t = useTranslations(locale);
   const router = useRouter();
   const { subscriptions, removeSubscription } = useSubscriptions();
-  const [newspapers, setNewspapers] = useState<Newspaper[]>([]);
+  const [newspapers, setNewspapers] = useState<NewspaperData[]>([]);
   const [loading, setLoading] = useState(true);
   const [missingNewspaperIds, setMissingNewspaperIds] = useState<string[]>([]);
 

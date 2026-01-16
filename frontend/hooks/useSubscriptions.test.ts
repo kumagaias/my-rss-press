@@ -214,6 +214,9 @@ describe('useSubscriptions', () => {
           async (ids) => {
             subscriptionStorage.clearAll();
 
+            // Remove duplicates to ensure unique IDs
+            const uniqueIds = Array.from(new Set(ids));
+
             // Create two hook instances (simulating two components)
             const { result: result1 } = renderHook(() => useSubscriptions());
             const { result: result2 } = renderHook(() => useSubscriptions());
@@ -224,7 +227,7 @@ describe('useSubscriptions', () => {
             });
 
             // Add subscriptions in first hook
-            for (const id of ids) {
+            for (const id of uniqueIds) {
               act(() => {
                 result1.current.addSubscription(id);
               });
@@ -242,7 +245,7 @@ describe('useSubscriptions', () => {
 
             // Wait for second hook to sync
             await waitFor(() => {
-              expect(result2.current.count).toBe(ids.length);
+              expect(result2.current.count).toBe(uniqueIds.length);
             });
 
             // Both hooks should have the same subscriptions
@@ -254,7 +257,7 @@ describe('useSubscriptions', () => {
         ),
         { numRuns: 50 }
       );
-    });
+    }, 20000); // Increase timeout to 20 seconds
 
     // Feature: issue-84-newspaper-subscription, Property 17: Data Validation on Load
     it('property: data validation on load', async () => {

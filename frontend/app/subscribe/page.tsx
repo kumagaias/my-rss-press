@@ -28,21 +28,23 @@ export default function SubscribePage() {
 
   // Sync locale from localStorage (updated by LayoutClient)
   useEffect(() => {
-    const handleStorageChange = () => {
+    // Check localStorage periodically for locale changes
+    const checkLocale = () => {
       const savedLocale = localStorage.getItem('locale') as Locale | null;
       if (savedLocale && savedLocale !== locale) {
+        console.log('[Subscribe] Locale changed to:', savedLocale);
         setLocale(savedLocale);
       }
     };
 
-    // Listen for storage changes from other tabs/components
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check on mount
-    handleStorageChange();
+    // Check immediately on mount
+    checkLocale();
+
+    // Check every 500ms for locale changes
+    const interval = setInterval(checkLocale, 500);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
     };
   }, [locale]);
 

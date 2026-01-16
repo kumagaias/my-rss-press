@@ -83,7 +83,8 @@ describe('SubscribePage', () => {
         fc.asyncProperty(
           fc.array(
             fc.record({
-              id: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0), // Valid IDs only
+              // Generate realistic newspaper IDs (alphanumeric + hyphens only)
+              id: fc.stringMatching(/^[a-zA-Z0-9][a-zA-Z0-9-]{0,48}[a-zA-Z0-9]$/),
               exists: fc.boolean(),
             }),
             { minLength: 1, maxLength: 5 } // Reduce max to avoid timeout

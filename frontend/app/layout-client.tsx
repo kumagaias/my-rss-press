@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { HamburgerMenu } from '@/components/ui/HamburgerMenu';
 import { Header } from '@/components/ui/Header';
 import { detectLocale, type Locale } from '@/lib/i18n';
 
-export function LayoutClient({ children }: { children: React.ReactNode }) {
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
   const [locale, setLocale] = useState<Locale>(() => {
     // During SSR, return 'en' as default
     if (typeof window === 'undefined') return 'en';
@@ -14,6 +18,12 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
     const savedLocale = localStorage.getItem('locale') as Locale | null;
     return savedLocale || detectLocale();
   });
+
+  // Check if we're on newspaper creation page (temp ID or no ID)
+  const isNewspaperCreation = pathname === '/newspaper' && (
+    !searchParams.get('id') || 
+    searchParams.get('id')?.startsWith('temp-')
+  );
 
   // Save locale to localStorage when it changes
   useEffect(() => {
@@ -33,8 +43,27 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
       <div className="fixed top-[1.25rem] left-4 z-50">
         <HamburgerMenu locale={locale} />
       </div>
-      <Header locale={locale} onLocaleChange={handleLocaleChange} />
+      <Header 
+        locale={locale} 
+        onLocaleChange={isNewspaperCreation ? undefined : handleLocaleChange} 
+      />
       {children}
     </>
+  );
+}
+
+export function LayoutClient({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={
+      <>
+        <div className="fixed top-[1.25rem] left-4 z-50">
+          <HamburgerMenu locale="en" />
+        </div>
+        <Header locale="en" />
+        {children}
+      </>
+    }>
+      <LayoutContent>{children}</LayoutContent>
+    </Suspense>
   );
 }

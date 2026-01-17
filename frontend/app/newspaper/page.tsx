@@ -327,21 +327,12 @@ function NewspaperContent() {
               locale={locale}
               isLoading={isDateChanging}
             />
-            {/* Subscribe Button - below date navigation */}
-            <div className="pb-3 flex justify-end">
-              <SubscribeButton
-                newspaperId={newspaper.newspaperId}
-                newspaperTitle={newspaper.name}
-                variant="full"
-                locale={locale}
-              />
-            </div>
           </div>
         </div>
       )}
 
-      {/* Save Button Bar - only show for unsaved newspapers (temp ID) */}
-      {newspaper.newspaperId.startsWith('temp-') && !isSaved && (
+      {/* Save Button - only show for unsaved newspapers (temp ID) and when newspaper is loaded */}
+      {newspaper && newspaper.newspaperId.startsWith('temp-') && !isSaved && (
         <>
           {/* Fixed Save Button - aligned with hamburger menu */}
           <div className="fixed top-[1.25rem] right-4 z-50">
@@ -381,6 +372,8 @@ function NewspaperContent() {
             summary={newspaper.summary}
             editorialColumn={newspaper.editorialColumn}
             bookRecommendations={newspaper.bookRecommendations}
+            newspaperId={newspaper.newspaperId}
+            showSubscribeButton={!newspaper.newspaperId.startsWith('temp-')}
           />
         )}
       </div>

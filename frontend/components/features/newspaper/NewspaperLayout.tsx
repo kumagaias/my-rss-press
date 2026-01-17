@@ -6,6 +6,7 @@ import { useTranslations, formatDate } from '@/lib/i18n';
 import { getPlaceholderImage } from '@/lib/placeholderImages';
 import { EditorialColumn } from './EditorialColumn';
 import { BookRecommendations, type BookRecommendation } from './BookRecommendations';
+import { SubscribeButton } from '../subscription/SubscribeButton';
 
 interface NewspaperLayoutProps {
   articles: Article[];
@@ -16,6 +17,8 @@ interface NewspaperLayoutProps {
   summary?: string | null;
   editorialColumn?: string | null;
   bookRecommendations?: BookRecommendation[];
+  newspaperId: string;
+  showSubscribeButton?: boolean;
 }
 
 /**
@@ -38,6 +41,8 @@ export function NewspaperLayout({
   summary,
   editorialColumn,
   bookRecommendations,
+  newspaperId,
+  showSubscribeButton = false,
 }: NewspaperLayoutProps) {
   const t = useTranslations(locale);
   const formattedDate = formatDate(createdAt, locale);
@@ -74,7 +79,7 @@ export function NewspaperLayout({
   return (
     <div className="max-w-7xl mx-auto p-8 bg-[#f5f5dc] font-serif min-h-screen">
       {/* Newspaper Header */}
-      <header className="text-center border-b-4 border-black pb-4 mb-8">
+      <header className="text-center border-b-4 border-black pb-4 mb-8 relative">
         <h1 className="text-6xl font-bold mb-2" style={{ fontFamily: 'Georgia, serif' }}>
           {newspaperName || 'MyRSSPress'}
         </h1>
@@ -89,6 +94,17 @@ export function NewspaperLayout({
             </>
           )}
         </div>
+        {/* Subscribe Button - positioned in top right of header */}
+        {showSubscribeButton && (
+          <div className="absolute top-0 right-0">
+            <SubscribeButton
+              newspaperId={newspaperId}
+              newspaperTitle={newspaperName}
+              variant="full"
+              locale={locale}
+            />
+          </div>
+        )}
       </header>
 
       {/* Summary Section - Temporarily hidden (backend still generates it) */}

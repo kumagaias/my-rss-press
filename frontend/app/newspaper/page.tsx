@@ -89,6 +89,9 @@ function NewspaperContent() {
     
     // Reset date changing state when URL params change
     setIsDateChanging(false);
+    
+    // Scroll to top when page loads or URL changes
+    window.scrollTo(0, 0);
   }, [searchParams]);
 
   useEffect(() => {
@@ -332,7 +335,7 @@ function NewspaperContent() {
       )}
 
       {/* Save Button - only show for unsaved newspapers (temp ID) and when newspaper is loaded */}
-      {newspaper && newspaper.newspaperId.startsWith('temp-') && !isSaved && (
+      {!loading && !isDateChanging && newspaper && newspaper.newspaperId.startsWith('temp-') && !isSaved && (
         <>
           {/* Fixed Save Button - aligned with hamburger menu */}
           <div className="fixed top-[1.25rem] right-4 z-50">

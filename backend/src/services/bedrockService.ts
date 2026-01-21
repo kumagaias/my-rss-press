@@ -265,13 +265,17 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
     const content = responseBody.content[0].text;
     
-    // Log response in chunks to avoid truncation
-    const chunkSize = 1000;
+    // Log complete response for debugging (split into chunks to avoid CloudWatch truncation)
+    console.log(`[Bedrock] === COMPLETE RESPONSE START (${content.length} chars) ===`);
+    const chunkSize = 2000;
     for (let i = 0; i < content.length; i += chunkSize) {
       const chunk = content.substring(i, Math.min(i + chunkSize, content.length));
-      console.log(`[Bedrock] Response chunk ${Math.floor(i / chunkSize) + 1}/${Math.ceil(content.length / chunkSize)}: ${chunk}`);
+      const chunkNum = Math.floor(i / chunkSize) + 1;
+      const totalChunks = Math.ceil(content.length / chunkSize);
+      console.log(`[Bedrock] CHUNK ${chunkNum}/${totalChunks}:`);
+      console.log(chunk);
     }
-    console.log(`[Bedrock] Total response length: ${content.length} characters`);
+    console.log(`[Bedrock] === COMPLETE RESPONSE END ===`);
     
     const result = parseAIResponse(response, theme, locale);
     console.log(`[Bedrock] AI suggested ${result.feeds.length} feeds:`, result.feeds.map(s => ({ url: s.url, title: s.title })));
@@ -548,13 +552,14 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
       cleanedJson = cleanedJson.replace(/,(\s*[}\]])/g, '$1');
       
       // Remove any control characters that might break JSON
+      // eslint-disable-next-line no-control-regex
       cleanedJson = cleanedJson.replace(/[\x00-\x1F\x7F]/g, '');
       
       // Try parsing the cleaned JSON
       try {
         parsed = JSON.parse(cleanedJson);
         console.log('[Bedrock] Successfully parsed cleaned JSON');
-      } catch (cleanError) {
+      } catch {
         console.error('[Bedrock] Cleaned JSON still failed to parse');
         
         // Strategy 3: Try to extract just the feeds array

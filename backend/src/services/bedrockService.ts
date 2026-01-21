@@ -261,11 +261,16 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     const bedrockTime = Date.now() - startTime;
     console.log(`[Bedrock] API call completed in ${bedrockTime}ms`);
     
-    // Log raw response for debugging (first 500 chars)
+    // Log raw response for debugging
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
     const content = responseBody.content[0].text;
-    console.log(`[Bedrock] Raw response (first 500 chars): ${content.substring(0, 500)}`);
-    console.log(`[Bedrock] Raw response (last 500 chars): ${content.substring(Math.max(0, content.length - 500))}`);
+    
+    // Log response in chunks to avoid truncation
+    const chunkSize = 1000;
+    for (let i = 0; i < content.length; i += chunkSize) {
+      const chunk = content.substring(i, Math.min(i + chunkSize, content.length));
+      console.log(`[Bedrock] Response chunk ${Math.floor(i / chunkSize) + 1}/${Math.ceil(content.length / chunkSize)}: ${chunk}`);
+    }
     console.log(`[Bedrock] Total response length: ${content.length} characters`);
     
     const result = parseAIResponse(response, theme, locale);
@@ -511,16 +516,21 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
       console.log('[Bedrock] Raw AI response:', content.substring(0, 200) + '...');
     }
 
-    // Extract JSON from response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    // Extract JSON from response - try multiple strategies
+    let jsonString = '';
+    
+    // Strategy 1: Find JSON between first { and last }
+    const firstBrace = content.indexOf('{');
+    const lastBrace = content.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      jsonString = content.substring(firstBrace, lastBrace + 1);
+      console.log(`[Bedrock] Extracted JSON length: ${jsonString.length} characters`);
+    } else {
       console.error('[Bedrock] No JSON found in response');
       console.error('[Bedrock] Response content:', content);
       throw new Error('No JSON found in response');
     }
-
-    const jsonString = jsonMatch[0];
-    console.log(`[Bedrock] Extracted JSON length: ${jsonString.length} characters`);
 
     let parsed;
     try {
@@ -531,23 +541,53 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
       console.error('[Bedrock] JSON string (first 1000 chars):', jsonString.substring(0, 1000));
       console.error('[Bedrock] JSON string (last 1000 chars):', jsonString.substring(Math.max(0, jsonString.length - 1000)));
       
-      // Try to extract feeds array even if JSON is incomplete
-      // Use greedy quantifier to capture entire feeds array
-      const feedsMatch = content.match(/"feeds"\s*:\s*\[[\s\S]*\]/);
-      if (feedsMatch) {
-        // Try to parse just the feeds array
-        try {
-          const feedsJson = `{${feedsMatch[0]}}`;
-          console.log(`[Bedrock] Attempting to parse feeds array only (${feedsJson.length} chars)`);
-          parsed = JSON.parse(feedsJson);
-          console.log('[Bedrock] Successfully recovered feeds from partial JSON');
-        } catch (recoveryError) {
-          console.error('[Bedrock] Failed to recover feeds:', recoveryError);
+      // Strategy 2: Try to clean up the JSON string
+      let cleanedJson = jsonString;
+      
+      // Remove any trailing commas before closing brackets/braces
+      cleanedJson = cleanedJson.replace(/,(\s*[}\]])/g, '$1');
+      
+      // Remove any control characters that might break JSON
+      cleanedJson = cleanedJson.replace(/[\x00-\x1F\x7F]/g, '');
+      
+      // Try parsing the cleaned JSON
+      try {
+        parsed = JSON.parse(cleanedJson);
+        console.log('[Bedrock] Successfully parsed cleaned JSON');
+      } catch (cleanError) {
+        console.error('[Bedrock] Cleaned JSON still failed to parse');
+        
+        // Strategy 3: Try to extract just the feeds array
+        const feedsMatch = content.match(/"feeds"\s*:\s*\[([\s\S]*?)\]\s*[,}]/);
+        if (feedsMatch) {
+          try {
+            // Reconstruct a minimal valid JSON with just the feeds array
+            const feedsArrayStr = feedsMatch[1];
+            const reconstructedJson = `{"feeds":[${feedsArrayStr}]}`;
+            console.log(`[Bedrock] Attempting to parse reconstructed JSON (${reconstructedJson.length} chars)`);
+            parsed = JSON.parse(reconstructedJson);
+            console.log('[Bedrock] Successfully recovered feeds from partial JSON');
+          } catch (recoveryError) {
+            console.error('[Bedrock] Failed to recover feeds:', recoveryError);
+            
+            // Strategy 4: Try to manually extract feed objects
+            try {
+              const feeds = extractFeedsManually(content);
+              if (feeds.length > 0) {
+                console.log(`[Bedrock] Manually extracted ${feeds.length} feeds`);
+                parsed = { feeds };
+              } else {
+                throw jsonError;
+              }
+            } catch (manualError) {
+              console.error('[Bedrock] Manual extraction failed:', manualError);
+              throw jsonError;
+            }
+          }
+        } else {
+          console.error('[Bedrock] Could not find feeds array in response');
           throw jsonError;
         }
-      } else {
-        console.error('[Bedrock] Could not find feeds array in response');
-        throw jsonError;
       }
     }
 
@@ -581,6 +621,35 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
       console.error('[Bedrock] Parse error details:', error.message);
     }
     throw error;
+  }
+}
+
+/**
+ * Manually extract feed objects from malformed JSON
+ * This is a last-resort fallback when JSON parsing fails
+ */
+function extractFeedsManually(content: string): Array<{ url: string; title: string; reasoning: string }> {
+  const feeds: Array<{ url: string; title: string; reasoning: string }> = [];
+  
+  try {
+    // Find all feed objects using regex
+    // Match pattern: { "url": "...", "title": "...", "reasoning": "..." }
+    const feedPattern = /\{\s*"url"\s*:\s*"([^"]+)"\s*,\s*"title"\s*:\s*"([^"]+)"\s*,\s*"reasoning"\s*:\s*"([^"]+)"\s*\}/g;
+    
+    let match;
+    while ((match = feedPattern.exec(content)) !== null) {
+      feeds.push({
+        url: match[1],
+        title: match[2],
+        reasoning: match[3],
+      });
+    }
+    
+    console.log(`[Manual] Extracted ${feeds.length} feeds using regex`);
+    return feeds;
+  } catch (error) {
+    console.error('[Manual] Failed to extract feeds manually:', error);
+    return [];
   }
 }
 

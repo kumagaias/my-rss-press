@@ -465,8 +465,9 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
 - 「${theme}」専門のメディア、ブログ、サイトを優先
 - 一般ニュースサイトは避ける
 - URL形式: /rss, /feed, /rss.xml, /feed.xml, /index.xml
+- reasoning は20文字以内で簡潔に
 
-重要: JSONのみを返してください。説明文や前置きは不要です。
+重要: 完全で正しいJSONのみを返してください。説明文や前置きは不要です。すべてのフィールドを完全に記述してください。
 
 {
   "newspaperName": "${theme}に関する新聞名",
@@ -487,8 +488,9 @@ Requirements:
 - Avoid general news sites
 - URL format: /rss, /feed, /rss.xml, /feed.xml, /index.xml
 - ALL text in English (titles, reasoning)
+- Keep reasoning under 20 words
 
-IMPORTANT: Return ONLY JSON. No explanations or preamble.
+CRITICAL: Return ONLY complete, valid JSON. No explanations. Complete all fields properly.
 
 {
   "newspaperName": "Newspaper name about ${theme}",

@@ -4,6 +4,7 @@ import { getAllDefaultFeeds as getDefaultFeedsFromFallback } from './categoryFal
 import { getCategoryByTheme } from './categoryService.js';
 import { categoryCache } from './categoryCache.js';
 import { getPopularFeeds } from './feedUsageService.js';
+import { logStructuredError, logStructuredWarning, logMonitoringMetrics, extractTokenUsage } from '../utils/structuredLogger.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({
@@ -237,23 +238,15 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     const prompt = buildPrompt(theme, locale);
     console.log(`[Bedrock] Requesting feed suggestions for theme: "${theme}", locale: "${locale}"`);
 
-    // Invoke Bedrock model (using Claude 3 Haiku - most cost-effective)
-    // Note: No system prompt - testing if it improves URL quality
+    // Invoke Bedrock model (configurable via BEDROCK_MODEL_ID)
+    // Default: Nova Micro (amazon.nova-micro-v1:0)
+    // Rollback: Set BEDROCK_MODEL_ID=anthropic.claude-3-haiku-20240307-v1:0
     
     const command = new InvokeModelCommand({
-      modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
+      modelId: config.bedrockModelIdLite, // Nova Lite for feed suggestions
       contentType: 'application/json',
       accept: 'application/json',
-      body: JSON.stringify({
-        anthropic_version: 'bedrock-2023-05-31',
-        max_tokens: 8192, // Increased to handle 20 feeds without truncation
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-      }),
+      body: JSON.stringify(buildBedrockRequest(prompt, config.bedrockModelIdLite)),
     });
 
     const startTime = Date.now();
@@ -261,9 +254,24 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     const bedrockTime = Date.now() - startTime;
     console.log(`[Bedrock] API call completed in ${bedrockTime}ms`);
     
-    // Log raw response for debugging
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    const content = responseBody.content[0].text;
+    // Extract token usage from response (if available)
+    const tokenUsage = extractTokenUsage(response);
+    
+    // Log monitoring metrics for cost tracking
+    logMonitoringMetrics({
+      apiCallCount: 1,
+      responseTimeMs: bedrockTime,
+      inputTokens: tokenUsage?.inputTokens,
+      outputTokens: tokenUsage?.outputTokens,
+      totalTokens: tokenUsage?.totalTokens,
+      modelId: config.bedrockModelIdLite,
+      service: 'feedSuggestionService',
+      operation: 'suggestFeeds',
+      success: true,
+    });
+    
+    // Parse response and log for debugging
+    const content = parseBedrockResponse(response, config.bedrockModelIdLite);
     
     // Log complete response for debugging (split into chunks to avoid CloudWatch truncation)
     console.log(`[Bedrock] === COMPLETE RESPONSE START (${content.length} chars) ===`);
@@ -366,15 +374,22 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       }
       
       // If no popular or DynamoDB feeds, use default feeds
-      console.log(`[Fallback] No popular or DynamoDB feeds, returning 1 random default feed`);
+      // Requirements 4.1: Return at least 15 feeds
+      console.log(`[Fallback] No popular or DynamoDB feeds, returning 15 default feeds`);
       const defaultFeeds = getAllDefaultFeeds(locale);
-      const randomIndex = Math.floor(Math.random() * defaultFeeds.length);
-      const randomDefaultFeed = defaultFeeds[randomIndex];
       
-      console.log(`[Fallback] Selected random default feed: ${randomDefaultFeed.title} (${randomDefaultFeed.url})`);
+      // Ensure we have at least 15 feeds by repeating if necessary
+      const feedsToReturn: FeedSuggestion[] = [];
+      while (feedsToReturn.length < 15) {
+        const remainingNeeded = 15 - feedsToReturn.length;
+        const feedsToAdd = defaultFeeds.slice(0, Math.min(remainingNeeded, defaultFeeds.length));
+        feedsToReturn.push(...feedsToAdd.map(feed => ({ ...feed, isDefault: true })));
+      }
+      
+      console.log(`[Fallback] Returning ${feedsToReturn.length} default feeds`);
       
       return {
-        feeds: [{ ...randomDefaultFeed, isDefault: true }],
+        feeds: feedsToReturn,
         newspaperName: generateNewspaperName(theme, locale),
       };
     }
@@ -442,15 +457,95 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       newspaperName: result.newspaperName,
     };
   } catch (error) {
-    console.error('[Bedrock] API error occurred:', error);
-    if (error instanceof Error) {
-      console.error('[Bedrock] Error message:', error.message);
-      console.error('[Bedrock] Error stack:', error.stack);
-    }
+    // Log monitoring metrics for failed API call
+    logMonitoringMetrics({
+      apiCallCount: 1,
+      responseTimeMs: 0, // Unknown response time for failed calls
+      modelId: config.bedrockModelIdLite,
+      service: 'feedSuggestionService',
+      operation: 'suggestFeeds',
+      success: false,
+      errorType: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+    });
+    
+    logStructuredError(
+      'feedSuggestionService',
+      'API_ERROR',
+      'Bedrock API error occurred',
+      {
+        theme,
+        locale,
+      },
+      error,
+      config.bedrockModelIdLite
+    );
     // Throw error to trigger retry logic in the endpoint
     // The endpoint will handle fallback to all default feeds after retries
     throw new Error('Bedrock API error');
   }
+}
+
+/**
+ * Build Bedrock request body based on model ID
+ * Adapts request format for different models (Claude 3 Haiku vs Nova Micro)
+ * 
+ * @param prompt - User prompt text
+ * @param modelId - Bedrock model ID
+ * @returns Request body object
+ */
+function buildBedrockRequest(prompt: string, modelId: string): object {
+  // Check if model is Claude 3 Haiku (Anthropic Messages API)
+  if (modelId.includes('anthropic.claude')) {
+    return {
+      anthropic_version: 'bedrock-2023-05-31',
+      max_tokens: 8192,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    };
+  }
+  
+  // Nova Micro (Messages API v1)
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            text: prompt,
+          },
+        ],
+      },
+    ],
+    inferenceConfig: {
+      maxTokens: 5000, // Nova Micro max tokens limit
+      temperature: 0.7,
+      topP: 0.9,
+    },
+  };
+}
+
+/**
+ * Parse Bedrock response based on model format
+ * Handles different response structures (Claude 3 Haiku vs Nova Micro)
+ * 
+ * @param response - Raw Bedrock API response
+ * @param modelId - Bedrock model ID
+ * @returns Extracted text content
+ */
+function parseBedrockResponse(response: any, modelId: string): string {
+  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+  
+  // Check if model is Claude 3 Haiku (Anthropic Messages API)
+  if (modelId.includes('anthropic.claude')) {
+    return responseBody.content[0].text;
+  }
+  
+  // Nova Micro (Messages API v1)
+  return responseBody.output.message.content[0].text;
 }
 
 /**
@@ -513,9 +608,8 @@ CRITICAL: Return ONLY complete, valid JSON. No explanations. Complete all fields
  */
 function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): FeedSuggestionsResponse {
   try {
-    // Decode response body
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    const content = responseBody.content[0].text;
+    // Parse response using model-specific parser
+    const content = parseBedrockResponse(response, config.bedrockModelIdLite);
     
     // Log raw response only in local development
     if (config.isLocal) {
@@ -533,8 +627,14 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
       jsonString = content.substring(firstBrace, lastBrace + 1);
       console.log(`[Bedrock] Extracted JSON length: ${jsonString.length} characters`);
     } else {
-      console.error('[Bedrock] No JSON found in response');
-      console.error('[Bedrock] Response content:', content);
+      logStructuredError(
+        'feedSuggestionService',
+        'PARSE_ERROR',
+        'No JSON found in response',
+        { theme, locale },
+        undefined,
+        config.bedrockModelIdLite
+      );
       throw new Error('No JSON found in response');
     }
 
@@ -543,9 +643,14 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
       parsed = JSON.parse(jsonString);
     } catch (jsonError) {
       // If JSON parsing fails, try to fix common issues
-      console.error('[Bedrock] JSON parse error, attempting to fix:', jsonError);
-      console.error('[Bedrock] JSON string (first 1000 chars):', jsonString.substring(0, 1000));
-      console.error('[Bedrock] JSON string (last 1000 chars):', jsonString.substring(Math.max(0, jsonString.length - 1000)));
+      logStructuredError(
+        'feedSuggestionService',
+        'PARSE_ERROR',
+        'JSON parse error, attempting to fix',
+        { theme, locale, jsonLength: jsonString.length },
+        jsonError,
+        config.bedrockModelIdLite
+      );
       
       // Strategy 2: Try to clean up the JSON string
       let cleanedJson = jsonString;
@@ -562,7 +667,14 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
         parsed = JSON.parse(cleanedJson);
         console.log('[Bedrock] Successfully parsed cleaned JSON');
       } catch {
-        console.error('[Bedrock] Cleaned JSON still failed to parse');
+        logStructuredError(
+          'feedSuggestionService',
+          'PARSE_ERROR',
+          'Cleaned JSON still failed to parse',
+          { theme, locale },
+          undefined,
+          config.bedrockModelIdLite
+        );
         
         // Strategy 3: Try to extract just the feeds array
         const feedsMatch = content.match(/"feeds"\s*:\s*\[([\s\S]*?)\]\s*[,}]/);
@@ -575,7 +687,14 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
             parsed = JSON.parse(reconstructedJson);
             console.log('[Bedrock] Successfully recovered feeds from partial JSON');
           } catch (recoveryError) {
-            console.error('[Bedrock] Failed to recover feeds:', recoveryError);
+            logStructuredError(
+              'feedSuggestionService',
+              'PARSE_ERROR',
+              'Failed to recover feeds from partial JSON',
+              { theme, locale },
+              recoveryError,
+              config.bedrockModelIdLite
+            );
             
             // Strategy 4: Try to manually extract feed objects
             try {
@@ -587,12 +706,26 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
                 throw jsonError;
               }
             } catch (manualError) {
-              console.error('[Bedrock] Manual extraction failed:', manualError);
+              logStructuredError(
+                'feedSuggestionService',
+                'PARSE_ERROR',
+                'Manual extraction failed',
+                { theme, locale },
+                manualError,
+                config.bedrockModelIdLite
+              );
               throw jsonError;
             }
           }
         } else {
-          console.error('[Bedrock] Could not find feeds array in response');
+          logStructuredError(
+            'feedSuggestionService',
+            'PARSE_ERROR',
+            'Could not find feeds array in response',
+            { theme, locale },
+            undefined,
+            config.bedrockModelIdLite
+          );
           throw jsonError;
         }
       }
@@ -623,10 +756,14 @@ function parseAIResponse(response: any, theme: string, locale: 'en' | 'ja'): Fee
       newspaperName,
     };
   } catch (error) {
-    console.error('[Bedrock] Failed to parse AI response:', error);
-    if (error instanceof Error) {
-      console.error('[Bedrock] Parse error details:', error.message);
-    }
+    logStructuredError(
+      'feedSuggestionService',
+      'PARSE_ERROR',
+      'Failed to parse AI response',
+      { theme, locale },
+      error,
+      config.bedrockModelIdLite
+    );
     throw error;
   }
 }
@@ -682,7 +819,7 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
     return themeFeeds;
   }
   
-  // Only use generic feeds as last resort
+  // Return 15 generic feeds to meet Requirements 4.1 (minimum 15 feeds)
   return [
     {
       url: 'https://feeds.bbci.co.uk/news/rss.xml',
@@ -708,6 +845,56 @@ function getMockFeedSuggestions(theme: string): FeedSuggestion[] {
       url: 'https://feeds.arstechnica.com/arstechnica/index',
       title: 'Ars Technica',
       reasoning: `Technology and science coverage of the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.wired.com/feed/rss',
+      title: 'Wired',
+      reasoning: `Technology and innovation news related to the theme: ${theme}`,
+    },
+    {
+      url: 'https://techcrunch.com/feed/',
+      title: 'TechCrunch',
+      reasoning: `Startup and technology news about the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.theverge.com/rss/index.xml',
+      title: 'The Verge',
+      reasoning: `Technology and culture coverage of the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.engadget.com/rss.xml',
+      title: 'Engadget',
+      reasoning: `Consumer electronics and technology news for the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.cnet.com/rss/news/',
+      title: 'CNET News',
+      reasoning: `Tech news and reviews related to the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.zdnet.com/news/rss.xml',
+      title: 'ZDNet',
+      reasoning: `Business technology news about the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.forbes.com/real-time/feed2/',
+      title: 'Forbes',
+      reasoning: `Business and finance news related to the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.bloomberg.com/feed/podcast/etf-report.xml',
+      title: 'Bloomberg',
+      reasoning: `Financial and business news about the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.wsj.com/xml/rss/3_7085.xml',
+      title: 'Wall Street Journal',
+      reasoning: `Business and financial coverage of the theme: ${theme}`,
+    },
+    {
+      url: 'https://www.economist.com/rss',
+      title: 'The Economist',
+      reasoning: `Global economic and political analysis of the theme: ${theme}`,
     },
   ];
 }

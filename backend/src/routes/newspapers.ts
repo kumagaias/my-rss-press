@@ -23,7 +23,7 @@ import {
 import { rateLimit } from '../middleware/rateLimit.js';
 import { recordFeedUsage } from '../services/feedUsageService.js';
 import { getCategoryByTheme } from '../services/categoryService.js';
-import { suggestFeeds } from '../services/bedrockService.js';
+import { suggestFeeds } from '../services/feedSuggestionService.js';
 import { limitDefaultFeedArticles, type FeedMetadata } from '../services/articleLimiter.js';
 
 export const newspapersRouter = new Hono();

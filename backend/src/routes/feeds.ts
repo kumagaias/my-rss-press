@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { suggestFeeds } from '../services/bedrockService.js';
+import { suggestFeeds } from '../services/feedSuggestionService.js';
 import { rateLimit } from '../middleware/rateLimit.js';
 
 export const feedsRouter = new Hono();
@@ -43,7 +43,7 @@ feedsRouter.post(
         console.log(`[Feed Suggestion] Failed: ${errorMessage}, falling back to 1 random default feed`);
         
         // Fall back to 1 random default feed
-        const { getAllDefaultFeeds } = await import('../services/bedrockService.js');
+        const { getAllDefaultFeeds } = await import('../services/feedSuggestionService.js');
         const defaultFeeds = getAllDefaultFeeds(validated.locale || 'en');
         
         // Select 1 random default feed

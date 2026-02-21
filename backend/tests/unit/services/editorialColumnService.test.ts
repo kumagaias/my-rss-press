@@ -1,233 +1,443 @@
-/**
- * Unit tests for Editorial Column Service
- */
-
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { generateEditorialColumn } from '../../../src/services/editorialColumnService.js';
 import type { Article } from '../../../src/services/rssFetcherService.js';
 
-// Create a mock send function that can be controlled per test
-let mockSend = vi.fn();
+// Create a shared mock send function
+const createMockSend = () => vi.fn();
+let mockSend = createMockSend();
 
 // Mock AWS SDK
-vi.mock('@aws-sdk/client-bedrock-runtime', () => {
-  return {
-    BedrockRuntimeClient: vi.fn(function() {
-      return {
-        send: (...args: any[]) => mockSend(...args),
-      };
-    }),
-    InvokeModelCommand: vi.fn(),
-  };
-});
+vi.mock('@aws-sdk/client-bedrock-runtime', () => ({
+  BedrockRuntimeClient: vi.fn(function(this: any) {
+    // Use a getter to access the current mockSend
+    Object.defineProperty(this, 'send', {
+      get: () => mockSend,
+      configurable: true,
+    });
+    return this;
+  }),
+  InvokeModelCommand: vi.fn(function(this: any, params: any) {
+    Object.assign(this, params);
+    return this;
+  }),
+}));
 
 // Mock config
 vi.mock('../../../src/config.js', () => ({
   config: {
-    bedrockRegion: 'us-east-1',
+    bedrockRegion: 'ap-northeast-1',
+    bedrockModelIdLite: 'amazon.nova-lite-v1:0',
+    bedrockModelIdMicro: 'amazon.nova-micro-v1:0',
+    useMockBedrock: false,
+    enableCache: false,
+    isLocal: false,
   },
 }));
 
-describe('Editorial Column Service', () => {
+// Import after mocks are set up
+import { InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+
+describe('editorialColumnService - Unit Tests', () => {
+  // Sample articles for testing
   const mockArticles: Article[] = [
     {
-      title: 'AI Breakthrough in Healthcare',
-      description: 'New AI system diagnoses diseases with 95% accuracy',
+      title: 'AI Revolution in Healthcare',
+      description: 'Artificial intelligence is transforming medical diagnosis and treatment planning.',
       link: 'https://example.com/ai-healthcare',
-      pubDate: '2025-01-14T00:00:00Z',
+      pubDate: new Date('2025-01-30').toISOString(),
+      imageUrl: 'https://example.com/image1.jpg',
       importance: 10,
       feedSource: 'https://example.com/feed',
     },
     {
-      title: 'Quantum Computing Advances',
-      description: 'Scientists achieve quantum supremacy milestone',
-      link: 'https://example.com/quantum',
-      pubDate: '2025-01-14T00:00:00Z',
+      title: 'Climate Change Impact on Agriculture',
+      description: 'Rising temperatures are affecting crop yields worldwide.',
+      link: 'https://example.com/climate-agriculture',
+      pubDate: new Date('2025-01-29').toISOString(),
       importance: 9,
       feedSource: 'https://example.com/feed',
     },
     {
-      title: 'Climate Tech Innovation',
-      description: 'New carbon capture technology shows promise',
-      link: 'https://example.com/climate',
-      pubDate: '2025-01-14T00:00:00Z',
+      title: 'Tech Giants Face Regulation',
+      description: 'New legislation aims to increase oversight of major technology companies.',
+      link: 'https://example.com/tech-regulation',
+      pubDate: new Date('2025-01-28').toISOString(),
+      imageUrl: 'https://example.com/image2.jpg',
       importance: 8,
       feedSource: 'https://example.com/feed',
     },
   ];
 
   beforeEach(() => {
-    mockSend = vi.fn();
+    // Reset mock implementation
+    mockSend.mockReset();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('generateEditorialColumn', () => {
-    it('should generate editorial column in English', async () => {
-      // Mock Bedrock response
+  describe('Editorial column generation with valid Nova Micro response', () => {
+    it('should successfully parse Nova Micro response and return editorial column (English)', async () => {
+      // Mock valid Nova Micro response
       const mockResponse = {
         body: new TextEncoder().encode(JSON.stringify({
-          content: [{
-            text: `Title: The Dawn of Intelligent Machines
-Column: As Prometheus brought fire to humanity, today's AI researchers bring the spark of intelligence to machines. The recent breakthrough in healthcare diagnostics reminds us that technology, like fire, can illuminate or consume. We stand at a crossroads where quantum computing and artificial intelligence converge, offering unprecedented power to solve humanity's greatest challenges. Yet with this power comes responsibility—to ensure these tools serve all of humanity, not just the privileged few. The question is not whether we can build intelligent machines, but whether we have the wisdom to guide them.`,
-          }],
+          output: {
+            message: {
+              role: 'assistant',
+              content: [
+                {
+                  text: `Title: The Dawn of Intelligent Medicine
+Column: As artificial intelligence reshapes healthcare, we stand at a crossroads between technological promise and ethical responsibility. The articles reveal a pattern: AI's diagnostic capabilities now rival human experts, yet questions of accountability and bias remain unresolved. History teaches us that every medical revolution—from antibiotics to vaccines—required not just innovation but wisdom in application. Will we learn from past mistakes, or repeat them at silicon speed?`,
+                },
+              ],
+            },
+          },
         })),
       };
-
+      
       mockSend.mockResolvedValue(mockResponse);
-
+      
       const result = await generateEditorialColumn({
         articles: mockArticles,
         theme: 'Technology',
         locale: 'en',
       });
-
+      
+      expect(result).toBeDefined();
       expect(result).not.toBeNull();
-      expect(result?.title).toBe('The Dawn of Intelligent Machines');
-      expect(result?.column).toContain('Prometheus');
-      expect(result?.column).toContain('AI');
+      expect(result?.title).toBe('The Dawn of Intelligent Medicine');
+      expect(result?.column).toContain('artificial intelligence');
+      expect(result?.column.length).toBeGreaterThan(50);
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
-    it('should generate editorial column in Japanese', async () => {
-      // Mock Bedrock response
+    it('should successfully parse Nova Micro response and return editorial column (Japanese)', async () => {
+      // Mock valid Nova Micro response in Japanese
       const mockResponse = {
         body: new TextEncoder().encode(JSON.stringify({
-          content: [{
-            text: `タイトル: 知性の火
-コラム: プロメテウスが人類に火をもたらしたように、今日のAI研究者は機械に知性の火花をもたらす。医療診断における最近の突破口は、技術が火のように照らすことも消費することもできることを思い出させる。量子コンピューティングと人工知能が収束する岐路に立ち、人類最大の課題を解決する前例のない力を提供している。しかし、この力には責任が伴う。これらのツールが特権階級だけでなく、すべての人類に奉仕することを確実にする責任だ。問題は、知的な機械を構築できるかどうかではなく、それらを導く知恵があるかどうかだ。`,
-          }],
+          output: {
+            message: {
+              role: 'assistant',
+              content: [
+                {
+                  text: `タイトル: 知能医療の夜明け
+コラム: 人工知能が医療を再構築する中、私たちは技術的な約束と倫理的責任の岐路に立っています。記事は一つのパターンを明らかにします：AIの診断能力は今や人間の専門家に匹敵しますが、説明責任とバイアスの問題は未解決のままです。歴史は私たちに教えています。抗生物質からワクチンまで、すべての医療革命には革新だけでなく、応用における知恵が必要でした。私たちは過去の過ちから学ぶのでしょうか、それともシリコンの速度でそれらを繰り返すのでしょうか？`,
+                },
+              ],
+            },
+          },
         })),
       };
-
+      
       mockSend.mockResolvedValue(mockResponse);
-
+      
       const result = await generateEditorialColumn({
         articles: mockArticles,
         theme: 'テクノロジー',
         locale: 'ja',
       });
-
+      
+      expect(result).toBeDefined();
       expect(result).not.toBeNull();
-      expect(result?.title).toBe('知性の火');
-      expect(result?.column).toContain('プロメテウス');
-      expect(result?.column).toContain('AI');
+      expect(result?.title).toBe('知能医療の夜明け');
+      expect(result?.column).toContain('人工知能');
+      expect(result?.column.length).toBeGreaterThan(50);
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle empty articles array', async () => {
+    it('should use Nova Micro request format by default', async () => {
+      const mockResponse = {
+        body: new TextEncoder().encode(JSON.stringify({
+          output: {
+            message: {
+              content: [
+                {
+                  text: 'Title: Test\nColumn: Test column content',
+                },
+              ],
+            },
+          },
+        })),
+      };
+      
+      mockSend.mockResolvedValue(mockResponse);
+      
+      await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Test',
+        locale: 'en',
+      });
+      
+      const commandArg = (InvokeModelCommand as any).mock.calls[0][0];
+      const requestBody = JSON.parse(commandArg.body);
+      
+      // Verify Nova Micro format
+      expect(requestBody).toHaveProperty('messages');
+      expect(requestBody).toHaveProperty('inferenceConfig');
+      expect(requestBody.messages[0].content).toBeInstanceOf(Array);
+      expect(requestBody.messages[0].content[0]).toHaveProperty('text');
+      expect(requestBody.inferenceConfig).toHaveProperty('maxTokens', 400);
+      expect(requestBody.inferenceConfig).toHaveProperty('topP', 0.9);
+    });
+
+    it('should handle fallback parsing when format does not match exactly', async () => {
+      // Mock response without explicit Title:/Column: labels
+      const mockResponse = {
+        body: new TextEncoder().encode(JSON.stringify({
+          output: {
+            message: {
+              content: [
+                {
+                  text: `The Future of AI
+This is a column about artificial intelligence and its impact on society. We must consider the ethical implications carefully.`,
+                },
+              ],
+            },
+          },
+        })),
+      };
+      
+      mockSend.mockResolvedValue(mockResponse);
+      
+      const result = await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Technology',
+        locale: 'en',
+      });
+      
+      expect(result).toBeDefined();
+      expect(result).not.toBeNull();
+      expect(result?.title).toBe('The Future of AI');
+      expect(result?.column).toContain('artificial intelligence');
+    });
+  });
+
+  describe('API error handling (return null)', () => {
+    it('should return null when Bedrock API fails', async () => {
+      mockSend.mockRejectedValue(new Error('Bedrock API error'));
+      
+      const result = await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Technology',
+        locale: 'en',
+      });
+      
+      expect(result).toBeNull();
+      expect(mockSend).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return null when API times out', async () => {
+      // Mock a delayed response that exceeds timeout
+      mockSend.mockImplementation(() => 
+        new Promise((resolve) => setTimeout(resolve, 15000))
+      );
+      
+      const result = await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Technology',
+        locale: 'en',
+      });
+      
+      expect(result).toBeNull();
+    });
+
+    it('should return null when throttling occurs', async () => {
+      mockSend.mockRejectedValue(new Error('ThrottlingException'));
+      
+      const result = await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Technology',
+        locale: 'en',
+      });
+      
+      expect(result).toBeNull();
+    });
+
+    it('should return null when no articles are provided', async () => {
       const result = await generateEditorialColumn({
         articles: [],
         theme: 'Technology',
         locale: 'en',
       });
-
+      
       expect(result).toBeNull();
+      expect(mockSend).not.toHaveBeenCalled();
     });
+  });
 
-    it('should handle Bedrock API errors gracefully', async () => {
-      mockSend.mockRejectedValue(new Error('Bedrock API error'));
-
-      const result = await generateEditorialColumn({
-        articles: mockArticles,
-        theme: 'Technology',
-        locale: 'en',
-        maxRetries: 2,
-      });
-
-      expect(result).toBeNull();
-      expect(mockSend).toHaveBeenCalledTimes(2); // Should retry
-    });
-
-    it('should handle timeout', async () => {
-      mockSend.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 15000)) // 15 second delay (longer than Bedrock timeout)
-      );
-
-      const result = await generateEditorialColumn({
-        articles: mockArticles,
-        theme: 'Technology',
-        locale: 'en',
-        maxRetries: 1,
-      });
-
-      expect(result).toBeNull();
-    }, 15000); // 15 second test timeout
-
-    it('should handle empty response from Bedrock', async () => {
+  describe('Parsing error handling', () => {
+    it('should return null when response text is empty', async () => {
       const mockResponse = {
         body: new TextEncoder().encode(JSON.stringify({
-          content: [{
-            text: '',
-          }],
+          output: {
+            message: {
+              content: [
+                {
+                  text: '',
+                },
+              ],
+            },
+          },
         })),
       };
-
+      
       mockSend.mockResolvedValue(mockResponse);
-
+      
       const result = await generateEditorialColumn({
         articles: mockArticles,
         theme: 'Technology',
         locale: 'en',
-        maxRetries: 1,
       });
-
+      
       expect(result).toBeNull();
     });
 
-    it('should handle malformed response format', async () => {
+    it('should return null when response format is invalid', async () => {
       const mockResponse = {
         body: new TextEncoder().encode(JSON.stringify({
-          content: [{
-            text: 'This is just plain text without proper format\nBut it has multiple lines',
-          }],
+          output: {
+            message: {
+              content: [
+                {
+                  text: 'This is just plain text without any structure',
+                },
+              ],
+            },
+          },
         })),
       };
-
+      
       mockSend.mockResolvedValue(mockResponse);
-
+      
       const result = await generateEditorialColumn({
         articles: mockArticles,
         theme: 'Technology',
         locale: 'en',
-        maxRetries: 1,
       });
-
-      // Should still parse with fallback logic
-      expect(result).not.toBeNull();
-      expect(result?.title).toBeTruthy();
-      expect(result?.column).toBeTruthy();
+      
+      expect(result).toBeNull();
     });
 
-    it('should retry on failure with exponential backoff', async () => {
-      let callCount = 0;
-      mockSend.mockImplementation(() => {
-        callCount++;
-        if (callCount < 2) {
-          return Promise.reject(new Error('Temporary error'));
-        }
-        return Promise.resolve({
-          body: new TextEncoder().encode(JSON.stringify({
-            content: [{
-              text: `Title: Success After Retry
-Column: This column was generated after a retry.`,
-            }],
-          })),
-        });
-      });
-
+    it('should return null when response JSON is malformed', async () => {
+      const mockResponse = {
+        body: new TextEncoder().encode('This is not valid JSON'),
+      };
+      
+      mockSend.mockResolvedValue(mockResponse);
+      
       const result = await generateEditorialColumn({
         articles: mockArticles,
         theme: 'Technology',
         locale: 'en',
-        maxRetries: 2,
       });
+      
+      expect(result).toBeNull();
+    });
 
-      expect(result).not.toBeNull();
-      expect(result?.title).toBe('Success After Retry');
-      expect(mockSend).toHaveBeenCalledTimes(2);
+    it('should return null when response has missing content field', async () => {
+      const mockResponse = {
+        body: new TextEncoder().encode(JSON.stringify({
+          output: {
+            message: {
+              // Missing content field
+            },
+          },
+        })),
+      };
+      
+      mockSend.mockResolvedValue(mockResponse);
+      
+      const result = await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Technology',
+        locale: 'en',
+      });
+      
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('Validation error handling', () => {
+    it('should return null when title is empty', async () => {
+      const mockResponse = {
+        body: new TextEncoder().encode(JSON.stringify({
+          output: {
+            message: {
+              content: [
+                {
+                  text: 'Title: \nColumn: This is a column without a title',
+                },
+              ],
+            },
+          },
+        })),
+      };
+      
+      mockSend.mockResolvedValue(mockResponse);
+      
+      const result = await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Technology',
+        locale: 'en',
+      });
+      
+      // The parsing should fail because title is empty
+      expect(result).toBeNull();
+    });
+
+    it('should return null when column is empty', async () => {
+      const mockResponse = {
+        body: new TextEncoder().encode(JSON.stringify({
+          output: {
+            message: {
+              content: [
+                {
+                  text: 'Title: Test Title\nColumn: ',
+                },
+              ],
+            },
+          },
+        })),
+      };
+      
+      mockSend.mockResolvedValue(mockResponse);
+      
+      const result = await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Technology',
+        locale: 'en',
+      });
+      
+      // The parsing should fail because column is empty
+      expect(result).toBeNull();
+    });
+
+    it('should handle response with only one line (no column)', async () => {
+      const mockResponse = {
+        body: new TextEncoder().encode(JSON.stringify({
+          output: {
+            message: {
+              content: [
+                {
+                  text: 'Just a single line',
+                },
+              ],
+            },
+          },
+        })),
+      };
+      
+      mockSend.mockResolvedValue(mockResponse);
+      
+      const result = await generateEditorialColumn({
+        articles: mockArticles,
+        theme: 'Technology',
+        locale: 'en',
+      });
+      
+      expect(result).toBeNull();
     });
   });
 });

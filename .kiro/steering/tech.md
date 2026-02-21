@@ -20,7 +20,7 @@
 - **Framework**: Hono 4.x
 - **Language**: TypeScript 5.9.x
 - **Database**: DynamoDB
-- **AI**: AWS Bedrock (Claude 3 Haiku)
+- **AI**: AWS Bedrock (Nova Micro)
 
 ### Infrastructure
 - **IaC**: Terraform 1.11.x
@@ -171,7 +171,7 @@ echo $GIT_PAGER  # Should be empty
 
 ### AI Summaries
 - **Service**: `summaryGenerationService.ts`
-- **AI Model**: AWS Bedrock (Claude 3 Haiku)
+- **AI Model**: AWS Bedrock (Nova Micro)
 - **Format**: 3 lines, 100-200 characters
 - **Language**: Auto-detected from newspaper languages
 - **Performance**: ~5-10s (first time), < 100ms (cached)
@@ -187,8 +187,53 @@ echo $GIT_PAGER  # Should be empty
 - **Reason**: Prevent errors when saving optional fields
 - **Applied to**: newspaperService, historicalNewspaperService, cleanupService
 
+### Bedrock Configuration
+
+**Models**: Mixed Nova Lite/Micro configuration for cost optimization
+
+**Nova Lite** (`amazon.nova-lite-v1:0`):
+- **Context Length**: 300K tokens
+- **Max Output Tokens**: 5,000 tokens
+- **Processing Speed**: 200 tokens per second
+- **Cost**: $0.06 per 1M input tokens, $0.24 per 1M output tokens
+- **Use Cases**: Feed suggestions, editorial columns (less critical tasks)
+
+**Nova Micro** (`amazon.nova-micro-v1:0`):
+- **Context Length**: 128K tokens
+- **Max Output Tokens**: 5,000 tokens
+- **Processing Speed**: 210 tokens per second
+- **Cost**: $0.035 per 1M input tokens, $0.14 per 1M output tokens
+- **Use Cases**: Summaries, importance scoring, article filtering (critical tasks)
+
+**Region**: ap-northeast-1 (Tokyo)
+
+**Environment Variables**:
+- `BEDROCK_MODEL_ID_LITE`: Override Lite model ID (default: `amazon.nova-lite-v1:0`)
+  - For rollback: Set to `anthropic.claude-3-haiku-20240307-v1:0`
+- `BEDROCK_MODEL_ID_MICRO`: Override Micro model ID (default: `amazon.nova-micro-v1:0`)
+  - For rollback: Set to `anthropic.claude-3-haiku-20240307-v1:0`
+- `BEDROCK_REGION`: AWS region (default: `ap-northeast-1`)
+- `USE_BEDROCK_MOCK`: Enable mock mode for local dev (default: `false`)
+- `ENABLE_BEDROCK_CACHE`: Enable caching in local dev (default: `true`)
+
+**Rollback Procedure**:
+1. Set environment variables:
+   - `BEDROCK_MODEL_ID_LITE=anthropic.claude-3-haiku-20240307-v1:0`
+   - `BEDROCK_MODEL_ID_MICRO=anthropic.claude-3-haiku-20240307-v1:0`
+2. Restart Lambda functions (or wait for cold start)
+3. Verify services use Claude 3 Haiku
+4. Monitor for stability
+
+**Service Model Assignment**:
+- `feedSuggestionService.ts` - Feed suggestions (Nova Lite)
+- `summaryGenerationService.ts` - AI summaries (Nova Micro)
+- `importanceCalculator.ts` - Article importance scoring (Nova Micro)
+- `articleFilterService.ts` - Theme-based article filtering (Nova Micro)
+- `editorialColumnService.ts` - Editorial column generation (Nova Lite)
+
 ---
 
 **For detailed implementation guidelines, refer to:**
 - Phase 1 specs: `.kiro/specs/features/issue-45-mvp/`
 - Phase 2 specs: `.kiro/specs/features/issue-46-enhance/`
+- Bedrock Nova Micro migration: `.kiro/specs/features/bedrock-to-nova-micro-migration/`

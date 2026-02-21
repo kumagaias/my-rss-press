@@ -54,14 +54,15 @@ backend/
 │   │   ├── newspapers.ts # Newspaper CRUD
 │   │   └── feeds.ts      # Feed suggestions
 │   ├── services/
-│   │   ├── bedrockService.ts              # AI suggestions
+│   │   ├── feedSuggestionService.ts       # AI feed suggestions (Nova Lite)
 │   │   ├── rssFetcherService.ts           # RSS parsing
-│   │   ├── importanceCalculator.ts        # Article importance (multilingual)
+│   │   ├── importanceCalculator.ts        # Article importance (Nova Micro)
 │   │   ├── languageDetectionService.ts    # JP/EN detection (Phase 2)
-│   │   ├── summaryGenerationService.ts    # AI summary (Phase 2)
+│   │   ├── summaryGenerationService.ts    # AI summary (Nova Micro, Phase 2)
 │   │   ├── historicalNewspaperService.ts  # Date-based newspapers (Phase 2)
 │   │   ├── cleanupService.ts              # Automatic cleanup (Phase 2)
-│   │   └── articleFilterService.ts        # Theme relevance filter (Phase 2)
+│   │   ├── articleFilterService.ts        # Theme relevance filter (Nova Micro, Phase 2)
+│   │   └── editorialColumnService.ts      # Editorial columns (Nova Lite)
 │   ├── models/
 │   │   └── newspaper.ts  # DynamoDB model (extended with Phase 2 fields)
 │   ├── middleware/
@@ -124,13 +125,14 @@ infra/
 ### Backend
 - `routes/feeds.ts` - POST `/api/suggest-feeds` (AI suggestions)
 - `routes/newspapers.ts` - Newspaper CRUD + historical newspapers
-- `services/bedrockService.ts` - Claude 3 Haiku integration
-- `services/importanceCalculator.ts` - Multilingual importance calculation
+- `services/feedSuggestionService.ts` - AI feed suggestions (Nova Lite)
+- `services/importanceCalculator.ts` - Multilingual importance calculation (Nova Micro)
 - `services/languageDetectionService.ts` - Language detection (Phase 2)
-- `services/summaryGenerationService.ts` - AI summary generation (Phase 2)
+- `services/summaryGenerationService.ts` - AI summary generation (Nova Micro, Phase 2)
 - `services/historicalNewspaperService.ts` - Date-based newspaper generation (Phase 2)
 - `services/cleanupService.ts` - Automatic cleanup (Phase 2)
-- `services/articleFilterService.ts` - Theme relevance filtering (Phase 2)
+- `services/articleFilterService.ts` - Theme relevance filtering (Nova Micro, Phase 2)
+- `services/editorialColumnService.ts` - Editorial column generation (Nova Lite)
 
 ### Infrastructure
 - `infra/environments/production/main.tf` - Main Terraform config

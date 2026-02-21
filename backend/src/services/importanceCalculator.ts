@@ -1,6 +1,7 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config.js';
 import type { Article } from './rssFetcherService.js';
+import { logStructuredError, logMonitoringMetrics, extractTokenUsage } from '../utils/structuredLogger.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({
@@ -32,26 +33,38 @@ export async function calculateImportance(
     // Build prompt for importance calculation
     const prompt = buildImportancePrompt(articles, userTheme);
 
-    // Invoke Bedrock model
+    // Invoke Bedrock model (configurable via BEDROCK_MODEL_ID_MICRO)
+    // Default: Nova Micro (amazon.nova-micro-v1:0)
+    // Rollback: Set BEDROCK_MODEL_ID_MICRO=anthropic.claude-3-haiku-20240307-v1:0
     const command = new InvokeModelCommand({
-      modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
+      modelId: config.bedrockModelIdMicro,
       contentType: 'application/json',
       accept: 'application/json',
-      body: JSON.stringify({
-        anthropic_version: 'bedrock-2023-05-31',
-        max_tokens: 1024,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.8, // Add randomness for variation
-      }),
+      body: JSON.stringify(buildImportanceRequest(prompt, config.bedrockModelIdMicro)),
     });
 
+    const startTime = Date.now();
     const response = await bedrockClient.send(command);
-    const scores = parseImportanceResponse(response);
+    const responseTime = Date.now() - startTime;
+    
+    const scores = parseImportanceResponse(response, config.bedrockModelIdMicro);
+    
+    // Extract token usage from response (if available)
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const tokenUsage = extractTokenUsage(responseBody);
+    
+    // Log monitoring metrics for cost tracking
+    logMonitoringMetrics({
+      apiCallCount: 1,
+      responseTimeMs: responseTime,
+      inputTokens: tokenUsage?.inputTokens,
+      outputTokens: tokenUsage?.outputTokens,
+      totalTokens: tokenUsage?.totalTokens,
+      modelId: config.bedrockModelIdMicro,
+      service: 'importanceCalculator',
+      operation: 'calculateImportance',
+      success: true,
+    });
 
     // Assign importance scores to articles with penalty for default feeds
     return articles.map((article, index) => {
@@ -69,7 +82,25 @@ export async function calculateImportance(
       };
     });
   } catch (error) {
-    console.error('Bedrock importance calculation error:', error);
+    // Log monitoring metrics for failed API call
+    logMonitoringMetrics({
+      apiCallCount: 1,
+      responseTimeMs: 0, // Unknown response time for failed calls
+      modelId: config.bedrockModelIdMicro,
+      service: 'importanceCalculator',
+      operation: 'calculateImportance',
+      success: false,
+      errorType: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+    });
+    
+    logStructuredError(
+      'importanceCalculator',
+      'API_ERROR',
+      'Bedrock importance calculation error',
+      { userTheme, articleCount: articles.length },
+      error,
+      config.bedrockModelIdMicro
+    );
     console.log('Falling back to simple algorithm');
 
     // Fallback to simple algorithm with penalty for default feeds
@@ -96,6 +127,46 @@ export async function calculateImportance(
 function containsJapanese(text: string): boolean {
   // Check for Hiragana, Katakana, or Kanji
   return /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text);
+}
+
+/**
+ * Build request body for Bedrock API
+ * Adapts request format based on model ID
+ */
+function buildImportanceRequest(prompt: string, modelId: string): object {
+  // Check if model is Claude 3 Haiku (Anthropic Messages API)
+  if (modelId.includes('anthropic.claude')) {
+    return {
+      anthropic_version: 'bedrock-2023-05-31',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.8, // Add randomness for variation
+    };
+  }
+  
+  // Nova Micro (Messages API v1)
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            text: prompt,
+          },
+        ],
+      },
+    ],
+    inferenceConfig: {
+      maxTokens: 1024,
+      temperature: 0.8, // Add randomness for variation
+      topP: 0.9,
+    },
+  };
 }
 
 /**
@@ -198,12 +269,22 @@ Return the importance scores (0-100) for each article in JSON format:
 
 /**
  * Parse importance response from Bedrock
+ * Adapts parsing based on model ID
  */
-function parseImportanceResponse(response: any): number[] {
+function parseImportanceResponse(response: any, modelId: string): number[] {
   try {
     // Decode response body
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    const content = responseBody.content[0].text;
+    
+    // Extract text content based on model type
+    let content: string;
+    if (modelId.includes('anthropic.claude')) {
+      // Claude 3 Haiku (Anthropic Messages API)
+      content = responseBody.content[0].text;
+    } else {
+      // Nova Micro (Messages API v1)
+      content = responseBody.output.message.content[0].text;
+    }
 
     // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -221,7 +302,14 @@ function parseImportanceResponse(response: any): number[] {
       return Math.max(0, Math.min(100, num));
     });
   } catch (error) {
-    console.error('Failed to parse importance response:', error);
+    logStructuredError(
+      'importanceCalculator',
+      'PARSE_ERROR',
+      'Failed to parse importance response',
+      {},
+      error,
+      modelId
+    );
     throw error;
   }
 }

@@ -1,5 +1,6 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config.js';
+import { logStructuredError, logMonitoringMetrics, extractTokenUsage } from '../utils/structuredLogger.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({
@@ -70,7 +71,25 @@ export async function filterArticlesByTheme(
     
     return filteredArticles;
   } catch (error) {
-    console.error('[Article Filter] Filtering failed, returning all articles:', error);
+    // Log monitoring metrics for failed API call
+    logMonitoringMetrics({
+      apiCallCount: 1,
+      responseTimeMs: 0, // Unknown response time for failed calls
+      modelId: config.bedrockModelIdMicro,
+      service: 'articleFilterService',
+      operation: 'filterArticlesByTheme',
+      success: false,
+      errorType: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+    });
+    
+    logStructuredError(
+      'articleFilterService',
+      'API_ERROR',
+      'Filtering failed, returning all articles',
+      { theme, locale, articleCount: articles.length },
+      error,
+      config.bedrockModelIdMicro
+    );
     return articles; // Fallback: return all articles
   }
 }
@@ -113,25 +132,114 @@ Return in JSON format (no explanation):
 }
 
 /**
- * Call Bedrock for article filtering
+ * Build Bedrock request body based on model ID
+ * Adapts request format for different models (Claude 3 Haiku vs Nova Micro)
+ * 
+ * @param prompt - User prompt text
+ * @param modelId - Bedrock model ID
+ * @returns Request body object
  */
-async function callBedrockForFiltering(prompt: string): Promise<{
-  content: Array<{ text: string }>;
-}> {
-  const command = new InvokeModelCommand({
-    modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
-    contentType: 'application/json',
-    accept: 'application/json',
-    body: JSON.stringify({
+function buildBedrockRequest(prompt: string, modelId: string): object {
+  // Check if model is Claude 3 Haiku (Anthropic Messages API)
+  if (modelId.includes('anthropic.claude')) {
+    return {
       anthropic_version: 'bedrock-2023-05-31',
       max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3, // Lower temperature for more consistent filtering
-    }),
+    };
+  }
+  
+  // Nova Micro (Messages API v1)
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            text: prompt,
+          },
+        ],
+      },
+    ],
+    inferenceConfig: {
+      maxTokens: 1000,
+      temperature: 0.3, // Lower temperature for more consistent filtering
+      topP: 0.9,
+    },
+  };
+}
+
+/**
+ * Parse Bedrock response based on model format
+ * Handles different response structures (Claude 3 Haiku vs Nova Micro)
+ * 
+ * @param response - Raw Bedrock API response
+ * @param modelId - Bedrock model ID
+ * @returns Parsed response with content array
+ */
+function parseBedrockResponse(response: any, modelId: string): {
+  content: Array<{ text: string }>;
+} {
+  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+  
+  // Check if model is Claude 3 Haiku (Anthropic Messages API)
+  if (modelId.includes('anthropic.claude')) {
+    return responseBody;
+  }
+  
+  // Nova Micro (Messages API v1) - adapt to Claude format
+  return {
+    content: [
+      {
+        text: responseBody.output.message.content[0].text,
+      },
+    ],
+  };
+}
+
+/**
+ * Call Bedrock for article filtering
+ * Uses configurable model ID (Nova Micro by default, Claude 3 Haiku for rollback)
+ */
+async function callBedrockForFiltering(prompt: string): Promise<{
+  content: Array<{ text: string }>;
+}> {
+  // Invoke Bedrock model (configurable via BEDROCK_MODEL_ID_MICRO)
+  // Default: Nova Micro (amazon.nova-micro-v1:0)
+  // Rollback: Set BEDROCK_MODEL_ID_MICRO=anthropic.claude-3-haiku-20240307-v1:0
+  
+  const command = new InvokeModelCommand({
+    modelId: config.bedrockModelIdMicro,
+    contentType: 'application/json',
+    accept: 'application/json',
+    body: JSON.stringify(buildBedrockRequest(prompt, config.bedrockModelIdMicro)),
   });
   
+  const startTime = Date.now();
   const response = await bedrockClient.send(command);
-  return JSON.parse(new TextDecoder().decode(response.body));
+  const responseTime = Date.now() - startTime;
+  
+  const parsedResponse = parseBedrockResponse(response, config.bedrockModelIdMicro);
+  
+  // Extract token usage from response (if available)
+  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+  const tokenUsage = extractTokenUsage(responseBody);
+  
+  // Log monitoring metrics for cost tracking
+  logMonitoringMetrics({
+    apiCallCount: 1,
+    responseTimeMs: responseTime,
+    inputTokens: tokenUsage?.inputTokens,
+    outputTokens: tokenUsage?.outputTokens,
+    totalTokens: tokenUsage?.totalTokens,
+    modelId: config.bedrockModelIdMicro,
+    service: 'articleFilterService',
+    operation: 'filterArticlesByTheme',
+    success: true,
+  });
+  
+  return parsedResponse;
 }
 
 /**
@@ -152,7 +260,14 @@ function parseFilterResponse(response: {
     const parsed = JSON.parse(jsonMatch[0]);
     return parsed.relevantIndices || [];
   } catch (error) {
-    console.error('[Article Filter] Failed to parse response:', error);
+    logStructuredError(
+      'articleFilterService',
+      'PARSE_ERROR',
+      'Failed to parse response',
+      {},
+      error,
+      config.bedrockModelIdMicro
+    );
     throw error;
   }
 }

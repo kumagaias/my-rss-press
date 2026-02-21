@@ -216,6 +216,10 @@ NODE_ENV=development
 ENABLE_BEDROCK_CACHE=true
 USE_BEDROCK_MOCK=false
 
+# Bedrock Model IDs (optional, for rollback or testing)
+# BEDROCK_MODEL_ID_LITE=amazon.nova-lite-v1:0
+# BEDROCK_MODEL_ID_MICRO=amazon.nova-micro-v1:0
+
 # DynamoDB Local (optional)
 # DYNAMODB_ENDPOINT=http://localhost:8000
 
@@ -225,11 +229,20 @@ USE_BEDROCK_MOCK=false
 # AWS_PROFILE=default
 ```
 
+**Bedrock Model Configuration:**
+- `BEDROCK_MODEL_ID_LITE`: Model ID for Lite tier services (default: `amazon.nova-lite-v1:0`)
+  - Used by: feedSuggestionService, editorialColumnService
+  - For rollback to Claude 3 Haiku: Set to `anthropic.claude-3-haiku-20240307-v1:0`
+  
+- `BEDROCK_MODEL_ID_MICRO`: Model ID for Micro tier services (default: `amazon.nova-micro-v1:0`)
+  - Used by: summaryGenerationService, importanceCalculator, articleFilterService
+  - For rollback to Claude 3 Haiku: Set to `anthropic.claude-3-haiku-20240307-v1:0`
+
 ## Local Development with AWS Services
 
 ### Bedrock
 
-The application uses AWS Bedrock (Claude 3 Haiku) for AI features. For local development:
+The application uses AWS Bedrock with a mixed Nova Lite/Micro configuration for AI features. For local development:
 
 1. **Configure AWS CLI**:
 ```bash
@@ -238,11 +251,23 @@ aws configure
 
 2. **Enable Bedrock Model Access**:
    - Go to AWS Console → Bedrock → Model access
-   - Enable Claude 3 Haiku
+   - Enable Nova Lite and Nova Micro models
+   - (Optional) Enable Claude 3 Haiku for rollback testing
 
-3. **Cost Management**:
+3. **Model Configuration**:
+   - **Nova Lite** (`amazon.nova-lite-v1:0`): Used for feed suggestions and editorial columns
+   - **Nova Micro** (`amazon.nova-micro-v1:0`): Used for summaries, importance scoring, and article filtering
+   - Override via environment variables: `BEDROCK_MODEL_ID_LITE` and `BEDROCK_MODEL_ID_MICRO`
+
+4. **Cost Management**:
    - Set `ENABLE_BEDROCK_CACHE=true` to cache responses locally
    - Set `USE_BEDROCK_MOCK=true` for offline development (uses mock data)
+
+5. **Rollback to Claude 3 Haiku** (if needed):
+```bash
+export BEDROCK_MODEL_ID_LITE=anthropic.claude-3-haiku-20240307-v1:0
+export BEDROCK_MODEL_ID_MICRO=anthropic.claude-3-haiku-20240307-v1:0
+```
 
 ### DynamoDB
 

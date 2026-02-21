@@ -60,7 +60,7 @@ MyRSSPress is a web application that transforms RSS feeds into visually appealin
 **Feature:** AI suggests RSS feeds based on theme
 
 **Specifications:**
-- **AI**: AWS Bedrock (Claude 3 Haiku)
+- **AI**: AWS Bedrock (Nova Micro)
 - **Suggestion count**: Request 20 feeds from Bedrock (reduced from 30 for faster response)
 - **Validation**: Check URL existence (HEAD request, 3 second timeout, reduced from 5s)
 - **Parallel processing**: Parallel validation with Promise.all (up to 20x faster)
@@ -96,7 +96,7 @@ MyRSSPress is a web application that transforms RSS feeds into visually appealin
 - **Data**: Title, description, link, image, publication date
 
 **Article Importance Calculation:**
-- **AI**: AWS Bedrock (Claude 3 Haiku)
+- **AI**: AWS Bedrock (Nova Micro)
 - **Consideration factors**:
   1. Theme relevance (highest priority)
   2. Image presence (+10 point bonus)
@@ -180,7 +180,7 @@ MyRSSPress is a web application that transforms RSS feeds into visually appealin
 - **Framework**: Hono 4.x
 - **Language**: TypeScript 5.9.x
 - **Database**: DynamoDB
-- **AI**: AWS Bedrock (Claude 3 Haiku)
+- **AI**: AWS Bedrock (Nova Micro)
 
 ### Infrastructure
 - **IaC**: Terraform 1.11.x
@@ -303,3 +303,19 @@ This document is updated according to product specification changes.
   - Automatic cleanup service (daily at 3 AM JST)
   - Fixed DynamoDB undefined value error
   - Related Issue: [#46](https://github.com/kumagaias/my-rss-press/issues/46)
+
+- **2025-01-30**: Migrated from Claude 3 Haiku to Nova Micro
+  - Migrated all AI services to AWS Bedrock Nova Micro
+  - Achieved 87-89% cost reduction on AI inference
+  - Maintained response quality and performance
+  - Added rollback capability via environment variable
+  - Related Spec: `.kiro/specs/features/bedrock-to-nova-micro-migration/`
+
+- **2026-02-21**: Optimized AI model usage with mixed Nova Lite/Micro configuration
+  - Split model usage: Nova Lite for less critical tasks, Nova Micro for critical tasks
+  - Feed suggestions and editorial columns now use Nova Lite (lower cost)
+  - Summaries, importance scoring, and article filtering use Nova Micro (higher accuracy)
+  - Renamed `bedrockService.ts` to `feedSuggestionService.ts` for better abstraction
+  - Added separate environment variables: `BEDROCK_MODEL_ID_LITE` and `BEDROCK_MODEL_ID_MICRO`
+  - Further cost optimization while maintaining quality for critical features
+  - Related Spec: `.kiro/specs/features/bedrock-to-nova-micro-migration/`

@@ -8,12 +8,14 @@
  * - Weaves together article themes with historical/philosophical insights
  * - Supports English and Japanese
  * - 150-200 words (concise and impactful)
- * - Uses AWS Bedrock (Claude 3 Haiku)
+ * - Uses AWS Bedrock (Nova Micro by default, Claude 3 Haiku for rollback)
+ * - Configurable model via BEDROCK_MODEL_ID environment variable
  */
 
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { config } from '../config.js';
 import type { Article } from './rssFetcherService.js';
+import { logStructuredError, logStructuredWarning, logMonitoringMetrics, extractTokenUsage } from '../utils/structuredLogger.js';
 
 // Bedrock client
 const bedrockClient = new BedrockRuntimeClient({
@@ -100,6 +102,75 @@ Column: [100-150 words of editorial content]`;
 }
 
 /**
+ * Build Bedrock request body based on model ID
+ * Adapts request format for different models (Claude 3 Haiku vs Nova Micro)
+ * 
+ * @param prompt - User prompt text
+ * @param modelId - Bedrock model ID
+ * @returns Request body object
+ */
+function buildBedrockRequest(prompt: string, modelId: string): object {
+  // Check if model is Claude 3 Haiku (Anthropic Messages API)
+  if (modelId.includes('anthropic.claude')) {
+    return {
+      anthropic_version: 'bedrock-2023-05-31',
+      max_tokens: 400, // Enough for 100-150 words (EN) or 200-250 chars (JP)
+      messages: [{ role: 'user', content: prompt }],
+    };
+  }
+  
+  // Nova Micro (Messages API v1)
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            text: prompt,
+          },
+        ],
+      },
+    ],
+    inferenceConfig: {
+      maxTokens: 400, // Enough for 100-150 words (EN) or 200-250 chars (JP)
+      topP: 0.9,
+    },
+  };
+}
+
+/**
+ * Parse Bedrock response based on model format
+ * Handles different response structures (Claude 3 Haiku vs Nova Micro)
+ * 
+ * @param response - Raw Bedrock API response
+ * @param modelId - Bedrock model ID
+ * @returns Response text content
+ */
+function parseBedrockResponse(response: any, modelId: string): string | null {
+  try {
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    
+    // Check if model is Claude 3 Haiku (Anthropic Messages API)
+    if (modelId.includes('anthropic.claude')) {
+      return responseBody.content?.[0]?.text?.trim() || null;
+    }
+    
+    // Nova Micro (Messages API v1)
+    return responseBody.output?.message?.content?.[0]?.text?.trim() || null;
+  } catch (error) {
+    logStructuredError(
+      'editorialColumnService',
+      'PARSE_ERROR',
+      'Error parsing Bedrock response',
+      {},
+      error,
+      modelId
+    );
+    return null;
+  }
+}
+
+/**
  * Parse editorial column response from Bedrock
  * 
  * Expected format:
@@ -132,10 +203,22 @@ function parseEditorialResponse(responseText: string): EditorialColumnResult | n
       };
     }
 
-    console.error('[Editorial Column] Failed to parse response format');
+    logStructuredWarning(
+      'editorialColumnService',
+      'Failed to parse response format',
+      {},
+      config.bedrockModelIdLite
+    );
     return null;
   } catch (error) {
-    console.error('[Editorial Column] Error parsing response:', error);
+    logStructuredError(
+      'editorialColumnService',
+      'PARSE_ERROR',
+      'Error parsing response',
+      {},
+      error,
+      config.bedrockModelIdLite
+    );
     return null;
   }
 }
@@ -153,7 +236,12 @@ export async function generateEditorialColumn(
 
   // Validate inputs
   if (!articles || articles.length === 0) {
-    console.error('[Editorial Column] No articles provided');
+    logStructuredWarning(
+      'editorialColumnService',
+      'No articles provided',
+      { theme, locale },
+      config.bedrockModelIdLite
+    );
     return null;
   }
 
@@ -164,37 +252,53 @@ export async function generateEditorialColumn(
       // Build prompt
       const prompt = buildEditorialPrompt(articles, theme, locale);
 
-      // Call Bedrock API
+      // Call Bedrock API (configurable via BEDROCK_MODEL_ID_LITE)
+      // Default: Nova Lite (amazon.nova-lite-v1:0)
+      // Rollback: Set BEDROCK_MODEL_ID_LITE=anthropic.claude-3-haiku-20240307-v1:0
       const command = new InvokeModelCommand({
-        modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
+        modelId: config.bedrockModelIdLite,
         contentType: 'application/json',
         accept: 'application/json',
-        body: JSON.stringify({
-          anthropic_version: 'bedrock-2023-05-31',
-          max_tokens: 400, // Enough for 100-150 words (EN) or 200-250 chars (JP)
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-        }),
+        body: JSON.stringify(buildBedrockRequest(prompt, config.bedrockModelIdLite)),
       });
 
       // Execute with timeout (10 seconds for async generation)
+      const startTime = Date.now();
       const response = await Promise.race([
         bedrockClient.send(command),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Bedrock API timeout')), 10000)
         ),
       ]);
+      const responseTime = Date.now() - startTime;
 
-      // Parse response
+      // Parse response using model-specific parser
+      const responseText = parseBedrockResponse(response, config.bedrockModelIdLite);
+      
+      // Extract token usage from response (if available)
       const responseBody = JSON.parse(new TextDecoder().decode((response as any).body));
-      const responseText = responseBody.content?.[0]?.text?.trim();
+      const tokenUsage = extractTokenUsage(responseBody);
+      
+      // Log monitoring metrics for cost tracking
+      logMonitoringMetrics({
+        apiCallCount: 1,
+        responseTimeMs: responseTime,
+        inputTokens: tokenUsage?.inputTokens,
+        outputTokens: tokenUsage?.outputTokens,
+        totalTokens: tokenUsage?.totalTokens,
+        modelId: config.bedrockModelIdLite,
+        service: 'editorialColumnService',
+        operation: 'generateEditorialColumn',
+        success: true,
+      });
 
       if (!responseText) {
-        console.error('[Editorial Column] Empty response from Bedrock');
+        logStructuredWarning(
+          'editorialColumnService',
+          'Empty response from Bedrock',
+          { theme, locale, attempt, maxRetries },
+          config.bedrockModelIdLite
+        );
         
         // Retry on empty response
         if (attempt < maxRetries) {
@@ -209,7 +313,12 @@ export async function generateEditorialColumn(
       const result = parseEditorialResponse(responseText);
       
       if (!result) {
-        console.error('[Editorial Column] Failed to parse response');
+        logStructuredWarning(
+          'editorialColumnService',
+          'Failed to parse response',
+          { theme, locale, attempt, maxRetries },
+          config.bedrockModelIdLite
+        );
         
         // Retry on parse failure
         if (attempt < maxRetries) {
@@ -223,7 +332,25 @@ export async function generateEditorialColumn(
       console.log(`[Editorial Column] Generated column: ${result.title}`);
       return result;
     } catch (error) {
-      console.error(`[Editorial Column] Generation failed (attempt ${attempt}/${maxRetries}):`, error);
+      // Log monitoring metrics for failed API call
+      logMonitoringMetrics({
+        apiCallCount: 1,
+        responseTimeMs: 0, // Unknown response time for failed calls
+        modelId: config.bedrockModelIdLite,
+        service: 'editorialColumnService',
+        operation: 'generateEditorialColumn',
+        success: false,
+        errorType: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+      });
+      
+      logStructuredError(
+        'editorialColumnService',
+        'API_ERROR',
+        `Generation failed (attempt ${attempt}/${maxRetries})`,
+        { theme, locale, attempt, maxRetries, articleCount: articles.length },
+        error,
+        config.bedrockModelIdLite
+      );
 
       // If this is the last attempt, return null
       if (attempt === maxRetries) {

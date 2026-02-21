@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Hono } from 'hono';
 import { newspapersRouter } from '../../../src/routes/newspapers';
-import * as bedrockService from '../../../src/services/bedrockService';
+import * as feedSuggestionService from '../../../src/services/feedSuggestionService';
 import * as rssFetcherService from '../../../src/services/rssFetcherService';
 import * as importanceCalculator from '../../../src/services/importanceCalculator';
 import * as languageDetectionService from '../../../src/services/languageDetectionService';
@@ -9,7 +9,7 @@ import * as summaryGenerationService from '../../../src/services/summaryGenerati
 import * as articleLimiter from '../../../src/services/articleLimiter';
 
 // Mock all services
-vi.mock('../../../src/services/bedrockService');
+vi.mock('../../../src/services/feedSuggestionService');
 vi.mock('../../../src/services/rssFetcherService');
 vi.mock('../../../src/services/importanceCalculator');
 vi.mock('../../../src/services/languageDetectionService');
@@ -31,7 +31,7 @@ describe('POST /api/newspapers/generate', () => {
 
   it('should generate newspaper successfully with valid theme', async () => {
     // Mock feed suggestions
-    vi.mocked(bedrockService.suggestFeeds).mockResolvedValue({
+    vi.mocked(feedSuggestionService.suggestFeeds).mockResolvedValue({
       feeds: [
         { url: 'http://feed1.com', title: 'Feed 1', isDefault: false },
         { url: 'http://feed2.com', title: 'Feed 2', isDefault: true },
@@ -149,7 +149,7 @@ describe('POST /api/newspapers/generate', () => {
   });
 
   it('should mark default feeds correctly', async () => {
-    vi.mocked(bedrockService.suggestFeeds).mockResolvedValue({
+    vi.mocked(feedSuggestionService.suggestFeeds).mockResolvedValue({
       feeds: [
         { url: 'http://feed1.com', title: 'Feed 1', isDefault: false },
         { url: 'http://feed2.com', title: 'Feed 2', isDefault: true },
@@ -241,7 +241,7 @@ describe('POST /api/newspapers/generate', () => {
   });
 
   it('should call article limiter with correct parameters', async () => {
-    vi.mocked(bedrockService.suggestFeeds).mockResolvedValue({
+    vi.mocked(feedSuggestionService.suggestFeeds).mockResolvedValue({
       feeds: [
         { url: 'http://feed1.com', title: 'Feed 1', isDefault: true },
       ],
@@ -300,7 +300,7 @@ describe('POST /api/newspapers/generate', () => {
   });
 
   it('should handle feed suggestion errors gracefully', async () => {
-    vi.mocked(bedrockService.suggestFeeds).mockRejectedValue(new Error('Bedrock error'));
+    vi.mocked(feedSuggestionService.suggestFeeds).mockRejectedValue(new Error('Bedrock error'));
 
     const response = await app.request('/api/newspapers/generate', {
       method: 'POST',
@@ -314,7 +314,7 @@ describe('POST /api/newspapers/generate', () => {
   });
 
   it('should handle article fetching errors gracefully', async () => {
-    vi.mocked(bedrockService.suggestFeeds).mockResolvedValue({
+    vi.mocked(feedSuggestionService.suggestFeeds).mockResolvedValue({
       feeds: [{ url: 'http://feed1.com', title: 'Feed 1', isDefault: false }],
       newspaperName: 'Technology News',
     });
@@ -335,7 +335,7 @@ describe('POST /api/newspapers/generate', () => {
   });
 
   it('should work with Japanese locale', async () => {
-    vi.mocked(bedrockService.suggestFeeds).mockResolvedValue({
+    vi.mocked(feedSuggestionService.suggestFeeds).mockResolvedValue({
       feeds: [{ url: 'http://feed1.com', title: 'フィード1', isDefault: false }],
       newspaperName: 'テクノロジーニュース',
     });

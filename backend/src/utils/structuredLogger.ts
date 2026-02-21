@@ -203,7 +203,7 @@ export function extractTokenUsage(response: any): { inputTokens?: number; output
     }
     
     return undefined;
-  } catch (error) {
+  } catch {
     // If extraction fails, return undefined (token usage is optional)
     return undefined;
   }

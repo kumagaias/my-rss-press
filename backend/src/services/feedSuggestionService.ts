@@ -4,7 +4,7 @@ import { getAllDefaultFeeds as getDefaultFeedsFromFallback } from './categoryFal
 import { getCategoryByTheme } from './categoryService.js';
 import { categoryCache } from './categoryCache.js';
 import { getPopularFeeds } from './feedUsageService.js';
-import { logStructuredError, logStructuredWarning, logMonitoringMetrics, extractTokenUsage } from '../utils/structuredLogger.js';
+import { logStructuredError, logMonitoringMetrics, extractTokenUsage } from '../utils/structuredLogger.js';
 
 // Bedrock client configuration
 const bedrockClient = new BedrockRuntimeClient({

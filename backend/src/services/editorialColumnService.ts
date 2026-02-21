@@ -183,13 +183,28 @@ function parseBedrockResponse(response: any, modelId: string): string | null {
 function parseEditorialResponse(responseText: string): EditorialColumnResult | null {
   try {
     // Try to extract title and column using regex (support both English and Japanese labels)
-    const titleMatch = responseText.match(/(?:Title|タイトル):\s*(.+?)(?:\n|$)/i);
-    const columnMatch = responseText.match(/(?:Column|コラム):\s*(.+)/is);
+    // Use .*? instead of .+? to match empty strings as well
+    const titleMatch = responseText.match(/(?:Title|タイトル):\s*(.*?)(?:\n|$)/i);
+    const columnMatch = responseText.match(/(?:Column|コラム):\s*(.*)/is);
 
     if (titleMatch && columnMatch) {
+      const title = titleMatch[1].trim();
+      const column = columnMatch[1].trim();
+      
+      // Validate that both title and column are non-empty
+      if (!title || !column) {
+        logStructuredWarning(
+          'editorialColumnService',
+          'Empty title or column in response',
+          { title, column },
+          config.bedrockModelIdLite
+        );
+        return null;
+      }
+      
       return {
-        title: titleMatch[1].trim(),
-        column: columnMatch[1].trim(),
+        title,
+        column,
       };
     }
 
@@ -197,9 +212,23 @@ function parseEditorialResponse(responseText: string): EditorialColumnResult | n
     const lines = responseText.trim().split('\n');
     if (lines.length >= 2) {
       // First line as title, rest as column
+      const title = lines[0].replace(/^(Title:|タイトル:)\s*/i, '').trim();
+      const column = lines.slice(1).join('\n').replace(/^(Column:|コラム:)\s*/i, '').trim();
+      
+      // Validate that both title and column are non-empty
+      if (!title || !column) {
+        logStructuredWarning(
+          'editorialColumnService',
+          'Empty title or column in fallback parsing',
+          { title, column },
+          config.bedrockModelIdLite
+        );
+        return null;
+      }
+      
       return {
-        title: lines[0].replace(/^(Title:|タイトル:)\s*/i, '').trim(),
-        column: lines.slice(1).join('\n').replace(/^(Column:|コラム:)\s*/i, '').trim(),
+        title,
+        column,
       };
     }
 

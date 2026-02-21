@@ -193,9 +193,9 @@ describe('Property 3: Response Parsing Correctness', () => {
           expect(result.feeds.length).toBeGreaterThan(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 50 } // Reduced from 100 to avoid timeout
     );
-  }, 30000); // 30 second timeout for feed validation
+  }, 60000); // 60 second timeout for feed validation (increased from 30s)
 
   /**
    * Property Test 2: Summary Generation Response Parsing

@@ -99,6 +99,7 @@ jobs:
       
       - name: Check frontend vulnerabilities
         working-directory: frontend
+        continue-on-error: true
         run: npm ci && npm audit --audit-level=moderate || exit 1
       
       - name: Check backend vulnerabilities

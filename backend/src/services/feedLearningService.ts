@@ -13,9 +13,9 @@ import { Feed } from '../types/category.js';
  * Criteria for promoting a feed to the category database
  */
 const PROMOTION_CRITERIA = {
-  MIN_USAGE_COUNT: 3,        // Minimum number of times the feed must be used
-  MIN_SUCCESS_RATE: 70,      // Minimum success rate (70%)
-  MIN_AVERAGE_ARTICLES: 2,   // Minimum average articles per fetch
+  MIN_USAGE_COUNT: 1,        // Minimum number of times the feed must be used (即座に追加)
+  MIN_SUCCESS_RATE: 100,     // Minimum success rate (100% - 1回でも成功すればOK)
+  MIN_AVERAGE_ARTICLES: 1,   // Minimum average articles per fetch (1記事以上取得できればOK)
 };
 
 /**

@@ -25,6 +25,7 @@ import { recordFeedUsage } from '../services/feedUsageService.js';
 import { getCategoryByTheme } from '../services/categoryService.js';
 import { suggestFeeds } from '../services/feedSuggestionService.js';
 import { limitDefaultFeedArticles, type FeedMetadata } from '../services/articleLimiter.js';
+import { promoteFeedsIfQualified } from '../services/feedLearningService.js';
 
 export const newspapersRouter = new Hono();
 
@@ -62,19 +63,21 @@ async function generateEditorialColumnAsync(
 }
 
 /**
- * Record feed usage asynchronously (fire-and-forget)
+ * Record feed usage and promote qualified feeds asynchronously (fire-and-forget)
  * @param feedUrls - Array of feed URLs used
  * @param theme - Theme keyword
  * @param locale - Locale
  * @param articles - Generated articles
  * @param feedTitles - Map of feed URLs to their titles
+ * @param feedLanguages - Map of feed URLs to their languages
  */
 async function recordFeedUsageAsync(
   feedUrls: string[],
   theme: string,
   locale: 'en' | 'ja',
   articles: Array<{ feedSource: string }>,
-  feedTitles: Map<string, string>
+  feedTitles: Map<string, string>,
+  feedLanguages: Map<string, string>
 ): Promise<void> {
   try {
     // Get category for the theme
@@ -113,6 +116,18 @@ async function recordFeedUsageAsync(
     
     await Promise.all(recordPromises);
     console.log(`[FeedUsage] Successfully recorded usage for ${feedUrls.length} feeds`);
+    
+    // Attempt to promote qualified feeds to category database (auto-learning)
+    const promotedCount = await promoteFeedsIfQualified(
+      feedUrls,
+      category.categoryId,
+      feedTitles,
+      feedLanguages
+    );
+    
+    if (promotedCount > 0) {
+      console.log(`[FeedLearning] 🎓 Auto-learned ${promotedCount} new feeds for category ${category.displayName}`);
+    }
   } catch (error) {
     console.error('[FeedUsage] Error recording usage:', error);
     // Don't throw - this is fire-and-forget
@@ -259,13 +274,14 @@ newspapersRouter.post(
       // Editorial column will be generated asynchronously after newspaper is saved
       const editorialColumn: string | null = null;
 
-      // Step 8: Record feed usage (fire-and-forget)
+      // Step 8: Record feed usage and auto-learn feeds (fire-and-forget)
       recordFeedUsageAsync(
         feedUrls,
         validated.theme,
         validated.locale,
         articlesWithImportance,
-        feedTitles
+        feedTitles,
+        feedLanguages
       ).catch(error => {
         console.error('[OneClick] Failed to record usage (non-blocking):', error);
       });
@@ -388,13 +404,14 @@ newspapersRouter.post(
         // Continue without summary (null)
       }
 
-      // Record feed usage (fire-and-forget, don't block response)
+      // Record feed usage and auto-learn feeds (fire-and-forget, don't block response)
       recordFeedUsageAsync(
         validated.feedUrls,
         validated.theme,
         validated.locale || 'en',
         articlesWithImportance,
-        feedTitles
+        feedTitles,
+        feedLanguages
       ).catch(error => {
         console.error('[FeedUsage] Failed to record usage (non-blocking):', error);
       });

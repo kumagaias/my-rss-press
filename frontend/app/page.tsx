@@ -140,6 +140,16 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#f4f1e8]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Header with RSS Database Link */}
+        <div className="mb-6 flex justify-end">
+          <button
+            onClick={() => router.push('/rss-database')}
+            className="px-4 py-2 bg-white border-2 border-black font-serif font-bold hover:bg-gray-100 transition-colors text-sm sm:text-base"
+          >
+            📚 RSS Database
+          </button>
+        </div>
+
         {/* Main Content */}
         <div className="space-y-8">
           {/* Theme Input & Generation */}

@@ -199,22 +199,22 @@ This plan outlines the implementation tasks for migrating MyRSSPress from AWS Be
     - Test metrics logging
     - _Requirements: 8.6, 11.5, 12.1, 12.2, 12.3_
 
-- [ ] 11. Integration testing and validation
-  - [~] 11.1 Test end-to-end newspaper generation with Nova Micro
+- [x] 11. Integration testing and validation
+  - [x] 11.1 Test end-to-end newspaper generation with Nova Micro
     - Test complete newspaper generation flow
     - Verify all services use Nova Micro
     - Verify response quality meets requirements
     - Test with real Nova Micro API in staging environment
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 5.4, 6.1, 6.2, 6.3_
 
-  - [~] 11.2 Test rollback capability
+  - [x] 11.2 Test rollback capability
     - Set `BEDROCK_MODEL_ID` to Claude 3 Haiku model ID
     - Verify all services switch to Claude 3 Haiku
     - Test complete newspaper generation flow with Claude 3 Haiku
     - Switch back to Nova Micro and verify
     - _Requirements: 13.1, 13.2, 13.3, 13.4_
 
-  - [~] 11.3 Performance testing
+  - [x] 11.3 Performance testing
     - Measure feed suggestion response time (target: <30s)
     - Measure summary generation response time (target: <10s)
     - Measure importance calculation response time (target: <5s)
@@ -223,7 +223,7 @@ This plan outlines the implementation tasks for migrating MyRSSPress from AWS Be
     - Compare with Claude 3 Haiku baseline
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [~] 12. Final checkpoint - Ensure all tests pass
+- [x] 12. Final checkpoint - Ensure all tests pass
   - Run all unit tests and verify they pass
   - Run all property tests with 100+ iterations
   - Verify test coverage above 60%
@@ -232,8 +232,11 @@ This plan outlines the implementation tasks for migrating MyRSSPress from AWS Be
   - Ask the user if questions arise
 
 - [x] 13. Update documentation
-  - Update design.md with Nova Micro model ID and API format details
-  - Update tech.md with Nova Micro configuration
+  - Update design.md with Nova Lite/Micro mixed configuration details
+  - Update tech.md with Nova Lite/Micro configuration (already updated)
+  - Update product.md with model assignment details (already updated)
+  - Update backend/README.md with environment variable documentation
+  - Update backend/.env.local.example with new environment variables
   - Document rollback procedure in design.md
   - Document cost comparison in design.md
   - Update environment variable documentation

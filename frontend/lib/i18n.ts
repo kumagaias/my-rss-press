@@ -143,6 +143,12 @@ export const translations = {
       'Psychology', 'Philosophy', 'History', 'Geography', 'Culture',
       'Language', 'Religion', 'Spirituality', 'Meditation', 'Wellness',
     ],
+    
+    // RSS Database
+    rssDatabase: 'RSS Database',
+    rssFeedsCollected: (count: number) => `${count} RSS feeds collected`,
+    feeds: 'feeds',
+    noCategories: 'No categories found',
   },
   ja: {
     // アプリメタデータ
@@ -282,6 +288,12 @@ export const translations = {
       '心理学', '哲学', '歴史', '地理', '文化',
       '言語', '宗教', 'スピリチュアル', '瞑想', 'ウェルネス',
     ],
+    
+    // RSS Database
+    rssDatabase: 'RSSデータベース',
+    rssFeedsCollected: (count: number) => `${count}個のRSSフィードを収集済`,
+    feeds: 'フィード',
+    noCategories: 'カテゴリが見つかりません',
   },
 };
 

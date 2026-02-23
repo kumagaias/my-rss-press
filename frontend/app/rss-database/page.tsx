@@ -34,7 +34,17 @@ interface FeedsResponse {
 
 export default function RssDatabasePage() {
   const router = useRouter();
-  const [locale, setLocale] = useState<Locale>('en');
+  
+  // Get locale from localStorage (set by LayoutClient)
+  const [locale, setLocale] = useState<Locale>(() => {
+    // During SSR, return 'en' as default
+    if (typeof window === 'undefined') return 'en';
+    
+    // On client, check localStorage
+    const savedLocale = localStorage.getItem('locale') as Locale | null;
+    return savedLocale || detectLocale();
+  });
+  
   const t = useTranslations(locale);
   
   const [categories, setCategories] = useState<Category[]>([]);
@@ -44,11 +54,27 @@ export default function RssDatabasePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Detect locale on mount
+  // Sync locale from localStorage (updated by LayoutClient)
   useEffect(() => {
-    const detectedLocale = detectLocale();
-    setLocale(detectedLocale);
-  }, []);
+    // Check localStorage periodically for locale changes
+    const checkLocale = () => {
+      const savedLocale = localStorage.getItem('locale') as Locale | null;
+      if (savedLocale && savedLocale !== locale) {
+        console.log('[RSS Database] Locale changed to:', savedLocale);
+        setLocale(savedLocale);
+      }
+    };
+
+    // Check immediately on mount
+    checkLocale();
+
+    // Check every 500ms for locale changes
+    const interval = setInterval(checkLocale, 500);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [locale]);
 
   // Fetch categories
   useEffect(() => {

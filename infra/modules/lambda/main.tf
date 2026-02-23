@@ -70,11 +70,14 @@ resource "aws_iam_role_policy" "bedrock_access" {
           "bedrock:InvokeModel"
         ]
         Resource = [
-          # Foundation models are AWS-managed, use * for account ID
+          # Foundation models - Claude 3 Haiku (specific region)
           "arn:aws:bedrock:${var.bedrock_region}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0",
-          # APAC inference profiles for Nova models (required for on-demand throughput)
-          "arn:aws:bedrock:${var.bedrock_region}::inference-profile/apac.amazon.nova-lite-v1:0",
-          "arn:aws:bedrock:${var.bedrock_region}::inference-profile/apac.amazon.nova-micro-v1:0"
+          # APAC inference profiles for Nova models (cross-region routing)
+          "arn:aws:bedrock:*:*:inference-profile/apac.amazon.nova-lite-v1:0",
+          "arn:aws:bedrock:*:*:inference-profile/apac.amazon.nova-micro-v1:0",
+          # Foundation models for Nova (cross-region routing by inference profile)
+          "arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0",
+          "arn:aws:bedrock:*::foundation-model/amazon.nova-micro-v1:0"
         ]
       }
     ]

@@ -29,12 +29,17 @@ export async function shouldPromoteFeed(
   categoryId: string
 ): Promise<boolean> {
   try {
+    console.log(`[FeedLearning] Checking promotion criteria for ${url} in category ${categoryId}`);
+    
     // Get feed usage statistics
     const usage = await getFeedUsage(url, categoryId);
     
     if (!usage) {
+      console.log(`[FeedLearning] No usage data found for ${url}`);
       return false;
     }
+    
+    console.log(`[FeedLearning] Usage stats for ${url}: count=${usage.usageCount}, success=${usage.successRate}%, avg=${usage.averageArticles}`);
     
     // Check promotion criteria
     const meetsUsageCount = usage.usageCount >= PROMOTION_CRITERIA.MIN_USAGE_COUNT;
@@ -47,6 +52,13 @@ export async function shouldPromoteFeed(
       console.log(
         `[FeedLearning] Feed ${url} meets promotion criteria:`,
         `usage=${usage.usageCount}, success=${usage.successRate}%, avg=${usage.averageArticles}`
+      );
+    } else {
+      console.log(
+        `[FeedLearning] Feed ${url} does NOT meet criteria:`,
+        `usage=${usage.usageCount}/${PROMOTION_CRITERIA.MIN_USAGE_COUNT},`,
+        `success=${usage.successRate}%/${PROMOTION_CRITERIA.MIN_SUCCESS_RATE}%,`,
+        `avg=${usage.averageArticles}/${PROMOTION_CRITERIA.MIN_AVERAGE_ARTICLES}`
       );
     }
     
@@ -143,6 +155,7 @@ export async function promoteFeedsIfQualified(
   feedTitles: Map<string, string>,
   feedLanguages: Map<string, string>
 ): Promise<number> {
+  console.log(`[FeedLearning] Starting promotion check for ${feedUrls.length} feeds in category ${categoryId}`);
   let promotedCount = 0;
   
   const promotionPromises = feedUrls.map(async (url) => {

@@ -179,9 +179,9 @@ describe('Property 24: Model Rollback via Environment Variable', () => {
       fc.asyncProperty(
         // Generate random model IDs (both valid AWS model ID formats)
         fc.constantFrom(
-          'amazon.nova-micro-v1:0',
+          'apac.amazon.nova-micro-v1:0',
           'anthropic.claude-3-haiku-20240307-v1:0',
-          'amazon.nova-lite-v1:0',
+          'apac.amazon.nova-lite-v1:0',
           'anthropic.claude-3-sonnet-20240229-v1:0'
         ),
         async (modelId) => {
@@ -212,9 +212,9 @@ describe('Property 24: Model Rollback via Environment Variable', () => {
       fc.asyncProperty(
         // Generate combinations of model IDs
         fc.constantFrom(
-          'amazon.nova-micro-v1:0',
+          'apac.amazon.nova-micro-v1:0',
           'anthropic.claude-3-haiku-20240307-v1:0',
-          'amazon.nova-lite-v1:0'
+          'apac.amazon.nova-lite-v1:0'
         ),
         async (modelId) => {
           // Get config with the specified model IDs
@@ -247,7 +247,7 @@ describe('Property 24: Model Rollback via Environment Variable', () => {
         // Generate sequences of model switches
         fc.array(
           fc.constantFrom(
-            'amazon.nova-micro-v1:0',
+            'apac.amazon.nova-micro-v1:0',
             'anthropic.claude-3-haiku-20240307-v1:0'
           ),
           { minLength: 2, maxLength: 5 }
@@ -289,7 +289,7 @@ describe('Property 24: Model Rollback via Environment Variable', () => {
     const { config } = await import('../../../src/config.js');
     
     // Verify default model IDs
-    expect(config.bedrockModelIdLite).toBe('amazon.nova-lite-v1:0');
-    expect(config.bedrockModelIdMicro).toBe('amazon.nova-micro-v1:0');
+    expect(config.bedrockModelIdLite).toBe('apac.amazon.nova-lite-v1:0');
+    expect(config.bedrockModelIdMicro).toBe('apac.amazon.nova-micro-v1:0');
   });
 });

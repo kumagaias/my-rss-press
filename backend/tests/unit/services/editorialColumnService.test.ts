@@ -26,8 +26,8 @@ vi.mock('@aws-sdk/client-bedrock-runtime', () => ({
 vi.mock('../../../src/config.js', () => ({
   config: {
     bedrockRegion: 'ap-northeast-1',
-    bedrockModelIdLite: 'amazon.nova-lite-v1:0',
-    bedrockModelIdMicro: 'amazon.nova-micro-v1:0',
+    bedrockModelIdLite: 'apac.amazon.nova-lite-v1:0',
+    bedrockModelIdMicro: 'apac.amazon.nova-micro-v1:0',
     useMockBedrock: false,
     enableCache: false,
     isLocal: false,

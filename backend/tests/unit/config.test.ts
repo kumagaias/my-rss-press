@@ -35,7 +35,7 @@ describe('Configuration Module', () => {
       // Import config fresh
       const { config } = await import('../../src/config.js');
 
-      expect(config.bedrockModelIdLite).toBe('amazon.nova-lite-v1:0');
+      expect(config.bedrockModelIdLite).toBe('apac.amazon.nova-lite-v1:0');
     });
 
     it('should use environment variable when BEDROCK_MODEL_ID_LITE is set', async () => {
@@ -65,7 +65,7 @@ describe('Configuration Module', () => {
       // Import config fresh
       const { config } = await import('../../src/config.js');
 
-      expect(config.bedrockModelIdLite).toBe('amazon.nova-lite-v1:0');
+      expect(config.bedrockModelIdLite).toBe('apac.amazon.nova-lite-v1:0');
     });
   });
 
@@ -77,7 +77,7 @@ describe('Configuration Module', () => {
       // Import config fresh
       const { config } = await import('../../src/config.js');
 
-      expect(config.bedrockModelIdMicro).toBe('amazon.nova-micro-v1:0');
+      expect(config.bedrockModelIdMicro).toBe('apac.amazon.nova-micro-v1:0');
     });
 
     it('should use environment variable when BEDROCK_MODEL_ID_MICRO is set', async () => {
@@ -107,7 +107,7 @@ describe('Configuration Module', () => {
       // Import config fresh
       const { config } = await import('../../src/config.js');
 
-      expect(config.bedrockModelIdMicro).toBe('amazon.nova-micro-v1:0');
+      expect(config.bedrockModelIdMicro).toBe('apac.amazon.nova-micro-v1:0');
     });
   });
 

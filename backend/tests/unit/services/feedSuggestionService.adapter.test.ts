@@ -34,7 +34,7 @@ describe('Bedrock Service - Request Adapter', () => {
 
   it('should build Nova Micro request format correctly', () => {
     const prompt = 'Test prompt';
-    const modelId = 'amazon.nova-micro-v1:0';
+    const modelId = 'apac.amazon.nova-micro-v1:0';
     
     // Expected format for Nova Micro
     const expected = {
@@ -128,7 +128,7 @@ describe('Bedrock Service - Model ID Configuration', () => {
   it('should use configurable model ID from environment variable', () => {
     // This test verifies that the model ID is configurable
     // The actual value is tested in config.test.ts
-    const defaultModelId = 'amazon.nova-micro-v1:0';
+    const defaultModelId = 'apac.amazon.nova-micro-v1:0';
     const claudeModelId = 'anthropic.claude-3-haiku-20240307-v1:0';
     
     // Verify model IDs are valid strings
@@ -144,7 +144,7 @@ describe('Bedrock Service - Model ID Configuration', () => {
   });
 
   it('should detect Nova Micro model ID correctly', () => {
-    const novaModelId = 'amazon.nova-micro-v1:0';
+    const novaModelId = 'apac.amazon.nova-micro-v1:0';
     expect(novaModelId.includes('amazon.nova')).toBe(true);
   });
 });

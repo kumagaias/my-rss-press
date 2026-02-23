@@ -53,7 +53,7 @@ describe('structuredLogger', () => {
         theme: 'technology',
         locale: 'en',
       };
-      const modelId = 'amazon.nova-micro-v1:0';
+      const modelId = 'apac.amazon.nova-micro-v1:0';
 
       // Act
       logStructuredError(service, errorType, errorMessage, context, undefined, modelId);
@@ -167,7 +167,7 @@ describe('structuredLogger', () => {
         theme: 'technology',
         articleCount: 10,
       };
-      const modelId = 'amazon.nova-micro-v1:0';
+      const modelId = 'apac.amazon.nova-micro-v1:0';
 
       // Act
       logStructuredWarning(service, message, context, modelId);
@@ -213,7 +213,7 @@ describe('structuredLogger', () => {
         theme: 'technology',
         feedCount: 15,
       };
-      const modelId = 'amazon.nova-micro-v1:0';
+      const modelId = 'apac.amazon.nova-micro-v1:0';
 
       // Act
       logStructuredInfo(service, message, context, modelId);
@@ -242,7 +242,7 @@ describe('structuredLogger', () => {
         inputTokens: 100,
         outputTokens: 50,
         totalTokens: 150,
-        modelId: 'amazon.nova-micro-v1:0',
+        modelId: 'apac.amazon.nova-micro-v1:0',
         service: 'bedrockService',
         operation: 'suggestFeeds',
         success: true,
@@ -268,7 +268,7 @@ describe('structuredLogger', () => {
       const metrics: MonitoringMetrics = {
         apiCallCount: 1,
         responseTimeMs: 0,
-        modelId: 'amazon.nova-micro-v1:0',
+        modelId: 'apac.amazon.nova-micro-v1:0',
         service: 'summaryGenerationService',
         operation: 'generateSummary',
         success: false,
@@ -292,7 +292,7 @@ describe('structuredLogger', () => {
       const metrics: MonitoringMetrics = {
         apiCallCount: 1,
         responseTimeMs: 500,
-        modelId: 'amazon.nova-micro-v1:0',
+        modelId: 'apac.amazon.nova-micro-v1:0',
         service: 'importanceCalculator',
         operation: 'calculateImportance',
         success: true,
@@ -326,7 +326,7 @@ describe('structuredLogger', () => {
         const metrics: MonitoringMetrics = {
           apiCallCount: 1,
           responseTimeMs: 1000,
-          modelId: 'amazon.nova-micro-v1:0',
+          modelId: 'apac.amazon.nova-micro-v1:0',
           service,
           operation: 'testOperation',
           success: true,
@@ -342,7 +342,7 @@ describe('structuredLogger', () => {
 
     it('should log metrics with both model IDs', () => {
       // Arrange
-      const modelIds = ['amazon.nova-micro-v1:0', 'anthropic.claude-3-haiku-20240307-v1:0'];
+      const modelIds = ['apac.amazon.nova-micro-v1:0', 'anthropic.claude-3-haiku-20240307-v1:0'];
 
       // Act & Assert
       modelIds.forEach((modelId) => {
@@ -582,7 +582,7 @@ describe('structuredLogger', () => {
       const errorType: ErrorType = 'API_ERROR';
       const errorMessage = 'Bedrock API timeout';
       const context = { theme: 'technology', locale: 'en' };
-      const modelId = 'amazon.nova-micro-v1:0';
+      const modelId = 'apac.amazon.nova-micro-v1:0';
 
       // Act
       logStructuredError(service, errorType, errorMessage, context, undefined, modelId);
@@ -605,7 +605,7 @@ describe('structuredLogger', () => {
       const metrics: MonitoringMetrics = {
         apiCallCount: 1,
         responseTimeMs: 1000,
-        modelId: 'amazon.nova-micro-v1:0',
+        modelId: 'apac.amazon.nova-micro-v1:0',
         service: 'bedrockService',
         operation: 'suggestFeeds',
         success: true,
@@ -625,7 +625,7 @@ describe('structuredLogger', () => {
       const metrics: MonitoringMetrics = {
         apiCallCount: 1,
         responseTimeMs: 2345,
-        modelId: 'amazon.nova-micro-v1:0',
+        modelId: 'apac.amazon.nova-micro-v1:0',
         service: 'summaryGenerationService',
         operation: 'generateSummary',
         success: true,
@@ -647,7 +647,7 @@ describe('structuredLogger', () => {
         inputTokens: 250,
         outputTokens: 125,
         totalTokens: 375,
-        modelId: 'amazon.nova-micro-v1:0',
+        modelId: 'apac.amazon.nova-micro-v1:0',
         service: 'importanceCalculator',
         operation: 'calculateImportance',
         success: true,
@@ -671,7 +671,7 @@ describe('structuredLogger', () => {
         inputTokens: 100,
         outputTokens: 50,
         totalTokens: 150,
-        modelId: 'amazon.nova-micro-v1:0',
+        modelId: 'apac.amazon.nova-micro-v1:0',
         service: 'bedrockService',
         operation: 'suggestFeeds',
         success: true,
@@ -698,7 +698,7 @@ describe('structuredLogger', () => {
       const claudeLog = JSON.parse(consoleLogSpy.mock.calls[1][0]);
 
       // Both logs should have the same structure for comparison
-      expect(novaLog.modelId).toBe('amazon.nova-micro-v1:0');
+      expect(novaLog.modelId).toBe('apac.amazon.nova-micro-v1:0');
       expect(claudeLog.modelId).toBe('anthropic.claude-3-haiku-20240307-v1:0');
       expect(novaLog.inputTokens).toBe(claudeLog.inputTokens);
       expect(novaLog.outputTokens).toBe(claudeLog.outputTokens);

@@ -146,12 +146,10 @@ export default function RssDatabasePage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-serif font-bold text-gray-900">
-                RSS Database
+                {t.rssDatabase}
               </h1>
               <p className="mt-2 text-gray-600">
-                {locale === 'ja' 
-                  ? `${totalFeeds}個のRSSフィードを収集済` 
-                  : `${totalFeeds} RSS feeds collected`}
+                {t.rssFeedsCollected(totalFeeds)}
               </p>
             </div>
             <button
@@ -182,7 +180,7 @@ export default function RssDatabasePage() {
                     {category.name}
                   </h2>
                   <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
-                    {category.feedCount} {locale === 'ja' ? 'フィード' : 'feeds'}
+                    {category.feedCount} {t.feeds}
                   </span>
                 </div>
                 <svg
@@ -259,7 +257,7 @@ export default function RssDatabasePage() {
         {categories.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-600">
-              {locale === 'ja' ? 'カテゴリが見つかりません' : 'No categories found'}
+              {t.noCategories}
             </p>
           </div>
         )}

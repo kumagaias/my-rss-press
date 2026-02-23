@@ -85,7 +85,7 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
             {title && (
               <h2 id="modal-title" className="text-2xl font-bold text-gray-900">
                 {title}
@@ -114,7 +114,7 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto flex-1">{children}</div>
+        <div className="p-6 overflow-y-auto flex-1 min-h-0">{children}</div>
       </div>
     </div>
   );
@@ -127,7 +127,7 @@ export interface ModalFooterProps {
 
 export const ModalFooter: React.FC<ModalFooterProps> = ({ children, className = '' }) => {
   return (
-    <div className={`px-6 py-4 border-t border-gray-200 flex justify-end gap-2 ${className}`}>
+    <div className={`px-6 py-4 border-t border-gray-200 flex justify-end gap-2 flex-shrink-0 ${className}`}>
       {children}
     </div>
   );

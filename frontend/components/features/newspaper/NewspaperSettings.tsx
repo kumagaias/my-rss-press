@@ -203,7 +203,7 @@ export function NewspaperSettingsModal({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t.addFeedManually}
           </label>
-          <div className="grid grid-cols-[1fr_auto] gap-2">
+          <div className="flex gap-2">
             <Input
               type="url"
               value={newFeedUrl}
@@ -213,17 +213,16 @@ export function NewspaperSettingsModal({
               }}
               placeholder={t.feedUrlPlaceholder}
               error={feedError || undefined}
+              className="flex-1"
             />
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="md"
-                onClick={handleAddFeed}
-                disabled={!newFeedUrl.trim()}
-              >
-                {t.addButton}
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleAddFeed}
+              disabled={!newFeedUrl.trim()}
+            >
+              {t.addButton}
+            </Button>
           </div>
         </div>
 
@@ -248,7 +247,7 @@ export function NewspaperSettingsModal({
         <button
           onClick={handleSave}
           disabled={feeds.length === 0}
-          className="px-6 py-3 text-base font-serif font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="px-6 py-3 text-base font-serif font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed border-2 border-blue-600 hover:border-blue-700 disabled:border-gray-400"
         >
           {t.save}
         </button>

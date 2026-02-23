@@ -55,7 +55,8 @@ export default function RssDatabasePage() {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories?locale=${locale}`);
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const response = await fetch(`${apiBaseUrl}/api/categories?locale=${locale}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch categories');
@@ -83,7 +84,8 @@ export default function RssDatabasePage() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories/${categoryId}/feeds`);
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiBaseUrl}/api/categories/${categoryId}/feeds`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch feeds');

@@ -244,27 +244,40 @@ describe('Bedrock Service - Unit Tests', () => {
   });
 
   describe('API error handling (fallback to defaults)', () => {
-    it('should throw error when Bedrock API fails', async () => {
+    it('should return default feeds when Bedrock API fails', async () => {
       mockSend.mockRejectedValue(new Error('Bedrock API error'));
       
-      await expect(suggestFeeds('Technology', 'en')).rejects.toThrow('Bedrock API error');
+      const result = await suggestFeeds('Technology', 'en');
+      
+      // Should return default feeds as fallback
+      expect(result.feeds).toBeDefined();
+      expect(result.feeds.length).toBeGreaterThanOrEqual(15);
+      expect(result.newspaperName).toBeDefined();
     }, 15000);
 
-    it('should handle timeout errors gracefully', async () => {
+    it('should return default feeds on timeout errors', async () => {
       mockSend.mockRejectedValue(new Error('Request timeout'));
       
-      await expect(suggestFeeds('Technology', 'en')).rejects.toThrow();
+      const result = await suggestFeeds('Technology', 'en');
+      
+      // Should return default feeds as fallback
+      expect(result.feeds).toBeDefined();
+      expect(result.feeds.length).toBeGreaterThanOrEqual(15);
     }, 15000);
 
-    it('should handle throttling errors', async () => {
+    it('should return default feeds on throttling errors', async () => {
       mockSend.mockRejectedValue(new Error('ThrottlingException'));
       
-      await expect(suggestFeeds('Technology', 'en')).rejects.toThrow();
+      const result = await suggestFeeds('Technology', 'en');
+      
+      // Should return default feeds as fallback
+      expect(result.feeds).toBeDefined();
+      expect(result.feeds.length).toBeGreaterThanOrEqual(15);
     }, 15000);
   });
 
   describe('Parsing error handling', () => {
-    it('should handle malformed JSON in response', async () => {
+    it('should return default feeds on malformed JSON in response', async () => {
       const mockResponse = {
         body: new TextEncoder().encode(JSON.stringify({
           output: {
@@ -281,10 +294,14 @@ describe('Bedrock Service - Unit Tests', () => {
       
       mockSend.mockResolvedValue(mockResponse);
       
-      await expect(suggestFeeds('Technology', 'en')).rejects.toThrow();
+      const result = await suggestFeeds('Technology', 'en');
+      
+      // Should return default feeds as fallback
+      expect(result.feeds).toBeDefined();
+      expect(result.feeds.length).toBeGreaterThanOrEqual(15);
     }, 15000);
 
-    it('should handle empty response', async () => {
+    it('should return default feeds on empty response', async () => {
       const mockResponse = {
         body: new TextEncoder().encode(JSON.stringify({
           output: {
@@ -301,7 +318,11 @@ describe('Bedrock Service - Unit Tests', () => {
       
       mockSend.mockResolvedValue(mockResponse);
       
-      await expect(suggestFeeds('Technology', 'en')).rejects.toThrow();
+      const result = await suggestFeeds('Technology', 'en');
+      
+      // Should return default feeds as fallback
+      expect(result.feeds).toBeDefined();
+      expect(result.feeds.length).toBeGreaterThanOrEqual(15);
     }, 15000);
 
     it('should handle response with missing feeds array', async () => {

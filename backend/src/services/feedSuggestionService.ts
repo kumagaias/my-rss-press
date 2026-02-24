@@ -233,6 +233,61 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
     return mockResponse;
   }
 
+  // OPTIMIZATION: Try database and popular feeds first (fast path)
+  console.log(`[FastPath] Checking database and popular feeds for theme: "${theme}"`);
+  const fastPathStartTime = Date.now();
+  
+  const [popularFeeds, dynamoDBFeeds] = await Promise.all([
+    getPopularFeedsFromUsage(theme, locale),
+    getFeedsFromDynamoDB(theme, locale),
+  ]);
+  
+  const fastPathTime = Date.now() - fastPathStartTime;
+  console.log(`[FastPath] Database lookup completed in ${fastPathTime}ms`);
+  
+  // Combine database and popular feeds
+  const databaseFeeds: FeedSuggestion[] = [];
+  const seenUrls = new Set<string>();
+  
+  // Add popular feeds first (highest priority)
+  for (const feed of popularFeeds) {
+    if (!seenUrls.has(feed.url)) {
+      databaseFeeds.push(feed);
+      seenUrls.add(feed.url);
+    }
+  }
+  
+  // Add DynamoDB feeds
+  for (const feed of dynamoDBFeeds) {
+    if (!seenUrls.has(feed.url) && databaseFeeds.length < 15) {
+      databaseFeeds.push(feed);
+      seenUrls.add(feed.url);
+    }
+  }
+  
+  // If we have enough feeds from database (10+), skip AI and return immediately
+  if (databaseFeeds.length >= 10) {
+    console.log(`[FastPath] ✅ Found ${databaseFeeds.length} feeds from database, skipping AI`);
+    console.log(`[FastPath] Total time: ${Date.now() - fastPathStartTime}ms (saved ~3-4 seconds)`);
+    
+    // Cache the result
+    if (config.isLocal && config.enableCache) {
+      cache.set(cacheKey, databaseFeeds);
+    }
+    
+    return {
+      feeds: databaseFeeds.slice(0, 15), // Limit to 15 feeds
+      newspaperName: generateNewspaperName(theme, locale),
+    };
+  }
+  
+  // If we have some feeds (5-9), use them but supplement with AI
+  if (databaseFeeds.length >= 5) {
+    console.log(`[FastPath] Found ${databaseFeeds.length} feeds from database, will supplement with AI`);
+  } else {
+    console.log(`[FastPath] Only ${databaseFeeds.length} feeds from database, will use AI as primary source`);
+  }
+
   try {
     // Build prompt for feed suggestions
     const prompt = buildPrompt(theme, locale);
@@ -306,38 +361,65 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Deduplication] Removed ${result.feeds.length - uniqueSuggestions.length} duplicate URLs`);
     }
 
-    // Validate feed URLs in parallel for better performance
-    console.log(`[Validation] Starting validation of ${uniqueSuggestions.length} feed URLs...`);
-    const validationStartTime = Date.now();
+    // OPTIMIZATION: Skip validation for feeds we already have from database
+    // Only validate new feeds from AI
+    const feedsToValidate: FeedSuggestion[] = [];
+    const preValidatedFeeds: FeedSuggestion[] = [];
+    const databaseUrls = new Set(databaseFeeds.map(f => f.url));
     
-    const validationResults = await Promise.all(
-      uniqueSuggestions.map(async (suggestion) => ({
-        suggestion,
-        isValid: await validateFeedUrl(suggestion.url),
-      }))
-    );
-    
-    const validationTime = Date.now() - validationStartTime;
-    console.log(`[Validation] Completed in ${validationTime}ms`);
-
-    const validatedSuggestions: FeedSuggestion[] = validationResults
-      .filter(result => result.isValid)
-      .map(result => ({
-        ...result.suggestion,
-        // Ensure all URLs use https://
-        url: result.suggestion.url.replace(/^http:\/\//i, 'https://'),
-      }));
-
-    // Log invalid feeds in one consolidated message
-    const invalidFeeds = validationResults
-      .filter(r => !r.isValid)
-      .map(r => r.suggestion.url);
-    
-    if (invalidFeeds.length > 0) {
-      console.log(`[Validation] Invalid feeds (${invalidFeeds.length}): ${invalidFeeds.join(', ')}`);
+    for (const suggestion of uniqueSuggestions) {
+      if (databaseUrls.has(suggestion.url)) {
+        // Feed is already in database, skip validation
+        preValidatedFeeds.push(suggestion);
+      } else {
+        // New feed from AI, needs validation
+        feedsToValidate.push(suggestion);
+      }
     }
     
-    console.log(`[Validation] Result: ${validatedSuggestions.length}/${uniqueSuggestions.length} feeds are valid`);
+    console.log(`[Validation] Skipping validation for ${preValidatedFeeds.length} database feeds`);
+    console.log(`[Validation] Validating ${feedsToValidate.length} new AI feeds...`);
+
+    // Validate only new feed URLs in parallel
+    let validatedSuggestions: FeedSuggestion[] = [...preValidatedFeeds];
+    
+    if (feedsToValidate.length > 0) {
+      const validationStartTime = Date.now();
+      
+      const validationResults = await Promise.all(
+        feedsToValidate.map(async (suggestion) => ({
+          suggestion,
+          isValid: await validateFeedUrl(suggestion.url),
+        }))
+      );
+      
+      const validationTime = Date.now() - validationStartTime;
+      console.log(`[Validation] Completed in ${validationTime}ms`);
+
+      const newValidatedFeeds: FeedSuggestion[] = validationResults
+        .filter(result => result.isValid)
+        .map(result => ({
+          ...result.suggestion,
+          // Ensure all URLs use https://
+          url: result.suggestion.url.replace(/^http:\/\//i, 'https://'),
+        }));
+
+      // Log invalid feeds in one consolidated message
+      const invalidFeeds = validationResults
+        .filter(r => !r.isValid)
+        .map(r => r.suggestion.url);
+      
+      if (invalidFeeds.length > 0) {
+        console.log(`[Validation] Invalid feeds (${invalidFeeds.length}): ${invalidFeeds.join(', ')}`);
+      }
+      
+      console.log(`[Validation] Result: ${newValidatedFeeds.length}/${feedsToValidate.length} new feeds are valid`);
+      
+      // Add newly validated feeds
+      validatedSuggestions.push(...newValidatedFeeds);
+    } else {
+      console.log(`[Validation] No new feeds to validate, using ${preValidatedFeeds.length} database feeds`);
+    }
 
     // Select top 14 feeds from validated suggestions (leave room for 1 default feed)
     const maxBedrockFeeds = 14;
@@ -347,35 +429,20 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       console.log(`[Selection] Selected top ${maxBedrockFeeds} feeds from ${validatedSuggestions.length} valid feeds`);
     }
 
-    // If we have 0 valid feeds, try popular feeds first, then DynamoDB, then default
+    // If we have 0 valid feeds from AI, use database feeds we already fetched
     if (topFeeds.length === 0) {
-      console.log(`[Fallback] No valid feeds from Bedrock, trying popular and DynamoDB feeds in parallel`);
+      console.log(`[Fallback] No valid feeds from Bedrock, using database feeds`);
       
-      // Try to get popular feeds and DynamoDB feeds in parallel
-      const [popularFeeds, dynamoDBFeeds] = await Promise.all([
-        getPopularFeedsFromUsage(theme, locale),
-        getFeedsFromDynamoDB(theme, locale),
-      ]);
-      
-      if (popularFeeds.length > 0) {
-        console.log(`[Popular] Using ${popularFeeds.length} popular feeds`);
+      if (databaseFeeds.length > 0) {
+        console.log(`[Fallback] Using ${databaseFeeds.length} feeds from database`);
         return {
-          feeds: popularFeeds.slice(0, 15), // Limit to 15 feeds
+          feeds: databaseFeeds.slice(0, 15), // Limit to 15 feeds
           newspaperName: generateNewspaperName(theme, locale),
         };
       }
       
-      if (dynamoDBFeeds.length > 0) {
-        console.log(`[DynamoDB] Using ${dynamoDBFeeds.length} feeds from DynamoDB`);
-        return {
-          feeds: dynamoDBFeeds.slice(0, 15), // Limit to 15 feeds
-          newspaperName: generateNewspaperName(theme, locale),
-        };
-      }
-      
-      // If no popular or DynamoDB feeds, use default feeds
-      // Requirements 4.1: Return at least 15 feeds
-      console.log(`[Fallback] No popular or DynamoDB feeds, returning 15 default feeds`);
+      // If no database feeds, use default feeds
+      console.log(`[Fallback] No database feeds, returning default feeds`);
       const defaultFeeds = getAllDefaultFeeds(locale);
       
       // Ensure we have at least 15 feeds by repeating if necessary
@@ -394,39 +461,17 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       };
     }
     
-    // Add popular feeds and DynamoDB feeds to supplement Bedrock suggestions (fetch in parallel)
-    const [popularFeeds, dynamoDBFeeds] = await Promise.all([
-      getPopularFeedsFromUsage(theme, locale),
-      getFeedsFromDynamoDB(theme, locale),
-    ]);
+    // Merge AI feeds with database feeds (database feeds already fetched at the beginning)
+    console.log(`[Merge] Combining ${topFeeds.length} AI feeds with ${databaseFeeds.length} database feeds`);
     
-    if (popularFeeds.length > 0) {
-      console.log(`[Popular] Found ${popularFeeds.length} popular feeds from usage tracking`);
-      
-      // Add popular feeds that are not already in the list
-      const existingUrls = new Set(topFeeds.map(s => s.url));
-      const newPopularFeeds = popularFeeds.filter(feed => !existingUrls.has(feed.url));
-      
-      if (newPopularFeeds.length > 0) {
-        // Add popular feeds at the beginning (highest priority)
-        topFeeds.unshift(...newPopularFeeds);
-        console.log(`[Popular] Added ${newPopularFeeds.length} popular feeds at the beginning`);
-      }
-    }
+    // Add database feeds that are not already in AI results
+    const existingUrls = new Set(topFeeds.map(s => s.url));
+    const newDatabaseFeeds = databaseFeeds.filter(feed => !existingUrls.has(feed.url));
     
-    if (dynamoDBFeeds.length > 0) {
-      console.log(`[DynamoDB] Found ${dynamoDBFeeds.length} relevant feeds from DynamoDB`);
-      
-      // Add DynamoDB feeds that are not already in the list
-      const existingUrls = new Set(topFeeds.map(s => s.url));
-      const newDynamoDBFeeds = dynamoDBFeeds.filter(feed => !existingUrls.has(feed.url));
-      
-      if (newDynamoDBFeeds.length > 0) {
-        // Add up to 5 DynamoDB feeds
-        const feedsToAdd = newDynamoDBFeeds.slice(0, 5);
-        topFeeds.push(...feedsToAdd);
-        console.log(`[DynamoDB] Added ${feedsToAdd.length} feeds from DynamoDB`);
-      }
+    if (newDatabaseFeeds.length > 0) {
+      // Add database feeds at the beginning (highest priority)
+      topFeeds.unshift(...newDatabaseFeeds);
+      console.log(`[Merge] Added ${newDatabaseFeeds.length} database feeds at the beginning`);
     }
     
     // Add 1 random default feed (with lower priority) if we have room
@@ -479,9 +524,26 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
       error,
       config.bedrockModelIdLite
     );
-    // Throw error to trigger retry logic in the endpoint
-    // The endpoint will handle fallback to all default feeds after retries
-    throw new Error('Bedrock API error');
+    
+    // OPTIMIZATION: If AI fails, use database feeds as fallback
+    console.log(`[Error] Bedrock API failed, using database feeds as fallback`);
+    
+    if (databaseFeeds.length > 0) {
+      console.log(`[Fallback] Using ${databaseFeeds.length} feeds from database`);
+      return {
+        feeds: databaseFeeds.slice(0, 15),
+        newspaperName: generateNewspaperName(theme, locale),
+      };
+    }
+    
+    // If no database feeds, use default feeds
+    console.log(`[Fallback] No database feeds, returning default feeds`);
+    const defaultFeeds = getAllDefaultFeeds(locale);
+    
+    return {
+      feeds: defaultFeeds.slice(0, 15),
+      newspaperName: generateNewspaperName(theme, locale),
+    };
   }
 }
 

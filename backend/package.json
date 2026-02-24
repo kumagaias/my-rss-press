@@ -13,7 +13,9 @@
     "docker:build": "docker build -t myrsspress-backend .",
     "docker:run": "docker run -p 9000:8080 myrsspress-backend",
     "migrate:categories": "tsx src/scripts/migrateCategories.ts",
-    "migrate:categories:dry-run": "tsx src/scripts/migrateCategories.ts --dry-run"
+    "migrate:categories:dry-run": "tsx src/scripts/migrateCategories.ts --dry-run",
+    "collect:rss": "tsx src/scripts/collectRssFeeds.ts",
+    "collect:rss:ja": "tsx src/scripts/collectRssFeeds.ts --locale ja"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",

@@ -18,9 +18,13 @@ amplify_app_name      = "myrsspress-frontend"
 
 # GitHub Configuration
 github_repository    = "https://github.com/YOUR_USERNAME/YOUR_REPO"
-# GitHub token is stored in AWS Secrets Manager for security
-# Terraform will create the secret automatically on first apply
+# GitHub token is stored in AWS SSM Parameter Store for security
+# Terraform will create the parameter automatically on first apply
 github_access_token  = "ghp_YOUR_GITHUB_TOKEN_HERE"
+
+# Admin API Key (for backend admin endpoints authentication)
+# Generate a strong random key, e.g.: openssl rand -hex 32
+admin_api_key = "YOUR_ADMIN_API_KEY_HERE"
 
 # Bedrock Configuration
 bedrock_region = "us-east-1"

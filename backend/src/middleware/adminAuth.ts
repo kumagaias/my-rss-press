@@ -1,18 +1,18 @@
 import { Context, Next } from 'hono';
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 
-// Secrets Manager client
-const secretsClient = new SecretsManagerClient({
+// SSM client
+const ssmClient = new SSMClient({
   region: process.env.AWS_REGION || 'ap-northeast-1',
 });
 
-// Cache for API key (to avoid repeated Secrets Manager calls)
+// Cache for API key (to avoid repeated SSM calls)
 let cachedApiKey: string | null = null;
 let cacheExpiry: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Get Admin API key from AWS Secrets Manager
+ * Get Admin API key from AWS SSM Parameter Store
  * @returns Admin API key
  */
 async function getAdminApiKey(): Promise<string> {
@@ -22,24 +22,19 @@ async function getAdminApiKey(): Promise<string> {
   }
 
   try {
-    const secretName = process.env.ADMIN_API_KEY_SECRET_NAME || 'myrsspress/admin-api-key';
-    
-    const response = await secretsClient.send(
-      new GetSecretValueCommand({
-        SecretId: secretName,
+    const paramName = process.env.ADMIN_API_KEY_PARAM_NAME || '/myrsspress/production/admin-api-key';
+
+    const response = await ssmClient.send(
+      new GetParameterCommand({
+        Name: paramName,
+        WithDecryption: true,
       })
     );
 
-    if (!response.SecretString) {
-      throw new Error('Admin API key not found in Secrets Manager');
-    }
-
-    // Parse secret (assuming JSON format: {"apiKey": "..."})
-    const secret = JSON.parse(response.SecretString);
-    const apiKey = secret.apiKey;
+    const apiKey = response.Parameter?.Value;
 
     if (!apiKey) {
-      throw new Error('apiKey field not found in secret');
+      throw new Error('Admin API key not found in SSM Parameter Store');
     }
 
     // Cache the key
@@ -48,14 +43,14 @@ async function getAdminApiKey(): Promise<string> {
 
     return apiKey;
   } catch (error) {
-    console.error('Error fetching Admin API key from Secrets Manager:', error);
+    console.error('Error fetching Admin API key from SSM Parameter Store:', error);
     throw new Error('Failed to authenticate: Unable to retrieve API key');
   }
 }
 
 /**
  * Admin API authentication middleware
- * Validates X-API-Key header against the key stored in AWS Secrets Manager
+ * Validates X-API-Key header against the key stored in AWS SSM Parameter Store
  */
 export async function adminAuth(c: Context, next: Next): Promise<Response> {
   try {
@@ -72,7 +67,7 @@ export async function adminAuth(c: Context, next: Next): Promise<Response> {
       );
     }
 
-    // Get expected API key from Secrets Manager
+    // Get expected API key from SSM Parameter Store
     const expectedApiKey = await getAdminApiKey();
 
     // Compare API keys (constant-time comparison to prevent timing attacks)

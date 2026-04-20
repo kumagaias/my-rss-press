@@ -131,9 +131,9 @@ resource "aws_iam_role_policy" "kms_access" {
   })
 }
 
-# Policy for Secrets Manager access (Admin API Key)
-resource "aws_iam_role_policy" "secrets_manager_access" {
-  name = "${var.function_name}-secrets-manager-policy"
+# Policy for SSM Parameter Store access (Admin API Key)
+resource "aws_iam_role_policy" "ssm_access" {
+  name = "${var.function_name}-ssm-policy"
   role = aws_iam_role.lambda_exec.id
 
   policy = jsonencode({
@@ -142,9 +142,9 @@ resource "aws_iam_role_policy" "secrets_manager_access" {
       {
         Effect = "Allow"
         Action = [
-          "secretsmanager:GetSecretValue"
+          "ssm:GetParameter"
         ]
-        Resource = "arn:aws:secretsmanager:${var.aws_region}:*:secret:myrsspress/admin-api-key-*"
+        Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/myrsspress/*/admin-api-key"
       }
     ]
   })
@@ -164,9 +164,10 @@ resource "aws_lambda_function" "api" {
 
   environment {
     variables = {
-      BEDROCK_REGION  = var.bedrock_region
-      DYNAMODB_TABLE  = var.dynamodb_table_name
-      NODE_ENV        = var.environment
+      BEDROCK_REGION           = var.bedrock_region
+      DYNAMODB_TABLE           = var.dynamodb_table_name
+      NODE_ENV                 = var.environment
+      ADMIN_API_KEY_PARAM_NAME = "/myrsspress/${var.environment}/admin-api-key"
     }
   }
 

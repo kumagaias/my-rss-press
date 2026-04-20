@@ -1,14 +1,15 @@
 # Amplify App for frontend hosting
 
-# Retrieve GitHub token from Secrets Manager
-data "aws_secretsmanager_secret_version" "github_token" {
-  secret_id = var.github_token_secret_id
+# Retrieve GitHub token from SSM Parameter Store
+data "aws_ssm_parameter" "github_token" {
+  name            = var.github_token_param_name
+  with_decryption = true
 }
 
 resource "aws_amplify_app" "main" {
   name         = var.app_name
   repository   = var.github_repository
-  access_token = data.aws_secretsmanager_secret_version.github_token.secret_string
+  access_token = data.aws_ssm_parameter.github_token.value
 
   # Build settings
   build_spec = file("${path.module}/amplify.yml")

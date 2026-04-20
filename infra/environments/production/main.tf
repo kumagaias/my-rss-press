@@ -71,13 +71,14 @@ module "acm_regional" {
   certificate_name          = "MyRSSPress API SSL Certificate"
 }
 
-# Secrets Manager
-module "secrets_manager" {
-  source = "../../modules/secrets-manager"
+# SSM Parameter Store
+module "ssm" {
+  source = "../../modules/ssm"
 
   project_name        = "myrsspress"
   environment         = var.environment
   github_access_token = var.github_access_token
+  admin_api_key       = var.admin_api_key
 }
 
 # DynamoDB Table
@@ -133,12 +134,12 @@ module "amplify" {
 
   app_name                = var.amplify_app_name
   github_repository       = var.github_repository
-  github_token_secret_id  = module.secrets_manager.github_token_secret_id
+  github_token_param_name = module.ssm.github_token_param_name
   domain_name             = var.domain_name
   api_base_url            = module.api_gateway.custom_domain_url
   environment             = var.environment
 
-  depends_on = [module.api_gateway, module.secrets_manager]
+  depends_on = [module.api_gateway, module.ssm]
 }
 
 # GitHub OIDC for GitHub Actions

@@ -11,8 +11,8 @@ variable "github_repository" {
   type        = string
 }
 
-variable "github_token_secret_id" {
-  description = "Secrets Manager secret ID containing GitHub access token"
+variable "github_token_param_name" {
+  description = "SSM Parameter Store parameter name containing GitHub access token"
   type        = string
 }
 

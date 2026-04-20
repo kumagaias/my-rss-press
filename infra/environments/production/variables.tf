@@ -61,6 +61,13 @@ variable "github_access_token" {
   # Set this in terraform.tfvars or via environment variable
 }
 
+variable "admin_api_key" {
+  description = "Admin API key for backend authentication"
+  type        = string
+  sensitive   = true
+  # Set this in terraform.tfvars or via environment variable
+}
+
 variable "bedrock_region" {
   description = "AWS region for Bedrock service"
   type        = string

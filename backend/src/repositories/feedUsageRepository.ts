@@ -139,7 +139,7 @@ export async function getPopularFeedsByCategory(
   const result = await docClient.send(
     new QueryCommand({
       TableName: TABLE_NAME,
-      IndexName: 'GSI1',
+      IndexName: 'CategoryLocale',
       KeyConditionExpression: 'GSI1PK = :pk',
       ExpressionAttributeValues: {
         ':pk': `CATEGORY#${categoryId}`,

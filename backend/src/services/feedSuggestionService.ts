@@ -618,11 +618,13 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
     return `「${theme}」に関する日本語のRSSフィードを20個提案してください。
 
 制約：
-- 実在するアクティブなRSSフィードのみ
+- 実在するアクティブな日本語のRSSフィードのみ
+- 日本のメディア、ブログ、サイトを優先（.jp ドメインなど）
 - 「${theme}」専門のメディア、ブログ、サイトを優先
 - 一般ニュースサイトは避ける
-- URL形式: /rss, /feed, /rss.xml, /feed.xml, /index.xml
+- URL形式: /rss, /feed, /rss.xml, /feed.xml, /index.xml, /atom.xml
 - reasoning は20文字以内で簡潔に
+- 2024年以降も運営されている現役のサイトのみ
 
 重要: 完全で正しいJSONのみを返してください。説明文や前置きは不要です。すべてのフィールドを完全に記述してください。
 

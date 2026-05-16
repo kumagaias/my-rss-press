@@ -141,7 +141,7 @@ describe('Property 18: Cache Behavior', () => {
         }),
         async ({ theme, locale, uniqueId }) => {
           // Make theme unique for this test iteration
-          const uniqueTheme = `${theme}${uniqueId}`;
+          const uniqueTheme = `duplicate-${theme}-${uniqueId}`;
           
           // Reset tracking
           invokeModelCalls = [];
@@ -208,8 +208,8 @@ describe('Property 18: Cache Behavior', () => {
         }),
         async ({ request1, request2, uniqueId }) => {
           // Make themes unique for this test iteration
-          const uniqueTheme1 = `${request1.theme}${uniqueId}`;
-          const uniqueTheme2 = `${request2.theme}${uniqueId}`;
+          const uniqueTheme1 = `isolation-${request1.theme}-${uniqueId}`;
+          const uniqueTheme2 = `isolation-${request2.theme}-${uniqueId}`;
           
           // Reset tracking
           invokeModelCalls = [];
@@ -270,7 +270,7 @@ describe('Property 18: Cache Behavior', () => {
         }),
         async ({ theme, locale, numRequests, uniqueId }) => {
           // Make theme unique for this test iteration
-          const uniqueTheme = `${theme}${uniqueId}`;
+          const uniqueTheme = `multiple-${theme}-${uniqueId}`;
           
           // Reset tracking
           invokeModelCalls = [];
@@ -316,30 +316,38 @@ describe('Property 18: Cache Behavior', () => {
     await fc.assert(
       fc.asyncProperty(
         // Generate multiple unique theme-locale combinations (alphanumeric only)
-        fc.array(
-          fc.record({
-            theme: fc.stringMatching(/^[a-zA-Z0-9]{3,20}$/),
-            locale: fc.constantFrom('en', 'ja'),
-          }),
-          { minLength: 2, maxLength: 4 }
-        ).map(requests => {
-          // Ensure all requests are unique
-          const seen = new Set<string>();
-          return requests.filter(req => {
-            const key = `${req.theme}:${req.locale}`;
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-          });
-        }).filter(requests => requests.length >= 2),
-        async (requests) => {
+        fc.record({
+          requests: fc.array(
+            fc.record({
+              theme: fc.stringMatching(/^[a-zA-Z0-9]{3,20}$/),
+              locale: fc.constantFrom('en', 'ja'),
+            }),
+            { minLength: 2, maxLength: 4 }
+          ).map(requests => {
+            // Ensure all requests are unique
+            const seen = new Set<string>();
+            return requests.filter(req => {
+              const key = `${req.theme}:${req.locale}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
+          }).filter(requests => requests.length >= 2),
+          uniqueId: fc.integer({ min: 1000000, max: 9999999 }),
+        }),
+        async ({ requests, uniqueId }) => {
+          const uniqueRequests = requests.map(req => ({
+            ...req,
+            theme: `key-${req.theme}-${uniqueId}`,
+          }));
+
           // Reset tracking
           invokeModelCalls = [];
           mockSend.mockReset();
 
           // Make first request for each unique combination
           const firstResults: any[] = [];
-          for (const req of requests) {
+          for (const req of uniqueRequests) {
             mockSend.mockResolvedValueOnce(createNovaResponse({
               newspaperName: `${req.theme} Daily`,
               feeds: [
@@ -354,7 +362,7 @@ describe('Property 18: Cache Behavior', () => {
 
           // Make second request for each combination (should use cache)
           const secondResults: any[] = [];
-          for (const req of requests) {
+          for (const req of uniqueRequests) {
             const result = await suggestFeeds(req.theme, req.locale);
             secondResults.push(result);
           }
@@ -365,7 +373,7 @@ describe('Property 18: Cache Behavior', () => {
           expect(sendCallsAfterSecond).toBe(sendCallsAfterFirst);
 
           // Verify each cached result matches its first result
-          for (let i = 0; i < requests.length; i++) {
+          for (let i = 0; i < uniqueRequests.length; i++) {
             expect(secondResults[i].feeds).toEqual(firstResults[i].feeds);
           }
         }

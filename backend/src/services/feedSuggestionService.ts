@@ -202,9 +202,14 @@ async function validateFeedUrl(url: string): Promise<boolean> {
  * @param locale - User's language preference ('en' or 'ja')
  * @returns Feed suggestions with AI-suggested newspaper name
  */
-export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): Promise<FeedSuggestionsResponse> {
+export async function suggestFeeds(
+  theme: string,
+  locale: 'en' | 'ja' = 'en',
+  intent?: string
+): Promise<FeedSuggestionsResponse> {
   // Check cache in local development mode
-  const cacheKey = `${theme}:${locale}`;
+  const normalizedIntent = intent?.trim();
+  const cacheKey = `${theme}:${locale}:${normalizedIntent || ''}`;
   if (config.isLocal && config.enableCache) {
     const cached = cache.get(cacheKey);
     if (cached) {
@@ -290,7 +295,7 @@ export async function suggestFeeds(theme: string, locale: 'en' | 'ja' = 'en'): P
 
   try {
     // Build prompt for feed suggestions
-    const prompt = buildPrompt(theme, locale);
+    const prompt = buildPrompt(theme, locale, normalizedIntent);
     console.log(`[Bedrock] Requesting feed suggestions for theme: "${theme}", locale: "${locale}"`);
 
     // Invoke Bedrock model (configurable via BEDROCK_MODEL_ID)
@@ -613,9 +618,16 @@ function parseBedrockResponse(response: any, modelId: string): string {
 /**
  * Build prompt for AI feed suggestions
  */
-function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
+function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en', intent?: string): string {
+  const intentBlockJa = intent
+    ? `\n編集意図：\n${intent}\n\nこの編集意図に合う専門性・視点・読者層のフィードを優先してください。`
+    : '';
+  const intentBlockEn = intent
+    ? `\nEditorial intent:\n${intent}\n\nPrioritize feeds whose specialization, perspective, and audience match this intent.`
+    : '';
+
   if (locale === 'ja') {
-    return `「${theme}」に関する日本語のRSSフィードを20個提案してください。
+    return `「${theme}」に関する日本語のRSSフィードを20個提案してください。${intentBlockJa}
 
 制約：
 - 実在するアクティブな日本語のRSSフィードのみ
@@ -639,7 +651,7 @@ function buildPrompt(theme: string, locale: 'en' | 'ja' = 'en'): string {
   ]
 }`;
   } else {
-    return `Suggest 20 RSS feeds about "${theme}".
+    return `Suggest 20 RSS feeds about "${theme}".${intentBlockEn}
 
 Requirements:
 - Only real, active RSS feeds
@@ -978,5 +990,4 @@ export function getAllDefaultFeeds(locale: 'en' | 'ja' = 'en'): FeedSuggestion[]
     reasoning: feed.description,
   }));
 }
-
 

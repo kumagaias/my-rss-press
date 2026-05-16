@@ -38,6 +38,7 @@ export interface NewspaperData {
   name: string;
   userName: string;
   feedUrls: string[];
+  intent?: string;
   articles?: Article[];
   createdAt: string;
   updatedAt: string;

@@ -102,6 +102,66 @@ const DEFAULT_FEEDS_EN = [
     description: 'Global economic and political analysis',
     language: 'en',
   },
+  {
+    url: 'https://news.ycombinator.com/rss',
+    title: 'Hacker News',
+    description: 'Technology, startups, and engineering discussions',
+    language: 'en',
+  },
+  {
+    url: 'https://www.nasa.gov/news-release/feed/',
+    title: 'NASA News',
+    description: 'Space, science, and exploration news',
+    language: 'en',
+  },
+  {
+    url: 'https://www.sciencedaily.com/rss/all.xml',
+    title: 'ScienceDaily',
+    description: 'Science research and discovery updates',
+    language: 'en',
+  },
+  {
+    url: 'https://www.theverge.com/science/rss/index.xml',
+    title: 'The Verge Science',
+    description: 'Science and technology culture coverage',
+    language: 'en',
+  },
+  {
+    url: 'https://www.healthline.com/rss',
+    title: 'Healthline',
+    description: 'Health and wellness information',
+    language: 'en',
+  },
+  {
+    url: 'https://www.producthunt.com/feed',
+    title: 'Product Hunt',
+    description: 'New products, startups, and maker launches',
+    language: 'en',
+  },
+  {
+    url: 'https://feeds.feedburner.com/venturebeat/SZYF',
+    title: 'VentureBeat',
+    description: 'AI, enterprise technology, and startup coverage',
+    language: 'en',
+  },
+  {
+    url: 'https://www.smashingmagazine.com/feed/',
+    title: 'Smashing Magazine',
+    description: 'Design and frontend development articles',
+    language: 'en',
+  },
+  {
+    url: 'https://css-tricks.com/feed/',
+    title: 'CSS-Tricks',
+    description: 'Frontend engineering and web design',
+    language: 'en',
+  },
+  {
+    url: 'https://www.marketingbrew.com/feed',
+    title: 'Marketing Brew',
+    description: 'Marketing, media, and advertising news',
+    language: 'en',
+  },
 ];
 
 const DEFAULT_FEEDS_JA = [
@@ -193,6 +253,66 @@ const DEFAULT_FEEDS_JA = [
     url: 'https://www.cinematoday.jp/rss/index.xml',
     title: 'シネマトゥデイ',
     description: '映画ニュース',
+    language: 'ja',
+  },
+  {
+    url: 'https://b.hatena.ne.jp/hotentry/it.rss',
+    title: 'はてなブックマーク IT',
+    description: '話題のIT・テクノロジー記事',
+    language: 'ja',
+  },
+  {
+    url: 'https://zenn.dev/feed',
+    title: 'Zenn',
+    description: 'エンジニアリングと開発知見',
+    language: 'ja',
+  },
+  {
+    url: 'https://qiita.com/popular-items/feed',
+    title: 'Qiita 人気投稿',
+    description: '開発者向け技術記事',
+    language: 'ja',
+  },
+  {
+    url: 'https://gigazine.net/news/rss_2.0/',
+    title: 'GIGAZINE',
+    description: 'テクノロジー・科学・カルチャー',
+    language: 'ja',
+  },
+  {
+    url: 'https://forest.watch.impress.co.jp/data/rss/1.0/wf/feed.rdf',
+    title: '窓の杜',
+    description: 'ソフトウェアとPC活用情報',
+    language: 'ja',
+  },
+  {
+    url: 'https://pc.watch.impress.co.jp/data/rss/1.0/pcw/feed.rdf',
+    title: 'PC Watch',
+    description: 'PC・半導体・デバイス情報',
+    language: 'ja',
+  },
+  {
+    url: 'https://k-tai.watch.impress.co.jp/data/rss/1.0/ktw/feed.rdf',
+    title: 'ケータイ Watch',
+    description: 'モバイルと通信のニュース',
+    language: 'ja',
+  },
+  {
+    url: 'https://internet.watch.impress.co.jp/data/rss/1.0/iw/feed.rdf',
+    title: 'INTERNET Watch',
+    description: 'インターネットとセキュリティ情報',
+    language: 'ja',
+  },
+  {
+    url: 'https://www.publickey1.jp/atom.xml',
+    title: 'Publickey',
+    description: 'クラウド・開発・エンタープライズIT',
+    language: 'ja',
+  },
+  {
+    url: 'https://www.lifehacker.jp/feed/index.xml',
+    title: 'ライフハッカー・ジャパン',
+    description: '仕事術・生産性・暮らしの情報',
     language: 'ja',
   },
 ];

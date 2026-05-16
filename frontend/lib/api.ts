@@ -35,7 +35,8 @@ export async function generateNewspaper(
   feedUrls: string[],
   theme: string,
   defaultFeedUrls: string[] = [],
-  locale: 'en' | 'ja' = 'en'
+  locale: 'en' | 'ja' = 'en',
+  intent?: string
 ): Promise<{ articles: Article[]; languages: string[]; summary: string | null }> {
   // Validate input
   if (!feedUrls || feedUrls.length === 0) {
@@ -53,6 +54,7 @@ export async function generateNewspaper(
     body: JSON.stringify({
       feedUrls,
       theme,
+      intent,
       defaultFeedUrls, // Pass default feed URLs for lower priority
       locale, // Language setting for the newspaper
       daysBack: 7,
@@ -81,12 +83,14 @@ export async function saveNewspaper(
   locale: 'en' | 'ja' = 'en',
   languages?: string[],
   summary?: string | null,
-  editorialColumn?: string | null
+  editorialColumn?: string | null,
+  intent?: string | null
 ): Promise<{ newspaperId: string; createdAt: string }> {
   const payload = {
     name: settings.newspaperName,
     userName: settings.userName,
     feedUrls,
+    intent,
     articles,
     isPublic: settings.isPublic,
     locale, // Language setting for the newspaper
@@ -149,7 +153,8 @@ export async function getPublicNewspapers(
  */
 export async function generateNewspaperOneClick(
   theme: string,
-  locale: 'en' | 'ja' = 'en'
+  locale: 'en' | 'ja' = 'en',
+  intent?: string
 ): Promise<{
   articles: Article[];
   feedUrls: string[];
@@ -164,7 +169,7 @@ export async function generateNewspaperOneClick(
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ theme, locale }),
+    body: JSON.stringify({ theme, locale, intent }),
   });
 
   if (!response.ok) {

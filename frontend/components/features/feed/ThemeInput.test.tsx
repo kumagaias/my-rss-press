@@ -70,7 +70,7 @@ describe('ThemeInput', () => {
     const button = screen.getByRole('button', { name: /Get Feed Suggestions/ });
     fireEvent.click(button);
 
-    expect(onSubmit).toHaveBeenCalledWith('Technology');
+    expect(onSubmit).toHaveBeenCalledWith('Technology', undefined);
   });
 
   it('should submit on Enter key press', () => {
@@ -87,7 +87,22 @@ describe('ThemeInput', () => {
       fireEvent.submit(form);
     }
 
-    expect(onSubmit).toHaveBeenCalledWith('Sports');
+    expect(onSubmit).toHaveBeenCalledWith('Sports', undefined);
+  });
+
+  it('should submit editorial intent when provided', () => {
+    const onSubmit = vi.fn();
+
+    render(<ThemeInput onSubmit={onSubmit} isLoading={false} locale="en" />);
+
+    const input = screen.getByPlaceholderText(/Technology, Sports, Business/);
+    const intent = screen.getByPlaceholderText(/editorial intent/i);
+    fireEvent.change(input, { target: { value: 'AI' } });
+    fireEvent.change(intent, { target: { value: 'Focus on practical product updates.' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /Get Feed Suggestions/ }));
+
+    expect(onSubmit).toHaveBeenCalledWith('AI', 'Focus on practical product updates.');
   });
 
   it('should disable input and button when loading', () => {

@@ -27,6 +27,7 @@ interface Newspaper {
   userName?: string;
   feedUrls: string[];
   theme?: string;
+  intent?: string;
   articles: Article[];
   newspaperDate: string;
   summary?: string;
@@ -101,6 +102,7 @@ function NewspaperContent() {
         const articlesJson = sessionStorage.getItem('newspaperArticles');
         const theme = sessionStorage.getItem('newspaperTheme');
         const newspaperName = sessionStorage.getItem('newspaperName'); // AI-suggested name
+        const intent = sessionStorage.getItem('newspaperIntent');
         const feedsJson = sessionStorage.getItem('newspaperFeeds');
         const languagesJson = sessionStorage.getItem('newspaperLanguages');
         const summary = sessionStorage.getItem('newspaperSummary');
@@ -129,6 +131,7 @@ function NewspaperContent() {
             userName: 'Anonymous',
             feedUrls,
             theme,
+            intent: intent || undefined,
             articles,
             newspaperDate: new Date().toISOString(),
             summary: summary || undefined,
@@ -224,6 +227,7 @@ function NewspaperContent() {
       const languagesJson = sessionStorage.getItem('newspaperLanguages');
       const summary = sessionStorage.getItem('newspaperSummary');
       const editorialColumn = sessionStorage.getItem('newspaperEditorialColumn');
+      const intent = sessionStorage.getItem('newspaperIntent') || newspaper.intent;
 
       const languages = languagesJson ? JSON.parse(languagesJson) : newspaper.languages || [];
 
@@ -234,12 +238,14 @@ function NewspaperContent() {
         locale,
         languages,
         summary || undefined,
-        editorialColumn || undefined
+        editorialColumn || undefined,
+        intent || undefined
       );
 
       // Clear sessionStorage after successful save
       sessionStorage.removeItem('newspaperArticles');
       sessionStorage.removeItem('newspaperTheme');
+      sessionStorage.removeItem('newspaperIntent');
       sessionStorage.removeItem('newspaperName');
       sessionStorage.removeItem('newspaperFeeds');
       sessionStorage.removeItem('newspaperFeedMetadata');

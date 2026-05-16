@@ -29,6 +29,7 @@ export interface NewspaperData {
   name: string;
   userName: string;
   feedUrls: string[];
+  intent?: string; // Editorial intent supplied by the user
   articles?: Article[];
   createdAt: string;
   updatedAt: string;

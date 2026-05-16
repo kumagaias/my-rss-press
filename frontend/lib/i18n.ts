@@ -17,6 +17,9 @@ export const translations = {
     // Theme input
     themeInputLabel: 'What are you interested in?',
     themeInputPlaceholder: 'e.g., Technology, Sports, Business',
+    newspaperIntentLabel: 'What should this newspaper focus on?',
+    newspaperIntentPlaceholder: 'Write the editorial intent in up to about 10 lines. Example: prioritize practical AI product news for startup founders, avoid funding gossip, include regulatory context.',
+    newspaperIntentHelp: 'Optional. This guides feed selection, ranking, and summaries.',
     suggestFeeds: 'Suggest Feeds',
     
     // Feed selection
@@ -162,6 +165,9 @@ export const translations = {
     // テーマ入力
     themeInputLabel: '興味のあるトピックは？',
     themeInputPlaceholder: '例：テクノロジー、スポーツ、ビジネス',
+    newspaperIntentLabel: 'この新聞で集めたい情報の意図',
+    newspaperIntentPlaceholder: '10行以内を目安に、編集方針を書けます。例：スタートアップ経営者向けに実務で使えるAIプロダクト情報を優先。資金調達の噂は避け、規制や市場背景も含めたい。',
+    newspaperIntentHelp: '任意。フィード選定、記事の重要度、要約に反映します。',
     suggestFeeds: 'フィードを提案',
     
     // フィード選択

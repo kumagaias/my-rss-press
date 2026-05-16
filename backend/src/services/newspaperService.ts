@@ -48,6 +48,7 @@ export async function saveNewspaper(
     name: newspaper.name,
     userName: newspaper.userName,
     feedUrls: userFeedUrls, // Only user-selected feeds
+    intent: newspaper.intent,
     articles: newspaper.articles,
     createdAt: now,
     updatedAt: now,
@@ -107,6 +108,7 @@ export async function getNewspaper(newspaperId: string): Promise<NewspaperData |
     name: result.Item.name,
     userName: result.Item.userName,
     feedUrls: result.Item.feedUrls,
+    intent: result.Item.intent,
     articles: result.Item.articles,
     createdAt: result.Item.createdAt,
     updatedAt: result.Item.updatedAt,
@@ -160,6 +162,7 @@ export async function getPublicNewspapers(
     name: item.name,
     userName: item.userName,
     feedUrls: item.feedUrls,
+    intent: item.intent,
     articles: item.articles, // Include articles in the response
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,

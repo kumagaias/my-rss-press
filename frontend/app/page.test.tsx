@@ -123,6 +123,57 @@ describe('Home Page', () => {
     }, { timeout: 3000 });
   });
 
+  it('passes newspaper intent to one-click generation', async () => {
+    const mockResponse = {
+      articles: [
+        {
+          title: 'Test Article',
+          description: 'Test description',
+          link: 'https://example.com',
+          pubDate: '2025-12-01T10:00:00Z',
+          importance: 85,
+        },
+      ],
+      feedUrls: ['https://example.com/feed'],
+      feedMetadata: [],
+      newspaperName: 'AI Operators Daily',
+      summary: 'Test summary',
+      languages: ['EN'],
+    };
+
+    (global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockResponse,
+    });
+
+    render(<Home />);
+
+    fireEvent.change(screen.getByPlaceholderText(/Technology, Sports/), {
+      target: { value: 'AI' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/editorial intent/i), {
+      target: { value: 'Prioritize practical operator workflows.' },
+    });
+    fireEvent.click(screen.getByText('Generate Newspaper'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:3001/api/newspapers/generate',
+        expect.objectContaining({
+          body: JSON.stringify({
+            theme: 'AI',
+            intent: 'Prioritize practical operator workflows.',
+            locale: 'en',
+          }),
+        })
+      );
+      expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
+        'newspaperIntent',
+        'Prioritize practical operator workflows.'
+      );
+    });
+  });
+
   it('shows loading animation during generation', async () => {
     const mockResponse = {
       articles: [],

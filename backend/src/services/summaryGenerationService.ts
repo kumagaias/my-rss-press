@@ -55,7 +55,8 @@ export function determineSummaryLanguage(languages: string[]): 'ja' | 'en' {
 export async function generateSummary(
   articles: Article[],
   theme: string,
-  languages: string[]
+  languages: string[],
+  intent?: string
 ): Promise<string | null> {
   try {
     // Determine summary language
@@ -74,14 +75,21 @@ export async function generateSummary(
       .join('\n');
 
     // Create prompt based on language
+    const intentBlockJa = intent
+      ? `\n編集意図：\n${intent}\n\nこの意図に沿って、読者が何を把握できる新聞かを要約に反映してください。`
+      : '';
+    const intentBlockEn = intent
+      ? `\nEditorial intent:\n${intent}\n\nReflect what this newspaper helps the reader understand according to that intent.`
+      : '';
+
     const prompt = summaryLanguage === 'ja'
-      ? `以下は「${theme}」をテーマにした新聞の記事タイトルです。この新聞の内容を3行（100-200文字）で要約してください。
+      ? `以下は「${theme}」をテーマにした新聞の記事タイトルです。この新聞の内容を3行（100-200文字）で要約してください。${intentBlockJa}
 
 記事タイトル:
 ${articleTitles}
 
 要約（3行、100-200文字）:`
-      : `The following are article titles from a newspaper themed "${theme}". Please summarize the content of this newspaper in 3 lines (100-200 characters).
+      : `The following are article titles from a newspaper themed "${theme}". Please summarize the content of this newspaper in 3 lines (100-200 characters).${intentBlockEn}
 
 Article titles:
 ${articleTitles}
@@ -270,11 +278,12 @@ export async function generateSummaryWithRetry(
   articles: Article[],
   theme: string,
   languages: string[],
-  maxRetries: number = 3
+  maxRetries: number = 3,
+  intent?: string
 ): Promise<string | null> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const summary = await generateSummary(articles, theme, languages);
+      const summary = await generateSummary(articles, theme, languages, intent);
       if (summary) {
         return summary;
       }

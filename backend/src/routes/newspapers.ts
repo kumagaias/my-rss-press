@@ -138,6 +138,7 @@ async function recordFeedUsageAsync(
 const GenerateNewspaperSchema = z.object({
   feedUrls: z.array(z.string().url()).min(1, 'At least 1 feed URL is required').max(15, 'Too many feed URLs'),
   theme: z.string().min(1, 'Theme is required'),
+  intent: z.string().max(800).optional(),
   defaultFeedUrls: z.array(z.string().url()).optional(), // URLs of default/fallback feeds
   locale: z.enum(['en', 'ja']).optional().default(DEFAULT_LANGUAGE.LOCALE), // Language setting for the newspaper
 });
@@ -157,6 +158,7 @@ const SaveNewspaperSchema = z.object({
   name: z.string().min(1, 'Newspaper name is required').max(100),
   userName: z.string().min(1).optional().default('Anonymous'),
   feedUrls: z.array(z.string().url()).min(1).max(15, 'Too many feed URLs'),
+  intent: z.string().max(800).optional(),
   articles: z.array(ArticleSchema).optional(),
   isPublic: z.boolean().optional().default(true),
   locale: z.enum(['en', 'ja']).optional().default(DEFAULT_LANGUAGE.LOCALE), // Language setting for the newspaper
@@ -167,6 +169,7 @@ const SaveNewspaperSchema = z.object({
 
 const OneClickGenerateSchema = z.object({
   theme: z.string().min(1, 'Theme is required'),
+  intent: z.string().max(800).optional(),
   locale: z.enum(['en', 'ja']).optional().default(DEFAULT_LANGUAGE.LOCALE),
 });
 
@@ -188,7 +191,7 @@ newspapersRouter.post(
 
       // Step 1: Suggest feeds
       console.log('[OneClick] Step 1: Suggesting feeds...');
-      const feedSuggestions = await suggestFeeds(validated.theme, validated.locale);
+      const feedSuggestions = await suggestFeeds(validated.theme, validated.locale, validated.intent);
       
       const feedUrls = feedSuggestions.feeds.map(f => f.url);
       const feedMetadata: FeedMetadata[] = feedSuggestions.feeds.map(f => ({
@@ -241,7 +244,8 @@ newspapersRouter.post(
       const articlesWithImportance = await calculateImportance(
         limitedArticles,
         validated.theme,
-        defaultFeedUrls
+        defaultFeedUrls,
+        validated.intent
       );
 
       // Step 5: Detect languages
@@ -262,7 +266,8 @@ newspapersRouter.post(
           articlesWithImportance,
           validated.theme,
           languages,
-          3
+          3,
+          validated.intent
         );
         if (summary) {
           console.log(`[OneClick] Generated summary: ${summary.substring(0, 50)}...`);
@@ -372,7 +377,8 @@ newspapersRouter.post(
       const articlesWithImportance = await calculateImportance(
         articles,
         validated.theme,
-        defaultFeedUrls
+        defaultFeedUrls,
+        validated.intent
       );
 
       // Detect languages from articles
@@ -392,7 +398,8 @@ newspapersRouter.post(
           articlesWithImportance,
           validated.theme,
           languages,
-          3 // Max 3 retries
+          3, // Max 3 retries
+          validated.intent
         );
         if (summary) {
           console.log(`Generated summary: ${summary.substring(0, 50)}...`);

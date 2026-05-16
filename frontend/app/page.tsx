@@ -28,6 +28,7 @@ export default function Home() {
   const t = useTranslations(locale);
 
   const [theme, setTheme] = useState('');
+  const [intent, setIntent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasCheckedInitialNavigation, setHasCheckedInitialNavigation] = useState(false);
@@ -72,8 +73,9 @@ export default function Home() {
     };
   }, [locale]);
 
-  const handleGenerateNewspaper = async (themeValue: string) => {
+  const handleGenerateNewspaper = async (themeValue: string, intentValue?: string) => {
     setTheme(themeValue);
+    setIntent(intentValue || '');
     setError(null);
     setIsGenerating(true);
 
@@ -89,6 +91,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           theme: themeValue,
+          intent: intentValue,
           locale,
         }),
       });
@@ -104,6 +107,11 @@ export default function Home() {
       // Store data in sessionStorage for the newspaper page
       sessionStorage.setItem('newspaperArticles', JSON.stringify(data.articles));
       sessionStorage.setItem('newspaperTheme', themeValue);
+      if (intentValue) {
+        sessionStorage.setItem('newspaperIntent', intentValue);
+      } else {
+        sessionStorage.removeItem('newspaperIntent');
+      }
       sessionStorage.setItem('newspaperName', data.newspaperName || themeValue);
       sessionStorage.setItem('newspaperFeeds', JSON.stringify(data.feedUrls));
       sessionStorage.setItem('newspaperFeedMetadata', JSON.stringify(data.feedMetadata));
@@ -171,6 +179,7 @@ export default function Home() {
                 isLoading={isGenerating}
                 locale={locale}
                 initialTheme={theme}
+                initialIntent={intent}
                 buttonText={t.generateButton}
               />
 

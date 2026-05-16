@@ -18,7 +18,8 @@ const bedrockClient = new BedrockRuntimeClient({
 export async function calculateImportance(
   articles: Article[],
   userTheme: string,
-  defaultFeedUrls: Set<string> = new Set()
+  defaultFeedUrls: Set<string> = new Set(),
+  intent?: string
 ): Promise<Article[]> {
   // Use mock mode if enabled
   if (config.useMockBedrock) {
@@ -31,7 +32,7 @@ export async function calculateImportance(
 
   try {
     // Build prompt for importance calculation
-    const prompt = buildImportancePrompt(articles, userTheme);
+    const prompt = buildImportancePrompt(articles, userTheme, intent);
 
     // Invoke Bedrock model (configurable via BEDROCK_MODEL_ID_MICRO)
     // Default: Nova Micro (amazon.nova-micro-v1:0)
@@ -172,9 +173,15 @@ function buildImportanceRequest(prompt: string, modelId: string): object {
 /**
  * Build prompt for importance calculation
  */
-function buildImportancePrompt(articles: Article[], userTheme: string): string {
+function buildImportancePrompt(articles: Article[], userTheme: string, intent?: string): string {
   const isJapanese = containsJapanese(userTheme);
   const timestamp = new Date().toISOString();
+  const intentBlockJa = intent
+    ? `\n新聞の編集意図：\n${intent}\n\nこの意図に合う記事を特に高く評価してください。`
+    : '';
+  const intentBlockEn = intent
+    ? `\nNewspaper editorial intent:\n${intent}\n\nScore articles that match this intent especially highly.`
+    : '';
 
   if (isJapanese) {
     // Japanese prompt for Japanese themes
@@ -193,7 +200,7 @@ function buildImportancePrompt(articles: Article[], userTheme: string): string {
       })
       .join('\n');
 
-    return `ユーザーは「${userTheme}」に興味があります。
+    return `ユーザーは「${userTheme}」に興味があります。${intentBlockJa}
 ${randomPerspective}、以下の記事リストからユーザーにとっての重要度を0-100のスコアで評価してください。
 
 評価基準（合計100点）：
@@ -237,7 +244,7 @@ ${articleList}
       })
       .join('\n');
 
-    return `The user is interested in the theme: "${userTheme}".
+    return `The user is interested in the theme: "${userTheme}".${intentBlockEn}
 Please evaluate the importance of each article for the user ${randomPerspective}, scoring from 0-100.
 
 Scoring criteria (total 100 points):

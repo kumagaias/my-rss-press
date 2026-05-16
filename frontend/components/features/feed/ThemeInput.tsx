@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/Button';
 import { useTranslations } from '@/lib/i18n';
 
 interface ThemeInputProps {
-  onSubmit: (theme: string) => void;
+  onSubmit: (theme: string, intent?: string) => void;
   isLoading: boolean;
   locale: 'en' | 'ja';
   initialTheme?: string;
+  initialIntent?: string;
   buttonText?: string;
 }
 
@@ -19,8 +20,16 @@ interface ThemeInputProps {
  * Allows users to input their interest theme for RSS feed suggestions.
  * Validates input to ensure it's not empty or whitespace-only.
  */
-export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '', buttonText }: ThemeInputProps) {
+export function ThemeInput({
+  onSubmit,
+  isLoading,
+  locale,
+  initialTheme = '',
+  initialIntent = '',
+  buttonText,
+}: ThemeInputProps) {
   const [theme, setTheme] = useState(initialTheme);
+  const [intent, setIntent] = useState(initialIntent);
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations(locale);
 
@@ -30,6 +39,12 @@ export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '', but
       setTheme(initialTheme);
     }
   }, [initialTheme]);
+
+  useEffect(() => {
+    if (initialIntent) {
+      setIntent(initialIntent);
+    }
+  }, [initialIntent]);
 
   /**
    * Validate theme input
@@ -55,7 +70,7 @@ export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '', but
     e.preventDefault();
 
     if (validateTheme(theme)) {
-      onSubmit(theme.trim());
+      onSubmit(theme.trim(), intent.trim() || undefined);
     }
   };
 
@@ -65,6 +80,10 @@ export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '', but
     if (error) {
       setError(null);
     }
+  };
+
+  const handleIntentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setIntent(e.target.value);
   };
 
   return (
@@ -78,6 +97,25 @@ export function ThemeInput({ onSubmit, isLoading, locale, initialTheme = '', but
           error={error || undefined}
           disabled={isLoading}
         />
+      </div>
+
+      <div>
+        <label htmlFor="newspaper-intent" className="block font-serif font-bold text-sm mb-2">
+          {t.newspaperIntentLabel}
+        </label>
+        <textarea
+          id="newspaper-intent"
+          placeholder={t.newspaperIntentPlaceholder}
+          value={intent}
+          onChange={handleIntentChange}
+          disabled={isLoading}
+          rows={5}
+          maxLength={800}
+          className="w-full border-2 border-black bg-white px-4 py-3 font-serif text-base focus:outline-none focus:ring-2 focus:ring-black disabled:bg-gray-100 disabled:cursor-not-allowed resize-y"
+        />
+        <p className="mt-1 text-xs text-gray-600 font-serif">
+          {t.newspaperIntentHelp}
+        </p>
       </div>
 
       <Button

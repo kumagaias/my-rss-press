@@ -3,10 +3,10 @@
 # Compatible with asdf version manager (https://asdf-vm.com/)
 
 # Node.js - Backend and Frontend runtime
-nodejs 24.11.0
+nodejs 24.14.0
 
 # Terraform - Infrastructure as Code
-terraform 1.11.0
+terraform 1.14.9
 
 # AWS CLI - AWS resource management
 # Note: Install separately via package manager

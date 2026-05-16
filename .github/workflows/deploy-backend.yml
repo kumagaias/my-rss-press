@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24.14.0'
           cache: 'npm'
           cache-dependency-path: package-lock.json
       
@@ -44,7 +44,7 @@ jobs:
         run: npm run build
       
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::843925270284:role/myrsspress-github-actions-role
           aws-region: ${{ env.AWS_REGION }}

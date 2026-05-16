@@ -63,11 +63,10 @@ terraform output route53_name_servers
 
 出力されたネームサーバーをXServerに設定:
 1. XServerのサーバーパネルにログイン
-2. ドメイン設定 → ネームサーバー設定
-3. `my-rss-press.com` を選択
-4. 「その他のネームサーバーを使用」を選択
-5. 4つのネームサーバーを入力
-6. 保存
+2. `kumagaias.com` のDNSレコード設定を開く
+3. `my-rss-press` のNSレコードを4件追加する
+4. 4つのネームサーバーを入力
+5. 保存
 
 **注意**: DNS伝播には最大48時間かかる場合があります（通常は数時間）。
 
@@ -117,7 +116,7 @@ terraform output deployment_summary
 
 ```bash
 # ヘルスチェック
-curl https://api.my-rss-press.com/api/health
+curl https://api.my-rss-press.kumagaias.com/api/health
 
 # 期待される出力: {"status":"ok"}
 ```
@@ -126,14 +125,14 @@ curl https://api.my-rss-press.com/api/health
 
 ```bash
 # ブラウザで開く
-open https://my-rss-press.com
+open https://my-rss-press.kumagaias.com
 ```
 
 ### 4. SSL証明書の確認
 
 ```bash
 # 証明書の有効期限を確認
-openssl s_client -connect my-rss-press.com:443 -servername my-rss-press.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
+openssl s_client -connect my-rss-press.kumagaias.com:443 -servername my-rss-press.kumagaias.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
 ```
 
 ### 5. すべてのテストを実行

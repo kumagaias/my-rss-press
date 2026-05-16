@@ -12,8 +12,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-FRONTEND_URL="https://my-rss-press.com"
-API_URL="https://api.my-rss-press.com"
+FRONTEND_URL="https://my-rss-press.kumagaias.com"
+API_URL="https://api.my-rss-press.kumagaias.com"
 TIMEOUT=10
 
 echo "========================================="
@@ -114,8 +114,8 @@ FAILURES=0
 echo "1. DNS Resolution"
 echo "-----------------"
 # DNS checks are informational only - if HTTPS works, DNS is working
-check_dns "my-rss-press.com" "Frontend" || echo "  Note: DNS check failed but HTTPS works, so DNS is functional"
-check_dns "api.my-rss-press.com" "API" || echo "  Note: DNS check failed but HTTPS works, so DNS is functional"
+check_dns "my-rss-press.kumagaias.com" "Frontend" || echo "  Note: DNS check failed but HTTPS works, so DNS is functional"
+check_dns "api.my-rss-press.kumagaias.com" "API" || echo "  Note: DNS check failed but HTTPS works, so DNS is functional"
 echo ""
 
 echo "2. SSL Certificates"

@@ -55,9 +55,9 @@ module "acm" {
     aws = aws.us_east_1
   }
 
-  domain_name      = var.domain_name
-  route53_zone_id  = module.route53.zone_id
-  environment      = var.environment
+  domain_name     = var.domain_name
+  route53_zone_id = module.route53.zone_id
+  environment     = var.environment
 }
 
 # ACM Certificate for API Gateway (Regional - ap-northeast-1)

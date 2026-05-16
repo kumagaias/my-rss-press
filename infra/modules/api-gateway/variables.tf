@@ -19,7 +19,7 @@ variable "lambda_invoke_arn" {
 variable "custom_domain_name" {
   description = "Custom domain name for the API"
   type        = string
-  default     = "api.my-rss-press.com"
+  default     = "api.my-rss-press.kumagaias.com"
 }
 
 variable "acm_certificate_arn" {

@@ -87,9 +87,9 @@ output "github_oidc_provider_arn" {
 output "deployment_summary" {
   description = "Summary of deployed resources"
   value = {
-    frontend_url             = module.amplify.app_url
-    api_url                  = module.api_gateway.custom_domain_url
-    name_servers             = module.route53.name_servers
-    github_actions_role_arn  = module.github_oidc.github_actions_role_arn
+    frontend_url            = module.amplify.app_url
+    api_url                 = module.api_gateway.custom_domain_url
+    name_servers            = module.route53.name_servers
+    github_actions_role_arn = module.github_oidc.github_actions_role_arn
   }
 }

@@ -23,8 +23,9 @@ app.use('*', logger());
 // 2. CORS configuration
 app.use('*', cors({
   origin: [
-    'https://my-rss-press.com',
-    'https://www.my-rss-press.com',
+    'https://my-rss-press.kumagaias.com',
+    'https://www.my-rss-press.kumagaias.com',
+    'https://my-ress-press-dev.kumagaias.com',
     // Development environment
     process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '',
   ].filter(Boolean),

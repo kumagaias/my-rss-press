@@ -7,7 +7,7 @@ aws_region = "us-east-1"
 environment = "production"
 
 # Domain Configuration
-domain_name = "my-rss-press.com"
+domain_name = "my-rss-press.kumagaias.com"
 
 # Resource Names
 dynamodb_table_name   = "myrsspress-newspapers"

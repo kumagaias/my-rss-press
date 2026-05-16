@@ -122,13 +122,13 @@ Test the category management APIs:
 
 ```bash
 # List all categories
-curl https://api.my-rss-press.com/api/admin/categories
+curl https://api.my-rss-press.kumagaias.com/api/admin/categories
 
 # Get specific category
-curl https://api.my-rss-press.com/api/admin/categories/technology-en
+curl https://api.my-rss-press.kumagaias.com/api/admin/categories/technology-en
 
 # List feeds for a category
-curl https://api.my-rss-press.com/api/admin/categories/feeds/general-news-en
+curl https://api.my-rss-press.kumagaias.com/api/admin/categories/feeds/general-news-en
 ```
 
 ### Step 7: Monitor Application
@@ -300,10 +300,10 @@ Test the authentication with your API key:
 export ADMIN_API_KEY="your-api-key-here"
 
 # Test authentication (should return 401 without key)
-curl https://api.my-rss-press.com/api/admin/categories
+curl https://api.my-rss-press.kumagaias.com/api/admin/categories
 
 # Test with valid key (should return categories)
-curl https://api.my-rss-press.com/api/admin/categories \
+curl https://api.my-rss-press.kumagaias.com/api/admin/categories \
   -H "X-API-Key: $ADMIN_API_KEY"
 ```
 
@@ -316,7 +316,7 @@ After setting up authentication, you can manage categories via API:
 export ADMIN_API_KEY="your-api-key-here"
 
 # Create a new category
-curl -X POST https://api.my-rss-press.com/api/admin/categories \
+curl -X POST https://api.my-rss-press.kumagaias.com/api/admin/categories \
   -H "Content-Type: application/json" \
   -H "X-API-Key: $ADMIN_API_KEY" \
   -d '{
@@ -328,7 +328,7 @@ curl -X POST https://api.my-rss-press.com/api/admin/categories \
   }'
 
 # Update a category
-curl -X PUT https://api.my-rss-press.com/api/admin/categories/science-en \
+curl -X PUT https://api.my-rss-press.kumagaias.com/api/admin/categories/science-en \
   -H "Content-Type: application/json" \
   -H "X-API-Key: $ADMIN_API_KEY" \
   -d '{
@@ -336,7 +336,7 @@ curl -X PUT https://api.my-rss-press.com/api/admin/categories/science-en \
   }'
 
 # Add a feed
-curl -X POST https://api.my-rss-press.com/api/admin/categories/feeds \
+curl -X POST https://api.my-rss-press.kumagaias.com/api/admin/categories/feeds \
   -H "Content-Type: application/json" \
   -H "X-API-Key: $ADMIN_API_KEY" \
   -d '{

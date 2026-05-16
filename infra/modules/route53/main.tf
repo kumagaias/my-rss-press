@@ -1,4 +1,4 @@
-# Route53 Hosted Zone for my-rss-press.com
+# Route53 Hosted Zone for my-rss-press.kumagaias.com
 
 resource "aws_route53_zone" "main" {
   name = var.domain_name

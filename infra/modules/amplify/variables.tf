@@ -19,7 +19,7 @@ variable "github_token_param_name" {
 variable "domain_name" {
   description = "Custom domain name for the app"
   type        = string
-  default     = "my-rss-press.com"
+  default     = "my-rss-press.kumagaias.com"
 }
 
 variable "api_base_url" {

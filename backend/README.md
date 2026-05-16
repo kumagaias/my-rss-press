@@ -184,8 +184,9 @@ Response:
 ### CORS
 
 Configured to allow requests from:
-- `https://my-rss-press.com`
-- `https://www.my-rss-press.com`
+- `https://my-rss-press.kumagaias.com`
+- `https://www.my-rss-press.kumagaias.com`
+- `https://my-ress-press-dev.kumagaias.com`
 - `http://localhost:3000` (development only)
 
 ### Rate Limiting

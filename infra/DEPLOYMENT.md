@@ -25,7 +25,8 @@
    - Personal Access Token（repo権限が必要）
 
 3. **ドメイン**
-   - XServerで登録済み: `my-rss-press.com`
+   - XServerで登録済み: `kumagaias.com`
+   - アプリ用サブドメイン: `my-rss-press.kumagaias.com`
 
 ## デプロイ手順
 
@@ -69,7 +70,7 @@ aws_region = "us-east-1"
 environment = "production"
 
 # Domain Configuration
-domain_name = "my-rss-press.com"
+domain_name = "my-rss-press.kumagaias.com"
 
 # Resource Names
 dynamodb_table_name   = "myrsspress-newspapers"
@@ -154,11 +155,10 @@ terraform output route53_name_servers
 ### ステップ8: XServerでネームサーバーを設定
 
 1. XServerのサーバーパネルにログイン
-2. 「ドメイン設定」→「ネームサーバー設定」を選択
-3. `my-rss-press.com` を選択
-4. 「その他のネームサーバーを使用」を選択
-5. Route53の4つのネームサーバーを入力
-6. 設定を保存
+2. `kumagaias.com` のDNSレコード設定を開く
+3. `my-rss-press` のNSレコードを4件追加する
+4. Route53の4つのネームサーバーを入力
+5. 設定を保存
 
 **注意**: DNS変更の反映には最大48時間かかる場合があります（通常は数時間）。
 
@@ -249,7 +249,7 @@ terraform output deployment_summary
 
 ```bash
 # ヘルスチェック
-curl https://api.my-rss-press.com/api/health
+curl https://api.my-rss-press.kumagaias.com/api/health
 
 # 期待される出力: {"status":"ok"}
 ```
@@ -258,27 +258,27 @@ curl https://api.my-rss-press.com/api/health
 
 ```bash
 # ブラウザで開く
-open https://my-rss-press.com
+open https://my-rss-press.kumagaias.com
 ```
 
 #### 11.4 SSL証明書の確認
 
 ```bash
 # SSL証明書の有効性を確認
-openssl s_client -connect my-rss-press.com:443 -servername my-rss-press.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
+openssl s_client -connect my-rss-press.kumagaias.com:443 -servername my-rss-press.kumagaias.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
 ```
 
 #### 11.5 DNS設定の確認
 
 ```bash
 # ネームサーバーの確認
-dig NS my-rss-press.com
+dig NS my-rss-press.kumagaias.com
 
 # Aレコードの確認
-dig A my-rss-press.com
+dig A my-rss-press.kumagaias.com
 
 # APIエンドポイントの確認
-dig A api.my-rss-press.com
+dig A api.my-rss-press.kumagaias.com
 ```
 
 ### ステップ12: CloudWatch Logsの確認
@@ -345,7 +345,7 @@ aws logs tail /aws/lambda/myrsspress-api --follow --region us-east-1
 
 ### API Gatewayのカスタムドメインが動作しない
 
-**症状**: `https://api.my-rss-press.com`にアクセスできない
+**症状**: `https://api.my-rss-press.kumagaias.com`にアクセスできない
 
 **原因**: DNS設定が完了していない、またはAPI Gatewayのマッピングが間違っている
 
@@ -354,11 +354,11 @@ aws logs tail /aws/lambda/myrsspress-api --follow --region us-east-1
 # Route53のレコードを確認
 aws route53 list-resource-record-sets \
   --hosted-zone-id $(terraform output -raw route53_zone_id) \
-  --query "ResourceRecordSets[?Name=='api.my-rss-press.com.']"
+  --query "ResourceRecordSets[?Name=='api.my-rss-press.kumagaias.com.']"
 
 # API Gatewayのカスタムドメインを確認
 aws apigateway get-domain-name \
-  --domain-name api.my-rss-press.com \
+  --domain-name api.my-rss-press.kumagaias.com \
   --region us-east-1
 ```
 
@@ -369,8 +369,8 @@ aws apigateway get-domain-name \
 - [ ] ACM証明書が検証済みステータスになっている
 - [ ] ECRにDockerイメージがプッシュされている
 - [ ] Lambda関数が最新のイメージを使用している
-- [ ] `https://api.my-rss-press.com/api/health`が正常に応答する
-- [ ] `https://my-rss-press.com`にアクセスできる
+- [ ] `https://api.my-rss-press.kumagaias.com/api/health`が正常に応答する
+- [ ] `https://my-rss-press.kumagaias.com`にアクセスできる
 - [ ] SSL証明書が有効である
 - [ ] すべてのテストが通る（`make test`）
 

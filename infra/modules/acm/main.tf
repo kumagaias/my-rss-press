@@ -1,4 +1,4 @@
-# ACM Certificate for my-rss-press.com and *.my-rss-press.com
+# ACM Certificate for my-rss-press.kumagaias.com and *.my-rss-press.kumagaias.com
 # Note: This certificate must be created in us-east-1 for CloudFront
 
 terraform {

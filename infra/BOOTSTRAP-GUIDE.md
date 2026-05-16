@@ -98,7 +98,7 @@ cd infra/environments/production
 
 # Create terraform.tfvars with your values
 cat > terraform.tfvars <<EOF
-domain_name          = "my-rss-press.com"
+domain_name          = "my-rss-press.kumagaias.com"
 github_repository    = "https://github.com/your-org/myrsspress"
 github_access_token  = "ghp_your_token_here"
 EOF

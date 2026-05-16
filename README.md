@@ -2,7 +2,7 @@
 
 Transform RSS feeds into visually appealing newspaper-style layouts with AI-powered curation.
 
-🌐 **Live Demo**: [https://www.my-rss-press.com/](https://www.my-rss-press.com/)
+🌐 **Live Demo**: [https://my-rss-press.kumagaias.com/](https://my-rss-press.kumagaias.com/)
 
 ## Features
 
@@ -68,7 +68,7 @@ make test
 
 ## Deployment
 
-**Production**: https://my-rss-press.com | API: https://api.my-rss-press.com
+**Production**: https://my-rss-press.kumagaias.com | API: https://api.my-rss-press.kumagaias.com
 
 Automatic deployment on push to `main`:
 - **Frontend**: AWS Amplify

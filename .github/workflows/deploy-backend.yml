@@ -92,4 +92,4 @@ jobs:
           sleep 10
           
           # Test health endpoint
-          curl -f https://api.my-rss-press.com/api/health || exit 1
+          curl -f https://api.my-rss-press.kumagaias.com/api/health || exit 1

@@ -155,7 +155,7 @@ echo -e "${BLUE}9. Production Deployment${NC}"
 echo "------------------------"
 echo -n "[$((TOTAL_CHECKS+1))] Production frontend accessible... "
 ((TOTAL_CHECKS++))
-if curl -s -o /dev/null -w "%{http_code}" https://my-rss-press.com | grep -q "200"; then
+if curl -s -o /dev/null -w "%{http_code}" https://my-rss-press.kumagaias.com | grep -q "200"; then
     echo -e "${GREEN}✓ PASS${NC}"
     ((PASSED_CHECKS++))
 else
@@ -165,7 +165,7 @@ fi
 
 echo -n "[$((TOTAL_CHECKS+1))] Production API accessible... "
 ((TOTAL_CHECKS++))
-if curl -s -o /dev/null -w "%{http_code}" https://api.my-rss-press.com/api/health | grep -q "200"; then
+if curl -s -o /dev/null -w "%{http_code}" https://api.my-rss-press.kumagaias.com/api/health | grep -q "200"; then
     echo -e "${GREEN}✓ PASS${NC}"
     ((PASSED_CHECKS++))
 else
@@ -175,7 +175,7 @@ fi
 
 echo -n "[$((TOTAL_CHECKS+1))] SSL certificates valid... "
 ((TOTAL_CHECKS++))
-if echo | openssl s_client -servername my-rss-press.com -connect my-rss-press.com:443 2>/dev/null | openssl x509 -noout -dates > /dev/null 2>&1; then
+if echo | openssl s_client -servername my-rss-press.kumagaias.com -connect my-rss-press.kumagaias.com:443 2>/dev/null | openssl x509 -noout -dates > /dev/null 2>&1; then
     echo -e "${GREEN}✓ PASS${NC}"
     ((PASSED_CHECKS++))
 else
@@ -212,8 +212,8 @@ if [ $FAILED_CHECKS -eq 0 ]; then
     echo "The system is ready for production use."
     echo ""
     echo "Production URLs:"
-    echo "  Frontend: https://my-rss-press.com"
-    echo "  API:      https://api.my-rss-press.com"
+    echo "  Frontend: https://my-rss-press.kumagaias.com"
+    echo "  API:      https://api.my-rss-press.kumagaias.com"
     echo ""
     echo "Next Steps:"
     echo "  1. Monitor CloudWatch logs for any issues"

@@ -3,7 +3,7 @@
 variable "domain_name" {
   description = "Domain name for the hosted zone"
   type        = string
-  default     = "my-rss-press.com"
+  default     = "my-rss-press.kumagaias.com"
 }
 
 variable "environment" {

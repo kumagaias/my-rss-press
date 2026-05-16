@@ -126,8 +126,8 @@
 
 - ❌ **エンドポイントのテスト**
   ```bash
-  curl https://api.my-rss-press.com/api/health
-  open https://my-rss-press.com
+  curl https://api.my-rss-press.kumagaias.com/api/health
+  open https://my-rss-press.kumagaias.com
   ```
 
 ## 🚀 次のステップ
@@ -162,8 +162,8 @@
 タスク1.6の受け入れ条件:
 
 - [ ] `terraform apply`が成功する
-- [ ] `https://my-rss-press.com`にアクセスできる
-- [ ] `https://api.my-rss-press.com/api/health`が正常に応答する
+- [ ] `https://my-rss-press.kumagaias.com`にアクセスできる
+- [ ] `https://api.my-rss-press.kumagaias.com/api/health`が正常に応答する
 - [ ] SSL証明書が有効
 - [ ] すべてのテストが通る
 
